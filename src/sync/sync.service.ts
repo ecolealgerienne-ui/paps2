@@ -243,12 +243,16 @@ export class SyncService {
       if (!model) continue;
 
       try {
+        // Build the appropriate where clause based on entity type
+        const whereClause = this.buildFarmWhereClause(
+          entityType as EntityType,
+          query.farmId,
+          since,
+        );
+
         // Get updated records
         const records = await model.findMany({
-          where: {
-            farmId: query.farmId,
-            updatedAt: { gt: since },
-          },
+          where: whereClause,
           orderBy: { updatedAt: 'asc' },
           take: limit,
         });
@@ -279,6 +283,59 @@ export class SyncService {
       changes: changes.slice(0, limit),
       serverTimestamp: new Date().toISOString(),
       hasMore,
+    };
+  }
+
+  private buildFarmWhereClause(
+    entityType: EntityType,
+    farmId: string,
+    since: Date,
+  ): Record<string, unknown> {
+    const baseCondition = { updatedAt: { gt: since } };
+
+    // Models with direct farmId field
+    const directFarmIdModels = [
+      EntityType.ANIMAL,
+      EntityType.LOT,
+      EntityType.MOVEMENT,
+      EntityType.CAMPAIGN,
+      EntityType.DOCUMENT,
+    ];
+
+    if (directFarmIdModels.includes(entityType)) {
+      return {
+        ...baseCondition,
+        farmId,
+      };
+    }
+
+    // Models that access farmId through Animal relation
+    const animalRelationModels = [
+      EntityType.WEIGHT,
+      EntityType.TREATMENT,
+      EntityType.VACCINATION,
+      EntityType.LOT_ANIMAL,
+    ];
+
+    if (animalRelationModels.includes(entityType)) {
+      return {
+        ...baseCondition,
+        animal: { farmId },
+      };
+    }
+
+    // Breeding uses femaleId (which is an Animal)
+    if (entityType === EntityType.BREEDING) {
+      return {
+        ...baseCondition,
+        female: { farmId },
+      };
+    }
+
+    // Fallback for unknown types
+    return {
+      ...baseCondition,
+      farmId,
     };
   }
 
