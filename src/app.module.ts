@@ -4,8 +4,12 @@ import { AnimalsModule } from './animals/animals.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { LotsModule } from './lots/lots.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SyncModule } from './sync/sync.module';
+import { TreatmentsModule } from './treatments/treatments.module';
+import { VaccinationsModule } from './vaccinations/vaccinations.module';
+import { WeightsModule } from './weights/weights.module';
 
 @Module({
   imports: [
@@ -15,6 +19,10 @@ import { SyncModule } from './sync/sync.module';
     PrismaModule,
     AuthModule,
     AnimalsModule,
+    LotsModule,
+    TreatmentsModule,
+    VaccinationsModule,
+    WeightsModule,
     SyncModule,
   ],
   controllers: [AppController],
