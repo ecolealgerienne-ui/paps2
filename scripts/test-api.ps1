@@ -242,8 +242,8 @@ Write-Success "Deleted"
 # =============================================================================
 Write-Header "Animals API - 5 endpoints"
 
-Write-Test "POST /animals - Create"
-$animalResponse = Invoke-Api -Method POST -Endpoint "/animals" -Body @{
+Write-Test "POST /farms/$FarmId/animals - Create"
+$animalResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/animals" -Body @{
     identifier = "OV-2024-001"
     name = "Bella"
     speciesId = "sheep"
@@ -251,24 +251,23 @@ $animalResponse = Invoke-Api -Method POST -Endpoint "/animals" -Body @{
     sex = "female"
     birthDate = "2023-01-15"
     status = "active"
-    farmId = $FarmId
 }
 $animalId = Get-ResponseData $animalResponse "id"
 Write-Success "Created: $animalId"
 
-Write-Test "GET /animals - List all"
-$response = Invoke-Api -Method GET -Endpoint "/animals?farmId=$FarmId"
+Write-Test "GET /farms/$FarmId/animals - List all"
+$response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/animals"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count animals"
 
 if ($animalId) {
-    Write-Test "GET /animals/$animalId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/animals/$animalId"
+    Write-Test "GET /farms/$FarmId/animals/$animalId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/animals/$animalId"
     $name = Get-ResponseData $response "name"
     Write-Success "Retrieved: $name"
 
-    Write-Test "PUT /animals/$animalId - Update"
-    $response = Invoke-Api -Method PUT -Endpoint "/animals/$animalId" -Body @{
+    Write-Test "PUT /farms/$FarmId/animals/$animalId - Update"
+    $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/animals/$animalId" -Body @{
         name = "Bella Updated"
     }
     Write-Success "Updated name"
@@ -279,48 +278,47 @@ if ($animalId) {
 # =============================================================================
 Write-Header "Lots API - 7 endpoints"
 
-Write-Test "POST /lots - Create"
-$lotResponse = Invoke-Api -Method POST -Endpoint "/lots" -Body @{
+Write-Test "POST /farms/$FarmId/lots - Create"
+$lotResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/lots" -Body @{
     name = "Lot Engraissement 2024"
     lotType = "fattening"
-    farmId = $FarmId
 }
 $lotId = Get-ResponseData $lotResponse "id"
 Write-Success "Created: $lotId"
 
-Write-Test "GET /lots - List all"
-$response = Invoke-Api -Method GET -Endpoint "/lots?farmId=$FarmId"
+Write-Test "GET /farms/$FarmId/lots - List all"
+$response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/lots"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count lots"
 
 if ($lotId) {
-    Write-Test "GET /lots/$lotId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/lots/$lotId"
+    Write-Test "GET /farms/$FarmId/lots/$lotId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/lots/$lotId"
     $name = Get-ResponseData $response "name"
     Write-Success "Retrieved: $name"
 
-    Write-Test "PUT /lots/$lotId - Update"
-    $response = Invoke-Api -Method PUT -Endpoint "/lots/$lotId" -Body @{
+    Write-Test "PUT /farms/$FarmId/lots/$lotId - Update"
+    $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/lots/$lotId" -Body @{
         name = "Lot Engraissement 2024 - Updated"
     }
     Write-Success "Updated name"
 
     if ($animalId) {
-        Write-Test "POST /lots/$lotId/animals - Add animal"
-        $response = Invoke-Api -Method POST -Endpoint "/lots/$lotId/animals" -Body @{
+        Write-Test "POST /farms/$FarmId/lots/$lotId/animals - Add animal"
+        $response = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/lots/$lotId/animals" -Body @{
             animalIds = @($animalId)
         }
         Write-Success "Added animal to lot"
 
-        Write-Test "DELETE /lots/$lotId/animals - Remove animal"
-        $response = Invoke-Api -Method DELETE -Endpoint "/lots/$lotId/animals" -Body @{
+        Write-Test "DELETE /farms/$FarmId/lots/$lotId/animals - Remove animal"
+        $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/lots/$lotId/animals" -Body @{
             animalIds = @($animalId)
         }
         Write-Success "Removed animal from lot"
     }
 
-    Write-Test "DELETE /lots/$lotId - Delete"
-    $response = Invoke-Api -Method DELETE -Endpoint "/lots/$lotId"
+    Write-Test "DELETE /farms/$FarmId/lots/$lotId - Delete"
+    $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/lots/$lotId"
     Write-Success "Deleted"
 }
 
@@ -330,48 +328,46 @@ if ($lotId) {
 Write-Header "Weights API - 6 endpoints"
 
 if ($animalId) {
-    Write-Test "POST /weights - Create first weight"
-    $weightResponse = Invoke-Api -Method POST -Endpoint "/weights" -Body @{
+    Write-Test "POST /farms/$FarmId/weights - Create first weight"
+    $weightResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/weights" -Body @{
         animalId = $animalId
         weight = 45.5
         measurementDate = "2024-01-15"
-        farmId = $FarmId
     }
     $weightId = Get-ResponseData $weightResponse "id"
     Write-Success "Created: $weightId"
 
-    Write-Test "POST /weights - Create second weight"
-    $response = Invoke-Api -Method POST -Endpoint "/weights" -Body @{
+    Write-Test "POST /farms/$FarmId/weights - Create second weight"
+    $response = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/weights" -Body @{
         animalId = $animalId
         weight = 52.3
         measurementDate = "2024-02-15"
-        farmId = $FarmId
     }
     Write-Success "Created second weight"
 
-    Write-Test "GET /weights - List all"
-    $response = Invoke-Api -Method GET -Endpoint "/weights?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/weights - List all"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/weights"
     if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count weights"
 
-    Write-Test "GET /weights/animal/$animalId/history - Get history"
-    $response = Invoke-Api -Method GET -Endpoint "/weights/animal/$animalId/history?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/weights/animal/$animalId/history - Get history"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/weights/animal/$animalId/history"
     if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "History: $count records"
 
     if ($weightId) {
-        Write-Test "GET /weights/$weightId - Get one"
-        $response = Invoke-Api -Method GET -Endpoint "/weights/$weightId"
+        Write-Test "GET /farms/$FarmId/weights/$weightId - Get one"
+        $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/weights/$weightId"
         Write-Success "Retrieved weight"
 
-        Write-Test "PUT /weights/$weightId - Update"
-        $response = Invoke-Api -Method PUT -Endpoint "/weights/$weightId" -Body @{
+        Write-Test "PUT /farms/$FarmId/weights/$weightId - Update"
+        $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/weights/$weightId" -Body @{
             weight = 46.0
         }
         Write-Success "Updated weight"
 
-        Write-Test "DELETE /weights/$weightId - Delete"
-        $response = Invoke-Api -Method DELETE -Endpoint "/weights/$weightId"
+        Write-Test "DELETE /farms/$FarmId/weights/$weightId - Delete"
+        $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/weights/$weightId"
         Write-Success "Deleted"
     }
 }
@@ -382,36 +378,35 @@ if ($animalId) {
 Write-Header "Treatments API - 5 endpoints"
 
 if ($animalId) {
-    Write-Test "POST /treatments - Create"
-    $treatmentResponse = Invoke-Api -Method POST -Endpoint "/treatments" -Body @{
+    Write-Test "POST /farms/$FarmId/treatments - Create"
+    $treatmentResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/treatments" -Body @{
         animalId = $animalId
         treatmentDate = "2024-01-20"
         reason = "Parasitisme interne"
         diagnosis = "Strongylose digestive"
         dosage = 5
-        farmId = $FarmId
     }
     $treatmentId = Get-ResponseData $treatmentResponse "id"
     Write-Success "Created: $treatmentId"
 
-    Write-Test "GET /treatments - List all"
-    $response = Invoke-Api -Method GET -Endpoint "/treatments?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/treatments - List all"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/treatments"
     if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count treatments"
 
     if ($treatmentId) {
-        Write-Test "GET /treatments/$treatmentId - Get one"
-        $response = Invoke-Api -Method GET -Endpoint "/treatments/$treatmentId"
+        Write-Test "GET /farms/$FarmId/treatments/$treatmentId - Get one"
+        $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/treatments/$treatmentId"
         Write-Success "Retrieved treatment"
 
-        Write-Test "PUT /treatments/$treatmentId - Update"
-        $response = Invoke-Api -Method PUT -Endpoint "/treatments/$treatmentId" -Body @{
+        Write-Test "PUT /farms/$FarmId/treatments/$treatmentId - Update"
+        $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/treatments/$treatmentId" -Body @{
             dosage = 6
         }
         Write-Success "Updated dosage"
 
-        Write-Test "DELETE /treatments/$treatmentId - Delete"
-        $response = Invoke-Api -Method DELETE -Endpoint "/treatments/$treatmentId"
+        Write-Test "DELETE /farms/$FarmId/treatments/$treatmentId - Delete"
+        $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/treatments/$treatmentId"
         Write-Success "Deleted"
     }
 }
@@ -422,34 +417,33 @@ if ($animalId) {
 Write-Header "Vaccinations API - 5 endpoints"
 
 if ($animalId) {
-    Write-Test "POST /vaccinations - Create"
-    $vaccinationResponse = Invoke-Api -Method POST -Endpoint "/vaccinations" -Body @{
+    Write-Test "POST /farms/$FarmId/vaccinations - Create"
+    $vaccinationResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/vaccinations" -Body @{
         animalId = $animalId
         vaccinationDate = "2024-01-25"
         nextDueDate = "2024-07-25"
-        farmId = $FarmId
     }
     $vaccinationId = Get-ResponseData $vaccinationResponse "id"
     Write-Success "Created: $vaccinationId"
 
-    Write-Test "GET /vaccinations - List all"
-    $response = Invoke-Api -Method GET -Endpoint "/vaccinations?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/vaccinations - List all"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/vaccinations"
     if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count vaccinations"
 
     if ($vaccinationId) {
-        Write-Test "GET /vaccinations/$vaccinationId - Get one"
-        $response = Invoke-Api -Method GET -Endpoint "/vaccinations/$vaccinationId"
+        Write-Test "GET /farms/$FarmId/vaccinations/$vaccinationId - Get one"
+        $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/vaccinations/$vaccinationId"
         Write-Success "Retrieved vaccination"
 
-        Write-Test "PUT /vaccinations/$vaccinationId - Update"
-        $response = Invoke-Api -Method PUT -Endpoint "/vaccinations/$vaccinationId" -Body @{
+        Write-Test "PUT /farms/$FarmId/vaccinations/$vaccinationId - Update"
+        $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/vaccinations/$vaccinationId" -Body @{
             nextDueDate = "2024-08-25"
         }
         Write-Success "Updated next due date"
 
-        Write-Test "DELETE /vaccinations/$vaccinationId - Delete"
-        $response = Invoke-Api -Method DELETE -Endpoint "/vaccinations/$vaccinationId"
+        Write-Test "DELETE /farms/$FarmId/vaccinations/$vaccinationId - Delete"
+        $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/vaccinations/$vaccinationId"
         Write-Success "Deleted"
     }
 }
@@ -460,39 +454,38 @@ if ($animalId) {
 Write-Header "Movements API - 6 endpoints"
 
 if ($animalId) {
-    Write-Test "POST /movements - Create entry"
-    $movementResponse = Invoke-Api -Method POST -Endpoint "/movements" -Body @{
+    Write-Test "POST /farms/$FarmId/movements - Create entry"
+    $movementResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/movements" -Body @{
         animalId = $animalId
         movementType = "entry"
         movementDate = "2024-01-01"
         origin = "Marche Djelfa"
-        farmId = $FarmId
     }
     $movementId = Get-ResponseData $movementResponse "id"
     Write-Success "Created: $movementId"
 
-    Write-Test "GET /movements - List all"
-    $response = Invoke-Api -Method GET -Endpoint "/movements?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/movements - List all"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/movements"
     if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count movements"
 
-    Write-Test "GET /movements/statistics - Get statistics"
-    $response = Invoke-Api -Method GET -Endpoint "/movements/statistics?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/movements/statistics - Get statistics"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/movements/statistics"
     Write-Success "Retrieved statistics"
 
     if ($movementId) {
-        Write-Test "GET /movements/$movementId - Get one"
-        $response = Invoke-Api -Method GET -Endpoint "/movements/$movementId"
+        Write-Test "GET /farms/$FarmId/movements/$movementId - Get one"
+        $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/movements/$movementId"
         Write-Success "Retrieved movement"
 
-        Write-Test "PUT /movements/$movementId - Update"
-        $response = Invoke-Api -Method PUT -Endpoint "/movements/$movementId" -Body @{
+        Write-Test "PUT /farms/$FarmId/movements/$movementId - Update"
+        $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/movements/$movementId" -Body @{
             origin = "Marche Djelfa - Updated"
         }
         Write-Success "Updated origin"
 
-        Write-Test "DELETE /movements/$movementId - Delete"
-        $response = Invoke-Api -Method DELETE -Endpoint "/movements/$movementId"
+        Write-Test "DELETE /farms/$FarmId/movements/$movementId - Delete"
+        $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/movements/$movementId"
         Write-Success "Deleted"
     }
 }
@@ -503,39 +496,38 @@ if ($animalId) {
 Write-Header "Breedings API - 6 endpoints"
 
 if ($animalId) {
-    Write-Test "POST /breedings - Create"
-    $breedingResponse = Invoke-Api -Method POST -Endpoint "/breedings" -Body @{
+    Write-Test "POST /farms/$FarmId/breedings - Create"
+    $breedingResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/breedings" -Body @{
         femaleId = $animalId
         breedingDate = "2024-02-01"
         method = "natural"
-        farmId = $FarmId
     }
     $breedingId = Get-ResponseData $breedingResponse "id"
     Write-Success "Created: $breedingId"
 
-    Write-Test "GET /breedings - List all"
-    $response = Invoke-Api -Method GET -Endpoint "/breedings?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/breedings - List all"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/breedings"
     if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count breedings"
 
-    Write-Test "GET /breedings/upcoming - Get upcoming"
-    $response = Invoke-Api -Method GET -Endpoint "/breedings/upcoming?farmId=$FarmId"
+    Write-Test "GET /farms/$FarmId/breedings/upcoming - Get upcoming"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/breedings/upcoming"
     if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Upcoming: $count"
 
     if ($breedingId) {
-        Write-Test "GET /breedings/$breedingId - Get one"
-        $response = Invoke-Api -Method GET -Endpoint "/breedings/$breedingId"
+        Write-Test "GET /farms/$FarmId/breedings/$breedingId - Get one"
+        $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/breedings/$breedingId"
         Write-Success "Retrieved breeding"
 
-        Write-Test "PUT /breedings/$breedingId - Update"
-        $response = Invoke-Api -Method PUT -Endpoint "/breedings/$breedingId" -Body @{
+        Write-Test "PUT /farms/$FarmId/breedings/$breedingId - Update"
+        $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/breedings/$breedingId" -Body @{
             method = "artificial"
         }
         Write-Success "Updated method"
 
-        Write-Test "DELETE /breedings/$breedingId - Delete"
-        $response = Invoke-Api -Method DELETE -Endpoint "/breedings/$breedingId"
+        Write-Test "DELETE /farms/$FarmId/breedings/$breedingId - Delete"
+        $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/breedings/$breedingId"
         Write-Success "Deleted"
     }
 }
@@ -545,45 +537,44 @@ if ($animalId) {
 # =============================================================================
 Write-Header "Campaigns API - 7 endpoints"
 
-Write-Test "POST /campaigns - Create"
-$campaignResponse = Invoke-Api -Method POST -Endpoint "/campaigns" -Body @{
+Write-Test "POST /farms/$FarmId/campaigns - Create"
+$campaignResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/campaigns" -Body @{
     name = "Campagne Enterotoxemie 2024"
     campaignType = "vaccination"
     startDate = "2024-03-01"
     endDate = "2024-03-15"
     targetCount = 100
-    farmId = $FarmId
 }
 $campaignId = Get-ResponseData $campaignResponse "id"
 Write-Success "Created: $campaignId"
 
-Write-Test "GET /campaigns - List all"
-$response = Invoke-Api -Method GET -Endpoint "/campaigns?farmId=$FarmId"
+Write-Test "GET /farms/$FarmId/campaigns - List all"
+$response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/campaigns"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count campaigns"
 
-Write-Test "GET /campaigns/active - Get active"
-$response = Invoke-Api -Method GET -Endpoint "/campaigns/active?farmId=$FarmId"
+Write-Test "GET /farms/$FarmId/campaigns/active - Get active"
+$response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/campaigns/active"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Active: $count"
 
 if ($campaignId) {
-    Write-Test "GET /campaigns/$campaignId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/campaigns/$campaignId"
+    Write-Test "GET /farms/$FarmId/campaigns/$campaignId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/campaigns/$campaignId"
     Write-Success "Retrieved campaign"
 
-    Write-Test "GET /campaigns/$campaignId/progress - Get progress"
-    $response = Invoke-Api -Method GET -Endpoint "/campaigns/$campaignId/progress"
+    Write-Test "GET /farms/$FarmId/campaigns/$campaignId/progress - Get progress"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/campaigns/$campaignId/progress"
     Write-Success "Retrieved progress"
 
-    Write-Test "PUT /campaigns/$campaignId - Update"
-    $response = Invoke-Api -Method PUT -Endpoint "/campaigns/$campaignId" -Body @{
+    Write-Test "PUT /farms/$FarmId/campaigns/$campaignId - Update"
+    $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/campaigns/$campaignId" -Body @{
         targetCount = 150
     }
     Write-Success "Updated target count"
 
-    Write-Test "DELETE /campaigns/$campaignId - Delete"
-    $response = Invoke-Api -Method DELETE -Endpoint "/campaigns/$campaignId"
+    Write-Test "DELETE /farms/$FarmId/campaigns/$campaignId - Delete"
+    $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/campaigns/$campaignId"
     Write-Success "Deleted"
 }
 
@@ -592,46 +583,45 @@ if ($campaignId) {
 # =============================================================================
 Write-Header "Documents API - 7 endpoints"
 
-Write-Test "POST /documents - Create"
-$documentResponse = Invoke-Api -Method POST -Endpoint "/documents" -Body @{
+Write-Test "POST /farms/$FarmId/documents - Create"
+$documentResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/documents" -Body @{
     documentType = "health_certificate"
     documentNumber = "CERT-2024-001"
     issueDate = "2024-01-15"
     expiryDate = "2024-07-15"
     issuingAuthority = "DSA Djelfa"
-    farmId = $FarmId
 }
 $documentId = Get-ResponseData $documentResponse "id"
 Write-Success "Created: $documentId"
 
-Write-Test "GET /documents - List all"
-$response = Invoke-Api -Method GET -Endpoint "/documents?farmId=$FarmId"
+Write-Test "GET /farms/$FarmId/documents - List all"
+$response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/documents"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count documents"
 
-Write-Test "GET /documents/expiring - Get expiring"
-$response = Invoke-Api -Method GET -Endpoint "/documents/expiring?farmId=$FarmId&days=180"
+Write-Test "GET /farms/$FarmId/documents/expiring - Get expiring"
+$response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/documents/expiring?days=180"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Expiring: $count"
 
-Write-Test "GET /documents/expired - Get expired"
-$response = Invoke-Api -Method GET -Endpoint "/documents/expired?farmId=$FarmId"
+Write-Test "GET /farms/$FarmId/documents/expired - Get expired"
+$response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/documents/expired"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Expired: $count"
 
 if ($documentId) {
-    Write-Test "GET /documents/$documentId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/documents/$documentId"
+    Write-Test "GET /farms/$FarmId/documents/$documentId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/documents/$documentId"
     Write-Success "Retrieved document"
 
-    Write-Test "PUT /documents/$documentId - Update"
-    $response = Invoke-Api -Method PUT -Endpoint "/documents/$documentId" -Body @{
+    Write-Test "PUT /farms/$FarmId/documents/$documentId - Update"
+    $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/documents/$documentId" -Body @{
         expiryDate = "2024-12-31"
     }
     Write-Success "Updated expiry date"
 
-    Write-Test "DELETE /documents/$documentId - Delete"
-    $response = Invoke-Api -Method DELETE -Endpoint "/documents/$documentId"
+    Write-Test "DELETE /farms/$FarmId/documents/$documentId - Delete"
+    $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/documents/$documentId"
     Write-Success "Deleted"
 }
 
@@ -658,8 +648,8 @@ Write-Success "Retrieved changes"
 Write-Header "Cleanup"
 
 if ($animalId) {
-    Write-Test "DELETE /animals/$animalId - Delete test animal"
-    $response = Invoke-Api -Method DELETE -Endpoint "/animals/$animalId"
+    Write-Test "DELETE /farms/$FarmId/animals/$animalId - Delete test animal"
+    $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/animals/$animalId"
     Write-Success "Deleted test animal"
 }
 
