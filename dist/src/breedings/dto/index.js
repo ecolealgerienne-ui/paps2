@@ -13,13 +13,17 @@ exports.QueryBreedingDto = exports.UpdateBreedingDto = exports.CreateBreedingDto
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const enums_1 = require("../../common/enums");
+const class_transformer_1 = require("class-transformer");
 class CreateBreedingDto {
     id;
-    femaleId;
-    maleId;
+    motherId;
+    fatherId;
+    fatherName;
     method;
     breedingDate;
-    expectedDueDate;
+    expectedBirthDate;
+    expectedOffspringCount;
+    veterinarianId;
     status;
     notes;
 }
@@ -31,16 +35,22 @@ __decorate([
     __metadata("design:type", String)
 ], CreateBreedingDto.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Female animal ID' }),
+    (0, swagger_1.ApiProperty)({ description: 'Mother animal ID' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateBreedingDto.prototype, "femaleId", void 0);
+], CreateBreedingDto.prototype, "motherId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Male animal ID', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Father animal ID', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateBreedingDto.prototype, "maleId", void 0);
+], CreateBreedingDto.prototype, "fatherId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Father name (for external males)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateBreedingDto.prototype, "fatherName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.BreedingMethod, description: 'Breeding method' }),
     (0, class_validator_1.IsEnum)(enums_1.BreedingMethod),
@@ -52,11 +62,24 @@ __decorate([
     __metadata("design:type", String)
 ], CreateBreedingDto.prototype, "breedingDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Expected due date', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Expected birth date', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
-], CreateBreedingDto.prototype, "expectedDueDate", void 0);
+], CreateBreedingDto.prototype, "expectedBirthDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Expected offspring count', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateBreedingDto.prototype, "expectedOffspringCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Veterinarian ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateBreedingDto.prototype, "veterinarianId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.BreedingStatus, default: 'planned', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -70,24 +93,32 @@ __decorate([
     __metadata("design:type", String)
 ], CreateBreedingDto.prototype, "notes", void 0);
 class UpdateBreedingDto {
-    maleId;
+    fatherId;
+    fatherName;
     method;
     breedingDate;
-    expectedDueDate;
-    actualDueDate;
+    expectedBirthDate;
+    actualBirthDate;
+    expectedOffspringCount;
+    offspringIds;
+    veterinarianId;
     status;
-    offspringId;
-    offspringCount;
     notes;
     version;
 }
 exports.UpdateBreedingDto = UpdateBreedingDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Male animal ID', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Father animal ID', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdateBreedingDto.prototype, "maleId", void 0);
+], UpdateBreedingDto.prototype, "fatherId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Father name (for external males)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateBreedingDto.prototype, "fatherName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.BreedingMethod, required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -101,35 +132,42 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateBreedingDto.prototype, "breedingDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Expected due date', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Expected birth date', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
-], UpdateBreedingDto.prototype, "expectedDueDate", void 0);
+], UpdateBreedingDto.prototype, "expectedBirthDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Actual due date', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Actual birth date', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
-], UpdateBreedingDto.prototype, "actualDueDate", void 0);
+], UpdateBreedingDto.prototype, "actualBirthDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Expected offspring count', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateBreedingDto.prototype, "expectedOffspringCount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Offspring IDs (JSON array)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateBreedingDto.prototype, "offspringIds", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Veterinarian ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateBreedingDto.prototype, "veterinarianId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.BreedingStatus, required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(enums_1.BreedingStatus),
     __metadata("design:type", String)
 ], UpdateBreedingDto.prototype, "status", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Offspring animal ID', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateBreedingDto.prototype, "offspringId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Number of offspring', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], UpdateBreedingDto.prototype, "offspringCount", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Notes', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -142,18 +180,25 @@ __decorate([
     __metadata("design:type", Number)
 ], UpdateBreedingDto.prototype, "version", void 0);
 class QueryBreedingDto {
-    femaleId;
+    motherId;
+    fatherId;
     status;
     fromDate;
     toDate;
 }
 exports.QueryBreedingDto = QueryBreedingDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Filter by female ID', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Filter by mother ID', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], QueryBreedingDto.prototype, "femaleId", void 0);
+], QueryBreedingDto.prototype, "motherId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Filter by father ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], QueryBreedingDto.prototype, "fatherId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.BreedingStatus, required: false }),
     (0, class_validator_1.IsOptional)(),

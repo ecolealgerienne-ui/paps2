@@ -1,28 +1,34 @@
 import { BreedingMethod, BreedingStatus } from '../../common/enums';
 export declare class CreateBreedingDto {
     id?: string;
-    femaleId: string;
-    maleId?: string;
+    motherId: string;
+    fatherId?: string;
+    fatherName?: string;
     method: BreedingMethod;
     breedingDate: string;
-    expectedDueDate?: string;
+    expectedBirthDate?: string;
+    expectedOffspringCount?: number;
+    veterinarianId?: string;
     status?: BreedingStatus;
     notes?: string;
 }
 export declare class UpdateBreedingDto {
-    maleId?: string;
+    fatherId?: string;
+    fatherName?: string;
     method?: BreedingMethod;
     breedingDate?: string;
-    expectedDueDate?: string;
-    actualDueDate?: string;
+    expectedBirthDate?: string;
+    actualBirthDate?: string;
+    expectedOffspringCount?: number;
+    offspringIds?: string[];
+    veterinarianId?: string;
     status?: BreedingStatus;
-    offspringId?: string;
-    offspringCount?: number;
     notes?: string;
     version?: number;
 }
 export declare class QueryBreedingDto {
-    femaleId?: string;
+    motherId?: string;
+    fatherId?: string;
     status?: BreedingStatus;
     fromDate?: string;
     toDate?: string;

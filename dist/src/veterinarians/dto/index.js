@@ -13,20 +13,48 @@ exports.QueryVeterinarianDto = exports.UpdateVeterinarianDto = exports.CreateVet
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 class CreateVeterinarianDto {
-    name;
+    firstName;
+    lastName;
+    licenseNumber;
+    specialties;
+    clinic;
     phone;
     email;
     address;
-    licenseNumber;
-    specialization;
+    isAvailable;
+    emergencyService;
+    consultationFee;
     isActive;
 }
 exports.CreateVeterinarianDto = CreateVeterinarianDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Veterinarian name' }),
+    (0, swagger_1.ApiProperty)({ description: 'First name' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateVeterinarianDto.prototype, "name", void 0);
+], CreateVeterinarianDto.prototype, "firstName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Last name' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateVeterinarianDto.prototype, "lastName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'License number', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateVeterinarianDto.prototype, "licenseNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Specialties (JSON array)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateVeterinarianDto.prototype, "specialties", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Clinic name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateVeterinarianDto.prototype, "clinic", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Phone number', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -46,17 +74,23 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVeterinarianDto.prototype, "address", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'License number', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Is available', required: false, default: true }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateVeterinarianDto.prototype, "licenseNumber", void 0);
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateVeterinarianDto.prototype, "isAvailable", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Specialization', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Emergency service available', required: false, default: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateVeterinarianDto.prototype, "specialization", void 0);
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateVeterinarianDto.prototype, "emergencyService", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Consultation fee', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateVeterinarianDto.prototype, "consultationFee", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Is active', required: false, default: true }),
     (0, class_validator_1.IsOptional)(),
@@ -64,21 +98,51 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateVeterinarianDto.prototype, "isActive", void 0);
 class UpdateVeterinarianDto {
-    name;
+    firstName;
+    lastName;
+    licenseNumber;
+    specialties;
+    clinic;
     phone;
     email;
     address;
-    licenseNumber;
-    specialization;
+    isAvailable;
+    emergencyService;
+    consultationFee;
+    rating;
     isActive;
 }
 exports.UpdateVeterinarianDto = UpdateVeterinarianDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Veterinarian name', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'First name', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdateVeterinarianDto.prototype, "name", void 0);
+], UpdateVeterinarianDto.prototype, "firstName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Last name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateVeterinarianDto.prototype, "lastName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'License number', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateVeterinarianDto.prototype, "licenseNumber", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Specialties (JSON array)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateVeterinarianDto.prototype, "specialties", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Clinic name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateVeterinarianDto.prototype, "clinic", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Phone number', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -98,17 +162,29 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateVeterinarianDto.prototype, "address", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'License number', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Is available', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateVeterinarianDto.prototype, "licenseNumber", void 0);
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateVeterinarianDto.prototype, "isAvailable", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Specialization', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Emergency service available', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateVeterinarianDto.prototype, "specialization", void 0);
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], UpdateVeterinarianDto.prototype, "emergencyService", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Consultation fee', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateVeterinarianDto.prototype, "consultationFee", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Rating', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateVeterinarianDto.prototype, "rating", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Is active', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -118,6 +194,8 @@ __decorate([
 class QueryVeterinarianDto {
     search;
     isActive;
+    isAvailable;
+    emergencyService;
 }
 exports.QueryVeterinarianDto = QueryVeterinarianDto;
 __decorate([
@@ -132,4 +210,16 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], QueryVeterinarianDto.prototype, "isActive", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Filter by availability', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], QueryVeterinarianDto.prototype, "isAvailable", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Filter by emergency service', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], QueryVeterinarianDto.prototype, "emergencyService", void 0);
 //# sourceMappingURL=index.js.map

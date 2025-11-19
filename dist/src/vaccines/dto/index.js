@@ -15,13 +15,16 @@ const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 class CreateVaccineDto {
     name;
-    disease;
-    speciesId;
+    description;
     manufacturer;
-    dosagePerAnimal;
-    dosageUnit;
-    boosterRequired;
-    boosterIntervalDays;
+    targetSpecies;
+    targetDiseases;
+    standardDose;
+    injectionsRequired;
+    injectionIntervalDays;
+    meatWithdrawalDays;
+    milkWithdrawalDays;
+    administrationRoute;
     isActive;
 }
 exports.CreateVaccineDto = CreateVaccineDto;
@@ -31,16 +34,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVaccineDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Target disease' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateVaccineDto.prototype, "disease", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Species ID', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Description', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateVaccineDto.prototype, "speciesId", void 0);
+], CreateVaccineDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Manufacturer', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -48,33 +46,63 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVaccineDto.prototype, "manufacturer", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Dosage per animal', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Target species (JSON array)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateVaccineDto.prototype, "targetSpecies", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Target diseases (JSON array)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], CreateVaccineDto.prototype, "targetDiseases", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Standard dose', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], CreateVaccineDto.prototype, "dosagePerAnimal", void 0);
+], CreateVaccineDto.prototype, "standardDose", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Dosage unit', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Number of injections required', required: false, default: 1 }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateVaccineDto.prototype, "dosageUnit", void 0);
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], CreateVaccineDto.prototype, "injectionsRequired", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Booster required', required: false, default: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateVaccineDto.prototype, "boosterRequired", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Booster interval in days', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Interval between injections (days)', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], CreateVaccineDto.prototype, "boosterIntervalDays", void 0);
+], CreateVaccineDto.prototype, "injectionIntervalDays", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Meat withdrawal days', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateVaccineDto.prototype, "meatWithdrawalDays", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Milk withdrawal days', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateVaccineDto.prototype, "milkWithdrawalDays", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Administration route', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateVaccineDto.prototype, "administrationRoute", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Is active', required: false, default: true }),
     (0, class_validator_1.IsOptional)(),
@@ -83,13 +111,16 @@ __decorate([
 ], CreateVaccineDto.prototype, "isActive", void 0);
 class UpdateVaccineDto {
     name;
-    disease;
-    speciesId;
+    description;
     manufacturer;
-    dosagePerAnimal;
-    dosageUnit;
-    boosterRequired;
-    boosterIntervalDays;
+    targetSpecies;
+    targetDiseases;
+    standardDose;
+    injectionsRequired;
+    injectionIntervalDays;
+    meatWithdrawalDays;
+    milkWithdrawalDays;
+    administrationRoute;
     isActive;
 }
 exports.UpdateVaccineDto = UpdateVaccineDto;
@@ -100,17 +131,11 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateVaccineDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Target disease', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Description', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdateVaccineDto.prototype, "disease", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Species ID', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateVaccineDto.prototype, "speciesId", void 0);
+], UpdateVaccineDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Manufacturer', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -118,33 +143,63 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateVaccineDto.prototype, "manufacturer", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Dosage per animal', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Target species (JSON array)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateVaccineDto.prototype, "targetSpecies", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Target diseases (JSON array)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], UpdateVaccineDto.prototype, "targetDiseases", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Standard dose', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], UpdateVaccineDto.prototype, "dosagePerAnimal", void 0);
+], UpdateVaccineDto.prototype, "standardDose", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Dosage unit', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Number of injections required', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateVaccineDto.prototype, "dosageUnit", void 0);
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    __metadata("design:type", Number)
+], UpdateVaccineDto.prototype, "injectionsRequired", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Booster required', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], UpdateVaccineDto.prototype, "boosterRequired", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Booster interval in days', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Interval between injections (days)', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
-], UpdateVaccineDto.prototype, "boosterIntervalDays", void 0);
+], UpdateVaccineDto.prototype, "injectionIntervalDays", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Meat withdrawal days', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], UpdateVaccineDto.prototype, "meatWithdrawalDays", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Milk withdrawal days', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], UpdateVaccineDto.prototype, "milkWithdrawalDays", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Administration route', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateVaccineDto.prototype, "administrationRoute", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Is active', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -153,8 +208,6 @@ __decorate([
 ], UpdateVaccineDto.prototype, "isActive", void 0);
 class QueryVaccineDto {
     search;
-    speciesId;
-    disease;
     isActive;
 }
 exports.QueryVaccineDto = QueryVaccineDto;
@@ -164,18 +217,6 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], QueryVaccineDto.prototype, "search", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Filter by species', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], QueryVaccineDto.prototype, "speciesId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Filter by disease', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], QueryVaccineDto.prototype, "disease", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Filter by active status', required: false }),
     (0, class_validator_1.IsOptional)(),

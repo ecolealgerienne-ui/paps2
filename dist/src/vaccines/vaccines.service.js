@@ -34,25 +34,17 @@ let VaccinesService = class VaccinesService {
         if (query.search) {
             where.name = { contains: query.search, mode: 'insensitive' };
         }
-        if (query.speciesId) {
-            where.speciesId = query.speciesId;
-        }
-        if (query.disease) {
-            where.disease = { contains: query.disease, mode: 'insensitive' };
-        }
         if (query.isActive !== undefined) {
             where.isActive = query.isActive;
         }
         return this.prisma.vaccine.findMany({
             where,
-            include: { species: true },
             orderBy: { name: 'asc' },
         });
     }
     async findOne(farmId, id) {
         const vaccine = await this.prisma.vaccine.findFirst({
             where: { id, farmId, deletedAt: null },
-            include: { species: true },
         });
         if (!vaccine) {
             throw new common_1.NotFoundException(`Vaccine ${id} not found`);
@@ -72,7 +64,6 @@ let VaccinesService = class VaccinesService {
                 ...dto,
                 version: existing.version + 1,
             },
-            include: { species: true },
         });
     }
     async remove(farmId, id) {
@@ -88,7 +79,6 @@ let VaccinesService = class VaccinesService {
                 deletedAt: new Date(),
                 version: existing.version + 1,
             },
-            include: { species: true },
         });
     }
 };

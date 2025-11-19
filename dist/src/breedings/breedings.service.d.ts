@@ -8,5 +8,5 @@ export declare class BreedingsService {
     findOne(farmId: string, id: string): Promise<any>;
     update(farmId: string, id: string, dto: UpdateBreedingDto): Promise<any>;
     remove(farmId: string, id: string): Promise<any>;
-    getUpcomingDueDates(farmId: string, days?: number): Promise<any>;
+    getUpcomingBirthDates(farmId: string, days?: number): Promise<any>;
 }

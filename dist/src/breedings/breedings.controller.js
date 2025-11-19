@@ -31,7 +31,7 @@ let BreedingsController = class BreedingsController {
         return this.breedingsService.findAll(farmId, query);
     }
     getUpcoming(farmId, days) {
-        return this.breedingsService.getUpcomingDueDates(farmId, days || 30);
+        return this.breedingsService.getUpcomingBirthDates(farmId, days || 30);
     }
     findOne(farmId, id) {
         return this.breedingsService.findOne(farmId, id);
@@ -66,7 +66,7 @@ __decorate([
 ], BreedingsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('upcoming'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get upcoming due dates' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get upcoming birth dates' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of upcoming births' }),
     __param(0, (0, common_1.Param)('farmId')),
     __param(1, (0, common_1.Query)('days')),

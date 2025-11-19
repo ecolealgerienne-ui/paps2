@@ -1,28 +1,32 @@
 export declare class CreateVaccineDto {
     name: string;
-    disease: string;
-    speciesId?: string;
+    description?: string;
     manufacturer?: string;
-    dosagePerAnimal?: number;
-    dosageUnit?: string;
-    boosterRequired?: boolean;
-    boosterIntervalDays?: number;
+    targetSpecies?: string[];
+    targetDiseases?: string[];
+    standardDose?: number;
+    injectionsRequired?: number;
+    injectionIntervalDays?: number;
+    meatWithdrawalDays?: number;
+    milkWithdrawalDays?: number;
+    administrationRoute?: string;
     isActive?: boolean;
 }
 export declare class UpdateVaccineDto {
     name?: string;
-    disease?: string;
-    speciesId?: string;
+    description?: string;
     manufacturer?: string;
-    dosagePerAnimal?: number;
-    dosageUnit?: string;
-    boosterRequired?: boolean;
-    boosterIntervalDays?: number;
+    targetSpecies?: string[];
+    targetDiseases?: string[];
+    standardDose?: number;
+    injectionsRequired?: number;
+    injectionIntervalDays?: number;
+    meatWithdrawalDays?: number;
+    milkWithdrawalDays?: number;
+    administrationRoute?: string;
     isActive?: boolean;
 }
 export declare class QueryVaccineDto {
     search?: string;
-    speciesId?: string;
-    disease?: string;
     isActive?: boolean;
 }

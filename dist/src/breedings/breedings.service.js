@@ -18,45 +18,48 @@ let BreedingsService = class BreedingsService {
         this.prisma = prisma;
     }
     async create(farmId, dto) {
-        const female = await this.prisma.animal.findFirst({
-            where: { id: dto.femaleId, farmId, deletedAt: null },
+        const mother = await this.prisma.animal.findFirst({
+            where: { id: dto.motherId, farmId, deletedAt: null },
         });
-        if (!female) {
-            throw new common_1.NotFoundException(`Female animal ${dto.femaleId} not found`);
+        if (!mother) {
+            throw new common_1.NotFoundException(`Mother animal ${dto.motherId} not found`);
         }
-        if (female.sex !== 'female') {
+        if (mother.sex !== 'female') {
             throw new common_1.BadRequestException('Animal must be female');
         }
-        if (dto.maleId) {
-            const male = await this.prisma.animal.findFirst({
-                where: { id: dto.maleId, farmId, deletedAt: null },
+        if (dto.fatherId) {
+            const father = await this.prisma.animal.findFirst({
+                where: { id: dto.fatherId, farmId, deletedAt: null },
             });
-            if (!male) {
-                throw new common_1.NotFoundException(`Male animal ${dto.maleId} not found`);
+            if (!father) {
+                throw new common_1.NotFoundException(`Father animal ${dto.fatherId} not found`);
             }
-            if (male.sex !== 'male') {
+            if (father.sex !== 'male') {
                 throw new common_1.BadRequestException('Animal must be male');
             }
         }
         return this.prisma.breeding.create({
             data: {
                 ...dto,
+                farmId,
                 breedingDate: new Date(dto.breedingDate),
-                expectedDueDate: dto.expectedDueDate ? new Date(dto.expectedDueDate) : null,
+                expectedBirthDate: dto.expectedBirthDate ? new Date(dto.expectedBirthDate) : null,
             },
             include: {
-                female: { select: { id: true, visualId: true, currentEid: true } },
-                male: { select: { id: true, visualId: true, currentEid: true } },
+                mother: { select: { id: true, visualId: true, currentEid: true } },
+                father: { select: { id: true, visualId: true, currentEid: true } },
             },
         });
     }
     async findAll(farmId, query) {
         const where = {
-            female: { farmId },
+            farmId,
             deletedAt: null,
         };
-        if (query.femaleId)
-            where.femaleId = query.femaleId;
+        if (query.motherId)
+            where.motherId = query.motherId;
+        if (query.fatherId)
+            where.fatherId = query.fatherId;
         if (query.status)
             where.status = query.status;
         if (query.fromDate || query.toDate) {
@@ -69,9 +72,8 @@ let BreedingsService = class BreedingsService {
         return this.prisma.breeding.findMany({
             where,
             include: {
-                female: { select: { id: true, visualId: true, currentEid: true } },
-                male: { select: { id: true, visualId: true, currentEid: true } },
-                offspring: { select: { id: true, visualId: true, currentEid: true } },
+                mother: { select: { id: true, visualId: true, currentEid: true } },
+                father: { select: { id: true, visualId: true, currentEid: true } },
             },
             orderBy: { breedingDate: 'desc' },
         });
@@ -80,13 +82,13 @@ let BreedingsService = class BreedingsService {
         const breeding = await this.prisma.breeding.findFirst({
             where: {
                 id,
-                female: { farmId },
+                farmId,
                 deletedAt: null,
             },
             include: {
-                female: { select: { id: true, visualId: true, currentEid: true, birthDate: true } },
-                male: { select: { id: true, visualId: true, currentEid: true } },
-                offspring: { select: { id: true, visualId: true, currentEid: true, birthDate: true } },
+                mother: { select: { id: true, visualId: true, currentEid: true, birthDate: true } },
+                father: { select: { id: true, visualId: true, currentEid: true } },
+                veterinarian: true,
             },
         });
         if (!breeding) {
@@ -98,7 +100,7 @@ let BreedingsService = class BreedingsService {
         const existing = await this.prisma.breeding.findFirst({
             where: {
                 id,
-                female: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });
@@ -118,17 +120,17 @@ let BreedingsService = class BreedingsService {
         };
         if (dto.breedingDate)
             updateData.breedingDate = new Date(dto.breedingDate);
-        if (dto.expectedDueDate)
-            updateData.expectedDueDate = new Date(dto.expectedDueDate);
-        if (dto.actualDueDate)
-            updateData.actualDueDate = new Date(dto.actualDueDate);
+        if (dto.expectedBirthDate)
+            updateData.expectedBirthDate = new Date(dto.expectedBirthDate);
+        if (dto.actualBirthDate)
+            updateData.actualBirthDate = new Date(dto.actualBirthDate);
         return this.prisma.breeding.update({
             where: { id },
             data: updateData,
             include: {
-                female: { select: { id: true, visualId: true, currentEid: true } },
-                male: { select: { id: true, visualId: true, currentEid: true } },
-                offspring: { select: { id: true, visualId: true, currentEid: true } },
+                mother: { select: { id: true, visualId: true, currentEid: true } },
+                father: { select: { id: true, visualId: true, currentEid: true } },
+                veterinarian: true,
             },
         });
     }
@@ -136,7 +138,7 @@ let BreedingsService = class BreedingsService {
         const existing = await this.prisma.breeding.findFirst({
             where: {
                 id,
-                female: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });
@@ -151,23 +153,23 @@ let BreedingsService = class BreedingsService {
             },
         });
     }
-    async getUpcomingDueDates(farmId, days = 30) {
+    async getUpcomingBirthDates(farmId, days = 30) {
         const futureDate = new Date();
         futureDate.setDate(futureDate.getDate() + days);
         return this.prisma.breeding.findMany({
             where: {
-                female: { farmId },
+                farmId,
                 deletedAt: null,
                 status: { in: ['confirmed', 'in_progress'] },
-                expectedDueDate: {
+                expectedBirthDate: {
                     gte: new Date(),
                     lte: futureDate,
                 },
             },
             include: {
-                female: { select: { id: true, visualId: true, currentEid: true } },
+                mother: { select: { id: true, visualId: true, currentEid: true } },
             },
-            orderBy: { expectedDueDate: 'asc' },
+            orderBy: { expectedBirthDate: 'asc' },
         });
     }
 };

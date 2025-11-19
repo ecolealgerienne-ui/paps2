@@ -1,22 +1,35 @@
 export declare class CreateVeterinarianDto {
-    name: string;
+    firstName: string;
+    lastName: string;
+    licenseNumber?: string;
+    specialties?: string[];
+    clinic?: string;
     phone?: string;
     email?: string;
     address?: string;
-    licenseNumber?: string;
-    specialization?: string;
+    isAvailable?: boolean;
+    emergencyService?: boolean;
+    consultationFee?: number;
     isActive?: boolean;
 }
 export declare class UpdateVeterinarianDto {
-    name?: string;
+    firstName?: string;
+    lastName?: string;
+    licenseNumber?: string;
+    specialties?: string[];
+    clinic?: string;
     phone?: string;
     email?: string;
     address?: string;
-    licenseNumber?: string;
-    specialization?: string;
+    isAvailable?: boolean;
+    emergencyService?: boolean;
+    consultationFee?: number;
+    rating?: number;
     isActive?: boolean;
 }
 export declare class QueryVeterinarianDto {
     search?: string;
     isActive?: boolean;
+    isAvailable?: boolean;
+    emergencyService?: boolean;
 }
