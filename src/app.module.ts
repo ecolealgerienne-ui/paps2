@@ -4,6 +4,9 @@ import { AnimalsModule } from './animals/animals.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { BreedingsModule } from './breedings/breedings.module';
+import { CampaignsModule } from './campaigns/campaigns.module';
+import { DocumentsModule } from './documents/documents.module';
 import { LotsModule } from './lots/lots.module';
 import { MovementsModule } from './movements/movements.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -25,6 +28,9 @@ import { WeightsModule } from './weights/weights.module';
     VaccinationsModule,
     WeightsModule,
     MovementsModule,
+    BreedingsModule,
+    CampaignsModule,
+    DocumentsModule,
     SyncModule,
   ],
   controllers: [AppController],
