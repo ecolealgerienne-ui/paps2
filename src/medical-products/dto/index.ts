@@ -29,8 +29,9 @@ export class CreateMedicalProductDto {
 
   @ApiProperty({ description: 'Dosage', required: false })
   @IsOptional()
-  @IsString()
-  dosage?: string;
+  @Type(() => Number)
+  @IsNumber()
+  dosage?: number;
 
   @ApiProperty({ description: 'Withdrawal period for meat (days)', required: false })
   @IsOptional()
@@ -49,14 +50,14 @@ export class CreateMedicalProductDto {
   @ApiProperty({ description: 'Current stock', required: false, default: 0 })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
+  @IsNumber()
   @Min(0)
   currentStock?: number;
 
   @ApiProperty({ description: 'Minimum stock level', required: false, default: 0 })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
+  @IsNumber()
   @Min(0)
   minStock?: number;
 
@@ -125,8 +126,9 @@ export class UpdateMedicalProductDto {
 
   @ApiProperty({ description: 'Dosage', required: false })
   @IsOptional()
-  @IsString()
-  dosage?: string;
+  @Type(() => Number)
+  @IsNumber()
+  dosage?: number;
 
   @ApiProperty({ description: 'Withdrawal period for meat (days)', required: false })
   @IsOptional()
@@ -145,14 +147,14 @@ export class UpdateMedicalProductDto {
   @ApiProperty({ description: 'Current stock', required: false })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
+  @IsNumber()
   @Min(0)
   currentStock?: number;
 
   @ApiProperty({ description: 'Minimum stock level', required: false })
   @IsOptional()
   @Type(() => Number)
-  @IsInt()
+  @IsNumber()
   @Min(0)
   minStock?: number;
 

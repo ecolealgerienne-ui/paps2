@@ -22,6 +22,7 @@ let DocumentsService = class DocumentsService {
             data: {
                 ...dto,
                 farmId,
+                uploadDate: new Date(dto.uploadDate),
                 issueDate: dto.issueDate ? new Date(dto.issueDate) : null,
                 expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
             },
@@ -77,6 +78,8 @@ let DocumentsService = class DocumentsService {
             ...dto,
             version: existing.version + 1,
         };
+        if (dto.uploadDate)
+            updateData.uploadDate = new Date(dto.uploadDate);
         if (dto.issueDate)
             updateData.issueDate = new Date(dto.issueDate);
         if (dto.expiryDate)

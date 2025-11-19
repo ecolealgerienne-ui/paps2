@@ -4,7 +4,7 @@ export declare class CreateMedicalProductDto {
     category?: string;
     activeIngredient?: string;
     manufacturer?: string;
-    dosage?: string;
+    dosage?: number;
     withdrawalPeriodMeat?: number;
     withdrawalPeriodMilk?: number;
     currentStock?: number;
@@ -23,7 +23,7 @@ export declare class UpdateMedicalProductDto {
     category?: string;
     activeIngredient?: string;
     manufacturer?: string;
-    dosage?: string;
+    dosage?: number;
     withdrawalPeriodMeat?: number;
     withdrawalPeriodMilk?: number;
     currentStock?: number;

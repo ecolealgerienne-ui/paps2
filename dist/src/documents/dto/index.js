@@ -15,12 +15,18 @@ const swagger_1 = require("@nestjs/swagger");
 const enums_1 = require("../../common/enums");
 class CreateDocumentDto {
     id;
+    animalId;
     type;
     title;
+    fileName;
+    fileUrl;
+    fileSizeBytes;
+    mimeType;
+    uploadDate;
+    uploadedBy;
     documentNumber;
     issueDate;
     expiryDate;
-    fileUrl;
     notes;
 }
 exports.CreateDocumentDto = CreateDocumentDto;
@@ -31,15 +37,55 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "id", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Animal ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDocumentDto.prototype, "animalId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.DocumentType, description: 'Type of document' }),
     (0, class_validator_1.IsEnum)(enums_1.DocumentType),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "type", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Document title' }),
+    (0, swagger_1.ApiProperty)({ description: 'Document title', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'File name' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDocumentDto.prototype, "fileName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'File URL' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDocumentDto.prototype, "fileUrl", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'File size in bytes', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], CreateDocumentDto.prototype, "fileSizeBytes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'MIME type', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDocumentDto.prototype, "mimeType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Upload date' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateDocumentDto.prototype, "uploadDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Uploaded by user ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateDocumentDto.prototype, "uploadedBy", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Document number', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -59,28 +105,34 @@ __decorate([
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "expiryDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'File URL', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateDocumentDto.prototype, "fileUrl", void 0);
-__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Notes', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateDocumentDto.prototype, "notes", void 0);
 class UpdateDocumentDto {
+    animalId;
     type;
     title;
+    fileName;
+    fileUrl;
+    fileSizeBytes;
+    mimeType;
+    uploadDate;
+    uploadedBy;
     documentNumber;
     issueDate;
     expiryDate;
-    fileUrl;
     notes;
     version;
 }
 exports.UpdateDocumentDto = UpdateDocumentDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Animal ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateDocumentDto.prototype, "animalId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.DocumentType, required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -93,6 +145,42 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateDocumentDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'File name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateDocumentDto.prototype, "fileName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'File URL', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateDocumentDto.prototype, "fileUrl", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'File size in bytes', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], UpdateDocumentDto.prototype, "fileSizeBytes", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'MIME type', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateDocumentDto.prototype, "mimeType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Upload date', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateDocumentDto.prototype, "uploadDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Uploaded by user ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateDocumentDto.prototype, "uploadedBy", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Document number', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -111,12 +199,6 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], UpdateDocumentDto.prototype, "expiryDate", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'File URL', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateDocumentDto.prototype, "fileUrl", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Notes', required: false }),
     (0, class_validator_1.IsOptional)(),

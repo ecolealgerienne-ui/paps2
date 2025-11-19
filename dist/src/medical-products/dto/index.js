@@ -65,8 +65,9 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Dosage', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], CreateMedicalProductDto.prototype, "dosage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Withdrawal period for meat (days)', required: false }),
@@ -88,7 +89,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Current stock', required: false, default: 0 }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateMedicalProductDto.prototype, "currentStock", void 0);
@@ -96,7 +97,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Minimum stock level', required: false, default: 0 }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateMedicalProductDto.prototype, "minStock", void 0);
@@ -196,8 +197,9 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Dosage', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], UpdateMedicalProductDto.prototype, "dosage", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Withdrawal period for meat (days)', required: false }),
@@ -219,7 +221,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Current stock', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], UpdateMedicalProductDto.prototype, "currentStock", void 0);
@@ -227,7 +229,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Minimum stock level', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], UpdateMedicalProductDto.prototype, "minStock", void 0);
