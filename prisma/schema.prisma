@@ -22,7 +22,6 @@ model Species {
 
   animals Animal[]
   breeds  Breed[]
-  vaccines Vaccine[]
 
   @@map("species")
 }
@@ -133,7 +132,6 @@ model Vaccine {
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  vaccinations Vaccination[]
 
   @@index([farmId])
   @@index([deletedAt])
@@ -149,7 +147,6 @@ model AdministrationRoute {
   displayOrder Int    @default(0) @map("display_order")
 
   treatments Treatment[]
-  vaccinations Vaccination[]
 
   @@map("administration_routes")
 }
@@ -502,7 +499,6 @@ model Campaign {
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   lot Lot? @relation(fields: [lotId], references: [id])
-  vaccinations Vaccination[]
 
   @@index([farmId])
   @@index([startDate])
