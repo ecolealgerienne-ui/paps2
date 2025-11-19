@@ -1,6 +1,5 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { VaccinationType } from '../../common/enums';
 
 export class CreateVaccinationDto {
   @ApiProperty({ description: 'Vaccination ID (UUID)', required: false })
@@ -8,32 +7,35 @@ export class CreateVaccinationDto {
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: 'Animal ID' })
+  @ApiProperty({ description: 'Animal ID', required: false })
+  @IsOptional()
   @IsString()
-  animalId: string;
+  animalId?: string;
 
-  @ApiProperty({ description: 'Vaccine ID' })
+  @ApiProperty({ description: 'Vaccine name', required: false })
+  @IsOptional()
   @IsString()
-  vaccineId: string;
+  vaccineName?: string;
+
+  @ApiProperty({ description: 'Vaccination type (obligatoire, recommandee, optionnelle)', required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @ApiProperty({ description: 'Disease', required: false })
+  @IsOptional()
+  @IsString()
+  disease?: string;
 
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
   @IsString()
   veterinarianId?: string;
 
-  @ApiProperty({ description: 'Administration route ID', required: false })
+  @ApiProperty({ description: 'Veterinarian name', required: false })
   @IsOptional()
   @IsString()
-  routeId?: string;
-
-  @ApiProperty({ description: 'Campaign ID', required: false })
-  @IsOptional()
-  @IsString()
-  campaignId?: string;
-
-  @ApiProperty({ enum: VaccinationType, description: 'Type of vaccination' })
-  @IsEnum(VaccinationType)
-  vaccinationType: VaccinationType;
+  veterinarianName?: string;
 
   @ApiProperty({ description: 'Vaccination date' })
   @IsDateString()
@@ -49,15 +51,30 @@ export class CreateVaccinationDto {
   @IsString()
   batchNumber?: string;
 
+  @ApiProperty({ description: 'Expiry date', required: false })
+  @IsOptional()
+  @IsDateString()
+  expiryDate?: string;
+
+  @ApiProperty({ description: 'Dose', required: false })
+  @IsOptional()
+  @IsString()
+  dose?: string;
+
+  @ApiProperty({ description: 'Administration route', required: false })
+  @IsOptional()
+  @IsString()
+  administrationRoute?: string;
+
+  @ApiProperty({ description: 'Withdrawal period in days', required: false })
+  @IsOptional()
+  @IsNumber()
+  withdrawalPeriodDays?: number;
+
   @ApiProperty({ description: 'Dosage amount', required: false })
   @IsOptional()
   @IsNumber()
   dosage?: number;
-
-  @ApiProperty({ description: 'Dosage unit', required: false })
-  @IsOptional()
-  @IsString()
-  dosageUnit?: string;
 
   @ApiProperty({ description: 'Cost', required: false })
   @IsOptional()
@@ -71,25 +88,30 @@ export class CreateVaccinationDto {
 }
 
 export class UpdateVaccinationDto {
-  @ApiProperty({ description: 'Vaccine ID', required: false })
+  @ApiProperty({ description: 'Vaccine name', required: false })
   @IsOptional()
   @IsString()
-  vaccineId?: string;
+  vaccineName?: string;
+
+  @ApiProperty({ description: 'Vaccination type (obligatoire, recommandee, optionnelle)', required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @ApiProperty({ description: 'Disease', required: false })
+  @IsOptional()
+  @IsString()
+  disease?: string;
 
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
   @IsString()
   veterinarianId?: string;
 
-  @ApiProperty({ description: 'Administration route ID', required: false })
+  @ApiProperty({ description: 'Veterinarian name', required: false })
   @IsOptional()
   @IsString()
-  routeId?: string;
-
-  @ApiProperty({ enum: VaccinationType, required: false })
-  @IsOptional()
-  @IsEnum(VaccinationType)
-  vaccinationType?: VaccinationType;
+  veterinarianName?: string;
 
   @ApiProperty({ description: 'Vaccination date', required: false })
   @IsOptional()
@@ -106,15 +128,30 @@ export class UpdateVaccinationDto {
   @IsString()
   batchNumber?: string;
 
+  @ApiProperty({ description: 'Expiry date', required: false })
+  @IsOptional()
+  @IsDateString()
+  expiryDate?: string;
+
+  @ApiProperty({ description: 'Dose', required: false })
+  @IsOptional()
+  @IsString()
+  dose?: string;
+
+  @ApiProperty({ description: 'Administration route', required: false })
+  @IsOptional()
+  @IsString()
+  administrationRoute?: string;
+
+  @ApiProperty({ description: 'Withdrawal period in days', required: false })
+  @IsOptional()
+  @IsNumber()
+  withdrawalPeriodDays?: number;
+
   @ApiProperty({ description: 'Dosage amount', required: false })
   @IsOptional()
   @IsNumber()
   dosage?: number;
-
-  @ApiProperty({ description: 'Dosage unit', required: false })
-  @IsOptional()
-  @IsString()
-  dosageUnit?: string;
 
   @ApiProperty({ description: 'Cost', required: false })
   @IsOptional()
@@ -137,15 +174,10 @@ export class QueryVaccinationDto {
   @IsString()
   animalId?: string;
 
-  @ApiProperty({ description: 'Filter by vaccine ID', required: false })
+  @ApiProperty({ description: 'Filter by type (obligatoire, recommandee, optionnelle)', required: false })
   @IsOptional()
   @IsString()
-  vaccineId?: string;
-
-  @ApiProperty({ enum: VaccinationType, required: false })
-  @IsOptional()
-  @IsEnum(VaccinationType)
-  vaccinationType?: VaccinationType;
+  type?: string;
 
   @ApiProperty({ description: 'From date', required: false })
   @IsOptional()

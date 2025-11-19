@@ -1,38 +1,43 @@
-import { VaccinationType } from '../../common/enums';
 export declare class CreateVaccinationDto {
     id?: string;
-    animalId: string;
-    vaccineId: string;
+    animalId?: string;
+    vaccineName?: string;
+    type?: string;
+    disease?: string;
     veterinarianId?: string;
-    routeId?: string;
-    campaignId?: string;
-    vaccinationType: VaccinationType;
+    veterinarianName?: string;
     vaccinationDate: string;
     nextDueDate?: string;
     batchNumber?: string;
+    expiryDate?: string;
+    dose?: string;
+    administrationRoute?: string;
+    withdrawalPeriodDays?: number;
     dosage?: number;
-    dosageUnit?: string;
     cost?: number;
     notes?: string;
 }
 export declare class UpdateVaccinationDto {
-    vaccineId?: string;
+    vaccineName?: string;
+    type?: string;
+    disease?: string;
     veterinarianId?: string;
-    routeId?: string;
-    vaccinationType?: VaccinationType;
+    veterinarianName?: string;
     vaccinationDate?: string;
     nextDueDate?: string;
     batchNumber?: string;
+    expiryDate?: string;
+    dose?: string;
+    administrationRoute?: string;
+    withdrawalPeriodDays?: number;
     dosage?: number;
-    dosageUnit?: string;
     cost?: number;
     notes?: string;
     version?: number;
 }
 export declare class QueryVaccinationDto {
     animalId?: string;
-    vaccineId?: string;
-    vaccinationType?: VaccinationType;
+    type?: string;
     fromDate?: string;
     toDate?: string;
 }

@@ -17,10 +17,14 @@ class CreateTreatmentDto {
     id;
     animalId;
     productId;
+    productName;
     veterinarianId;
+    veterinarianName;
+    campaignId;
     routeId;
     diagnosis;
     treatmentDate;
+    dose;
     dosage;
     dosageUnit;
     duration;
@@ -48,11 +52,29 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "productId", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Product name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTreatmentDto.prototype, "productName", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Veterinarian ID', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "veterinarianId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Veterinarian name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTreatmentDto.prototype, "veterinarianName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Campaign ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTreatmentDto.prototype, "campaignId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Administration route ID', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -70,6 +92,12 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "treatmentDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Dose amount', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateTreatmentDto.prototype, "dose", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Dosage amount', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -114,10 +142,14 @@ __decorate([
 ], CreateTreatmentDto.prototype, "notes", void 0);
 class UpdateTreatmentDto {
     productId;
+    productName;
     veterinarianId;
+    veterinarianName;
+    campaignId;
     routeId;
     diagnosis;
     treatmentDate;
+    dose;
     dosage;
     dosageUnit;
     duration;
@@ -135,11 +167,29 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateTreatmentDto.prototype, "productId", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Product name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateTreatmentDto.prototype, "productName", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Veterinarian ID', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateTreatmentDto.prototype, "veterinarianId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Veterinarian name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateTreatmentDto.prototype, "veterinarianName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Campaign ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateTreatmentDto.prototype, "campaignId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Administration route ID', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -158,6 +208,12 @@ __decorate([
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], UpdateTreatmentDto.prototype, "treatmentDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Dose amount', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateTreatmentDto.prototype, "dose", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Dosage amount', required: false }),
     (0, class_validator_1.IsOptional)(),

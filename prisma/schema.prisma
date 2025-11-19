@@ -49,15 +49,26 @@ model Veterinarian {
   farmId                String    @map("farm_id")
   firstName             String    @map("first_name")
   lastName              String    @map("last_name")
+  title                 String?
   licenseNumber         String?   @map("license_number")
   specialties           Json?     // JSON array of specialties
   clinic                String?
   phone                 String?
+  mobile                String?
   email                 String?
   address               String?
+  city                  String?
+  postalCode            String?   @map("postal_code")
+  country               String?
   isAvailable           Boolean   @default(true) @map("is_available")
   emergencyService      Boolean   @default(false) @map("emergency_service")
+  workingHours          String?   @map("working_hours")
   consultationFee       Float?    @map("consultation_fee")
+  emergencyFee          Float?    @map("emergency_fee")
+  currency              String?
+  notes                 String?
+  isPreferred           Boolean   @default(false) @map("is_preferred")
+  isDefault             Boolean   @default(false) @map("is_default")
   rating                Float?
   totalInterventions    Int       @default(0) @map("total_interventions")
   lastInterventionDate  DateTime? @map("last_intervention_date")
@@ -303,10 +314,14 @@ model Treatment {
   farmId              String   @map("farm_id")
   animalId            String   @map("animal_id")
   productId           String?  @map("product_id")
+  productName         String?  @map("product_name")
   veterinarianId      String?  @map("veterinarian_id")
+  veterinarianName    String?  @map("veterinarian_name")
+  campaignId          String?  @map("campaign_id")
   routeId             String?  @map("route_id")
   diagnosis           String?
   treatmentDate       DateTime @map("treatment_date")
+  dose                Float?
   dosage              Float?
   dosageUnit          String?  @map("dosage_unit")
   duration            Int?     // jours
@@ -340,13 +355,16 @@ model Vaccination {
   animalIds             Json?     @map("animal_ids") // JSON array for group vaccinations
   protocolId            String?   @map("protocol_id")
   vaccineName           String?   @map("vaccine_name")
+  type                  String?   // obligatoire, recommandee, optionnelle
   disease               String?
   vaccinationDate       DateTime  @map("vaccination_date")
   batchNumber           String?   @map("batch_number")
   expiryDate            DateTime? @map("expiry_date")
+  dose                  String?
   administrationRoute   String?   @map("administration_route")
   nextDueDate           DateTime? @map("next_due_date")
   veterinarianId        String?   @map("veterinarian_id")
+  veterinarianName      String?   @map("veterinarian_name")
   withdrawalPeriodDays  Int?      @map("withdrawal_period_days")
   dosage                Float?
   cost                  Float?

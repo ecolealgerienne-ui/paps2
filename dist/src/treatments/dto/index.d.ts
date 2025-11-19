@@ -3,10 +3,14 @@ export declare class CreateTreatmentDto {
     id?: string;
     animalId: string;
     productId?: string;
+    productName?: string;
     veterinarianId?: string;
+    veterinarianName?: string;
+    campaignId?: string;
     routeId?: string;
     diagnosis?: string;
     treatmentDate: string;
+    dose?: number;
     dosage?: number;
     dosageUnit?: string;
     duration?: number;
@@ -17,10 +21,14 @@ export declare class CreateTreatmentDto {
 }
 export declare class UpdateTreatmentDto {
     productId?: string;
+    productName?: string;
     veterinarianId?: string;
+    veterinarianName?: string;
+    campaignId?: string;
     routeId?: string;
     diagnosis?: string;
     treatmentDate?: string;
+    dose?: number;
     dosage?: number;
     dosageUnit?: string;
     duration?: number;

@@ -17,10 +17,25 @@ export class CreateTreatmentDto {
   @IsString()
   productId?: string;
 
+  @ApiProperty({ description: 'Product name', required: false })
+  @IsOptional()
+  @IsString()
+  productName?: string;
+
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
   @IsString()
   veterinarianId?: string;
+
+  @ApiProperty({ description: 'Veterinarian name', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianName?: string;
+
+  @ApiProperty({ description: 'Campaign ID', required: false })
+  @IsOptional()
+  @IsString()
+  campaignId?: string;
 
   @ApiProperty({ description: 'Administration route ID', required: false })
   @IsOptional()
@@ -35,6 +50,11 @@ export class CreateTreatmentDto {
   @ApiProperty({ description: 'Treatment date' })
   @IsDateString()
   treatmentDate: string;
+
+  @ApiProperty({ description: 'Dose amount', required: false })
+  @IsOptional()
+  @IsNumber()
+  dose?: number;
 
   @ApiProperty({ description: 'Dosage amount', required: false })
   @IsOptional()
@@ -78,10 +98,25 @@ export class UpdateTreatmentDto {
   @IsString()
   productId?: string;
 
+  @ApiProperty({ description: 'Product name', required: false })
+  @IsOptional()
+  @IsString()
+  productName?: string;
+
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
   @IsString()
   veterinarianId?: string;
+
+  @ApiProperty({ description: 'Veterinarian name', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianName?: string;
+
+  @ApiProperty({ description: 'Campaign ID', required: false })
+  @IsOptional()
+  @IsString()
+  campaignId?: string;
 
   @ApiProperty({ description: 'Administration route ID', required: false })
   @IsOptional()
@@ -97,6 +132,11 @@ export class UpdateTreatmentDto {
   @IsOptional()
   @IsDateString()
   treatmentDate?: string;
+
+  @ApiProperty({ description: 'Dose amount', required: false })
+  @IsOptional()
+  @IsNumber()
+  dose?: number;
 
   @ApiProperty({ description: 'Dosage amount', required: false })
   @IsOptional()

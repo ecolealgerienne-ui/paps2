@@ -44,10 +44,8 @@ let VaccinationsService = class VaccinationsService {
         };
         if (query.animalId)
             where.animalId = query.animalId;
-        if (query.vaccineId)
-            where.vaccineId = query.vaccineId;
-        if (query.vaccinationType)
-            where.vaccinationType = query.vaccinationType;
+        if (query.type)
+            where.type = query.type;
         if (query.fromDate || query.toDate) {
             where.vaccinationDate = {};
             if (query.fromDate)
