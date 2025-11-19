@@ -89,29 +89,42 @@ model Veterinarian {
 
 // Produits médicaux (multi-tenant)
 model MedicalProduct {
-  id                   String    @id @default(uuid())
-  farmId               String    @map("farm_id")
-  name                 String
-  commercialName       String?   @map("commercial_name")
-  category             String?   // antibiotic, anti-inflammatory, vitamin, etc.
-  activeIngredient     String?   @map("active_ingredient")
-  manufacturer         String?
-  dosage               String?
-  withdrawalPeriodMeat Int?      @map("withdrawal_period_meat") // jours
-  withdrawalPeriodMilk Int?      @map("withdrawal_period_milk") // jours
-  currentStock         Int       @default(0) @map("current_stock")
-  minStock             Int       @default(0) @map("min_stock")
-  unitPrice            Float?    @map("unit_price")
-  batchNumber          String?   @map("batch_number")
-  expiryDate           DateTime? @map("expiry_date")
-  prescription         Boolean   @default(false)
-  type                 String?   // treatment, supplement, etc.
-  targetSpecies        String?   @map("target_species")
-  isActive             Boolean   @default(true) @map("is_active")
-  version              Int       @default(1)
-  deletedAt            DateTime? @map("deleted_at")
-  createdAt            DateTime  @default(now()) @map("created_at")
-  updatedAt            DateTime  @updatedAt @map("updated_at")
+  id                        String    @id @default(uuid())
+  farmId                    String    @map("farm_id")
+  name                      String
+  commercialName            String?   @map("commercial_name")
+  category                  String?   // antibiotic, anti-inflammatory, vitamin, etc.
+  activeIngredient          String?   @map("active_ingredient")
+  manufacturer              String?
+  form                      String?   // tablet, injection, powder, etc.
+  dosage                    Float?
+  dosageUnit                String?   @map("dosage_unit")
+  withdrawalPeriodMeat      Int?      @map("withdrawal_period_meat") // jours
+  withdrawalPeriodMilk      Int?      @map("withdrawal_period_milk") // jours
+  currentStock              Float     @default(0) @map("current_stock")
+  minStock                  Float     @default(0) @map("min_stock")
+  stockUnit                 String?   @map("stock_unit")
+  unitPrice                 Float?    @map("unit_price")
+  currency                  String?
+  batchNumber               String?   @map("batch_number")
+  expiryDate                DateTime? @map("expiry_date")
+  storageConditions         String?   @map("storage_conditions")
+  prescription              String?   // prescription notes/requirements
+  type                      String?   // treatment, vaccine
+  targetSpecies             String?   @map("target_species")
+  standardCureDays          Int?      @map("standard_cure_days")
+  administrationFrequency   String?   @map("administration_frequency")
+  dosageFormula             String?   @map("dosage_formula")
+  vaccinationProtocol       String?   @map("vaccination_protocol")
+  reminderDays              String?   @map("reminder_days") // comma-separated
+  defaultAdministrationRoute String?  @map("default_administration_route")
+  defaultInjectionSite      String?   @map("default_injection_site")
+  notes                     String?
+  isActive                  Boolean   @default(true) @map("is_active")
+  version                   Int       @default(1)
+  deletedAt                 DateTime? @map("deleted_at")
+  createdAt                 DateTime  @default(now()) @map("created_at")
+  updatedAt                 DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   treatments Treatment[]
@@ -412,36 +425,46 @@ model Vaccination {
 
 // Mouvement (entrée/sortie)
 model Movement {
-  id              String   @id @default(uuid())
-  farmId          String   @map("farm_id")
-  movementType    String   @map("movement_type") // entry, exit, birth, death, sale, etc.
-  movementDate    DateTime @map("movement_date")
-  reason          String?
+  id                  String    @id @default(uuid())
+  farmId              String    @map("farm_id")
+  movementType        String    @map("movement_type") // birth, purchase, sale, death, slaughter, temporary_out, temporary_return
+  movementDate        DateTime  @map("movement_date")
+  reason              String?
+  status              String    @default("ongoing") // ongoing, closed, archived
 
   // Pour les ventes
-  buyerName       String?  @map("buyer_name")
-  buyerType       String?  @map("buyer_type")
-  buyerContact    String?  @map("buyer_contact")
-  salePrice       Float?   @map("sale_price")
+  buyerName           String?   @map("buyer_name")
+  buyerType           String?   @map("buyer_type")
+  buyerContact        String?   @map("buyer_contact")
+  buyerFarmId         String?   @map("buyer_farm_id")
+  salePrice           Float?    @map("sale_price")
 
   // Pour les achats
-  sellerName      String?  @map("seller_name")
-  purchasePrice   Float?   @map("purchase_price")
+  sellerName          String?   @map("seller_name")
+  purchasePrice       Float?    @map("purchase_price")
 
   // Pour les transferts
-  destinationFarmId String? @map("destination_farm_id")
-  originFarmId      String? @map("origin_farm_id")
+  destinationFarmId   String?   @map("destination_farm_id")
+  originFarmId        String?   @map("origin_farm_id")
+
+  // Pour les abattages
+  slaughterhouseName  String?   @map("slaughterhouse_name")
+  slaughterhouseId    String?   @map("slaughterhouse_id")
 
   // Pour les mouvements temporaires
-  temporaryType     String? @map("temporary_type")
-  expectedReturnDate DateTime? @map("expected_return_date")
+  isTemporary         Boolean   @default(false) @map("is_temporary")
+  temporaryType       String?   @map("temporary_type") // loan, transhumance, boarding, quarantine, exhibition
+  expectedReturnDate  DateTime? @map("expected_return_date")
+  returnDate          DateTime? @map("return_date")
+  returnNotes         String?   @map("return_notes")
+  relatedMovementId   String?   @map("related_movement_id")
 
-  documentNumber  String?  @map("document_number")
-  notes           String?
-  version         Int      @default(1)
-  deletedAt       DateTime? @map("deleted_at")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  documentNumber      String?   @map("document_number")
+  notes               String?
+  version             Int       @default(1)
+  deletedAt           DateTime? @map("deleted_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   movementAnimals MovementAnimal[]
@@ -449,6 +472,7 @@ model Movement {
   @@index([farmId])
   @@index([movementDate])
   @@index([movementType])
+  @@index([status])
   @@index([deletedAt])
   @@map("movements")
 }
@@ -590,19 +614,24 @@ model Document {
 
 // Préférences de la ferme
 model FarmPreferences {
-  id                String  @id @default(uuid())
-  farmId            String  @unique @map("farm_id")
-  defaultSpeciesId  String? @map("default_species_id")
-  weightUnit        String  @default("kg") @map("weight_unit")
-  currency          String  @default("DZD")
-  language          String  @default("fr")
-  dateFormat        String  @default("DD/MM/YYYY") @map("date_format")
-  enableNotifications Boolean @default(true) @map("enable_notifications")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  id                     String    @id @default(uuid())
+  farmId                 String    @unique @map("farm_id")
+  defaultVeterinarianId  String?   @map("default_veterinarian_id")
+  defaultSpeciesId       String?   @map("default_species_id")
+  defaultBreedId         String?   @map("default_breed_id")
+  weightUnit             String    @default("kg") @map("weight_unit")
+  currency               String    @default("DZD")
+  language               String    @default("fr")
+  dateFormat             String    @default("DD/MM/YYYY") @map("date_format")
+  enableNotifications    Boolean   @default(true) @map("enable_notifications")
+  version                Int       @default(1)
+  deletedAt              DateTime? @map("deleted_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
 
+  @@index([deletedAt])
   @@map("farm_preferences")
 }
 
