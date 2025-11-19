@@ -121,10 +121,10 @@ __decorate([
     __metadata("design:type", String)
 ], CreateMedicalProductDto.prototype, "expiryDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Requires prescription', required: false, default: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Prescription notes/requirements', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], CreateMedicalProductDto.prototype, "prescription", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Type (treatment, supplement, etc.)', required: false }),
@@ -253,10 +253,10 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateMedicalProductDto.prototype, "expiryDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Requires prescription', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Prescription notes/requirements', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], UpdateMedicalProductDto.prototype, "prescription", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Type', required: false }),
@@ -281,7 +281,6 @@ class QueryMedicalProductDto {
     category;
     type;
     isActive;
-    prescription;
 }
 exports.QueryMedicalProductDto = QueryMedicalProductDto;
 __decorate([
@@ -308,10 +307,4 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], QueryMedicalProductDto.prototype, "isActive", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Filter by prescription required', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], QueryMedicalProductDto.prototype, "prescription", void 0);
 //# sourceMappingURL=index.js.map

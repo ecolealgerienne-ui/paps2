@@ -77,10 +77,10 @@ export class CreateMedicalProductDto {
   @IsDateString()
   expiryDate?: string;
 
-  @ApiProperty({ description: 'Requires prescription', required: false, default: false })
+  @ApiProperty({ description: 'Prescription notes/requirements', required: false })
   @IsOptional()
-  @IsBoolean()
-  prescription?: boolean;
+  @IsString()
+  prescription?: string;
 
   @ApiProperty({ description: 'Type (treatment, supplement, etc.)', required: false })
   @IsOptional()
@@ -174,10 +174,10 @@ export class UpdateMedicalProductDto {
   @IsDateString()
   expiryDate?: string;
 
-  @ApiProperty({ description: 'Requires prescription', required: false })
+  @ApiProperty({ description: 'Prescription notes/requirements', required: false })
   @IsOptional()
-  @IsBoolean()
-  prescription?: boolean;
+  @IsString()
+  prescription?: string;
 
   @ApiProperty({ description: 'Type', required: false })
   @IsOptional()
@@ -215,9 +215,4 @@ export class QueryMedicalProductDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-
-  @ApiProperty({ description: 'Filter by prescription required', required: false })
-  @IsOptional()
-  @IsBoolean()
-  prescription?: boolean;
 }

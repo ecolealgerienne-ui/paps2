@@ -12,7 +12,7 @@ export declare class CreateMedicalProductDto {
     unitPrice?: number;
     batchNumber?: string;
     expiryDate?: string;
-    prescription?: boolean;
+    prescription?: string;
     type?: string;
     targetSpecies?: string;
     isActive?: boolean;
@@ -31,7 +31,7 @@ export declare class UpdateMedicalProductDto {
     unitPrice?: number;
     batchNumber?: string;
     expiryDate?: string;
-    prescription?: boolean;
+    prescription?: string;
     type?: string;
     targetSpecies?: string;
     isActive?: boolean;
@@ -41,5 +41,4 @@ export declare class QueryMedicalProductDto {
     category?: string;
     type?: string;
     isActive?: boolean;
-    prescription?: boolean;
 }
