@@ -6,14 +6,20 @@ import { CreateVeterinarianDto, UpdateVeterinarianDto, QueryVeterinarianDto } fr
 export class VeterinariansService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateVeterinarianDto) {
+  async create(farmId: string, dto: CreateVeterinarianDto) {
     return this.prisma.veterinarian.create({
-      data: dto,
+      data: {
+        ...dto,
+        farmId,
+      },
     });
   }
 
-  async findAll(query: QueryVeterinarianDto) {
-    const where: any = {};
+  async findAll(farmId: string, query: QueryVeterinarianDto) {
+    const where: any = {
+      farmId,
+      deletedAt: null,
+    };
 
     if (query.search) {
       where.name = { contains: query.search, mode: 'insensitive' };
@@ -28,9 +34,9 @@ export class VeterinariansService {
     });
   }
 
-  async findOne(id: string) {
-    const vet = await this.prisma.veterinarian.findUnique({
-      where: { id },
+  async findOne(farmId: string, id: string) {
+    const vet = await this.prisma.veterinarian.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!vet) {
@@ -40,9 +46,9 @@ export class VeterinariansService {
     return vet;
   }
 
-  async update(id: string, dto: UpdateVeterinarianDto) {
-    const existing = await this.prisma.veterinarian.findUnique({
-      where: { id },
+  async update(farmId: string, id: string, dto: UpdateVeterinarianDto) {
+    const existing = await this.prisma.veterinarian.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
@@ -51,21 +57,29 @@ export class VeterinariansService {
 
     return this.prisma.veterinarian.update({
       where: { id },
-      data: dto,
+      data: {
+        ...dto,
+        version: existing.version + 1,
+      },
     });
   }
 
-  async remove(id: string) {
-    const existing = await this.prisma.veterinarian.findUnique({
-      where: { id },
+  async remove(farmId: string, id: string) {
+    const existing = await this.prisma.veterinarian.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
       throw new NotFoundException(`Veterinarian ${id} not found`);
     }
 
-    return this.prisma.veterinarian.delete({
+    // Soft delete
+    return this.prisma.veterinarian.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+        version: existing.version + 1,
+      },
     });
   }
 }

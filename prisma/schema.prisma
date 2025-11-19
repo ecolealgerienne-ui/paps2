@@ -44,61 +44,79 @@ model Breed {
   @@map("breeds")
 }
 
-// Table de référence - Vétérinaires
+// Vétérinaires (multi-tenant)
 model Veterinarian {
-  id           String  @id @default(uuid())
-  name         String
-  phone        String?
-  email        String?
-  address      String?
-  licenseNumber String? @map("license_number")
+  id             String   @id @default(uuid())
+  farmId         String   @map("farm_id")
+  name           String
+  phone          String?
+  email          String?
+  address        String?
+  licenseNumber  String?  @map("license_number")
   specialization String?
-  isActive     Boolean @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  isActive       Boolean  @default(true) @map("is_active")
+  version        Int      @default(1)
+  deletedAt      DateTime? @map("deleted_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   treatments Treatment[]
   vaccinations Vaccination[]
 
+  @@index([farmId])
+  @@index([deletedAt])
   @@map("veterinarians")
 }
 
-// Table de référence - Produits médicaux
+// Produits médicaux (multi-tenant)
 model MedicalProduct {
-  id              String  @id @default(uuid())
-  name            String
-  activeSubstance String? @map("active_substance")
-  manufacturer    String?
-  withdrawalPeriodMeat Int? @map("withdrawal_period_meat") // jours
-  withdrawalPeriodMilk Int? @map("withdrawal_period_milk") // jours
-  dosageUnit      String? @map("dosage_unit")
-  isActive        Boolean @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                   String   @id @default(uuid())
+  farmId               String   @map("farm_id")
+  name                 String
+  activeSubstance      String?  @map("active_substance")
+  manufacturer         String?
+  withdrawalPeriodMeat Int?     @map("withdrawal_period_meat") // jours
+  withdrawalPeriodMilk Int?     @map("withdrawal_period_milk") // jours
+  dosageUnit           String?  @map("dosage_unit")
+  isActive             Boolean  @default(true) @map("is_active")
+  version              Int      @default(1)
+  deletedAt            DateTime? @map("deleted_at")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   treatments Treatment[]
 
+  @@index([farmId])
+  @@index([deletedAt])
   @@map("medical_products")
 }
 
-// Table de référence - Vaccins
+// Vaccins (multi-tenant)
 model Vaccine {
-  id              String  @id @default(uuid())
-  name            String
-  disease         String  // Maladie ciblée
-  speciesId       String? @map("species_id")
-  manufacturer    String?
-  dosagePerAnimal Float?  @map("dosage_per_animal")
-  dosageUnit      String? @map("dosage_unit")
-  boosterRequired Boolean @default(false) @map("booster_required")
-  boosterIntervalDays Int? @map("booster_interval_days")
-  isActive        Boolean @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                  String   @id @default(uuid())
+  farmId              String   @map("farm_id")
+  name                String
+  disease             String   // Maladie ciblée
+  speciesId           String?  @map("species_id")
+  manufacturer        String?
+  dosagePerAnimal     Float?   @map("dosage_per_animal")
+  dosageUnit          String?  @map("dosage_unit")
+  boosterRequired     Boolean  @default(false) @map("booster_required")
+  boosterIntervalDays Int?     @map("booster_interval_days")
+  isActive            Boolean  @default(true) @map("is_active")
+  version             Int      @default(1)
+  deletedAt           DateTime? @map("deleted_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   species Species? @relation(fields: [speciesId], references: [id])
   vaccinations Vaccination[]
 
+  @@index([farmId])
+  @@index([deletedAt])
   @@map("vaccines")
 }
 
@@ -160,6 +178,9 @@ model Farm {
   vaccinations Vaccination[]
   breedings Breeding[]
   lotAnimals LotAnimal[]
+  veterinarians Veterinarian[]
+  medicalProducts MedicalProduct[]
+  vaccines Vaccine[]
   preferences FarmPreferences?
   alertConfigurations AlertConfiguration[]
 
