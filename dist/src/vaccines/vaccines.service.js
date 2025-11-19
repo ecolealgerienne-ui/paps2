@@ -17,14 +17,20 @@ let VaccinesService = class VaccinesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(dto) {
+    async create(farmId, dto) {
         return this.prisma.vaccine.create({
-            data: dto,
+            data: {
+                ...dto,
+                farmId,
+            },
             include: { species: true },
         });
     }
-    async findAll(query) {
-        const where = {};
+    async findAll(farmId, query) {
+        const where = {
+            farmId,
+            deletedAt: null,
+        };
         if (query.search) {
             where.name = { contains: query.search, mode: 'insensitive' };
         }
@@ -43,9 +49,9 @@ let VaccinesService = class VaccinesService {
             orderBy: { name: 'asc' },
         });
     }
-    async findOne(id) {
-        const vaccine = await this.prisma.vaccine.findUnique({
-            where: { id },
+    async findOne(farmId, id) {
+        const vaccine = await this.prisma.vaccine.findFirst({
+            where: { id, farmId, deletedAt: null },
             include: { species: true },
         });
         if (!vaccine) {
@@ -53,28 +59,36 @@ let VaccinesService = class VaccinesService {
         }
         return vaccine;
     }
-    async update(id, dto) {
-        const existing = await this.prisma.vaccine.findUnique({
-            where: { id },
+    async update(farmId, id, dto) {
+        const existing = await this.prisma.vaccine.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!existing) {
             throw new common_1.NotFoundException(`Vaccine ${id} not found`);
         }
         return this.prisma.vaccine.update({
             where: { id },
-            data: dto,
+            data: {
+                ...dto,
+                version: existing.version + 1,
+            },
             include: { species: true },
         });
     }
-    async remove(id) {
-        const existing = await this.prisma.vaccine.findUnique({
-            where: { id },
+    async remove(farmId, id) {
+        const existing = await this.prisma.vaccine.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!existing) {
             throw new common_1.NotFoundException(`Vaccine ${id} not found`);
         }
-        return this.prisma.vaccine.delete({
+        return this.prisma.vaccine.update({
             where: { id },
+            data: {
+                deletedAt: new Date(),
+                version: existing.version + 1,
+            },
+            include: { species: true },
         });
     }
 };

@@ -6,15 +6,21 @@ import { CreateVaccineDto, UpdateVaccineDto, QueryVaccineDto } from './dto';
 export class VaccinesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateVaccineDto) {
+  async create(farmId: string, dto: CreateVaccineDto) {
     return this.prisma.vaccine.create({
-      data: dto,
+      data: {
+        ...dto,
+        farmId,
+      },
       include: { species: true },
     });
   }
 
-  async findAll(query: QueryVaccineDto) {
-    const where: any = {};
+  async findAll(farmId: string, query: QueryVaccineDto) {
+    const where: any = {
+      farmId,
+      deletedAt: null,
+    };
 
     if (query.search) {
       where.name = { contains: query.search, mode: 'insensitive' };
@@ -36,9 +42,9 @@ export class VaccinesService {
     });
   }
 
-  async findOne(id: string) {
-    const vaccine = await this.prisma.vaccine.findUnique({
-      where: { id },
+  async findOne(farmId: string, id: string) {
+    const vaccine = await this.prisma.vaccine.findFirst({
+      where: { id, farmId, deletedAt: null },
       include: { species: true },
     });
 
@@ -49,9 +55,9 @@ export class VaccinesService {
     return vaccine;
   }
 
-  async update(id: string, dto: UpdateVaccineDto) {
-    const existing = await this.prisma.vaccine.findUnique({
-      where: { id },
+  async update(farmId: string, id: string, dto: UpdateVaccineDto) {
+    const existing = await this.prisma.vaccine.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
@@ -60,22 +66,31 @@ export class VaccinesService {
 
     return this.prisma.vaccine.update({
       where: { id },
-      data: dto,
+      data: {
+        ...dto,
+        version: existing.version + 1,
+      },
       include: { species: true },
     });
   }
 
-  async remove(id: string) {
-    const existing = await this.prisma.vaccine.findUnique({
-      where: { id },
+  async remove(farmId: string, id: string) {
+    const existing = await this.prisma.vaccine.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
       throw new NotFoundException(`Vaccine ${id} not found`);
     }
 
-    return this.prisma.vaccine.delete({
+    // Soft delete
+    return this.prisma.vaccine.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+        version: existing.version + 1,
+      },
+      include: { species: true },
     });
   }
 }

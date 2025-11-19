@@ -23,20 +23,20 @@ let VeterinariansController = class VeterinariansController {
     constructor(veterinariansService) {
         this.veterinariansService = veterinariansService;
     }
-    create(dto) {
-        return this.veterinariansService.create(dto);
+    create(farmId, dto) {
+        return this.veterinariansService.create(farmId, dto);
     }
-    findAll(query) {
-        return this.veterinariansService.findAll(query);
+    findAll(farmId, query) {
+        return this.veterinariansService.findAll(farmId, query);
     }
-    findOne(id) {
-        return this.veterinariansService.findOne(id);
+    findOne(farmId, id) {
+        return this.veterinariansService.findOne(farmId, id);
     }
-    update(id, dto) {
-        return this.veterinariansService.update(id, dto);
+    update(farmId, id, dto) {
+        return this.veterinariansService.update(farmId, id, dto);
     }
-    remove(id) {
-        return this.veterinariansService.remove(id);
+    remove(farmId, id) {
+        return this.veterinariansService.remove(farmId, id);
     }
 };
 exports.VeterinariansController = VeterinariansController;
@@ -44,53 +44,58 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create a veterinarian' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Veterinarian created' }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.CreateVeterinarianDto]),
+    __metadata("design:paramtypes", [String, dto_1.CreateVeterinarianDto]),
     __metadata("design:returntype", void 0)
 ], VeterinariansController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all veterinarians' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of veterinarians' }),
-    __param(0, (0, common_1.Query)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.QueryVeterinarianDto]),
+    __metadata("design:paramtypes", [String, dto_1.QueryVeterinarianDto]),
     __metadata("design:returntype", void 0)
 ], VeterinariansController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a veterinarian by ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Veterinarian details' }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], VeterinariansController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update a veterinarian' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Veterinarian updated' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, dto_1.UpdateVeterinarianDto]),
+    __metadata("design:paramtypes", [String, String, dto_1.UpdateVeterinarianDto]),
     __metadata("design:returntype", void 0)
 ], VeterinariansController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete a veterinarian' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Veterinarian deleted' }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], VeterinariansController.prototype, "remove", null);
 exports.VeterinariansController = VeterinariansController = __decorate([
     (0, swagger_1.ApiTags)('veterinarians'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
-    (0, common_1.Controller)('veterinarians'),
+    (0, common_1.Controller)('farms/:farmId/veterinarians'),
     __metadata("design:paramtypes", [veterinarians_service_1.VeterinariansService])
 ], VeterinariansController);
 //# sourceMappingURL=veterinarians.controller.js.map

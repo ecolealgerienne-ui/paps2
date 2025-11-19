@@ -17,13 +17,19 @@ let VeterinariansService = class VeterinariansService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(dto) {
+    async create(farmId, dto) {
         return this.prisma.veterinarian.create({
-            data: dto,
+            data: {
+                ...dto,
+                farmId,
+            },
         });
     }
-    async findAll(query) {
-        const where = {};
+    async findAll(farmId, query) {
+        const where = {
+            farmId,
+            deletedAt: null,
+        };
         if (query.search) {
             where.name = { contains: query.search, mode: 'insensitive' };
         }
@@ -35,36 +41,43 @@ let VeterinariansService = class VeterinariansService {
             orderBy: { name: 'asc' },
         });
     }
-    async findOne(id) {
-        const vet = await this.prisma.veterinarian.findUnique({
-            where: { id },
+    async findOne(farmId, id) {
+        const vet = await this.prisma.veterinarian.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!vet) {
             throw new common_1.NotFoundException(`Veterinarian ${id} not found`);
         }
         return vet;
     }
-    async update(id, dto) {
-        const existing = await this.prisma.veterinarian.findUnique({
-            where: { id },
+    async update(farmId, id, dto) {
+        const existing = await this.prisma.veterinarian.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!existing) {
             throw new common_1.NotFoundException(`Veterinarian ${id} not found`);
         }
         return this.prisma.veterinarian.update({
             where: { id },
-            data: dto,
+            data: {
+                ...dto,
+                version: existing.version + 1,
+            },
         });
     }
-    async remove(id) {
-        const existing = await this.prisma.veterinarian.findUnique({
-            where: { id },
+    async remove(farmId, id) {
+        const existing = await this.prisma.veterinarian.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!existing) {
             throw new common_1.NotFoundException(`Veterinarian ${id} not found`);
         }
-        return this.prisma.veterinarian.delete({
+        return this.prisma.veterinarian.update({
             where: { id },
+            data: {
+                deletedAt: new Date(),
+                version: existing.version + 1,
+            },
         });
     }
 };

@@ -23,20 +23,20 @@ let VaccinesController = class VaccinesController {
     constructor(vaccinesService) {
         this.vaccinesService = vaccinesService;
     }
-    create(dto) {
-        return this.vaccinesService.create(dto);
+    create(farmId, dto) {
+        return this.vaccinesService.create(farmId, dto);
     }
-    findAll(query) {
-        return this.vaccinesService.findAll(query);
+    findAll(farmId, query) {
+        return this.vaccinesService.findAll(farmId, query);
     }
-    findOne(id) {
-        return this.vaccinesService.findOne(id);
+    findOne(farmId, id) {
+        return this.vaccinesService.findOne(farmId, id);
     }
-    update(id, dto) {
-        return this.vaccinesService.update(id, dto);
+    update(farmId, id, dto) {
+        return this.vaccinesService.update(farmId, id, dto);
     }
-    remove(id) {
-        return this.vaccinesService.remove(id);
+    remove(farmId, id) {
+        return this.vaccinesService.remove(farmId, id);
     }
 };
 exports.VaccinesController = VaccinesController;
@@ -44,53 +44,58 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create a vaccine' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Vaccine created' }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.CreateVaccineDto]),
+    __metadata("design:paramtypes", [String, dto_1.CreateVaccineDto]),
     __metadata("design:returntype", void 0)
 ], VaccinesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all vaccines' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of vaccines' }),
-    __param(0, (0, common_1.Query)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.QueryVaccineDto]),
+    __metadata("design:paramtypes", [String, dto_1.QueryVaccineDto]),
     __metadata("design:returntype", void 0)
 ], VaccinesController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a vaccine by ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Vaccine details' }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], VaccinesController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update a vaccine' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Vaccine updated' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, dto_1.UpdateVaccineDto]),
+    __metadata("design:paramtypes", [String, String, dto_1.UpdateVaccineDto]),
     __metadata("design:returntype", void 0)
 ], VaccinesController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete a vaccine' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Vaccine deleted' }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], VaccinesController.prototype, "remove", null);
 exports.VaccinesController = VaccinesController = __decorate([
     (0, swagger_1.ApiTags)('vaccines'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
-    (0, common_1.Controller)('vaccines'),
+    (0, common_1.Controller)('farms/:farmId/vaccines'),
     __metadata("design:paramtypes", [vaccines_service_1.VaccinesService])
 ], VaccinesController);
 //# sourceMappingURL=vaccines.controller.js.map

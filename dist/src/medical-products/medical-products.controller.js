@@ -23,20 +23,20 @@ let MedicalProductsController = class MedicalProductsController {
     constructor(medicalProductsService) {
         this.medicalProductsService = medicalProductsService;
     }
-    create(dto) {
-        return this.medicalProductsService.create(dto);
+    create(farmId, dto) {
+        return this.medicalProductsService.create(farmId, dto);
     }
-    findAll(query) {
-        return this.medicalProductsService.findAll(query);
+    findAll(farmId, query) {
+        return this.medicalProductsService.findAll(farmId, query);
     }
-    findOne(id) {
-        return this.medicalProductsService.findOne(id);
+    findOne(farmId, id) {
+        return this.medicalProductsService.findOne(farmId, id);
     }
-    update(id, dto) {
-        return this.medicalProductsService.update(id, dto);
+    update(farmId, id, dto) {
+        return this.medicalProductsService.update(farmId, id, dto);
     }
-    remove(id) {
-        return this.medicalProductsService.remove(id);
+    remove(farmId, id) {
+        return this.medicalProductsService.remove(farmId, id);
     }
 };
 exports.MedicalProductsController = MedicalProductsController;
@@ -44,53 +44,58 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create a medical product' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Medical product created' }),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.CreateMedicalProductDto]),
+    __metadata("design:paramtypes", [String, dto_1.CreateMedicalProductDto]),
     __metadata("design:returntype", void 0)
 ], MedicalProductsController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all medical products' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of medical products' }),
-    __param(0, (0, common_1.Query)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [dto_1.QueryMedicalProductDto]),
+    __metadata("design:paramtypes", [String, dto_1.QueryMedicalProductDto]),
     __metadata("design:returntype", void 0)
 ], MedicalProductsController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a medical product by ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Medical product details' }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], MedicalProductsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update a medical product' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Medical product updated' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, dto_1.UpdateMedicalProductDto]),
+    __metadata("design:paramtypes", [String, String, dto_1.UpdateMedicalProductDto]),
     __metadata("design:returntype", void 0)
 ], MedicalProductsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete a medical product' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Medical product deleted' }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Param)('farmId')),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], MedicalProductsController.prototype, "remove", null);
 exports.MedicalProductsController = MedicalProductsController = __decorate([
     (0, swagger_1.ApiTags)('medical-products'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
-    (0, common_1.Controller)('medical-products'),
+    (0, common_1.Controller)('farms/:farmId/medical-products'),
     __metadata("design:paramtypes", [medical_products_service_1.MedicalProductsService])
 ], MedicalProductsController);
 //# sourceMappingURL=medical-products.controller.js.map

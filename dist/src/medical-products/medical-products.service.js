@@ -17,13 +17,19 @@ let MedicalProductsService = class MedicalProductsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(dto) {
+    async create(farmId, dto) {
         return this.prisma.medicalProduct.create({
-            data: dto,
+            data: {
+                ...dto,
+                farmId,
+            },
         });
     }
-    async findAll(query) {
-        const where = {};
+    async findAll(farmId, query) {
+        const where = {
+            farmId,
+            deletedAt: null,
+        };
         if (query.search) {
             where.name = { contains: query.search, mode: 'insensitive' };
         }
@@ -35,36 +41,43 @@ let MedicalProductsService = class MedicalProductsService {
             orderBy: { name: 'asc' },
         });
     }
-    async findOne(id) {
-        const product = await this.prisma.medicalProduct.findUnique({
-            where: { id },
+    async findOne(farmId, id) {
+        const product = await this.prisma.medicalProduct.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!product) {
             throw new common_1.NotFoundException(`Medical product ${id} not found`);
         }
         return product;
     }
-    async update(id, dto) {
-        const existing = await this.prisma.medicalProduct.findUnique({
-            where: { id },
+    async update(farmId, id, dto) {
+        const existing = await this.prisma.medicalProduct.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!existing) {
             throw new common_1.NotFoundException(`Medical product ${id} not found`);
         }
         return this.prisma.medicalProduct.update({
             where: { id },
-            data: dto,
+            data: {
+                ...dto,
+                version: existing.version + 1,
+            },
         });
     }
-    async remove(id) {
-        const existing = await this.prisma.medicalProduct.findUnique({
-            where: { id },
+    async remove(farmId, id) {
+        const existing = await this.prisma.medicalProduct.findFirst({
+            where: { id, farmId, deletedAt: null },
         });
         if (!existing) {
             throw new common_1.NotFoundException(`Medical product ${id} not found`);
         }
-        return this.prisma.medicalProduct.delete({
+        return this.prisma.medicalProduct.update({
             where: { id },
+            data: {
+                deletedAt: new Date(),
+                version: existing.version + 1,
+            },
         });
     }
 };

@@ -6,14 +6,20 @@ import { CreateMedicalProductDto, UpdateMedicalProductDto, QueryMedicalProductDt
 export class MedicalProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateMedicalProductDto) {
+  async create(farmId: string, dto: CreateMedicalProductDto) {
     return this.prisma.medicalProduct.create({
-      data: dto,
+      data: {
+        ...dto,
+        farmId,
+      },
     });
   }
 
-  async findAll(query: QueryMedicalProductDto) {
-    const where: any = {};
+  async findAll(farmId: string, query: QueryMedicalProductDto) {
+    const where: any = {
+      farmId,
+      deletedAt: null,
+    };
 
     if (query.search) {
       where.name = { contains: query.search, mode: 'insensitive' };
@@ -28,9 +34,9 @@ export class MedicalProductsService {
     });
   }
 
-  async findOne(id: string) {
-    const product = await this.prisma.medicalProduct.findUnique({
-      where: { id },
+  async findOne(farmId: string, id: string) {
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!product) {
@@ -40,9 +46,9 @@ export class MedicalProductsService {
     return product;
   }
 
-  async update(id: string, dto: UpdateMedicalProductDto) {
-    const existing = await this.prisma.medicalProduct.findUnique({
-      where: { id },
+  async update(farmId: string, id: string, dto: UpdateMedicalProductDto) {
+    const existing = await this.prisma.medicalProduct.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
@@ -51,21 +57,29 @@ export class MedicalProductsService {
 
     return this.prisma.medicalProduct.update({
       where: { id },
-      data: dto,
+      data: {
+        ...dto,
+        version: existing.version + 1,
+      },
     });
   }
 
-  async remove(id: string) {
-    const existing = await this.prisma.medicalProduct.findUnique({
-      where: { id },
+  async remove(farmId: string, id: string) {
+    const existing = await this.prisma.medicalProduct.findFirst({
+      where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
       throw new NotFoundException(`Medical product ${id} not found`);
     }
 
-    return this.prisma.medicalProduct.delete({
+    // Soft delete
+    return this.prisma.medicalProduct.update({
       where: { id },
+      data: {
+        deletedAt: new Date(),
+        version: existing.version + 1,
+      },
     });
   }
 }
