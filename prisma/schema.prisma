@@ -220,6 +220,8 @@ model Lot {
   type        String   // reproduction, fattening, weaning, etc.
   description String?
   isActive    Boolean  @default(true) @map("is_active")
+  version     Int      @default(1)
+  deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -228,6 +230,7 @@ model Lot {
   campaigns Campaign[]
 
   @@index([farmId])
+  @@index([deletedAt])
   @@map("lots")
 }
 
@@ -264,6 +267,8 @@ model Treatment {
   withdrawalEndDate   DateTime? @map("withdrawal_end_date")
   cost                Float?
   notes               String?
+  version             Int      @default(1)
+  deletedAt           DateTime? @map("deleted_at")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
@@ -274,6 +279,7 @@ model Treatment {
 
   @@index([animalId])
   @@index([treatmentDate])
+  @@index([deletedAt])
   @@map("treatments")
 }
 
@@ -293,6 +299,8 @@ model Vaccination {
   dosageUnit      String?  @map("dosage_unit")
   cost            Float?
   notes           String?
+  version         Int      @default(1)
+  deletedAt       DateTime? @map("deleted_at")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -304,6 +312,7 @@ model Vaccination {
 
   @@index([animalId])
   @@index([vaccinationDate])
+  @@index([deletedAt])
   @@map("vaccinations")
 }
 
@@ -335,6 +344,8 @@ model Movement {
 
   documentNumber  String?  @map("document_number")
   notes           String?
+  version         Int      @default(1)
+  deletedAt       DateTime? @map("deleted_at")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -344,6 +355,7 @@ model Movement {
   @@index([farmId])
   @@index([movementDate])
   @@index([movementType])
+  @@index([deletedAt])
   @@map("movements")
 }
 
@@ -368,12 +380,15 @@ model Weight {
   weightDate  DateTime @map("weight_date")
   source      String   @default("manual") // manual, scale, estimated
   notes       String?
+  version     Int      @default(1)
+  deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime @default(now()) @map("created_at")
 
   animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
 
   @@index([animalId])
   @@index([weightDate])
+  @@index([deletedAt])
   @@map("weights")
 }
 
@@ -390,6 +405,8 @@ model Breeding {
   offspringId     String?  @map("offspring_id")
   offspringCount  Int?     @map("offspring_count")
   notes           String?
+  version         Int      @default(1)
+  deletedAt       DateTime? @map("deleted_at")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -399,6 +416,7 @@ model Breeding {
 
   @@index([femaleId])
   @@index([breedingDate])
+  @@index([deletedAt])
   @@map("breedings")
 }
 
@@ -415,6 +433,8 @@ model Campaign {
   targetCount   Int?     @map("target_count")
   completedCount Int     @default(0) @map("completed_count")
   notes         String?
+  version       Int      @default(1)
+  deletedAt     DateTime? @map("deleted_at")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -424,6 +444,7 @@ model Campaign {
 
   @@index([farmId])
   @@index([startDate])
+  @@index([deletedAt])
   @@map("campaigns")
 }
 
@@ -438,6 +459,8 @@ model Document {
   expiryDate    DateTime? @map("expiry_date")
   fileUrl       String?  @map("file_url")
   notes         String?
+  version       Int      @default(1)
+  deletedAt     DateTime? @map("deleted_at")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -445,6 +468,7 @@ model Document {
 
   @@index([farmId])
   @@index([type])
+  @@index([deletedAt])
   @@map("documents")
 }
 
@@ -464,4 +488,50 @@ model FarmPreferences {
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
 
   @@map("farm_preferences")
+}
+
+// ============================================================
+// SYNCHRONISATION
+// ============================================================
+
+// Queue de synchronisation
+model SyncQueueItem {
+  id              String   @id @default(uuid())
+  farmId          String   @map("farm_id")
+  entityType      String   @map("entity_type") // animal, treatment, vaccination, etc.
+  entityId        String   @map("entity_id")
+  action          String   // create, update, delete
+  payload         Json     // données de l'entité
+  clientTimestamp DateTime @map("client_timestamp")
+  serverTimestamp DateTime? @map("server_timestamp")
+  status          String   @default("pending") // pending, synced, conflict, failed
+  conflictData    Json?    @map("conflict_data") // données serveur en cas de conflit
+  errorMessage    String?  @map("error_message")
+  retryCount      Int      @default(0) @map("retry_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  processedAt     DateTime? @map("processed_at")
+
+  @@index([farmId])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("sync_queue_items")
+}
+
+// Log de synchronisation (historique)
+model SyncLog {
+  id              String   @id @default(uuid())
+  farmId          String   @map("farm_id")
+  syncType        String   @map("sync_type") // push, pull
+  itemsCount      Int      @map("items_count")
+  successCount    Int      @map("success_count")
+  failureCount    Int      @map("failure_count")
+  conflictCount   Int      @map("conflict_count")
+  duration        Int      // millisecondes
+  deviceInfo      String?  @map("device_info")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([farmId])
+  @@index([createdAt])
+  @@map("sync_logs")
 }
