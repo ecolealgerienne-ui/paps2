@@ -21,17 +21,17 @@ function Write-Header {
 
 function Write-Test {
     param([string]$Text)
-    Write-Host "► $Text" -ForegroundColor Yellow
+    Write-Host "[TEST] $Text" -ForegroundColor Yellow
 }
 
 function Write-Success {
     param([string]$Text)
-    Write-Host "  $Text" -ForegroundColor Green
+    Write-Host "  OK: $Text" -ForegroundColor Green
 }
 
 function Write-ErrorMsg {
     param([string]$Text)
-    Write-Host "  $Text" -ForegroundColor Red
+    Write-Host "  ERROR: $Text" -ForegroundColor Red
 }
 
 # Generic API call function
@@ -66,6 +66,15 @@ function Invoke-Api {
     }
 }
 
+# Helper to get data from response
+function Get-ResponseData {
+    param($response, $field)
+    if ($response.data) {
+        return $response.data.$field
+    }
+    return $response.$field
+}
+
 # =============================================================================
 # Health Check
 # =============================================================================
@@ -76,9 +85,9 @@ $response = Invoke-Api -Method GET -Endpoint "/"
 $response | ConvertTo-Json -Depth 5
 
 # =============================================================================
-# Veterinarians (Reference Table) - FULL CRUD
+# Veterinarians - FULL CRUD - 5 endpoints
 # =============================================================================
-Write-Header "Veterinarians API (5 endpoints)"
+Write-Header "Veterinarians API - 5 endpoints"
 
 Write-Test "POST /veterinarians - Create"
 $vetResponse = Invoke-Api -Method POST -Endpoint "/veterinarians" -Body @{
@@ -88,18 +97,20 @@ $vetResponse = Invoke-Api -Method POST -Endpoint "/veterinarians" -Body @{
     licenseNumber = "VET-2024-001"
     specialization = "Ruminants"
 }
-$vetId = if ($vetResponse.data) { $vetResponse.data.id } else { $vetResponse.id }
+$vetId = Get-ResponseData $vetResponse "id"
 Write-Success "Created: $vetId"
 
 Write-Test "GET /veterinarians - List all"
 $response = Invoke-Api -Method GET -Endpoint "/veterinarians"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+$data = Get-ResponseData $response "id"
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count veterinarians"
 
 if ($vetId) {
     Write-Test "GET /veterinarians/$vetId - Get one"
     $response = Invoke-Api -Method GET -Endpoint "/veterinarians/$vetId"
-    Write-Success "Retrieved: $($response.data.name // $response.name)"
+    $name = Get-ResponseData $response "name"
+    Write-Success "Retrieved: $name"
 
     Write-Test "PUT /veterinarians/$vetId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/veterinarians/$vetId" -Body @{
@@ -113,9 +124,9 @@ if ($vetId) {
 }
 
 # =============================================================================
-# Medical Products (Reference Table) - FULL CRUD
+# Medical Products - FULL CRUD - 5 endpoints
 # =============================================================================
-Write-Header "Medical Products API (5 endpoints)"
+Write-Header "Medical Products API - 5 endpoints"
 
 Write-Test "POST /medical-products - Create"
 $productResponse = Invoke-Api -Method POST -Endpoint "/medical-products" -Body @{
@@ -126,18 +137,19 @@ $productResponse = Invoke-Api -Method POST -Endpoint "/medical-products" -Body @
     withdrawalPeriodMilk = 0
     dosageUnit = "ml"
 }
-$productId = if ($productResponse.data) { $productResponse.data.id } else { $productResponse.id }
+$productId = Get-ResponseData $productResponse "id"
 Write-Success "Created: $productId"
 
 Write-Test "GET /medical-products - List all"
 $response = Invoke-Api -Method GET -Endpoint "/medical-products"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count products"
 
 if ($productId) {
     Write-Test "GET /medical-products/$productId - Get one"
     $response = Invoke-Api -Method GET -Endpoint "/medical-products/$productId"
-    Write-Success "Retrieved: $($response.data.name // $response.name)"
+    $name = Get-ResponseData $response "name"
+    Write-Success "Retrieved: $name"
 
     Write-Test "PUT /medical-products/$productId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/medical-products/$productId" -Body @{
@@ -151,9 +163,9 @@ if ($productId) {
 }
 
 # =============================================================================
-# Vaccines (Reference Table) - FULL CRUD
+# Vaccines - FULL CRUD - 5 endpoints
 # =============================================================================
-Write-Header "Vaccines API (5 endpoints)"
+Write-Header "Vaccines API - 5 endpoints"
 
 Write-Test "POST /vaccines - Create"
 $vaccineResponse = Invoke-Api -Method POST -Endpoint "/vaccines" -Body @{
@@ -165,18 +177,19 @@ $vaccineResponse = Invoke-Api -Method POST -Endpoint "/vaccines" -Body @{
     boosterRequired = $true
     boosterIntervalDays = 21
 }
-$vaccineId = if ($vaccineResponse.data) { $vaccineResponse.data.id } else { $vaccineResponse.id }
+$vaccineId = Get-ResponseData $vaccineResponse "id"
 Write-Success "Created: $vaccineId"
 
 Write-Test "GET /vaccines - List all"
 $response = Invoke-Api -Method GET -Endpoint "/vaccines"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count vaccines"
 
 if ($vaccineId) {
     Write-Test "GET /vaccines/$vaccineId - Get one"
     $response = Invoke-Api -Method GET -Endpoint "/vaccines/$vaccineId"
-    Write-Success "Retrieved: $($response.data.name // $response.name)"
+    $name = Get-ResponseData $response "name"
+    Write-Success "Retrieved: $name"
 
     Write-Test "PUT /vaccines/$vaccineId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/vaccines/$vaccineId" -Body @{
@@ -190,28 +203,29 @@ if ($vaccineId) {
 }
 
 # =============================================================================
-# Administration Routes (Reference Table) - FULL CRUD
+# Administration Routes - FULL CRUD - 5 endpoints
 # =============================================================================
-Write-Header "Administration Routes API (5 endpoints)"
+Write-Header "Administration Routes API - 5 endpoints"
 
 Write-Test "POST /administration-routes - Create IM"
 $routeResponse = Invoke-Api -Method POST -Endpoint "/administration-routes" -Body @{
     id = "IM"
     nameFr = "Intramusculaire"
     nameEn = "Intramuscular"
-    nameAr = "عضلي"
+    nameAr = "Intramuscular-AR"
     displayOrder = 1
 }
 Write-Success "Created: IM"
 
 Write-Test "GET /administration-routes - List all"
 $response = Invoke-Api -Method GET -Endpoint "/administration-routes"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count routes"
 
 Write-Test "GET /administration-routes/IM - Get one"
 $response = Invoke-Api -Method GET -Endpoint "/administration-routes/IM"
-Write-Success "Retrieved: $($response.data.nameFr // $response.nameFr)"
+$name = Get-ResponseData $response "nameFr"
+Write-Success "Retrieved: $name"
 
 Write-Test "PUT /administration-routes/IM - Update"
 $response = Invoke-Api -Method PUT -Endpoint "/administration-routes/IM" -Body @{
@@ -224,9 +238,9 @@ $response = Invoke-Api -Method DELETE -Endpoint "/administration-routes/IM"
 Write-Success "Deleted"
 
 # =============================================================================
-# Animals API - FULL CRUD
+# Animals - FULL CRUD - 5 endpoints
 # =============================================================================
-Write-Header "Animals API (5 endpoints)"
+Write-Header "Animals API - 5 endpoints"
 
 Write-Test "POST /animals - Create"
 $animalResponse = Invoke-Api -Method POST -Endpoint "/animals" -Body @{
@@ -239,18 +253,19 @@ $animalResponse = Invoke-Api -Method POST -Endpoint "/animals" -Body @{
     status = "active"
     farmId = $FarmId
 }
-$animalId = if ($animalResponse.data) { $animalResponse.data.id } else { $animalResponse.id }
+$animalId = Get-ResponseData $animalResponse "id"
 Write-Success "Created: $animalId"
 
 Write-Test "GET /animals - List all"
 $response = Invoke-Api -Method GET -Endpoint "/animals?farmId=$FarmId"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count animals"
 
 if ($animalId) {
     Write-Test "GET /animals/$animalId - Get one"
     $response = Invoke-Api -Method GET -Endpoint "/animals/$animalId"
-    Write-Success "Retrieved: $($response.data.name // $response.name)"
+    $name = Get-ResponseData $response "name"
+    Write-Success "Retrieved: $name"
 
     Write-Test "PUT /animals/$animalId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/animals/$animalId" -Body @{
@@ -260,9 +275,9 @@ if ($animalId) {
 }
 
 # =============================================================================
-# Lots API - FULL CRUD + Animals management
+# Lots - FULL CRUD + Animals - 7 endpoints
 # =============================================================================
-Write-Header "Lots API (7 endpoints)"
+Write-Header "Lots API - 7 endpoints"
 
 Write-Test "POST /lots - Create"
 $lotResponse = Invoke-Api -Method POST -Endpoint "/lots" -Body @{
@@ -270,18 +285,19 @@ $lotResponse = Invoke-Api -Method POST -Endpoint "/lots" -Body @{
     lotType = "fattening"
     farmId = $FarmId
 }
-$lotId = if ($lotResponse.data) { $lotResponse.data.id } else { $lotResponse.id }
+$lotId = Get-ResponseData $lotResponse "id"
 Write-Success "Created: $lotId"
 
 Write-Test "GET /lots - List all"
 $response = Invoke-Api -Method GET -Endpoint "/lots?farmId=$FarmId"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count lots"
 
 if ($lotId) {
     Write-Test "GET /lots/$lotId - Get one"
     $response = Invoke-Api -Method GET -Endpoint "/lots/$lotId"
-    Write-Success "Retrieved: $($response.data.name // $response.name)"
+    $name = Get-ResponseData $response "name"
+    Write-Success "Retrieved: $name"
 
     Write-Test "PUT /lots/$lotId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/lots/$lotId" -Body @{
@@ -309,9 +325,9 @@ if ($lotId) {
 }
 
 # =============================================================================
-# Weights API - FULL CRUD + History
+# Weights - FULL CRUD + History - 6 endpoints
 # =============================================================================
-Write-Header "Weights API (6 endpoints)"
+Write-Header "Weights API - 6 endpoints"
 
 if ($animalId) {
     Write-Test "POST /weights - Create first weight"
@@ -321,7 +337,7 @@ if ($animalId) {
         measurementDate = "2024-01-15"
         farmId = $FarmId
     }
-    $weightId = if ($weightResponse.data) { $weightResponse.data.id } else { $weightResponse.id }
+    $weightId = Get-ResponseData $weightResponse "id"
     Write-Success "Created: $weightId"
 
     Write-Test "POST /weights - Create second weight"
@@ -335,12 +351,12 @@ if ($animalId) {
 
     Write-Test "GET /weights - List all"
     $response = Invoke-Api -Method GET -Endpoint "/weights?farmId=$FarmId"
-    $count = if ($response.data) { $response.data.Count } else { $response.Count }
+    if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count weights"
 
     Write-Test "GET /weights/animal/$animalId/history - Get history"
     $response = Invoke-Api -Method GET -Endpoint "/weights/animal/$animalId/history?farmId=$FarmId"
-    $count = if ($response.data) { $response.data.Count } else { $response.Count }
+    if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "History: $count records"
 
     if ($weightId) {
@@ -361,9 +377,9 @@ if ($animalId) {
 }
 
 # =============================================================================
-# Treatments API - FULL CRUD
+# Treatments - FULL CRUD - 5 endpoints
 # =============================================================================
-Write-Header "Treatments API (5 endpoints)"
+Write-Header "Treatments API - 5 endpoints"
 
 if ($animalId) {
     Write-Test "POST /treatments - Create"
@@ -375,12 +391,12 @@ if ($animalId) {
         dosage = 5
         farmId = $FarmId
     }
-    $treatmentId = if ($treatmentResponse.data) { $treatmentResponse.data.id } else { $treatmentResponse.id }
+    $treatmentId = Get-ResponseData $treatmentResponse "id"
     Write-Success "Created: $treatmentId"
 
     Write-Test "GET /treatments - List all"
     $response = Invoke-Api -Method GET -Endpoint "/treatments?farmId=$FarmId"
-    $count = if ($response.data) { $response.data.Count } else { $response.Count }
+    if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count treatments"
 
     if ($treatmentId) {
@@ -401,9 +417,9 @@ if ($animalId) {
 }
 
 # =============================================================================
-# Vaccinations API - FULL CRUD
+# Vaccinations - FULL CRUD - 5 endpoints
 # =============================================================================
-Write-Header "Vaccinations API (5 endpoints)"
+Write-Header "Vaccinations API - 5 endpoints"
 
 if ($animalId) {
     Write-Test "POST /vaccinations - Create"
@@ -413,12 +429,12 @@ if ($animalId) {
         nextDueDate = "2024-07-25"
         farmId = $FarmId
     }
-    $vaccinationId = if ($vaccinationResponse.data) { $vaccinationResponse.data.id } else { $vaccinationResponse.id }
+    $vaccinationId = Get-ResponseData $vaccinationResponse "id"
     Write-Success "Created: $vaccinationId"
 
     Write-Test "GET /vaccinations - List all"
     $response = Invoke-Api -Method GET -Endpoint "/vaccinations?farmId=$FarmId"
-    $count = if ($response.data) { $response.data.Count } else { $response.Count }
+    if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count vaccinations"
 
     if ($vaccinationId) {
@@ -439,9 +455,9 @@ if ($animalId) {
 }
 
 # =============================================================================
-# Movements API - FULL CRUD + Statistics
+# Movements - FULL CRUD + Statistics - 6 endpoints
 # =============================================================================
-Write-Header "Movements API (6 endpoints)"
+Write-Header "Movements API - 6 endpoints"
 
 if ($animalId) {
     Write-Test "POST /movements - Create entry"
@@ -452,12 +468,12 @@ if ($animalId) {
         origin = "Marche Djelfa"
         farmId = $FarmId
     }
-    $movementId = if ($movementResponse.data) { $movementResponse.data.id } else { $movementResponse.id }
+    $movementId = Get-ResponseData $movementResponse "id"
     Write-Success "Created: $movementId"
 
     Write-Test "GET /movements - List all"
     $response = Invoke-Api -Method GET -Endpoint "/movements?farmId=$FarmId"
-    $count = if ($response.data) { $response.data.Count } else { $response.Count }
+    if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count movements"
 
     Write-Test "GET /movements/statistics - Get statistics"
@@ -482,9 +498,9 @@ if ($animalId) {
 }
 
 # =============================================================================
-# Breedings API - FULL CRUD + Upcoming
+# Breedings - FULL CRUD + Upcoming - 6 endpoints
 # =============================================================================
-Write-Header "Breedings API (6 endpoints)"
+Write-Header "Breedings API - 6 endpoints"
 
 if ($animalId) {
     Write-Test "POST /breedings - Create"
@@ -494,17 +510,17 @@ if ($animalId) {
         method = "natural"
         farmId = $FarmId
     }
-    $breedingId = if ($breedingResponse.data) { $breedingResponse.data.id } else { $breedingResponse.id }
+    $breedingId = Get-ResponseData $breedingResponse "id"
     Write-Success "Created: $breedingId"
 
     Write-Test "GET /breedings - List all"
     $response = Invoke-Api -Method GET -Endpoint "/breedings?farmId=$FarmId"
-    $count = if ($response.data) { $response.data.Count } else { $response.Count }
+    if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Found: $count breedings"
 
     Write-Test "GET /breedings/upcoming - Get upcoming"
     $response = Invoke-Api -Method GET -Endpoint "/breedings/upcoming?farmId=$FarmId"
-    $count = if ($response.data) { $response.data.Count } else { $response.Count }
+    if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
     Write-Success "Upcoming: $count"
 
     if ($breedingId) {
@@ -525,9 +541,9 @@ if ($animalId) {
 }
 
 # =============================================================================
-# Campaigns API - FULL CRUD + Active + Progress
+# Campaigns - FULL CRUD + Active + Progress - 7 endpoints
 # =============================================================================
-Write-Header "Campaigns API (7 endpoints)"
+Write-Header "Campaigns API - 7 endpoints"
 
 Write-Test "POST /campaigns - Create"
 $campaignResponse = Invoke-Api -Method POST -Endpoint "/campaigns" -Body @{
@@ -538,17 +554,17 @@ $campaignResponse = Invoke-Api -Method POST -Endpoint "/campaigns" -Body @{
     targetCount = 100
     farmId = $FarmId
 }
-$campaignId = if ($campaignResponse.data) { $campaignResponse.data.id } else { $campaignResponse.id }
+$campaignId = Get-ResponseData $campaignResponse "id"
 Write-Success "Created: $campaignId"
 
 Write-Test "GET /campaigns - List all"
 $response = Invoke-Api -Method GET -Endpoint "/campaigns?farmId=$FarmId"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count campaigns"
 
 Write-Test "GET /campaigns/active - Get active"
 $response = Invoke-Api -Method GET -Endpoint "/campaigns/active?farmId=$FarmId"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Active: $count"
 
 if ($campaignId) {
@@ -572,9 +588,9 @@ if ($campaignId) {
 }
 
 # =============================================================================
-# Documents API - FULL CRUD + Expiring + Expired
+# Documents - FULL CRUD + Expiring + Expired - 7 endpoints
 # =============================================================================
-Write-Header "Documents API (7 endpoints)"
+Write-Header "Documents API - 7 endpoints"
 
 Write-Test "POST /documents - Create"
 $documentResponse = Invoke-Api -Method POST -Endpoint "/documents" -Body @{
@@ -585,22 +601,22 @@ $documentResponse = Invoke-Api -Method POST -Endpoint "/documents" -Body @{
     issuingAuthority = "DSA Djelfa"
     farmId = $FarmId
 }
-$documentId = if ($documentResponse.data) { $documentResponse.data.id } else { $documentResponse.id }
+$documentId = Get-ResponseData $documentResponse "id"
 Write-Success "Created: $documentId"
 
 Write-Test "GET /documents - List all"
 $response = Invoke-Api -Method GET -Endpoint "/documents?farmId=$FarmId"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count documents"
 
 Write-Test "GET /documents/expiring - Get expiring"
 $response = Invoke-Api -Method GET -Endpoint "/documents/expiring?farmId=$FarmId&days=180"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Expiring: $count"
 
 Write-Test "GET /documents/expired - Get expired"
 $response = Invoke-Api -Method GET -Endpoint "/documents/expired?farmId=$FarmId"
-$count = if ($response.data) { $response.data.Count } else { $response.Count }
+if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Expired: $count"
 
 if ($documentId) {
@@ -620,9 +636,9 @@ if ($documentId) {
 }
 
 # =============================================================================
-# Sync API - FULL
+# Sync API - 2 endpoints
 # =============================================================================
-Write-Header "Sync API (2 endpoints)"
+Write-Header "Sync API - 2 endpoints"
 
 Write-Test "POST /sync - Push changes"
 $response = Invoke-Api -Method POST -Endpoint "/sync" -Body @{
@@ -637,7 +653,7 @@ $response = Invoke-Api -Method GET -Endpoint "/sync/changes?farmId=$FarmId&since
 Write-Success "Retrieved changes"
 
 # =============================================================================
-# Cleanup - Delete test animal
+# Cleanup
 # =============================================================================
 Write-Header "Cleanup"
 
@@ -652,17 +668,17 @@ if ($animalId) {
 # =============================================================================
 Write-Header "Rate Limiting Test"
 
-Write-Test "Testing rate limit (5 rapid requests)..."
+Write-Test "Testing rate limit - 5 rapid requests..."
 for ($i = 1; $i -le 5; $i++) {
     try {
         $response = Invoke-Api -Method GET -Endpoint "/veterinarians"
         if ($response.success -eq $false) {
-            Write-ErrorMsg "Request $i : Rate limited"
+            Write-ErrorMsg "Request $i - Rate limited"
         } else {
-            Write-Success "Request $i : OK"
+            Write-Success "Request $i - OK"
         }
     } catch {
-        Write-ErrorMsg "Request $i : Error"
+        Write-ErrorMsg "Request $i - Error"
     }
 }
 
@@ -675,19 +691,19 @@ Write-Host ""
 Write-Host "Endpoints tested: 77/77" -ForegroundColor Green
 Write-Host ""
 Write-Host "Modules covered:"
-Write-Host "  - App (1)"
-Write-Host "  - Veterinarians (5)"
-Write-Host "  - Medical Products (5)"
-Write-Host "  - Vaccines (5)"
-Write-Host "  - Administration Routes (5)"
-Write-Host "  - Animals (5)"
-Write-Host "  - Lots (7)"
-Write-Host "  - Weights (6)"
-Write-Host "  - Treatments (5)"
-Write-Host "  - Vaccinations (5)"
-Write-Host "  - Movements (6)"
-Write-Host "  - Breedings (6)"
-Write-Host "  - Campaigns (7)"
-Write-Host "  - Documents (7)"
-Write-Host "  - Sync (2)"
+Write-Host "  - App: 1"
+Write-Host "  - Veterinarians: 5"
+Write-Host "  - Medical Products: 5"
+Write-Host "  - Vaccines: 5"
+Write-Host "  - Administration Routes: 5"
+Write-Host "  - Animals: 5"
+Write-Host "  - Lots: 7"
+Write-Host "  - Weights: 6"
+Write-Host "  - Treatments: 5"
+Write-Host "  - Vaccinations: 5"
+Write-Host "  - Movements: 6"
+Write-Host "  - Breedings: 6"
+Write-Host "  - Campaigns: 7"
+Write-Host "  - Documents: 7"
+Write-Host "  - Sync: 2"
 Write-Host ""
