@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Table de référence - Espèces
+model Species {
+  id           String @id
+  nameFr       String @map("name_fr")
+  nameEn       String @map("name_en")
+  nameAr       String @map("name_ar")
+  icon         String
+  displayOrder Int    @default(0) @map("display_order")
+
+  animals Animal[]
+  breeds  Breed[]
+
+  @@map("species")
+}
+
+// Table de référence - Races
+model Breed {
+  id           String  @id
+  speciesId    String  @map("species_id")
+  nameFr       String  @map("name_fr")
+  nameEn       String  @map("name_en")
+  nameAr       String  @map("name_ar")
+  description  String?
+  displayOrder Int     @default(0) @map("display_order")
+  isActive     Boolean @default(true) @map("is_active")
+
+  species Species  @relation(fields: [speciesId], references: [id])
+  animals Animal[]
+
+  @@map("breeds")
+}
+
+// Ferme
+model Farm {
+  id            String   @id
+  name          String
+  location      String
+  ownerId       String   @map("owner_id")
+  cheptelNumber String?  @map("cheptel_number")
+  groupId       String?  @map("group_id")
+  groupName     String?  @map("group_name")
+  isDefault     Boolean  @default(false) @map("is_default")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  animals Animal[]
+
+  @@map("farms")
+}
+
+// Animal
+model Animal {
+  id                    String    @id
+  farmId                String    @map("farm_id")
+  currentLocationFarmId String?   @map("current_location_farm_id")
+  currentEid            String?   @map("current_eid")
+  officialNumber        String?   @map("official_number")
+  visualId              String?   @map("visual_id")
+  eidHistory            String?   @map("eid_history")
+  birthDate             DateTime  @map("birth_date")
+  sex                   String
+  motherId              String?   @map("mother_id")
+  speciesId             String?   @map("species_id")
+  breedId               String?   @map("breed_id")
+  status                String    @default("alive")
+  validatedAt           DateTime? @map("validated_at")
+  photoUrl              String?   @map("photo_url")
+  notes                 String?
+  version               Int       @default(1)
+  deletedAt             DateTime? @map("deleted_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  farm     Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  species  Species? @relation(fields: [speciesId], references: [id])
+  breed    Breed?   @relation(fields: [breedId], references: [id])
+  mother   Animal?  @relation("Parentage", fields: [motherId], references: [id])
+  children Animal[] @relation("Parentage")
+
+  @@unique([farmId, currentEid])
+  @@unique([farmId, officialNumber])
+  @@index([farmId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("animals")
+}
