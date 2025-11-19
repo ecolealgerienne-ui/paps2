@@ -27,12 +27,12 @@ let VaccinationsService = class VaccinationsService {
         return this.prisma.vaccination.create({
             data: {
                 ...dto,
+                farmId,
                 vaccinationDate: new Date(dto.vaccinationDate),
                 nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : null,
             },
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
-                vaccine: true,
                 veterinarian: true,
             },
         });
@@ -59,8 +59,7 @@ let VaccinationsService = class VaccinationsService {
             where,
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
-                vaccine: { select: { id: true, name: true, disease: true } },
-                veterinarian: { select: { id: true, name: true } },
+                veterinarian: { select: { id: true, firstName: true, lastName: true } },
             },
             orderBy: { vaccinationDate: 'desc' },
         });
@@ -74,9 +73,7 @@ let VaccinationsService = class VaccinationsService {
             },
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
-                vaccine: true,
                 veterinarian: true,
-                route: true,
             },
         });
         if (!vaccination) {
@@ -115,7 +112,6 @@ let VaccinationsService = class VaccinationsService {
             data: updateData,
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
-                vaccine: true,
                 veterinarian: true,
             },
         });

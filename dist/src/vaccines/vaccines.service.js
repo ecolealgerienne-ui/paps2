@@ -23,7 +23,6 @@ let VaccinesService = class VaccinesService {
                 ...dto,
                 farmId,
             },
-            include: { species: true },
         });
     }
     async findAll(farmId, query) {

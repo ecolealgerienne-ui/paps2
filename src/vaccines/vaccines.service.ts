@@ -12,7 +12,6 @@ export class VaccinesService {
         ...dto,
         farmId,
       },
-      include: { species: true },
     });
   }
 

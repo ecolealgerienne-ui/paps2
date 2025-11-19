@@ -35,7 +35,6 @@ let CampaignsService = class CampaignsService {
             },
             include: {
                 lot: { select: { id: true, name: true, type: true } },
-                _count: { select: { vaccinations: true } },
             },
         });
     }
@@ -59,7 +58,6 @@ let CampaignsService = class CampaignsService {
             where,
             include: {
                 lot: { select: { id: true, name: true, type: true } },
-                _count: { select: { vaccinations: true } },
             },
             orderBy: { startDate: 'desc' },
         });
@@ -74,12 +72,6 @@ let CampaignsService = class CampaignsService {
                         name: true,
                         type: true,
                         _count: { select: { lotAnimals: true } },
-                    },
-                },
-                vaccinations: {
-                    include: {
-                        animal: { select: { id: true, visualId: true, currentEid: true } },
-                        vaccine: { select: { id: true, name: true } },
                     },
                 },
             },
@@ -116,7 +108,6 @@ let CampaignsService = class CampaignsService {
             data: updateData,
             include: {
                 lot: { select: { id: true, name: true, type: true } },
-                _count: { select: { vaccinations: true } },
             },
         });
     }
@@ -144,7 +135,6 @@ let CampaignsService = class CampaignsService {
             },
             include: {
                 lot: { select: { id: true, name: true } },
-                _count: { select: { vaccinations: true } },
             },
             orderBy: { startDate: 'asc' },
         });
@@ -154,7 +144,6 @@ let CampaignsService = class CampaignsService {
         const progress = {
             targetCount: campaign.targetCount || 0,
             completedCount: campaign.completedCount,
-            vaccinationsCount: campaign.vaccinations.length,
             progressPercent: campaign.targetCount
                 ? Math.round((campaign.completedCount / campaign.targetCount) * 100)
                 : 0,

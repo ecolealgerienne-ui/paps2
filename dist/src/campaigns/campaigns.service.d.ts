@@ -14,7 +14,6 @@ export declare class CampaignsService {
         progress: {
             targetCount: any;
             completedCount: any;
-            vaccinationsCount: any;
             progressPercent: number;
         };
     }>;

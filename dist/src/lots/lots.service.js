@@ -123,6 +123,7 @@ let LotsService = class LotsService {
             throw new common_1.NotFoundException(`Lot ${lotId} not found`);
         }
         const creates = dto.animalIds.map(animalId => ({
+            farmId,
             lotId,
             animalId,
             joinedAt: new Date(),

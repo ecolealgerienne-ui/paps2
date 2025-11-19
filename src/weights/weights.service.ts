@@ -19,6 +19,7 @@ export class WeightsService {
     return this.prisma.weight.create({
       data: {
         ...dto,
+        farmId,
         weightDate: new Date(dto.weightDate),
       },
       include: {

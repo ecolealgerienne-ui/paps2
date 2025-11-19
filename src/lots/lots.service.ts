@@ -129,6 +129,7 @@ export class LotsService {
 
     // Add animals to lot
     const creates = dto.animalIds.map(animalId => ({
+      farmId,
       lotId,
       animalId,
       joinedAt: new Date(),

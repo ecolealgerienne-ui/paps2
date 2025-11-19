@@ -12,7 +12,6 @@ export declare class CampaignsController {
         progress: {
             targetCount: any;
             completedCount: any;
-            vaccinationsCount: any;
             progressPercent: number;
         };
     }>;

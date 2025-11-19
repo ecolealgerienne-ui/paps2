@@ -27,6 +27,7 @@ let TreatmentsService = class TreatmentsService {
         return this.prisma.treatment.create({
             data: {
                 ...dto,
+                farmId,
                 treatmentDate: new Date(dto.treatmentDate),
                 withdrawalEndDate: dto.withdrawalEndDate ? new Date(dto.withdrawalEndDate) : null,
             },
@@ -59,7 +60,7 @@ let TreatmentsService = class TreatmentsService {
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
                 product: { select: { id: true, name: true } },
-                veterinarian: { select: { id: true, name: true } },
+                veterinarian: { select: { id: true, firstName: true, lastName: true } },
             },
             orderBy: { treatmentDate: 'desc' },
         });

@@ -84,7 +84,6 @@ export class BreedingsService {
       include: {
         mother: { select: { id: true, visualId: true, currentEid: true, birthDate: true } },
         father: { select: { id: true, visualId: true, currentEid: true } },
-        veterinarian: true,
       },
     });
 
@@ -131,7 +130,6 @@ export class BreedingsService {
       include: {
         mother: { select: { id: true, visualId: true, currentEid: true } },
         father: { select: { id: true, visualId: true, currentEid: true } },
-        veterinarian: true,
       },
     });
   }

@@ -27,7 +27,6 @@ export class CampaignsService {
       },
       include: {
         lot: { select: { id: true, name: true, type: true } },
-        _count: { select: { vaccinations: true } },
       },
     });
   }
@@ -50,7 +49,6 @@ export class CampaignsService {
       where,
       include: {
         lot: { select: { id: true, name: true, type: true } },
-        _count: { select: { vaccinations: true } },
       },
       orderBy: { startDate: 'desc' },
     });
@@ -66,12 +64,6 @@ export class CampaignsService {
             name: true,
             type: true,
             _count: { select: { lotAnimals: true } },
-          },
-        },
-        vaccinations: {
-          include: {
-            animal: { select: { id: true, visualId: true, currentEid: true } },
-            vaccine: { select: { id: true, name: true } },
           },
         },
       },
@@ -114,7 +106,6 @@ export class CampaignsService {
       data: updateData,
       include: {
         lot: { select: { id: true, name: true, type: true } },
-        _count: { select: { vaccinations: true } },
       },
     });
   }
@@ -147,7 +138,6 @@ export class CampaignsService {
       },
       include: {
         lot: { select: { id: true, name: true } },
-        _count: { select: { vaccinations: true } },
       },
       orderBy: { startDate: 'asc' },
     });
@@ -160,7 +150,6 @@ export class CampaignsService {
     const progress = {
       targetCount: campaign.targetCount || 0,
       completedCount: campaign.completedCount,
-      vaccinationsCount: campaign.vaccinations.length,
       progressPercent: campaign.targetCount
         ? Math.round((campaign.completedCount / campaign.targetCount) * 100)
         : 0,

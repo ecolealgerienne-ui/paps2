@@ -22,7 +22,10 @@ export class VeterinariansService {
     };
 
     if (query.search) {
-      where.name = { contains: query.search, mode: 'insensitive' };
+      where.OR = [
+        { firstName: { contains: query.search, mode: 'insensitive' } },
+        { lastName: { contains: query.search, mode: 'insensitive' } },
+      ];
     }
     if (query.isActive !== undefined) {
       where.isActive = query.isActive;
@@ -30,7 +33,7 @@ export class VeterinariansService {
 
     return this.prisma.veterinarian.findMany({
       where,
-      orderBy: { name: 'asc' },
+      orderBy: { lastName: 'asc' },
     });
   }
 
