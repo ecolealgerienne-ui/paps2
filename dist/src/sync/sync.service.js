@@ -215,9 +215,11 @@ let SyncService = SyncService_1 = class SyncService {
             if (!model)
                 continue;
             try {
-                const whereClause = this.buildFarmWhereClause(entityType, query.farmId, since);
                 const records = await model.findMany({
-                    where: whereClause,
+                    where: {
+                        farmId: query.farmId,
+                        updatedAt: { gt: since },
+                    },
                     orderBy: { updatedAt: 'asc' },
                     take: limit,
                 });
@@ -242,44 +244,6 @@ let SyncService = SyncService_1 = class SyncService {
             changes: changes.slice(0, limit),
             serverTimestamp: new Date().toISOString(),
             hasMore,
-        };
-    }
-    buildFarmWhereClause(entityType, farmId, since) {
-        const baseCondition = { updatedAt: { gt: since } };
-        const directFarmIdModels = [
-            dto_1.EntityType.ANIMAL,
-            dto_1.EntityType.LOT,
-            dto_1.EntityType.MOVEMENT,
-            dto_1.EntityType.CAMPAIGN,
-            dto_1.EntityType.DOCUMENT,
-        ];
-        if (directFarmIdModels.includes(entityType)) {
-            return {
-                ...baseCondition,
-                farmId,
-            };
-        }
-        const animalRelationModels = [
-            dto_1.EntityType.WEIGHT,
-            dto_1.EntityType.TREATMENT,
-            dto_1.EntityType.VACCINATION,
-            dto_1.EntityType.LOT_ANIMAL,
-        ];
-        if (animalRelationModels.includes(entityType)) {
-            return {
-                ...baseCondition,
-                animal: { farmId },
-            };
-        }
-        if (entityType === dto_1.EntityType.BREEDING) {
-            return {
-                ...baseCondition,
-                female: { farmId },
-            };
-        }
-        return {
-            ...baseCondition,
-            farmId,
         };
     }
     getModelName(entityType) {

@@ -155,6 +155,11 @@ model Farm {
   movements Movement[]
   campaigns Campaign[]
   documents Document[]
+  weights Weight[]
+  treatments Treatment[]
+  vaccinations Vaccination[]
+  breedings Breeding[]
+  lotAnimals LotAnimal[]
   preferences FarmPreferences?
   alertConfigurations AlertConfiguration[]
 
@@ -237,15 +242,19 @@ model Lot {
 // Association Animal-Lot
 model LotAnimal {
   id        String   @id @default(uuid())
+  farmId    String   @map("farm_id")
   lotId     String   @map("lot_id")
   animalId  String   @map("animal_id")
   joinedAt  DateTime @default(now()) @map("joined_at")
   leftAt    DateTime? @map("left_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   lot Lot @relation(fields: [lotId], references: [id], onDelete: Cascade)
   animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
 
   @@unique([lotId, animalId, joinedAt])
+  @@index([farmId])
   @@index([lotId])
   @@index([animalId])
   @@map("lot_animals")
@@ -254,6 +263,7 @@ model LotAnimal {
 // Traitement médical
 model Treatment {
   id                  String   @id @default(uuid())
+  farmId              String   @map("farm_id")
   animalId            String   @map("animal_id")
   productId           String?  @map("product_id")
   veterinarianId      String?  @map("veterinarian_id")
@@ -272,11 +282,13 @@ model Treatment {
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
   product MedicalProduct? @relation(fields: [productId], references: [id])
   veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id])
   route AdministrationRoute? @relation(fields: [routeId], references: [id])
 
+  @@index([farmId])
   @@index([animalId])
   @@index([treatmentDate])
   @@index([deletedAt])
@@ -286,6 +298,7 @@ model Treatment {
 // Vaccination
 model Vaccination {
   id              String   @id @default(uuid())
+  farmId          String   @map("farm_id")
   animalId        String   @map("animal_id")
   vaccineId       String   @map("vaccine_id")
   veterinarianId  String?  @map("veterinarian_id")
@@ -304,12 +317,14 @@ model Vaccination {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
   vaccine Vaccine @relation(fields: [vaccineId], references: [id])
   veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id])
   route AdministrationRoute? @relation(fields: [routeId], references: [id])
   campaign Campaign? @relation(fields: [campaignId], references: [id])
 
+  @@index([farmId])
   @@index([animalId])
   @@index([vaccinationDate])
   @@index([deletedAt])
@@ -375,6 +390,7 @@ model MovementAnimal {
 // Pesée
 model Weight {
   id          String   @id @default(uuid())
+  farmId      String   @map("farm_id")
   animalId    String   @map("animal_id")
   weight      Float    // kg
   weightDate  DateTime @map("weight_date")
@@ -383,9 +399,12 @@ model Weight {
   version     Int      @default(1)
   deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
 
+  @@index([farmId])
   @@index([animalId])
   @@index([weightDate])
   @@index([deletedAt])
@@ -395,6 +414,7 @@ model Weight {
 // Reproduction
 model Breeding {
   id              String   @id @default(uuid())
+  farmId          String   @map("farm_id")
   femaleId        String   @map("female_id")
   maleId          String?  @map("male_id")
   method          String   // natural, artificial_insemination, embryo_transfer
@@ -410,10 +430,12 @@ model Breeding {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   female Animal @relation("BreedingFemale", fields: [femaleId], references: [id], onDelete: Cascade)
   male Animal? @relation("BreedingMale", fields: [maleId], references: [id])
   offspring Animal? @relation("BreedingOffspring", fields: [offspringId], references: [id])
 
+  @@index([farmId])
   @@index([femaleId])
   @@index([breedingDate])
   @@index([deletedAt])

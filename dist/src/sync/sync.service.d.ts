@@ -11,6 +11,5 @@ export declare class SyncService {
     private handleUpdate;
     private handleDelete;
     pullChanges(query: SyncPullQueryDto): Promise<SyncPullResponseDto>;
-    private buildFarmWhereClause;
     private getModelName;
 }
