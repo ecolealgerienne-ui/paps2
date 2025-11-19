@@ -37,13 +37,13 @@ export class BreedingsController {
   }
 
   @Get('upcoming')
-  @ApiOperation({ summary: 'Get upcoming due dates' })
+  @ApiOperation({ summary: 'Get upcoming birth dates' })
   @ApiResponse({ status: 200, description: 'List of upcoming births' })
   getUpcoming(
     @Param('farmId') farmId: string,
     @Query('days') days?: number,
   ) {
-    return this.breedingsService.getUpcomingDueDates(farmId, days || 30);
+    return this.breedingsService.getUpcomingBirthDates(farmId, days || 30);
   }
 
   @Get(':id')

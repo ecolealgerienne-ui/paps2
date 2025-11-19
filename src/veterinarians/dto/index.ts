@@ -1,10 +1,29 @@
-import { IsString, IsOptional, IsBoolean, IsEmail } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEmail, IsNumber, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVeterinarianDto {
-  @ApiProperty({ description: 'Veterinarian name' })
+  @ApiProperty({ description: 'First name' })
   @IsString()
-  name: string;
+  firstName: string;
+
+  @ApiProperty({ description: 'Last name' })
+  @IsString()
+  lastName: string;
+
+  @ApiProperty({ description: 'License number', required: false })
+  @IsOptional()
+  @IsString()
+  licenseNumber?: string;
+
+  @ApiProperty({ description: 'Specialties (JSON array)', required: false })
+  @IsOptional()
+  @IsArray()
+  specialties?: string[];
+
+  @ApiProperty({ description: 'Clinic name', required: false })
+  @IsOptional()
+  @IsString()
+  clinic?: string;
 
   @ApiProperty({ description: 'Phone number', required: false })
   @IsOptional()
@@ -21,15 +40,20 @@ export class CreateVeterinarianDto {
   @IsString()
   address?: string;
 
-  @ApiProperty({ description: 'License number', required: false })
+  @ApiProperty({ description: 'Is available', required: false, default: true })
   @IsOptional()
-  @IsString()
-  licenseNumber?: string;
+  @IsBoolean()
+  isAvailable?: boolean;
 
-  @ApiProperty({ description: 'Specialization', required: false })
+  @ApiProperty({ description: 'Emergency service available', required: false, default: false })
   @IsOptional()
-  @IsString()
-  specialization?: string;
+  @IsBoolean()
+  emergencyService?: boolean;
+
+  @ApiProperty({ description: 'Consultation fee', required: false })
+  @IsOptional()
+  @IsNumber()
+  consultationFee?: number;
 
   @ApiProperty({ description: 'Is active', required: false, default: true })
   @IsOptional()
@@ -38,10 +62,30 @@ export class CreateVeterinarianDto {
 }
 
 export class UpdateVeterinarianDto {
-  @ApiProperty({ description: 'Veterinarian name', required: false })
+  @ApiProperty({ description: 'First name', required: false })
   @IsOptional()
   @IsString()
-  name?: string;
+  firstName?: string;
+
+  @ApiProperty({ description: 'Last name', required: false })
+  @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @ApiProperty({ description: 'License number', required: false })
+  @IsOptional()
+  @IsString()
+  licenseNumber?: string;
+
+  @ApiProperty({ description: 'Specialties (JSON array)', required: false })
+  @IsOptional()
+  @IsArray()
+  specialties?: string[];
+
+  @ApiProperty({ description: 'Clinic name', required: false })
+  @IsOptional()
+  @IsString()
+  clinic?: string;
 
   @ApiProperty({ description: 'Phone number', required: false })
   @IsOptional()
@@ -58,15 +102,25 @@ export class UpdateVeterinarianDto {
   @IsString()
   address?: string;
 
-  @ApiProperty({ description: 'License number', required: false })
+  @ApiProperty({ description: 'Is available', required: false })
   @IsOptional()
-  @IsString()
-  licenseNumber?: string;
+  @IsBoolean()
+  isAvailable?: boolean;
 
-  @ApiProperty({ description: 'Specialization', required: false })
+  @ApiProperty({ description: 'Emergency service available', required: false })
   @IsOptional()
-  @IsString()
-  specialization?: string;
+  @IsBoolean()
+  emergencyService?: boolean;
+
+  @ApiProperty({ description: 'Consultation fee', required: false })
+  @IsOptional()
+  @IsNumber()
+  consultationFee?: number;
+
+  @ApiProperty({ description: 'Rating', required: false })
+  @IsOptional()
+  @IsNumber()
+  rating?: number;
 
   @ApiProperty({ description: 'Is active', required: false })
   @IsOptional()
@@ -84,4 +138,14 @@ export class QueryVeterinarianDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ description: 'Filter by availability', required: false })
+  @IsOptional()
+  @IsBoolean()
+  isAvailable?: boolean;
+
+  @ApiProperty({ description: 'Filter by emergency service', required: false })
+  @IsOptional()
+  @IsBoolean()
+  emergencyService?: boolean;
 }

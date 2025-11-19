@@ -1,6 +1,7 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { BreedingMethod, BreedingStatus } from '../../common/enums';
+import { Type } from 'class-transformer';
 
 export class CreateBreedingDto {
   @ApiProperty({ description: 'Breeding ID (UUID)', required: false })
@@ -8,14 +9,19 @@ export class CreateBreedingDto {
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: 'Female animal ID' })
+  @ApiProperty({ description: 'Mother animal ID' })
   @IsString()
-  femaleId: string;
+  motherId: string;
 
-  @ApiProperty({ description: 'Male animal ID', required: false })
+  @ApiProperty({ description: 'Father animal ID', required: false })
   @IsOptional()
   @IsString()
-  maleId?: string;
+  fatherId?: string;
+
+  @ApiProperty({ description: 'Father name (for external males)', required: false })
+  @IsOptional()
+  @IsString()
+  fatherName?: string;
 
   @ApiProperty({ enum: BreedingMethod, description: 'Breeding method' })
   @IsEnum(BreedingMethod)
@@ -25,10 +31,21 @@ export class CreateBreedingDto {
   @IsDateString()
   breedingDate: string;
 
-  @ApiProperty({ description: 'Expected due date', required: false })
+  @ApiProperty({ description: 'Expected birth date', required: false })
   @IsOptional()
   @IsDateString()
-  expectedDueDate?: string;
+  expectedBirthDate?: string;
+
+  @ApiProperty({ description: 'Expected offspring count', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  expectedOffspringCount?: number;
+
+  @ApiProperty({ description: 'Veterinarian ID', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianId?: string;
 
   @ApiProperty({ enum: BreedingStatus, default: 'planned', required: false })
   @IsOptional()
@@ -42,10 +59,15 @@ export class CreateBreedingDto {
 }
 
 export class UpdateBreedingDto {
-  @ApiProperty({ description: 'Male animal ID', required: false })
+  @ApiProperty({ description: 'Father animal ID', required: false })
   @IsOptional()
   @IsString()
-  maleId?: string;
+  fatherId?: string;
+
+  @ApiProperty({ description: 'Father name (for external males)', required: false })
+  @IsOptional()
+  @IsString()
+  fatherName?: string;
 
   @ApiProperty({ enum: BreedingMethod, required: false })
   @IsOptional()
@@ -57,30 +79,36 @@ export class UpdateBreedingDto {
   @IsDateString()
   breedingDate?: string;
 
-  @ApiProperty({ description: 'Expected due date', required: false })
+  @ApiProperty({ description: 'Expected birth date', required: false })
   @IsOptional()
   @IsDateString()
-  expectedDueDate?: string;
+  expectedBirthDate?: string;
 
-  @ApiProperty({ description: 'Actual due date', required: false })
+  @ApiProperty({ description: 'Actual birth date', required: false })
   @IsOptional()
   @IsDateString()
-  actualDueDate?: string;
+  actualBirthDate?: string;
+
+  @ApiProperty({ description: 'Expected offspring count', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  expectedOffspringCount?: number;
+
+  @ApiProperty({ description: 'Offspring IDs (JSON array)', required: false })
+  @IsOptional()
+  @IsArray()
+  offspringIds?: string[];
+
+  @ApiProperty({ description: 'Veterinarian ID', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianId?: string;
 
   @ApiProperty({ enum: BreedingStatus, required: false })
   @IsOptional()
   @IsEnum(BreedingStatus)
   status?: BreedingStatus;
-
-  @ApiProperty({ description: 'Offspring animal ID', required: false })
-  @IsOptional()
-  @IsString()
-  offspringId?: string;
-
-  @ApiProperty({ description: 'Number of offspring', required: false })
-  @IsOptional()
-  @IsNumber()
-  offspringCount?: number;
 
   @ApiProperty({ description: 'Notes', required: false })
   @IsOptional()
@@ -93,10 +121,15 @@ export class UpdateBreedingDto {
 }
 
 export class QueryBreedingDto {
-  @ApiProperty({ description: 'Filter by female ID', required: false })
+  @ApiProperty({ description: 'Filter by mother ID', required: false })
   @IsOptional()
   @IsString()
-  femaleId?: string;
+  motherId?: string;
+
+  @ApiProperty({ description: 'Filter by father ID', required: false })
+  @IsOptional()
+  @IsString()
+  fatherId?: string;
 
   @ApiProperty({ enum: BreedingStatus, required: false })
   @IsOptional()

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsInt, Min } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsInt, IsNumber, Min, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -7,15 +7,30 @@ export class CreateMedicalProductDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'Active substance', required: false })
+  @ApiProperty({ description: 'Commercial name', required: false })
   @IsOptional()
   @IsString()
-  activeSubstance?: string;
+  commercialName?: string;
+
+  @ApiProperty({ description: 'Category (antibiotic, anti-inflammatory, vitamin, etc.)', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Active ingredient', required: false })
+  @IsOptional()
+  @IsString()
+  activeIngredient?: string;
 
   @ApiProperty({ description: 'Manufacturer', required: false })
   @IsOptional()
   @IsString()
   manufacturer?: string;
+
+  @ApiProperty({ description: 'Dosage', required: false })
+  @IsOptional()
+  @IsString()
+  dosage?: string;
 
   @ApiProperty({ description: 'Withdrawal period for meat (days)', required: false })
   @IsOptional()
@@ -31,10 +46,50 @@ export class CreateMedicalProductDto {
   @Min(0)
   withdrawalPeriodMilk?: number;
 
-  @ApiProperty({ description: 'Dosage unit', required: false })
+  @ApiProperty({ description: 'Current stock', required: false, default: 0 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  currentStock?: number;
+
+  @ApiProperty({ description: 'Minimum stock level', required: false, default: 0 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minStock?: number;
+
+  @ApiProperty({ description: 'Unit price', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  unitPrice?: number;
+
+  @ApiProperty({ description: 'Batch number', required: false })
   @IsOptional()
   @IsString()
-  dosageUnit?: string;
+  batchNumber?: string;
+
+  @ApiProperty({ description: 'Expiry date', required: false })
+  @IsOptional()
+  @IsDateString()
+  expiryDate?: string;
+
+  @ApiProperty({ description: 'Requires prescription', required: false, default: false })
+  @IsOptional()
+  @IsBoolean()
+  prescription?: boolean;
+
+  @ApiProperty({ description: 'Type (treatment, supplement, etc.)', required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @ApiProperty({ description: 'Target species', required: false })
+  @IsOptional()
+  @IsString()
+  targetSpecies?: string;
 
   @ApiProperty({ description: 'Is active', required: false, default: true })
   @IsOptional()
@@ -48,15 +103,30 @@ export class UpdateMedicalProductDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({ description: 'Active substance', required: false })
+  @ApiProperty({ description: 'Commercial name', required: false })
   @IsOptional()
   @IsString()
-  activeSubstance?: string;
+  commercialName?: string;
+
+  @ApiProperty({ description: 'Category', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Active ingredient', required: false })
+  @IsOptional()
+  @IsString()
+  activeIngredient?: string;
 
   @ApiProperty({ description: 'Manufacturer', required: false })
   @IsOptional()
   @IsString()
   manufacturer?: string;
+
+  @ApiProperty({ description: 'Dosage', required: false })
+  @IsOptional()
+  @IsString()
+  dosage?: string;
 
   @ApiProperty({ description: 'Withdrawal period for meat (days)', required: false })
   @IsOptional()
@@ -72,10 +142,50 @@ export class UpdateMedicalProductDto {
   @Min(0)
   withdrawalPeriodMilk?: number;
 
-  @ApiProperty({ description: 'Dosage unit', required: false })
+  @ApiProperty({ description: 'Current stock', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  currentStock?: number;
+
+  @ApiProperty({ description: 'Minimum stock level', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minStock?: number;
+
+  @ApiProperty({ description: 'Unit price', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  unitPrice?: number;
+
+  @ApiProperty({ description: 'Batch number', required: false })
   @IsOptional()
   @IsString()
-  dosageUnit?: string;
+  batchNumber?: string;
+
+  @ApiProperty({ description: 'Expiry date', required: false })
+  @IsOptional()
+  @IsDateString()
+  expiryDate?: string;
+
+  @ApiProperty({ description: 'Requires prescription', required: false })
+  @IsOptional()
+  @IsBoolean()
+  prescription?: boolean;
+
+  @ApiProperty({ description: 'Type', required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
+  @ApiProperty({ description: 'Target species', required: false })
+  @IsOptional()
+  @IsString()
+  targetSpecies?: string;
 
   @ApiProperty({ description: 'Is active', required: false })
   @IsOptional()
@@ -89,8 +199,23 @@ export class QueryMedicalProductDto {
   @IsString()
   search?: string;
 
+  @ApiProperty({ description: 'Filter by category', required: false })
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @ApiProperty({ description: 'Filter by type', required: false })
+  @IsOptional()
+  @IsString()
+  type?: string;
+
   @ApiProperty({ description: 'Filter by active status', required: false })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ description: 'Filter by prescription required', required: false })
+  @IsOptional()
+  @IsBoolean()
+  prescription?: boolean;
 }
