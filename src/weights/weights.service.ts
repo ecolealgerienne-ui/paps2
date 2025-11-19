@@ -141,7 +141,7 @@ export class WeightsService {
 
     // Calculate daily gain between consecutive weights
     const history = weights.map((w, i) => {
-      let dailyGain = null;
+      let dailyGain: number | null = null;
       if (i > 0) {
         const prevWeight = weights[i - 1];
         const daysDiff = Math.ceil(
@@ -153,7 +153,7 @@ export class WeightsService {
       }
       return {
         ...w,
-        dailyGain: dailyGain ? Math.round(dailyGain * 1000) / 1000 : null, // kg/day
+        dailyGain: dailyGain !== null ? Math.round(dailyGain * 1000) / 1000 : null, // kg/day
       };
     });
 
