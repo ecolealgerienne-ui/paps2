@@ -433,6 +433,8 @@ if ($animalId) {
         productId = "test-ivermectine-id"
         productName = "Ivermectine 1%"
         treatmentDate = "2024-01-20"
+        dose = 2.5
+        withdrawalEndDate = "2024-02-17"
         diagnosis = "Strongylose digestive"
     }
     $treatmentId = Get-ResponseData $treatmentResponse "id"
@@ -473,6 +475,9 @@ if ($animalId) {
         type = "obligatoire"
         disease = "Enterotoxemie"
         vaccinationDate = "2024-01-25"
+        dose = "2ml"
+        administrationRoute = "SC"
+        withdrawalPeriodDays = 0
         nextDueDate = "2024-07-25"
     }
     $vaccinationId = Get-ResponseData $vaccinationResponse "id"
@@ -598,6 +603,7 @@ $campaignResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/campaigns"
     productName = "Ivermectine"
     campaignDate = "2024-03-01"
     withdrawalEndDate = "2024-03-15"
+    animalIdsJson = "[]"
 }
 $campaignId = Get-ResponseData $campaignResponse "id"
 Write-Success "Created: $campaignId"
