@@ -5,8 +5,7 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { randomUUID } from 'crypto';
-import { AuthGuard } from '../src/auth/guards/auth.guard';
-import { ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 /**
  * E2E tests for BACKEND_DELTA.md alignment
@@ -21,10 +20,8 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideGuard(AuthGuard)
-      .useValue({ canActivate: () => true }) // Bypass auth for e2e tests
-      .overrideGuard(ThrottlerGuard)
-      .useValue({ canActivate: () => true }) // Bypass rate limiting for e2e tests
+      .overrideProvider(APP_GUARD)
+      .useValue({ canActivate: () => true }) // Bypass all global guards (Auth + Throttler)
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -92,6 +89,12 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
       expect([200, 201]).toContain(response.status);
       expect(response.body.success).toBe(true);
       expect(response.body.results).toBeDefined();
+
+      // Log error if sync failed
+      if (!response.body.results[0].success) {
+        console.error('Sync failed:', JSON.stringify(response.body.results[0], null, 2));
+      }
+
       expect(response.body.results[0].success).toBe(true);
 
       // Verify database has snake_case
