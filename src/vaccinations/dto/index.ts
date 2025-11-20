@@ -12,20 +12,21 @@ export class CreateVaccinationDto {
   @IsString()
   animalId?: string;
 
-  @ApiProperty({ description: 'Vaccine name', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Animal IDs (comma-separated or JSON string)' })
   @IsString()
-  vaccineName?: string;
+  animalIds: string;
 
-  @ApiProperty({ description: 'Vaccination type (obligatoire, recommandee, optionnelle)', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Vaccine name' })
   @IsString()
-  type?: string;
+  vaccineName: string;
 
-  @ApiProperty({ description: 'Disease', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Vaccination type (obligatoire, recommandee, optionnelle)' })
   @IsString()
-  disease?: string;
+  type: string;
+
+  @ApiProperty({ description: 'Disease' })
+  @IsString()
+  disease: string;
 
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
@@ -56,20 +57,17 @@ export class CreateVaccinationDto {
   @IsDateString()
   expiryDate?: string;
 
-  @ApiProperty({ description: 'Dose', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Dose' })
   @IsString()
-  dose?: string;
+  dose: string;
 
-  @ApiProperty({ description: 'Administration route', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Administration route' })
   @IsString()
-  administrationRoute?: string;
+  administrationRoute: string;
 
-  @ApiProperty({ description: 'Withdrawal period in days', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Withdrawal period in days' })
   @IsNumber()
-  withdrawalPeriodDays?: number;
+  withdrawalPeriodDays: number;
 
   @ApiProperty({ description: 'Dosage amount', required: false })
   @IsOptional()

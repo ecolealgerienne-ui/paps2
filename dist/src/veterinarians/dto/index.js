@@ -55,16 +55,14 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVeterinarianDto.prototype, "title", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'License number', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'License number' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateVeterinarianDto.prototype, "licenseNumber", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Specialties (JSON array)', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
-    __metadata("design:type", Array)
+    (0, swagger_1.ApiProperty)({ description: 'Specialties (comma-separated or JSON string)' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], CreateVeterinarianDto.prototype, "specialties", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Clinic name', required: false }),
@@ -73,8 +71,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVeterinarianDto.prototype, "clinic", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Phone number', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Phone number' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateVeterinarianDto.prototype, "phone", void 0);

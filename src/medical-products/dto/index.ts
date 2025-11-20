@@ -12,10 +12,9 @@ export class CreateMedicalProductDto {
   @IsString()
   commercialName?: string;
 
-  @ApiProperty({ description: 'Category (antibiotic, anti-inflammatory, vitamin, etc.)', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Category (antibiotic, anti-inflammatory, vitamin, etc.)' })
   @IsString()
-  category?: string;
+  category: string;
 
   @ApiProperty({ description: 'Active ingredient', required: false })
   @IsOptional()
@@ -33,19 +32,17 @@ export class CreateMedicalProductDto {
   @IsNumber()
   dosage?: number;
 
-  @ApiProperty({ description: 'Withdrawal period for meat (days)', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Withdrawal period for meat (days)' })
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  withdrawalPeriodMeat?: number;
+  withdrawalPeriodMeat: number;
 
-  @ApiProperty({ description: 'Withdrawal period for milk (days)', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Withdrawal period for milk (days)' })
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  withdrawalPeriodMilk?: number;
+  withdrawalPeriodMilk: number;
 
   @ApiProperty({ description: 'Current stock', required: false, default: 0 })
   @IsOptional()
@@ -60,6 +57,10 @@ export class CreateMedicalProductDto {
   @IsNumber()
   @Min(0)
   minStock?: number;
+
+  @ApiProperty({ description: 'Stock unit' })
+  @IsString()
+  stockUnit: string;
 
   @ApiProperty({ description: 'Unit price', required: false })
   @IsOptional()
@@ -82,12 +83,12 @@ export class CreateMedicalProductDto {
   @IsString()
   prescription?: string;
 
-  @ApiProperty({ description: 'Type (treatment, supplement, etc.)', required: false })
+  @ApiProperty({ description: 'Type (treatment, supplement, etc.)', default: 'treatment' })
   @IsOptional()
   @IsString()
   type?: string;
 
-  @ApiProperty({ description: 'Target species', required: false })
+  @ApiProperty({ description: 'Target species', default: '' })
   @IsOptional()
   @IsString()
   targetSpecies?: string;

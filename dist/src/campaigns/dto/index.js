@@ -16,8 +16,15 @@ const enums_1 = require("../../common/enums");
 class CreateCampaignDto {
     id;
     name;
+    productId;
+    productName;
     type;
     lotId;
+    campaignDate;
+    withdrawalEndDate;
+    veterinarianId;
+    veterinarianName;
+    animalIdsJson;
     startDate;
     endDate;
     targetCount;
@@ -37,7 +44,18 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: enums_1.CampaignType, description: 'Type of campaign' }),
+    (0, swagger_1.ApiProperty)({ description: 'Product ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "productId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Product name' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "productName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: enums_1.CampaignType, description: 'Type of campaign', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(enums_1.CampaignType),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "type", void 0);
@@ -48,7 +66,35 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "lotId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Start date' }),
+    (0, swagger_1.ApiProperty)({ description: 'Campaign date' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "campaignDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Withdrawal end date' }),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "withdrawalEndDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Veterinarian ID', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "veterinarianId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Veterinarian name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "veterinarianName", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Animal IDs (JSON string)' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCampaignDto.prototype, "animalIdsJson", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Start date', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateCampaignDto.prototype, "startDate", void 0);

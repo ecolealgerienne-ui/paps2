@@ -24,6 +24,7 @@ class CreateMedicalProductDto {
     withdrawalPeriodMilk;
     currentStock;
     minStock;
+    stockUnit;
     unitPrice;
     batchNumber;
     expiryDate;
@@ -45,8 +46,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateMedicalProductDto.prototype, "commercialName", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Category (antibiotic, anti-inflammatory, vitamin, etc.)', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Category (antibiotic, anti-inflammatory, vitamin, etc.)' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateMedicalProductDto.prototype, "category", void 0);
@@ -70,16 +70,14 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateMedicalProductDto.prototype, "dosage", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Withdrawal period for meat (days)', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Withdrawal period for meat (days)' }),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateMedicalProductDto.prototype, "withdrawalPeriodMeat", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Withdrawal period for milk (days)', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Withdrawal period for milk (days)' }),
     (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
@@ -101,6 +99,11 @@ __decorate([
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateMedicalProductDto.prototype, "minStock", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Stock unit' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateMedicalProductDto.prototype, "stockUnit", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Unit price', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -127,13 +130,13 @@ __decorate([
     __metadata("design:type", String)
 ], CreateMedicalProductDto.prototype, "prescription", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Type (treatment, supplement, etc.)', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Type (treatment, supplement, etc.)', default: 'treatment' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateMedicalProductDto.prototype, "type", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Target species', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Target species', default: '' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

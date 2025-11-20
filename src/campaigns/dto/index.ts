@@ -12,18 +12,50 @@ export class CreateCampaignDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ enum: CampaignType, description: 'Type of campaign' })
+  @ApiProperty({ description: 'Product ID' })
+  @IsString()
+  productId: string;
+
+  @ApiProperty({ description: 'Product name' })
+  @IsString()
+  productName: string;
+
+  @ApiProperty({ enum: CampaignType, description: 'Type of campaign', required: false })
+  @IsOptional()
   @IsEnum(CampaignType)
-  type: CampaignType;
+  type?: CampaignType;
 
   @ApiProperty({ description: 'Lot ID to target', required: false })
   @IsOptional()
   @IsString()
   lotId?: string;
 
-  @ApiProperty({ description: 'Start date' })
+  @ApiProperty({ description: 'Campaign date' })
   @IsDateString()
-  startDate: string;
+  campaignDate: string;
+
+  @ApiProperty({ description: 'Withdrawal end date' })
+  @IsDateString()
+  withdrawalEndDate: string;
+
+  @ApiProperty({ description: 'Veterinarian ID', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianId?: string;
+
+  @ApiProperty({ description: 'Veterinarian name', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianName?: string;
+
+  @ApiProperty({ description: 'Animal IDs (JSON string)' })
+  @IsString()
+  animalIdsJson: string;
+
+  @ApiProperty({ description: 'Start date', required: false })
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
 
   @ApiProperty({ description: 'End date', required: false })
   @IsOptional()

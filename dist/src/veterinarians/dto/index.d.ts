@@ -2,10 +2,10 @@ export declare class CreateVeterinarianDto {
     firstName: string;
     lastName: string;
     title?: string;
-    licenseNumber?: string;
-    specialties?: string[];
+    licenseNumber: string;
+    specialties: string;
     clinic?: string;
-    phone?: string;
+    phone: string;
     mobile?: string;
     email?: string;
     address?: string;

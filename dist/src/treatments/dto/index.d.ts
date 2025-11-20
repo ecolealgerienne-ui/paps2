@@ -2,20 +2,20 @@ import { TreatmentStatus } from '../../common/enums';
 export declare class CreateTreatmentDto {
     id?: string;
     animalId: string;
-    productId?: string;
-    productName?: string;
+    productId: string;
+    productName: string;
     veterinarianId?: string;
     veterinarianName?: string;
     campaignId?: string;
     routeId?: string;
     diagnosis?: string;
     treatmentDate: string;
-    dose?: number;
+    dose: number;
     dosage?: number;
     dosageUnit?: string;
     duration?: number;
     status?: TreatmentStatus;
-    withdrawalEndDate?: string;
+    withdrawalEndDate: string;
     cost?: number;
     notes?: string;
 }

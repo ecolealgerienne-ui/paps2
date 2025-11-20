@@ -15,6 +15,7 @@ const swagger_1 = require("@nestjs/swagger");
 class CreateVaccinationDto {
     id;
     animalId;
+    animalIds;
     vaccineName;
     type;
     disease;
@@ -45,20 +46,22 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVaccinationDto.prototype, "animalId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Vaccine name', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Animal IDs (comma-separated or JSON string)' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateVaccinationDto.prototype, "animalIds", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Vaccine name' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateVaccinationDto.prototype, "vaccineName", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Vaccination type (obligatoire, recommandee, optionnelle)', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Vaccination type (obligatoire, recommandee, optionnelle)' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateVaccinationDto.prototype, "type", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Disease', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Disease' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateVaccinationDto.prototype, "disease", void 0);
@@ -98,20 +101,17 @@ __decorate([
     __metadata("design:type", String)
 ], CreateVaccinationDto.prototype, "expiryDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Dose', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Dose' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateVaccinationDto.prototype, "dose", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Administration route', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Administration route' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateVaccinationDto.prototype, "administrationRoute", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Withdrawal period in days', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Withdrawal period in days' }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateVaccinationDto.prototype, "withdrawalPeriodDays", void 0);

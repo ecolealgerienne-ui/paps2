@@ -1,14 +1,15 @@
 export declare class CreateMedicalProductDto {
     name: string;
     commercialName?: string;
-    category?: string;
+    category: string;
     activeIngredient?: string;
     manufacturer?: string;
     dosage?: number;
-    withdrawalPeriodMeat?: number;
-    withdrawalPeriodMilk?: number;
+    withdrawalPeriodMeat: number;
+    withdrawalPeriodMilk: number;
     currentStock?: number;
     minStock?: number;
+    stockUnit: string;
     unitPrice?: number;
     batchNumber?: string;
     expiryDate?: string;

@@ -50,10 +50,10 @@ model Veterinarian {
   firstName             String    @map("first_name")
   lastName              String    @map("last_name")
   title                 String?
-  licenseNumber         String?   @map("license_number")
-  specialties           Json?     // JSON array of specialties
+  licenseNumber         String    @map("license_number")
+  specialties           String    // comma-separated or JSON string
   clinic                String?
-  phone                 String?
+  phone                 String
   mobile                String?
   email                 String?
   address               String?
@@ -69,7 +69,7 @@ model Veterinarian {
   notes                 String?
   isPreferred           Boolean   @default(false) @map("is_preferred")
   isDefault             Boolean   @default(false) @map("is_default")
-  rating                Float?
+  rating                Int       @default(5)
   totalInterventions    Int       @default(0) @map("total_interventions")
   lastInterventionDate  DateTime? @map("last_intervention_date")
   isActive              Boolean   @default(true) @map("is_active")
@@ -93,25 +93,25 @@ model MedicalProduct {
   farmId                    String    @map("farm_id")
   name                      String
   commercialName            String?   @map("commercial_name")
-  category                  String?   // antibiotic, anti-inflammatory, vitamin, etc.
+  category                  String    // antibiotic, anti-inflammatory, vitamin, etc.
   activeIngredient          String?   @map("active_ingredient")
   manufacturer              String?
   form                      String?   // tablet, injection, powder, etc.
   dosage                    Float?
   dosageUnit                String?   @map("dosage_unit")
-  withdrawalPeriodMeat      Int?      @map("withdrawal_period_meat") // jours
-  withdrawalPeriodMilk      Int?      @map("withdrawal_period_milk") // jours
+  withdrawalPeriodMeat      Int       @map("withdrawal_period_meat") // jours
+  withdrawalPeriodMilk      Int       @map("withdrawal_period_milk") // jours
   currentStock              Float     @default(0) @map("current_stock")
   minStock                  Float     @default(0) @map("min_stock")
-  stockUnit                 String?   @map("stock_unit")
+  stockUnit                 String    @map("stock_unit")
   unitPrice                 Float?    @map("unit_price")
   currency                  String?
   batchNumber               String?   @map("batch_number")
   expiryDate                DateTime? @map("expiry_date")
   storageConditions         String?   @map("storage_conditions")
   prescription              String?   // prescription notes/requirements
-  type                      String?   // treatment, vaccine
-  targetSpecies             String?   @map("target_species")
+  type                      String    @default("treatment") // treatment, vaccine
+  targetSpecies             String    @default("") @map("target_species")
   standardCureDays          Int?      @map("standard_cure_days")
   administrationFrequency   String?   @map("administration_frequency")
   dosageFormula             String?   @map("dosage_formula")
@@ -180,13 +180,13 @@ model AlertConfiguration {
   id              String    @id @default(uuid())
   farmId          String    @map("farm_id")
   evaluationType  String    @map("evaluation_type")
-  type            String?   // urgent, important, routine
-  category        String?
-  titleKey        String?   @map("title_key") // i18n key
-  messageKey      String?   @map("message_key") // i18n key
+  type            String    // urgent, important, routine
+  category        String
+  titleKey        String    @map("title_key") // i18n key
+  messageKey      String    @map("message_key") // i18n key
   severity        Int       @default(5)
-  iconName        String?   @map("icon_name")
-  colorHex        String?   @map("color_hex")
+  iconName        String    @map("icon_name")
+  colorHex        String    @map("color_hex")
   enabled         Boolean   @default(true)
   alertType       String?   @map("alert_type") // vaccination_due, treatment_due, etc.
   isEnabled       Boolean   @default(true) @map("is_enabled")
@@ -259,6 +259,7 @@ model Animal {
   validatedAt           DateTime? @map("validated_at")
   photoUrl              String?   @map("photo_url")
   notes                 String?
+  days                  Int?
   version               Int       @default(1)
   deletedAt             DateTime? @map("deleted_at")
   createdAt             DateTime  @default(now()) @map("created_at")
@@ -351,20 +352,20 @@ model Treatment {
   id                  String   @id @default(uuid())
   farmId              String   @map("farm_id")
   animalId            String   @map("animal_id")
-  productId           String?  @map("product_id")
-  productName         String?  @map("product_name")
+  productId           String   @map("product_id")
+  productName         String   @map("product_name")
   veterinarianId      String?  @map("veterinarian_id")
   veterinarianName    String?  @map("veterinarian_name")
   campaignId          String?  @map("campaign_id")
   routeId             String?  @map("route_id")
   diagnosis           String?
   treatmentDate       DateTime @map("treatment_date")
-  dose                Float?
+  dose                Float
   dosage              Float?
   dosageUnit          String?  @map("dosage_unit")
   duration            Int?     // jours
   status              String   @default("completed")
-  withdrawalEndDate   DateTime? @map("withdrawal_end_date")
+  withdrawalEndDate   DateTime @map("withdrawal_end_date")
   cost                Float?
   notes               String?
   version             Int      @default(1)
@@ -390,20 +391,20 @@ model Vaccination {
   id                    String    @id @default(uuid())
   farmId                String    @map("farm_id")
   animalId              String?   @map("animal_id") // nullable for group vaccinations
-  animalIds             Json?     @map("animal_ids") // JSON array for group vaccinations
+  animalIds             String    @map("animal_ids") // comma-separated or JSON string
   protocolId            String?   @map("protocol_id")
-  vaccineName           String?   @map("vaccine_name")
-  type                  String?   // obligatoire, recommandee, optionnelle
-  disease               String?
+  vaccineName           String    @map("vaccine_name")
+  type                  String    // obligatoire, recommandee, optionnelle
+  disease               String
   vaccinationDate       DateTime  @map("vaccination_date")
   batchNumber           String?   @map("batch_number")
   expiryDate            DateTime? @map("expiry_date")
-  dose                  String?
-  administrationRoute   String?   @map("administration_route")
+  dose                  String
+  administrationRoute   String    @map("administration_route")
   nextDueDate           DateTime? @map("next_due_date")
   veterinarianId        String?   @map("veterinarian_id")
   veterinarianName      String?   @map("veterinarian_name")
-  withdrawalPeriodDays  Int?      @map("withdrawal_period_days")
+  withdrawalPeriodDays  Int       @map("withdrawal_period_days")
   dosage                Float?
   cost                  Float?
   notes                 String?
@@ -427,6 +428,7 @@ model Vaccination {
 model Movement {
   id                  String    @id @default(uuid())
   farmId              String    @map("farm_id")
+  lotId               String?   @map("lot_id")
   movementType        String    @map("movement_type") // birth, purchase, sale, death, slaughter, temporary_out, temporary_return
   movementDate        DateTime  @map("movement_date")
   reason              String?
@@ -437,6 +439,7 @@ model Movement {
   buyerType           String?   @map("buyer_type")
   buyerContact        String?   @map("buyer_contact")
   buyerFarmId         String?   @map("buyer_farm_id")
+  buyerQrSignature    String?   @map("buyer_qr_signature")
   salePrice           Float?    @map("sale_price")
 
   // Pour les achats
@@ -523,11 +526,12 @@ model Breeding {
   fatherName             String?   @map("father_name") // for external males
   method                 String    // natural, artificial_insemination, embryo_transfer
   breedingDate           DateTime  @map("breeding_date")
-  expectedBirthDate      DateTime? @map("expected_birth_date")
+  expectedBirthDate      DateTime  @map("expected_birth_date")
   actualBirthDate        DateTime? @map("actual_birth_date")
   expectedOffspringCount Int?      @map("expected_offspring_count")
   offspringIds           Json?     @map("offspring_ids") // JSON array
   veterinarianId         String?   @map("veterinarian_id")
+  veterinarianName       String?   @map("veterinarian_name")
   status                 String    @default("planned") // planned, in_progress, confirmed, failed, delivered
   notes                  String?
   version                Int       @default(1)
@@ -552,14 +556,14 @@ model Campaign {
   farmId            String    @map("farm_id")
   lotId             String?   @map("lot_id")
   name              String
-  productId         String?   @map("product_id")
-  productName       String?   @map("product_name")
+  productId         String    @map("product_id")
+  productName       String    @map("product_name")
   type              String?   // vaccination, treatment, weighing, identification
-  campaignDate      DateTime? @map("campaign_date")
-  withdrawalEndDate DateTime? @map("withdrawal_end_date")
+  campaignDate      DateTime  @map("campaign_date")
+  withdrawalEndDate DateTime  @map("withdrawal_end_date")
   veterinarianId    String?   @map("veterinarian_id")
   veterinarianName  String?   @map("veterinarian_name")
-  animalIdsJson     Json?     @map("animal_ids_json")
+  animalIdsJson     String    @map("animal_ids_json") // JSON string of animal IDs
   status            String    @default("planned") // planned, in_progress, completed, cancelled
   startDate         DateTime? @map("start_date")
   endDate           DateTime? @map("end_date")
@@ -617,7 +621,7 @@ model FarmPreferences {
   id                     String    @id @default(uuid())
   farmId                 String    @unique @map("farm_id")
   defaultVeterinarianId  String?   @map("default_veterinarian_id")
-  defaultSpeciesId       String?   @map("default_species_id")
+  defaultSpeciesId       String    @map("default_species_id")
   defaultBreedId         String?   @map("default_breed_id")
   weightUnit             String    @default("kg") @map("weight_unit")
   currency               String    @default("DZD")

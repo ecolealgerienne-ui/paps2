@@ -46,14 +46,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "animalId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Medical product ID', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Medical product ID' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "productId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Product name', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Product name' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "productName", void 0);
@@ -93,8 +91,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "treatmentDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Dose amount', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Dose amount' }),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateTreatmentDto.prototype, "dose", void 0);
@@ -123,8 +120,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "status", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Withdrawal end date', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Withdrawal end date' }),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateTreatmentDto.prototype, "withdrawalEndDate", void 0);

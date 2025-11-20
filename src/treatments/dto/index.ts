@@ -12,15 +12,13 @@ export class CreateTreatmentDto {
   @IsString()
   animalId: string;
 
-  @ApiProperty({ description: 'Medical product ID', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Medical product ID' })
   @IsString()
-  productId?: string;
+  productId: string;
 
-  @ApiProperty({ description: 'Product name', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Product name' })
   @IsString()
-  productName?: string;
+  productName: string;
 
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
@@ -51,10 +49,9 @@ export class CreateTreatmentDto {
   @IsDateString()
   treatmentDate: string;
 
-  @ApiProperty({ description: 'Dose amount', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Dose amount' })
   @IsNumber()
-  dose?: number;
+  dose: number;
 
   @ApiProperty({ description: 'Dosage amount', required: false })
   @IsOptional()
@@ -76,10 +73,9 @@ export class CreateTreatmentDto {
   @IsEnum(TreatmentStatus)
   status?: TreatmentStatus;
 
-  @ApiProperty({ description: 'Withdrawal end date', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Withdrawal end date' })
   @IsDateString()
-  withdrawalEndDate?: string;
+  withdrawalEndDate: string;
 
   @ApiProperty({ description: 'Cost', required: false })
   @IsOptional()

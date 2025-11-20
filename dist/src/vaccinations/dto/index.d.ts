@@ -1,18 +1,19 @@
 export declare class CreateVaccinationDto {
     id?: string;
     animalId?: string;
-    vaccineName?: string;
-    type?: string;
-    disease?: string;
+    animalIds: string;
+    vaccineName: string;
+    type: string;
+    disease: string;
     veterinarianId?: string;
     veterinarianName?: string;
     vaccinationDate: string;
     nextDueDate?: string;
     batchNumber?: string;
     expiryDate?: string;
-    dose?: string;
-    administrationRoute?: string;
-    withdrawalPeriodDays?: number;
+    dose: string;
+    administrationRoute: string;
+    withdrawalPeriodDays: number;
     dosage?: number;
     cost?: number;
     notes?: string;

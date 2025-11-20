@@ -2,9 +2,16 @@ import { CampaignType, CampaignStatus } from '../../common/enums';
 export declare class CreateCampaignDto {
     id?: string;
     name: string;
-    type: CampaignType;
+    productId: string;
+    productName: string;
+    type?: CampaignType;
     lotId?: string;
-    startDate: string;
+    campaignDate: string;
+    withdrawalEndDate: string;
+    veterinarianId?: string;
+    veterinarianName?: string;
+    animalIdsJson: string;
+    startDate?: string;
     endDate?: string;
     targetCount?: number;
     status?: CampaignStatus;

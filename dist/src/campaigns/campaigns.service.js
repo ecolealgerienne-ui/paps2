@@ -30,7 +30,9 @@ let CampaignsService = class CampaignsService {
             data: {
                 ...dto,
                 farmId,
-                startDate: new Date(dto.startDate),
+                campaignDate: new Date(dto.campaignDate),
+                withdrawalEndDate: new Date(dto.withdrawalEndDate),
+                startDate: dto.startDate ? new Date(dto.startDate) : null,
                 endDate: dto.endDate ? new Date(dto.endDate) : null,
             },
             include: {

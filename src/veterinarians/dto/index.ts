@@ -15,25 +15,22 @@ export class CreateVeterinarianDto {
   @IsString()
   title?: string;
 
-  @ApiProperty({ description: 'License number', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'License number' })
   @IsString()
-  licenseNumber?: string;
+  licenseNumber: string;
 
-  @ApiProperty({ description: 'Specialties (JSON array)', required: false })
-  @IsOptional()
-  @IsArray()
-  specialties?: string[];
+  @ApiProperty({ description: 'Specialties (comma-separated or JSON string)' })
+  @IsString()
+  specialties: string;
 
   @ApiProperty({ description: 'Clinic name', required: false })
   @IsOptional()
   @IsString()
   clinic?: string;
 
-  @ApiProperty({ description: 'Phone number', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Phone number' })
   @IsString()
-  phone?: string;
+  phone: string;
 
   @ApiProperty({ description: 'Mobile number', required: false })
   @IsOptional()
