@@ -142,11 +142,13 @@ Write-Header "Veterinarians API - 5 endpoints"
 
 Write-Test "POST /farms/$FarmId/veterinarians - Create"
 $vetResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/veterinarians" -Body @{
-    name = "Dr. Ahmed Benali"
+    firstName = "Ahmed"
+    lastName = "Benali"
+    title = "Dr."
     phone = "0551234567"
     email = "ahmed.benali@vet.dz"
     licenseNumber = "VET-2024-001"
-    specialization = "Ruminants"
+    specialties = "Ruminants"
 }
 $vetId = Get-ResponseData $vetResponse "id"
 Write-Success "Created: $vetId"
@@ -182,11 +184,12 @@ Write-Header "Medical Products API - 5 endpoints"
 Write-Test "POST /farms/$FarmId/medical-products - Create"
 $productResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/medical-products" -Body @{
     name = "Ivermectine 1%"
-    activeSubstance = "Ivermectine"
+    category = "antibiotic"
+    activeIngredient = "Ivermectine"
     manufacturer = "MSD Animal Health"
     withdrawalPeriodMeat = 28
     withdrawalPeriodMilk = 0
-    dosageUnit = "ml"
+    stockUnit = "ml"
 }
 $productId = Get-ResponseData $productResponse "id"
 Write-Success "Created: $productId"
@@ -221,12 +224,12 @@ Write-Header "Vaccines API - 5 endpoints"
 Write-Test "POST /farms/$FarmId/vaccines - Create"
 $vaccineResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/vaccines" -Body @{
     name = "Enterotoxemie"
-    disease = "Enterotoxemie"
+    description = "Vaccin contre l'enterotoxemie"
     manufacturer = "INMV Algerie"
-    dosagePerAnimal = 2
-    dosageUnit = "ml"
-    boosterRequired = $true
-    boosterIntervalDays = 21
+    targetDiseases = @("Enterotoxemie")
+    standardDose = 2
+    injectionsRequired = 2
+    injectionIntervalDays = 21
 }
 $vaccineId = Get-ResponseData $vaccineResponse "id"
 Write-Success "Created: $vaccineId"
@@ -244,9 +247,9 @@ if ($vaccineId) {
 
     Write-Test "PUT /farms/$FarmId/vaccines/$vaccineId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/vaccines/$vaccineId" -Body @{
-        boosterIntervalDays = 28
+        injectionIntervalDays = 28
     }
-    Write-Success "Updated booster interval"
+    Write-Success "Updated injection interval"
 
     Write-Test "DELETE /farms/$FarmId/vaccines/$vaccineId - Delete"
     $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/vaccines/$vaccineId"
@@ -327,7 +330,7 @@ Write-Header "Lots API - 7 endpoints"
 Write-Test "POST /farms/$FarmId/lots - Create"
 $lotResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/lots" -Body @{
     name = "Lot Engraissement 2024"
-    lotType = "fattening"
+    type = "fattening"
 }
 $lotId = Get-ResponseData $lotResponse "id"
 Write-Success "Created: $lotId"
