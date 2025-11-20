@@ -426,12 +426,26 @@ if ($animalId) {
 # =============================================================================
 Write-Header "Treatments API - 5 endpoints"
 
-if ($animalId) {
+# Create a medical product to use for treatments and campaigns
+Write-Test "POST /farms/$FarmId/medical-products - Create test product for treatments"
+$testProductResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/medical-products" -Body @{
+    name = "Ivermectine Test 1%"
+    category = "antiparasitic"
+    activeIngredient = "Ivermectine"
+    manufacturer = "Test Lab"
+    withdrawalPeriodMeat = 28
+    withdrawalPeriodMilk = 0
+    stockUnit = "ml"
+}
+$testProductId = Get-ResponseData $testProductResponse "id"
+Write-Success "Created test product: $testProductId"
+
+if ($animalId -and $testProductId) {
     Write-Test "POST /farms/$FarmId/treatments - Create"
     $treatmentResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/treatments" -Body @{
         animalId = $animalId
-        productId = "test-ivermectine-id"
-        productName = "Ivermectine 1%"
+        productId = $testProductId
+        productName = "Ivermectine Test 1%"
         treatmentDate = "2024-01-20"
         dose = 2.5
         withdrawalEndDate = "2024-02-17"
@@ -596,17 +610,21 @@ if ($animalId -and $maleAnimalId) {
 # =============================================================================
 Write-Header "Campaigns API - 7 endpoints"
 
-Write-Test "POST /farms/$FarmId/campaigns - Create"
-$campaignResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/campaigns" -Body @{
-    name = "Campagne Traitement 2024"
-    productId = "test-product-id"
-    productName = "Ivermectine"
-    campaignDate = "2024-03-01"
-    withdrawalEndDate = "2024-03-15"
-    animalIdsJson = "[]"
+if ($testProductId) {
+    Write-Test "POST /farms/$FarmId/campaigns - Create"
+    $campaignResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/campaigns" -Body @{
+        name = "Campagne Traitement 2024"
+        productId = $testProductId
+        productName = "Ivermectine Test 1%"
+        campaignDate = "2024-03-01"
+        withdrawalEndDate = "2024-03-15"
+        animalIdsJson = "[]"
+    }
+    $campaignId = Get-ResponseData $campaignResponse "id"
+    Write-Success "Created: $campaignId"
+} else {
+    Write-Warning "Skipping campaign creation - no test product available"
 }
-$campaignId = Get-ResponseData $campaignResponse "id"
-Write-Success "Created: $campaignId"
 
 Write-Test "GET /farms/$FarmId/campaigns - List all"
 $response = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/campaigns"
@@ -750,6 +768,12 @@ Write-Success "Retrieved changes"
 # Cleanup
 # =============================================================================
 Write-Header "Cleanup"
+
+if ($testProductId) {
+    Write-Test "DELETE /farms/$FarmId/medical-products/$testProductId - Delete test product"
+    $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/medical-products/$testProductId"
+    Write-Success "Deleted test product"
+}
 
 if ($animalId) {
     Write-Test "DELETE /farms/$FarmId/animals/$animalId - Delete test female animal"
