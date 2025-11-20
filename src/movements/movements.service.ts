@@ -90,7 +90,7 @@ export class MovementsService {
         return tx.movement.findUnique({
           where: { id: movement.id },
           include: {
-            animals: {
+            movementAnimals: {
               include: {
                 animal: true,
               },
