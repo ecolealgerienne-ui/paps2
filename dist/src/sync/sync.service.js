@@ -26,13 +26,14 @@ let SyncService = SyncService_1 = class SyncService {
     async pushChanges(dto) {
         const results = [];
         const startTime = Date.now();
+        this.logger.log(`📤 Push sync started: ${dto.items.length} items`);
         for (const item of dto.items) {
             try {
                 const result = await this.processItem(item);
                 results.push(result);
             }
             catch (error) {
-                this.logger.error(`Failed to process sync item ${item.id}:`, error);
+                this.logger.error(`Failed to process sync item ${item.entityId}:`, error.stack);
                 results.push({
                     entityId: item.entityId,
                     success: false,
@@ -42,21 +43,29 @@ let SyncService = SyncService_1 = class SyncService {
         }
         const summary = {
             total: results.length,
-            synced: results.filter(r => r.success && !r.error).length,
-            conflicts: results.filter(r => r.error && r.error.includes('conflict')).length,
-            failed: results.filter(r => !r.success).length,
+            synced: results.filter((r) => r.success && !r.error).length,
+            conflicts: results.filter((r) => r.error && r.error.includes('conflict')).length,
+            failed: results.filter((r) => !r.success).length,
         };
-        await this.prisma.syncLog.create({
-            data: {
-                farmId: dto.items[0]?.farmId || 'unknown',
-                syncType: 'push',
-                itemsCount: summary.total,
-                successCount: summary.synced,
-                failureCount: summary.failed,
-                conflictCount: summary.conflicts,
-                duration: Date.now() - startTime,
-            },
-        });
+        try {
+            await this.prisma.syncLog.create({
+                data: {
+                    farmId: dto.items[0]?.farmId || 'unknown',
+                    syncType: 'push',
+                    itemsCount: summary.total,
+                    successCount: summary.synced,
+                    failureCount: summary.failed,
+                    conflictCount: summary.conflicts,
+                    duration: Date.now() - startTime,
+                },
+            });
+        }
+        catch (error) {
+            this.logger.error('Failed to log sync operation', error.stack);
+        }
+        this.logger.log(`📤 Push sync completed: ${summary.synced}/${summary.total} synced, ` +
+            `${summary.conflicts} conflicts, ${summary.failed} failed ` +
+            `(${Date.now() - startTime}ms)`);
         return {
             success: true,
             results,
@@ -256,24 +265,32 @@ let SyncService = SyncService_1 = class SyncService {
         try {
             const { _animalIds, ...lotData } = payload;
             const animalIds = _animalIds;
-            const lot = await this.prisma.lot.create({
-                data: {
-                    ...lotData,
-                    id: lotId,
-                    version: 1,
-                },
-            });
-            if (animalIds && animalIds.length > 0) {
-                await this.prisma.lotAnimal.createMany({
-                    data: animalIds.map(animalId => ({
-                        lotId: lot.id,
-                        animalId,
-                        farmId: lot.farmId,
-                        joinedAt: new Date(),
-                    })),
-                    skipDuplicates: true,
+            this.logger.debug(`Creating lot ${lotId} with ${animalIds?.length || 0} animals`);
+            const lot = await this.prisma.$transaction(async (tx) => {
+                const createdLot = await tx.lot.create({
+                    data: {
+                        ...lotData,
+                        id: lotId,
+                        version: 1,
+                    },
                 });
-            }
+                if (animalIds && animalIds.length > 0) {
+                    await tx.lotAnimal.createMany({
+                        data: animalIds.map((animalId) => ({
+                            lotId: createdLot.id,
+                            animalId,
+                            farmId: createdLot.farmId,
+                            joinedAt: new Date(),
+                        })),
+                        skipDuplicates: true,
+                    });
+                }
+                return createdLot;
+            }, {
+                maxWait: 5000,
+                timeout: 10000,
+            });
+            this.logger.log(`Lot created: ${lotId} with ${animalIds?.length || 0} animals`);
             return {
                 entityId: lotId,
                 success: true,
@@ -282,6 +299,7 @@ let SyncService = SyncService_1 = class SyncService {
             };
         }
         catch (error) {
+            this.logger.error(`Failed to create lot ${lotId}: ${error.message}`, error.stack);
             return {
                 entityId: lotId,
                 success: false,
@@ -293,29 +311,39 @@ let SyncService = SyncService_1 = class SyncService {
         try {
             const { _animalIds, ...lotData } = payload;
             const animalIds = _animalIds;
-            const lot = await this.prisma.lot.update({
-                where: { id: lotId },
-                data: {
-                    ...lotData,
-                    version: (existing.version || 1) + 1,
-                },
-            });
-            if (animalIds !== undefined) {
-                await this.prisma.lotAnimal.deleteMany({
-                    where: { lotId },
+            this.logger.debug(`Updating lot ${lotId} (version ${existing.version})` +
+                `${animalIds !== undefined ? ` with ${animalIds.length} animals` : ''}`);
+            const lot = await this.prisma.$transaction(async (tx) => {
+                const updatedLot = await tx.lot.update({
+                    where: { id: lotId },
+                    data: {
+                        ...lotData,
+                        version: (existing.version || 1) + 1,
+                    },
                 });
-                if (animalIds.length > 0) {
-                    await this.prisma.lotAnimal.createMany({
-                        data: animalIds.map(animalId => ({
-                            lotId: lot.id,
-                            animalId,
-                            farmId: lot.farmId,
-                            joinedAt: new Date(),
-                        })),
-                        skipDuplicates: true,
+                if (animalIds !== undefined) {
+                    await tx.lotAnimal.deleteMany({
+                        where: { lotId },
                     });
+                    if (animalIds.length > 0) {
+                        await tx.lotAnimal.createMany({
+                            data: animalIds.map((animalId) => ({
+                                lotId: updatedLot.id,
+                                animalId,
+                                farmId: updatedLot.farmId,
+                                joinedAt: new Date(),
+                            })),
+                            skipDuplicates: true,
+                        });
+                    }
                 }
-            }
+                return updatedLot;
+            }, {
+                maxWait: 5000,
+                timeout: 10000,
+            });
+            this.logger.log(`Lot updated: ${lotId} (version ${existing.version} → ${lot.version})` +
+                `${animalIds !== undefined ? ` with ${animalIds.length} animals` : ''}`);
             return {
                 entityId: lotId,
                 success: true,
@@ -324,6 +352,7 @@ let SyncService = SyncService_1 = class SyncService {
             };
         }
         catch (error) {
+            this.logger.error(`Failed to update lot ${lotId}: ${error.message}`, error.stack);
             return {
                 entityId: lotId,
                 success: false,
