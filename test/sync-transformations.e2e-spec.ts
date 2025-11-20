@@ -1,14 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ExecutionContext } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { randomUUID } from 'crypto';
 
-// Mock guard that bypasses all checks
-class MockGuard {
+// Mock ThrottlerGuard that bypasses all rate limiting
+class MockThrottlerGuard {
   canActivate(context: ExecutionContext): boolean {
     return true;
   }
@@ -27,8 +27,8 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(APP_GUARD)
-      .useValue(new MockGuard())
+      .overrideGuard(ThrottlerGuard)
+      .useClass(MockThrottlerGuard)
       .compile();
 
     app = moduleFixture.createNestApplication();
