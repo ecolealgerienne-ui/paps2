@@ -49,7 +49,6 @@ export class FarmPreferencesService {
         const created = await this.prisma.farmPreferences.create({
           data: {
             farmId,
-            defaultSpeciesId: dto.defaultSpeciesId || '',
             ...dto,
             version: 1,
           },
