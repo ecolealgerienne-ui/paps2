@@ -18,11 +18,13 @@ let VaccinationsService = class VaccinationsService {
         this.prisma = prisma;
     }
     async create(farmId, dto) {
-        const animal = await this.prisma.animal.findFirst({
-            where: { id: dto.animalId, farmId, deletedAt: null },
-        });
-        if (!animal) {
-            throw new common_1.NotFoundException(`Animal ${dto.animalId} not found`);
+        if (dto.animalId) {
+            const animal = await this.prisma.animal.findFirst({
+                where: { id: dto.animalId, farmId, deletedAt: null },
+            });
+            if (!animal) {
+                throw new common_1.NotFoundException(`Animal ${dto.animalId} not found`);
+            }
         }
         return this.prisma.vaccination.create({
             data: {
@@ -30,16 +32,13 @@ let VaccinationsService = class VaccinationsService {
                 farmId,
                 vaccinationDate: new Date(dto.vaccinationDate),
                 nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : null,
-            },
-            include: {
-                animal: { select: { id: true, visualId: true, currentEid: true } },
-                veterinarian: true,
+                expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
             },
         });
     }
     async findAll(farmId, query) {
         const where = {
-            animal: { farmId },
+            farmId,
             deletedAt: null,
         };
         if (query.animalId)
@@ -55,10 +54,6 @@ let VaccinationsService = class VaccinationsService {
         }
         return this.prisma.vaccination.findMany({
             where,
-            include: {
-                animal: { select: { id: true, visualId: true, currentEid: true } },
-                veterinarian: { select: { id: true, firstName: true, lastName: true } },
-            },
             orderBy: { vaccinationDate: 'desc' },
         });
     }
@@ -66,12 +61,8 @@ let VaccinationsService = class VaccinationsService {
         const vaccination = await this.prisma.vaccination.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
-            },
-            include: {
-                animal: { select: { id: true, visualId: true, currentEid: true } },
-                veterinarian: true,
             },
         });
         if (!vaccination) {
@@ -83,7 +74,7 @@ let VaccinationsService = class VaccinationsService {
         const existing = await this.prisma.vaccination.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });
@@ -105,20 +96,18 @@ let VaccinationsService = class VaccinationsService {
             updateData.vaccinationDate = new Date(dto.vaccinationDate);
         if (dto.nextDueDate)
             updateData.nextDueDate = new Date(dto.nextDueDate);
+        if (dto.expiryDate)
+            updateData.expiryDate = new Date(dto.expiryDate);
         return this.prisma.vaccination.update({
             where: { id },
             data: updateData,
-            include: {
-                animal: { select: { id: true, visualId: true, currentEid: true } },
-                veterinarian: true,
-            },
         });
     }
     async remove(farmId, id) {
         const existing = await this.prisma.vaccination.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });

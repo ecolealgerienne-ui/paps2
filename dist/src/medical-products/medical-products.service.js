@@ -33,6 +33,12 @@ let MedicalProductsService = class MedicalProductsService {
         if (query.search) {
             where.name = { contains: query.search, mode: 'insensitive' };
         }
+        if (query.category) {
+            where.category = query.category;
+        }
+        if (query.type) {
+            where.type = query.type;
+        }
         if (query.isActive !== undefined) {
             where.isActive = query.isActive;
         }
