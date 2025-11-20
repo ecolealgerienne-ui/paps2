@@ -21,7 +21,7 @@ export class TreatmentsService {
         ...dto,
         farmId,
         treatmentDate: new Date(dto.treatmentDate),
-        withdrawalEndDate: dto.withdrawalEndDate ? new Date(dto.withdrawalEndDate) : null,
+        withdrawalEndDate: new Date(dto.withdrawalEndDate),
       },
       include: {
         animal: { select: { id: true, visualId: true, currentEid: true } },

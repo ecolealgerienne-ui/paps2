@@ -31,10 +31,9 @@ export class CreateBreedingDto {
   @IsDateString()
   breedingDate: string;
 
-  @ApiProperty({ description: 'Expected birth date', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Expected birth date' })
   @IsDateString()
-  expectedBirthDate?: string;
+  expectedBirthDate: string;
 
   @ApiProperty({ description: 'Expected offspring count', required: false })
   @IsOptional()
@@ -46,6 +45,11 @@ export class CreateBreedingDto {
   @IsOptional()
   @IsString()
   veterinarianId?: string;
+
+  @ApiProperty({ description: 'Veterinarian name', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianName?: string;
 
   @ApiProperty({ enum: BreedingStatus, default: 'planned', required: false })
   @IsOptional()

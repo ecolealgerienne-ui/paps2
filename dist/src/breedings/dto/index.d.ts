@@ -6,9 +6,10 @@ export declare class CreateBreedingDto {
     fatherName?: string;
     method: BreedingMethod;
     breedingDate: string;
-    expectedBirthDate?: string;
+    expectedBirthDate: string;
     expectedOffspringCount?: number;
     veterinarianId?: string;
+    veterinarianName?: string;
     status?: BreedingStatus;
     notes?: string;
 }

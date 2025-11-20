@@ -24,6 +24,7 @@ class CreateBreedingDto {
     expectedBirthDate;
     expectedOffspringCount;
     veterinarianId;
+    veterinarianName;
     status;
     notes;
 }
@@ -62,8 +63,7 @@ __decorate([
     __metadata("design:type", String)
 ], CreateBreedingDto.prototype, "breedingDate", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Expected birth date', required: false }),
-    (0, class_validator_1.IsOptional)(),
+    (0, swagger_1.ApiProperty)({ description: 'Expected birth date' }),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
 ], CreateBreedingDto.prototype, "expectedBirthDate", void 0);
@@ -80,6 +80,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateBreedingDto.prototype, "veterinarianId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Veterinarian name', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateBreedingDto.prototype, "veterinarianName", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.BreedingStatus, default: 'planned', required: false }),
     (0, class_validator_1.IsOptional)(),

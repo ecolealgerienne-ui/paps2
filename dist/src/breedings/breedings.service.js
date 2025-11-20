@@ -43,7 +43,7 @@ let BreedingsService = class BreedingsService {
                 ...dto,
                 farmId,
                 breedingDate: new Date(dto.breedingDate),
-                expectedBirthDate: dto.expectedBirthDate ? new Date(dto.expectedBirthDate) : null,
+                expectedBirthDate: new Date(dto.expectedBirthDate),
             },
             include: {
                 mother: { select: { id: true, visualId: true, currentEid: true } },
