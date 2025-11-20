@@ -1,13 +1,26 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMovementDto, UpdateMovementDto, QueryMovementDto } from './dto';
 import { MovementType } from '../common/enums';
+import { AppLogger } from '../common/utils/logger.service';
+import {
+  EntityNotFoundException,
+  EntityConflictException,
+} from '../common/exceptions';
+import { ERROR_CODES } from '../common/constants/error-codes';
 
 @Injectable()
 export class MovementsService {
+  private readonly logger = new AppLogger(MovementsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateMovementDto) {
+    this.logger.debug(`Creating movement in farm ${farmId}`, {
+      type: dto.movementType,
+      animalCount: dto.animalIds.length
+    });
+
     // Verify all animals belong to farm
     const animals = await this.prisma.animal.findMany({
       where: {
@@ -18,53 +31,76 @@ export class MovementsService {
     });
 
     if (animals.length !== dto.animalIds.length) {
-      throw new BadRequestException('One or more animals not found');
+      this.logger.warn('One or more animals not found for movement', {
+        farmId,
+        expected: dto.animalIds.length,
+        found: animals.length
+      });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MOVEMENT_ANIMALS_NOT_FOUND,
+        'One or more animals not found',
+        { farmId, animalCount: dto.animalIds.length },
+      );
     }
 
-    // Create movement with transaction
-    return this.prisma.$transaction(async (tx) => {
-      // Create the movement
-      const movement = await tx.movement.create({
-        data: {
-          id: dto.id,
-          farmId,
-          movementType: dto.movementType,
-          movementDate: new Date(dto.movementDate),
-          reason: dto.reason,
-          buyerName: dto.buyerName,
-          buyerType: dto.buyerType,
-          buyerContact: dto.buyerContact,
-          salePrice: dto.salePrice,
-          sellerName: dto.sellerName,
-          purchasePrice: dto.purchasePrice,
-          destinationFarmId: dto.destinationFarmId,
-          originFarmId: dto.originFarmId,
-          temporaryType: dto.temporaryType,
-          expectedReturnDate: dto.expectedReturnDate ? new Date(dto.expectedReturnDate) : null,
-          documentNumber: dto.documentNumber,
-          notes: dto.notes,
-        },
-      });
-
-      // Create movement-animal associations
-      await tx.movementAnimal.createMany({
-        data: dto.animalIds.map(animalId => ({
-          movementId: movement.id,
-          animalId,
-        })),
-      });
-
-      // Update animal status based on movement type
-      const statusUpdate = this.getStatusUpdate(dto.movementType);
-      if (statusUpdate) {
-        await tx.animal.updateMany({
-          where: { id: { in: dto.animalIds } },
-          data: { status: statusUpdate },
+    try {
+      // Create movement with transaction
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Create the movement
+        const movement = await tx.movement.create({
+          data: {
+            id: dto.id,
+            farmId,
+            movementType: dto.movementType,
+            movementDate: new Date(dto.movementDate),
+            reason: dto.reason,
+            buyerName: dto.buyerName,
+            buyerType: dto.buyerType,
+            buyerContact: dto.buyerContact,
+            salePrice: dto.salePrice,
+            sellerName: dto.sellerName,
+            purchasePrice: dto.purchasePrice,
+            destinationFarmId: dto.destinationFarmId,
+            originFarmId: dto.originFarmId,
+            temporaryType: dto.temporaryType,
+            expectedReturnDate: dto.expectedReturnDate ? new Date(dto.expectedReturnDate) : null,
+            documentNumber: dto.documentNumber,
+            notes: dto.notes,
+          },
         });
-      }
 
-      return this.findOne(farmId, movement.id);
-    });
+        // Create movement-animal associations
+        await tx.movementAnimal.createMany({
+          data: dto.animalIds.map(animalId => ({
+            movementId: movement.id,
+            animalId,
+          })),
+        });
+
+        // Update animal status based on movement type
+        const statusUpdate = this.getStatusUpdate(dto.movementType);
+        if (statusUpdate) {
+          await tx.animal.updateMany({
+            where: { id: { in: dto.animalIds } },
+            data: { status: statusUpdate },
+          });
+        }
+
+        return this.findOne(farmId, movement.id);
+      });
+
+      this.logger.audit('Movement created', {
+        movementId: dto.id,
+        farmId,
+        type: dto.movementType,
+        animalCount: dto.animalIds.length
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to create movement in farm ${farmId}`, error.stack);
+      throw error;
+    }
   }
 
   private getStatusUpdate(movementType: MovementType): string | null {
@@ -147,75 +183,128 @@ export class MovementsService {
     });
 
     if (!movement) {
-      throw new NotFoundException(`Movement ${id} not found`);
+      this.logger.warn('Movement not found', { movementId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MOVEMENT_NOT_FOUND,
+        `Movement ${id} not found`,
+        { movementId: id, farmId },
+      );
     }
 
     return movement;
   }
 
   async update(farmId: string, id: string, dto: UpdateMovementDto) {
+    this.logger.debug(`Updating movement ${id} (version ${dto.version})`);
+
     const existing = await this.prisma.movement.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      throw new NotFoundException(`Movement ${id} not found`);
+      this.logger.warn('Movement not found', { movementId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MOVEMENT_NOT_FOUND,
+        `Movement ${id} not found`,
+        { movementId: id, farmId },
+      );
     }
 
+    // Version conflict check
     if (dto.version && existing.version > dto.version) {
-      throw new ConflictException({
-        message: 'Version conflict',
+      this.logger.warn('Version conflict detected', {
+        movementId: id,
         serverVersion: existing.version,
-        serverData: existing,
+        clientVersion: dto.version,
       });
+
+      throw new EntityConflictException(
+        ERROR_CODES.VERSION_CONFLICT,
+        'Version conflict detected',
+        {
+          movementId: id,
+          serverVersion: existing.version,
+          clientVersion: dto.version,
+        },
+      );
     }
 
-    const updateData: any = {
-      ...dto,
-      version: existing.version + 1,
-    };
+    try {
+      const updateData: any = {
+        ...dto,
+        version: existing.version + 1,
+      };
 
-    if (dto.movementDate) updateData.movementDate = new Date(dto.movementDate);
+      if (dto.movementDate) updateData.movementDate = new Date(dto.movementDate);
 
-    return this.prisma.movement.update({
-      where: { id },
-      data: updateData,
-      include: {
-        movementAnimals: {
-          include: {
-            animal: {
-              select: {
-                id: true,
-                visualId: true,
-                currentEid: true,
+      const updated = await this.prisma.movement.update({
+        where: { id },
+        data: updateData,
+        include: {
+          movementAnimals: {
+            include: {
+              animal: {
+                select: {
+                  id: true,
+                  visualId: true,
+                  currentEid: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+
+      this.logger.audit('Movement updated', {
+        movementId: id,
+        farmId,
+        version: `${existing.version} → ${updated.version}`,
+      });
+
+      return updated;
+    } catch (error) {
+      this.logger.error(`Failed to update movement ${id}`, error.stack);
+      throw error;
+    }
   }
 
   async remove(farmId: string, id: string) {
+    this.logger.debug(`Soft deleting movement ${id}`);
+
     const existing = await this.prisma.movement.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      throw new NotFoundException(`Movement ${id} not found`);
+      this.logger.warn('Movement not found', { movementId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MOVEMENT_NOT_FOUND,
+        `Movement ${id} not found`,
+        { movementId: id, farmId },
+      );
     }
 
-    return this.prisma.movement.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        version: existing.version + 1,
-      },
-    });
+    try {
+      const deleted = await this.prisma.movement.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          version: existing.version + 1,
+        },
+      });
+
+      this.logger.audit('Movement soft deleted', { movementId: id, farmId });
+      return deleted;
+    } catch (error) {
+      this.logger.error(`Failed to delete movement ${id}`, error.stack);
+      throw error;
+    }
   }
 
   // Get movement statistics
   async getStatistics(farmId: string, fromDate?: string, toDate?: string) {
+    this.logger.debug(`Calculating movement statistics for farm ${farmId}`);
+
     const where: any = {
       farmId,
       deletedAt: null,
