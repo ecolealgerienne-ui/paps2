@@ -63,6 +63,7 @@ export class LotsService {
             data: animalIds.map(animalId => ({
               lotId: newLot.id,
               animalId,
+              farmId: dtoFarmId || farmId,
               joinedAt: new Date(),
             })),
           });
@@ -76,6 +77,10 @@ export class LotsService {
           },
         });
       });
+
+      if (!lot) {
+        throw new Error('Failed to create lot');
+      }
 
       this.logger.audit('Lot created', {
         lotId: lot.id,
