@@ -28,7 +28,7 @@ export class SpeciesService {
           nameFr: dto.nameFr,
           nameEn: dto.nameEn,
           nameAr: dto.nameAr,
-          icon: dto.icon,
+          icon: dto.icon || '',
           displayOrder: dto.displayOrder ?? 0,
         },
       });
