@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsEmail, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEmail, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVeterinarianDto {
@@ -134,10 +134,10 @@ export class UpdateVeterinarianDto {
   @IsString()
   licenseNumber?: string;
 
-  @ApiProperty({ description: 'Specialties (JSON array)', required: false })
+  @ApiProperty({ description: 'Specialties (comma-separated or JSON string)', required: false })
   @IsOptional()
-  @IsArray()
-  specialties?: string[];
+  @IsString()
+  specialties?: string;
 
   @ApiProperty({ description: 'Clinic name', required: false })
   @IsOptional()
