@@ -1,7 +1,7 @@
-import { Controller, Get, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AlertConfigurationsService } from './alert-configurations.service';
-import { UpdateAlertConfigurationDto, QueryAlertConfigurationDto } from './dto';
+import { CreateAlertConfigurationDto, UpdateAlertConfigurationDto, QueryAlertConfigurationDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FarmGuard } from '../auth/guards/farm.guard';
 
@@ -10,6 +10,17 @@ import { FarmGuard } from '../auth/guards/farm.guard';
 @UseGuards(AuthGuard, FarmGuard)
 export class AlertConfigurationsController {
   constructor(private readonly alertConfigurationsService: AlertConfigurationsService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a new alert configuration (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Alert configuration created successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  create(
+    @Param('farmId') farmId: string,
+    @Body() dto: CreateAlertConfigurationDto,
+  ) {
+    return this.alertConfigurationsService.create(farmId, dto);
+  }
 
   @Get()
   @ApiOperation({ summary: 'List alert configurations' })

@@ -13,6 +13,7 @@ import { BreedsModule } from './breeds/breeds.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
+import { FarmsModule } from './farms/farms.module';
 import { LotsModule } from './lots/lots.module';
 import { MedicalProductsModule } from './medical-products/medical-products.module';
 import { MovementsModule } from './movements/movements.module';
@@ -66,6 +67,7 @@ import { WeightsModule } from './weights/weights.module';
     SpeciesModule,
     BreedsModule,
     // Farm settings
+    FarmsModule,
     AlertConfigurationsModule,
     FarmPreferencesModule,
     SyncModule,

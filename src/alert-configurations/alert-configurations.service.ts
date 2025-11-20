@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateAlertConfigurationDto, QueryAlertConfigurationDto } from './dto';
+import { CreateAlertConfigurationDto, UpdateAlertConfigurationDto, QueryAlertConfigurationDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import {
   EntityNotFoundException,
@@ -13,6 +13,44 @@ export class AlertConfigurationsService {
   private readonly logger = new AppLogger(AlertConfigurationsService.name);
 
   constructor(private prisma: PrismaService) {}
+
+  async create(farmId: string, dto: CreateAlertConfigurationDto) {
+    this.logger.debug(`Creating alert configuration`, { farmId, type: dto.type, category: dto.category });
+
+    try {
+      const config = await this.prisma.alertConfiguration.create({
+        data: {
+          id: dto.id,
+          farmId: dto.farmId || farmId,
+          evaluationType: dto.evaluationType,
+          type: dto.type,
+          category: dto.category,
+          titleKey: dto.titleKey,
+          messageKey: dto.messageKey,
+          severity: dto.severity ?? 5,
+          iconName: dto.iconName,
+          colorHex: dto.colorHex,
+          enabled: dto.enabled ?? true,
+          alertType: dto.alertType,
+          isEnabled: dto.isEnabled ?? true,
+          daysBeforeDue: dto.daysBeforeDue ?? 7,
+          priority: dto.priority ?? 'medium',
+        },
+      });
+
+      this.logger.audit('Alert configuration created', {
+        configId: config.id,
+        farmId,
+        type: config.type,
+        category: config.category,
+      });
+
+      return config;
+    } catch (error) {
+      this.logger.error(`Failed to create alert configuration`, error.stack);
+      throw error;
+    }
+  }
 
   async findAll(farmId: string, query: QueryAlertConfigurationDto) {
     const where: any = {
