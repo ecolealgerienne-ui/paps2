@@ -268,7 +268,7 @@ let SyncService = SyncService_1 = class SyncService {
                     data: animalIds.map(animalId => ({
                         lotId: lot.id,
                         animalId,
-                        farmId: lot.farm_id,
+                        farmId: lot.farmId,
                         joinedAt: new Date(),
                     })),
                     skipDuplicates: true,
@@ -309,7 +309,7 @@ let SyncService = SyncService_1 = class SyncService {
                         data: animalIds.map(animalId => ({
                             lotId: lot.id,
                             animalId,
-                            farmId: lot.farm_id,
+                            farmId: lot.farmId,
                             joinedAt: new Date(),
                         })),
                         skipDuplicates: true,
