@@ -1,11 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ExecutionContext } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { randomUUID } from 'crypto';
-import { APP_GUARD } from '@nestjs/core';
+
+// Mock guard that bypasses all checks
+class MockGuard {
+  canActivate(context: ExecutionContext): boolean {
+    return true;
+  }
+}
 
 /**
  * E2E tests for BACKEND_DELTA.md alignment
@@ -19,12 +25,13 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    })
-      .overrideProvider(APP_GUARD)
-      .useValue({ canActivate: () => true }) // Bypass all global guards (Auth + Throttler)
-      .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
+
+    // Override all global guards with mock that allows everything
+    app.useGlobalGuards(new MockGuard());
+
     prisma = app.get<PrismaService>(PrismaService);
     await app.init();
 
@@ -160,6 +167,11 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
         });
 
       expect([200, 201]).toContain(response.status);
+
+      if (!response.body.results[0].success) {
+        console.error('Lot sync failed:', JSON.stringify(response.body.results[0], null, 2));
+      }
+
       expect(response.body.results[0].success).toBe(true);
 
       const lot = await prisma.lot.findUnique({ where: { id: lotId } });
