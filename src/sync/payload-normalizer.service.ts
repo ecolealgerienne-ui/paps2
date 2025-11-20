@@ -30,20 +30,9 @@ export class PayloadNormalizerService {
     let normalized = { ...payload };
 
     // === STEP 1: Case Conversion ===
-
-    // Entities that require COMPLETE camelCase → snake_case transformation
-    const camelCaseEntities = [
-      'lot',
-      'breeding',
-      'document',
-      'campaign',
-      'veterinarian',
-      'medicalProduct',
-    ];
-
-    if (camelCaseEntities.includes(entityType)) {
-      normalized = camelToSnake(payload);
-    }
+    // NOTE: Prisma models use camelCase and auto-map to snake_case DB columns via @map
+    // So we DON'T convert to snake_case - Prisma handles that
+    // We only need to handle special cases below
 
     // === STEP 2: Special Case - Animal ===
     // Animal: Accept farm_id (snake_case) and convert TO farmId (camelCase) for Prisma
@@ -57,19 +46,18 @@ export class PayloadNormalizerService {
     }
 
     // === STEP 3: Special Case - Lot.animalIds ===
-    // Extract animalIds before normalizing (keep as separate field)
-    if (entityType === 'lot' && (payload.animalIds || normalized.animal_ids)) {
-      // Store animalIds separately - will be handled by LotsService
-      normalized._animalIds = payload.animalIds || normalized.animal_ids;
-      delete normalized.animal_ids; // Remove from main payload
+    // Extract animalIds (keep as separate field for junction table)
+    if (entityType === 'lot' && payload.animalIds) {
+      // Store animalIds separately - will be handled by sync service
+      normalized._animalIds = payload.animalIds;
+      delete normalized.animalIds; // Remove from main payload
     }
 
     // === STEP 4: Special Case - Campaign.animalIds ===
-    // Convert array to JSON string for animal_ids_json field
-    if (entityType === 'campaign' && (payload.animalIds || normalized.animal_ids)) {
-      const animalIdsArray = payload.animalIds || normalized.animal_ids;
-      normalized.animal_ids_json = JSON.stringify(animalIdsArray);
-      delete normalized.animal_ids;
+    // Convert array to JSON string for animalIdsJson field
+    if (entityType === 'campaign' && payload.animalIds) {
+      normalized.animalIdsJson = JSON.stringify(payload.animalIds);
+      delete normalized.animalIds;
     }
 
     // === STEP 5: Enum Conversions ===
@@ -128,32 +116,28 @@ export class PayloadNormalizerService {
   private convertEnums(entityType: string, payload: any): any {
     switch (entityType) {
       case 'movement':
-        // Convert movement type
-        if (payload.movement_type || payload.movementType) {
-          const typeField = payload.movement_type || payload.movementType;
-          payload.movement_type = convertEnumValue('movement_type', typeField);
-          delete payload.movementType; // Clean up if exists
+        // Convert movement type (Prisma field is movementType)
+        if (payload.movementType) {
+          payload.movementType = convertEnumValue('movement_type', payload.movementType);
         }
 
         // Convert temporary type if exists
-        if (payload.temporary_type || payload.temporaryType) {
-          const tempField = payload.temporary_type || payload.temporaryType;
-          payload.temporary_type = convertEnumValue('temporary_type', tempField);
-          delete payload.temporaryType;
+        if (payload.temporaryType) {
+          payload.temporaryType = convertEnumValue('temporary_type', payload.temporaryType);
         }
         break;
 
       case 'breeding':
-        // Convert breeding method (field is breeding_method after camelToSnake)
-        if (payload.breeding_method) {
-          payload.breeding_method = convertEnumValue('breeding_method', payload.breeding_method);
+        // Convert breeding method (Prisma field is breedingMethod)
+        if (payload.breedingMethod) {
+          payload.breedingMethod = convertEnumValue('breeding_method', payload.breedingMethod);
         }
         break;
 
       case 'document':
-        // Convert document type (field is document_type after camelToSnake)
-        if (payload.document_type) {
-          payload.document_type = convertEnumValue('document_type', payload.document_type);
+        // Convert document type (Prisma field is documentType)
+        if (payload.documentType) {
+          payload.documentType = convertEnumValue('document_type', payload.documentType);
         }
         break;
 
