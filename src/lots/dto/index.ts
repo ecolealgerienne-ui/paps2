@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { LotType } from '../../common/enums';
 
@@ -12,14 +12,70 @@ export class CreateLotDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ enum: LotType, description: 'Type of lot' })
+  @ApiProperty({ enum: LotType, description: 'Type of lot', required: false })
+  @IsOptional()
   @IsEnum(LotType)
-  type: LotType;
+  type?: LotType;
+
+  @ApiProperty({ description: 'Status (open, closed, archived)', required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiProperty({ description: 'Product ID', required: false })
+  @IsOptional()
+  @IsString()
+  productId?: string;
+
+  @ApiProperty({ description: 'Product name', required: false })
+  @IsOptional()
+  @IsString()
+  productName?: string;
+
+  @ApiProperty({ description: 'Treatment date', required: false })
+  @IsOptional()
+  @IsDateString()
+  treatmentDate?: string;
+
+  @ApiProperty({ description: 'Withdrawal end date', required: false })
+  @IsOptional()
+  @IsDateString()
+  withdrawalEndDate?: string;
+
+  @ApiProperty({ description: 'Veterinarian ID', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianId?: string;
+
+  @ApiProperty({ description: 'Veterinarian name', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianName?: string;
+
+  @ApiProperty({ description: 'Total price', required: false })
+  @IsOptional()
+  @IsNumber()
+  priceTotal?: number;
+
+  @ApiProperty({ description: 'Buyer name', required: false })
+  @IsOptional()
+  @IsString()
+  buyerName?: string;
+
+  @ApiProperty({ description: 'Seller name', required: false })
+  @IsOptional()
+  @IsString()
+  sellerName?: string;
 
   @ApiProperty({ description: 'Description', required: false })
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiProperty({ description: 'Notes', required: false })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
   @ApiProperty({ description: 'Is lot active', default: true, required: false })
   @IsOptional()
@@ -38,15 +94,75 @@ export class UpdateLotDto {
   @IsEnum(LotType)
   type?: LotType;
 
+  @ApiProperty({ description: 'Status', required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiProperty({ description: 'Product ID', required: false })
+  @IsOptional()
+  @IsString()
+  productId?: string;
+
+  @ApiProperty({ description: 'Product name', required: false })
+  @IsOptional()
+  @IsString()
+  productName?: string;
+
+  @ApiProperty({ description: 'Treatment date', required: false })
+  @IsOptional()
+  @IsDateString()
+  treatmentDate?: string;
+
+  @ApiProperty({ description: 'Withdrawal end date', required: false })
+  @IsOptional()
+  @IsDateString()
+  withdrawalEndDate?: string;
+
+  @ApiProperty({ description: 'Veterinarian ID', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianId?: string;
+
+  @ApiProperty({ description: 'Veterinarian name', required: false })
+  @IsOptional()
+  @IsString()
+  veterinarianName?: string;
+
+  @ApiProperty({ description: 'Total price', required: false })
+  @IsOptional()
+  @IsNumber()
+  priceTotal?: number;
+
+  @ApiProperty({ description: 'Buyer name', required: false })
+  @IsOptional()
+  @IsString()
+  buyerName?: string;
+
+  @ApiProperty({ description: 'Seller name', required: false })
+  @IsOptional()
+  @IsString()
+  sellerName?: string;
+
   @ApiProperty({ description: 'Description', required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
+  @ApiProperty({ description: 'Notes', required: false })
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
   @ApiProperty({ description: 'Is lot active', required: false })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ description: 'Is completed', required: false })
+  @IsOptional()
+  @IsBoolean()
+  completed?: boolean;
 
   @ApiProperty({ description: 'Version for conflict detection', required: false })
   @IsOptional()
@@ -58,6 +174,16 @@ export class QueryLotDto {
   @IsOptional()
   @IsEnum(LotType)
   type?: LotType;
+
+  @ApiProperty({ description: 'Filter by status (open, closed, archived)', required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
+  @ApiProperty({ description: 'Filter by completed', required: false })
+  @IsOptional()
+  @IsBoolean()
+  completed?: boolean;
 
   @ApiProperty({ description: 'Filter by active status', required: false })
   @IsOptional()

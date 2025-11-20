@@ -17,4 +17,5 @@ export declare class CampaignsService {
             progressPercent: number;
         };
     }>;
+    complete(farmId: string, id: string): Promise<any>;
 }

@@ -34,7 +34,10 @@ export declare class UpdateMovementDto {
 }
 export declare class QueryMovementDto {
     movementType?: MovementType;
+    status?: string;
     fromDate?: string;
     toDate?: string;
     animalId?: string;
+    page?: number;
+    limit?: number;
 }

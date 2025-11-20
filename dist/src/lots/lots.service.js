@@ -153,6 +153,25 @@ let LotsService = class LotsService {
         });
         return this.findOne(farmId, lotId);
     }
+    async finalize(farmId, lotId) {
+        const lot = await this.prisma.lot.findFirst({
+            where: { id: lotId, farmId, deletedAt: null },
+        });
+        if (!lot) {
+            throw new common_1.NotFoundException(`Lot ${lotId} not found`);
+        }
+        return this.prisma.lot.update({
+            where: { id: lotId },
+            data: {
+                completed: true,
+                status: 'closed',
+                version: lot.version + 1,
+            },
+            include: {
+                _count: { select: { lotAnimals: true } },
+            },
+        });
+    }
 };
 exports.LotsService = LotsService;
 exports.LotsService = LotsService = __decorate([

@@ -221,9 +221,12 @@ __decorate([
 ], UpdateMovementDto.prototype, "version", void 0);
 class QueryMovementDto {
     movementType;
+    status;
     fromDate;
     toDate;
     animalId;
+    page;
+    limit;
 }
 exports.QueryMovementDto = QueryMovementDto;
 __decorate([
@@ -232,6 +235,12 @@ __decorate([
     (0, class_validator_1.IsEnum)(enums_1.MovementType),
     __metadata("design:type", String)
 ], QueryMovementDto.prototype, "movementType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Status (pending, completed, cancelled)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], QueryMovementDto.prototype, "status", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'From date', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -250,4 +259,16 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], QueryMovementDto.prototype, "animalId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Page number', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], QueryMovementDto.prototype, "page", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Items per page', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], QueryMovementDto.prototype, "limit", void 0);
 //# sourceMappingURL=index.js.map

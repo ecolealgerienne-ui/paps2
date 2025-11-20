@@ -10,4 +10,5 @@ export declare class LotsService {
     remove(farmId: string, id: string): Promise<any>;
     addAnimals(farmId: string, lotId: string, dto: AddAnimalsToLotDto): Promise<any>;
     removeAnimals(farmId: string, lotId: string, animalIds: string[]): Promise<any>;
+    finalize(farmId: string, lotId: string): Promise<any>;
 }

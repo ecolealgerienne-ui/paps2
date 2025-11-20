@@ -28,7 +28,7 @@ let WeightsService = class WeightsService {
             data: {
                 ...dto,
                 farmId,
-                weightDate: new Date(dto.weightDate),
+                recordedAt: new Date(dto.recordedAt),
             },
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
@@ -37,7 +37,7 @@ let WeightsService = class WeightsService {
     }
     async findAll(farmId, query) {
         const where = {
-            animal: { farmId },
+            farmId,
             deletedAt: null,
         };
         if (query.animalId)
@@ -45,25 +45,25 @@ let WeightsService = class WeightsService {
         if (query.source)
             where.source = query.source;
         if (query.fromDate || query.toDate) {
-            where.weightDate = {};
+            where.recordedAt = {};
             if (query.fromDate)
-                where.weightDate.gte = new Date(query.fromDate);
+                where.recordedAt.gte = new Date(query.fromDate);
             if (query.toDate)
-                where.weightDate.lte = new Date(query.toDate);
+                where.recordedAt.lte = new Date(query.toDate);
         }
         return this.prisma.weight.findMany({
             where,
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
             },
-            orderBy: { weightDate: 'desc' },
+            orderBy: { recordedAt: 'desc' },
         });
     }
     async findOne(farmId, id) {
         const weight = await this.prisma.weight.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
             include: {
@@ -79,7 +79,7 @@ let WeightsService = class WeightsService {
         const existing = await this.prisma.weight.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });
@@ -97,8 +97,8 @@ let WeightsService = class WeightsService {
             ...dto,
             version: existing.version + 1,
         };
-        if (dto.weightDate)
-            updateData.weightDate = new Date(dto.weightDate);
+        if (dto.recordedAt)
+            updateData.recordedAt = new Date(dto.recordedAt);
         return this.prisma.weight.update({
             where: { id },
             data: updateData,
@@ -111,7 +111,7 @@ let WeightsService = class WeightsService {
         const existing = await this.prisma.weight.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });
@@ -130,16 +130,16 @@ let WeightsService = class WeightsService {
         const weights = await this.prisma.weight.findMany({
             where: {
                 animalId,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
-            orderBy: { weightDate: 'asc' },
+            orderBy: { recordedAt: 'asc' },
         });
         const history = weights.map((w, i) => {
             let dailyGain = null;
             if (i > 0) {
                 const prevWeight = weights[i - 1];
-                const daysDiff = Math.ceil((w.weightDate.getTime() - prevWeight.weightDate.getTime()) / (1000 * 60 * 60 * 24));
+                const daysDiff = Math.ceil((w.recordedAt.getTime() - prevWeight.recordedAt.getTime()) / (1000 * 60 * 60 * 24));
                 if (daysDiff > 0) {
                     dailyGain = (w.weight - prevWeight.weight) / daysDiff;
                 }

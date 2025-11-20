@@ -25,7 +25,7 @@ let AnimalsController = class AnimalsController {
         this.animalsService = animalsService;
     }
     create(farmId, createAnimalDto) {
-        return this.animalsService.create({ ...createAnimalDto, farmId });
+        return this.animalsService.create(farmId, createAnimalDto);
     }
     findAll(farmId, query) {
         return this.animalsService.findAll(farmId, query);

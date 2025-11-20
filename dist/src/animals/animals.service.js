@@ -17,11 +17,11 @@ let AnimalsService = class AnimalsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(dto) {
+    async create(farmId, dto) {
         return this.prisma.animal.create({
             data: {
                 id: dto.id,
-                farmId: dto.farmId,
+                farmId,
                 currentEid: dto.currentEid,
                 officialNumber: dto.officialNumber,
                 visualId: dto.visualId,

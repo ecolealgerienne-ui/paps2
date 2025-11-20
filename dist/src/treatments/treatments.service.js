@@ -41,7 +41,7 @@ let TreatmentsService = class TreatmentsService {
     }
     async findAll(farmId, query) {
         const where = {
-            animal: { farmId },
+            farmId,
             deletedAt: null,
         };
         if (query.animalId)
@@ -69,7 +69,7 @@ let TreatmentsService = class TreatmentsService {
         const treatment = await this.prisma.treatment.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
             include: {
@@ -88,7 +88,7 @@ let TreatmentsService = class TreatmentsService {
         const existing = await this.prisma.treatment.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });
@@ -125,7 +125,7 @@ let TreatmentsService = class TreatmentsService {
         const existing = await this.prisma.treatment.findFirst({
             where: {
                 id,
-                animal: { farmId },
+                farmId,
                 deletedAt: null,
             },
         });

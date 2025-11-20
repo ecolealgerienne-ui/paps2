@@ -20,7 +20,7 @@ export class WeightsService {
       data: {
         ...dto,
         farmId,
-        weightDate: new Date(dto.weightDate),
+        recordedAt: new Date(dto.recordedAt),
       },
       include: {
         animal: { select: { id: true, visualId: true, currentEid: true } },
@@ -30,16 +30,16 @@ export class WeightsService {
 
   async findAll(farmId: string, query: QueryWeightDto) {
     const where: any = {
-      animal: { farmId },
+      farmId,
       deletedAt: null,
     };
 
     if (query.animalId) where.animalId = query.animalId;
     if (query.source) where.source = query.source;
     if (query.fromDate || query.toDate) {
-      where.weightDate = {};
-      if (query.fromDate) where.weightDate.gte = new Date(query.fromDate);
-      if (query.toDate) where.weightDate.lte = new Date(query.toDate);
+      where.recordedAt = {};
+      if (query.fromDate) where.recordedAt.gte = new Date(query.fromDate);
+      if (query.toDate) where.recordedAt.lte = new Date(query.toDate);
     }
 
     return this.prisma.weight.findMany({
@@ -47,7 +47,7 @@ export class WeightsService {
       include: {
         animal: { select: { id: true, visualId: true, currentEid: true } },
       },
-      orderBy: { weightDate: 'desc' },
+      orderBy: { recordedAt: 'desc' },
     });
   }
 
@@ -55,7 +55,7 @@ export class WeightsService {
     const weight = await this.prisma.weight.findFirst({
       where: {
         id,
-        animal: { farmId },
+        farmId,
         deletedAt: null,
       },
       include: {
@@ -74,7 +74,7 @@ export class WeightsService {
     const existing = await this.prisma.weight.findFirst({
       where: {
         id,
-        animal: { farmId },
+        farmId,
         deletedAt: null,
       },
     });
@@ -96,7 +96,7 @@ export class WeightsService {
       version: existing.version + 1,
     };
 
-    if (dto.weightDate) updateData.weightDate = new Date(dto.weightDate);
+    if (dto.recordedAt) updateData.recordedAt = new Date(dto.recordedAt);
 
     return this.prisma.weight.update({
       where: { id },
@@ -111,7 +111,7 @@ export class WeightsService {
     const existing = await this.prisma.weight.findFirst({
       where: {
         id,
-        animal: { farmId },
+        farmId,
         deletedAt: null,
       },
     });
@@ -134,10 +134,10 @@ export class WeightsService {
     const weights = await this.prisma.weight.findMany({
       where: {
         animalId,
-        animal: { farmId },
+        farmId,
         deletedAt: null,
       },
-      orderBy: { weightDate: 'asc' },
+      orderBy: { recordedAt: 'asc' },
     });
 
     // Calculate daily gain between consecutive weights
@@ -146,7 +146,7 @@ export class WeightsService {
       if (i > 0) {
         const prevWeight = weights[i - 1];
         const daysDiff = Math.ceil(
-          (w.weightDate.getTime() - prevWeight.weightDate.getTime()) / (1000 * 60 * 60 * 24)
+          (w.recordedAt.getTime() - prevWeight.recordedAt.getTime()) / (1000 * 60 * 60 * 24)
         );
         if (daysDiff > 0) {
           dailyGain = (w.weight - prevWeight.weight) / daysDiff;

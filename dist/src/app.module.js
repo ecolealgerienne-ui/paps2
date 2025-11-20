@@ -12,6 +12,7 @@ const config_1 = require("@nestjs/config");
 const core_1 = require("@nestjs/core");
 const throttler_1 = require("@nestjs/throttler");
 const administration_routes_module_1 = require("./administration-routes/administration-routes.module");
+const alert_configurations_module_1 = require("./alert-configurations/alert-configurations.module");
 const animals_module_1 = require("./animals/animals.module");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
@@ -19,6 +20,7 @@ const auth_module_1 = require("./auth/auth.module");
 const breedings_module_1 = require("./breedings/breedings.module");
 const campaigns_module_1 = require("./campaigns/campaigns.module");
 const documents_module_1 = require("./documents/documents.module");
+const farm_preferences_module_1 = require("./farm-preferences/farm-preferences.module");
 const lots_module_1 = require("./lots/lots.module");
 const medical_products_module_1 = require("./medical-products/medical-products.module");
 const movements_module_1 = require("./movements/movements.module");
@@ -70,6 +72,8 @@ exports.AppModule = AppModule = __decorate([
             medical_products_module_1.MedicalProductsModule,
             vaccines_module_1.VaccinesModule,
             administration_routes_module_1.AdministrationRoutesModule,
+            alert_configurations_module_1.AlertConfigurationsModule,
+            farm_preferences_module_1.FarmPreferencesModule,
             sync_module_1.SyncModule,
         ],
         controllers: [app_controller_1.AppController],

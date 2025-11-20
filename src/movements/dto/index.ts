@@ -158,6 +158,11 @@ export class QueryMovementDto {
   @IsEnum(MovementType)
   movementType?: MovementType;
 
+  @ApiProperty({ description: 'Status (pending, completed, cancelled)', required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+
   @ApiProperty({ description: 'From date', required: false })
   @IsOptional()
   @IsDateString()
@@ -172,4 +177,14 @@ export class QueryMovementDto {
   @IsOptional()
   @IsString()
   animalId?: string;
+
+  @ApiProperty({ description: 'Page number', required: false })
+  @IsOptional()
+  @IsNumber()
+  page?: number;
+
+  @ApiProperty({ description: 'Items per page', required: false })
+  @IsOptional()
+  @IsNumber()
+  limit?: number;
 }

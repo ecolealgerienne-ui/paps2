@@ -3,7 +3,7 @@ import { CreateAnimalDto, QueryAnimalDto, UpdateAnimalDto } from './dto';
 export declare class AnimalsService {
     private prisma;
     constructor(prisma: PrismaService);
-    create(dto: CreateAnimalDto): Promise<any>;
+    create(farmId: string, dto: CreateAnimalDto): Promise<any>;
     findAll(farmId: string, query: QueryAnimalDto): Promise<{
         data: any;
         meta: {

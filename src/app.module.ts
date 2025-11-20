@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AdministrationRoutesModule } from './administration-routes/administration-routes.module';
+import { AlertConfigurationsModule } from './alert-configurations/alert-configurations.module';
 import { AnimalsModule } from './animals/animals.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { BreedingsModule } from './breedings/breedings.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { DocumentsModule } from './documents/documents.module';
+import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
 import { LotsModule } from './lots/lots.module';
 import { MedicalProductsModule } from './medical-products/medical-products.module';
 import { MovementsModule } from './movements/movements.module';
@@ -59,6 +61,9 @@ import { WeightsModule } from './weights/weights.module';
     MedicalProductsModule,
     VaccinesModule,
     AdministrationRoutesModule,
+    // Farm settings
+    AlertConfigurationsModule,
+    FarmPreferencesModule,
     SyncModule,
   ],
   controllers: [AppController],

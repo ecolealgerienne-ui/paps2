@@ -17,7 +17,7 @@ class CreateWeightDto {
     id;
     animalId;
     weight;
-    weightDate;
+    recordedAt;
     source;
     notes;
 }
@@ -39,10 +39,10 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateWeightDto.prototype, "weight", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Weight date' }),
+    (0, swagger_1.ApiProperty)({ description: 'Date when weight was recorded' }),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
-], CreateWeightDto.prototype, "weightDate", void 0);
+], CreateWeightDto.prototype, "recordedAt", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.WeightSource, default: 'manual', required: false }),
     (0, class_validator_1.IsOptional)(),
@@ -57,7 +57,7 @@ __decorate([
 ], CreateWeightDto.prototype, "notes", void 0);
 class UpdateWeightDto {
     weight;
-    weightDate;
+    recordedAt;
     source;
     notes;
     version;
@@ -70,11 +70,11 @@ __decorate([
     __metadata("design:type", Number)
 ], UpdateWeightDto.prototype, "weight", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Weight date', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Date when weight was recorded', required: false }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
-], UpdateWeightDto.prototype, "weightDate", void 0);
+], UpdateWeightDto.prototype, "recordedAt", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: enums_1.WeightSource, required: false }),
     (0, class_validator_1.IsOptional)(),

@@ -159,4 +159,27 @@ export class CampaignsService {
 
     return { campaign, progress };
   }
+
+  // Complete a campaign
+  async complete(farmId: string, id: string) {
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { id, farmId, deletedAt: null },
+    });
+
+    if (!campaign) {
+      throw new NotFoundException(`Campaign ${id} not found`);
+    }
+
+    return this.prisma.campaign.update({
+      where: { id },
+      data: {
+        status: 'completed',
+        endDate: new Date(),
+        version: campaign.version + 1,
+      },
+      include: {
+        lot: { select: { id: true, name: true, type: true } },
+      },
+    });
+  }
 }
