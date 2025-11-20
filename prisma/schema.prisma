@@ -621,7 +621,7 @@ model FarmPreferences {
   id                     String    @id @default(uuid())
   farmId                 String    @unique @map("farm_id")
   defaultVeterinarianId  String?   @map("default_veterinarian_id")
-  defaultSpeciesId       String    @map("default_species_id")
+  defaultSpeciesId       String?   @map("default_species_id")
   defaultBreedId         String?   @map("default_breed_id")
   weightUnit             String    @default("kg") @map("weight_unit")
   currency               String    @default("DZD")
