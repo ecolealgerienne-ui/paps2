@@ -4,6 +4,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { randomUUID } from 'crypto';
 
 /**
  * E2E tests for BACKEND_DELTA.md alignment
@@ -23,28 +24,36 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
     prisma = app.get<PrismaService>(PrismaService);
     await app.init();
 
-    // Create test farm
-    const farm = await prisma.farm.create({
+    // Create test farm with all required fields
+    testFarmId = randomUUID();
+    await prisma.farm.create({
       data: {
+        id: testFarmId,
         name: 'Test Farm for DELTA',
-        address: '123 Test Street',
-        phoneNumber: '+213555000000',
-        version: 1,
+        location: '123 Test Street, Algiers',
+        ownerId: randomUUID(), // Required field
       },
     });
-    testFarmId = farm.id;
   });
 
   afterAll(async () => {
-    // Clean up test data
-    await prisma.animal.deleteMany({ where: { farmId: testFarmId } });
-    await prisma.lot.deleteMany({ where: { farmId: testFarmId } });
-    await prisma.breeding.deleteMany({ where: { farmId: testFarmId } });
-    await prisma.document.deleteMany({ where: { farmId: testFarmId } });
-    await prisma.campaign.deleteMany({ where: { farmId: testFarmId } });
-    await prisma.veterinarian.deleteMany({ where: { farmId: testFarmId } });
-    await prisma.medicalProduct.deleteMany({ where: { farmId: testFarmId } });
-    await prisma.farm.delete({ where: { id: testFarmId } });
+    // Clean up test data - delete in correct order to respect foreign keys
+    try {
+      await prisma.lotAnimal.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.movement.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.breeding.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.document.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.campaign.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.veterinarian.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.medicalProduct.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.lot.deleteMany({ where: { farmId: testFarmId } });
+      await prisma.animal.deleteMany({ where: { farmId: testFarmId } });
+      if (testFarmId) {
+        await prisma.farm.delete({ where: { id: testFarmId } });
+      }
+    } catch (error) {
+      console.error('Cleanup error:', error);
+    }
     await app.close();
   });
 
