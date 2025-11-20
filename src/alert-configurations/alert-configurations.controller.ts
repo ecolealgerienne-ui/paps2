@@ -1,10 +1,13 @@
-import { Controller, Get, Put, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { AlertConfigurationsService } from './alert-configurations.service';
 import { UpdateAlertConfigurationDto, QueryAlertConfigurationDto } from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { FarmGuard } from '../auth/guards/farm.guard';
 
 @ApiTags('Alert Configurations')
 @Controller('farms/:farmId/alert-configurations')
+@UseGuards(AuthGuard, FarmGuard)
 export class AlertConfigurationsController {
   constructor(private readonly alertConfigurationsService: AlertConfigurationsService) {}
 
