@@ -2,6 +2,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto } from './dto';
 export declare class LotsService {
     private prisma;
+    private readonly logger;
     constructor(prisma: PrismaService);
     create(farmId: string, dto: CreateLotDto): Promise<any>;
     findAll(farmId: string, query: QueryLotDto): Promise<any>;
