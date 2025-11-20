@@ -70,6 +70,7 @@ export class VaccinationsService {
                 ...(id && { id: `${id}-${index}` }),
                 ...vaccinationData,
                 animalId,
+                animalIds: JSON.stringify(animalIds), // Required field in Prisma schema
                 farmId: dtoFarmId || farmId,
                 vaccinationDate: new Date(dto.vaccinationDate),
                 nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : null,
@@ -97,6 +98,7 @@ export class VaccinationsService {
           ...(id && { id }),
           ...vaccinationData,
           animalId: animalIds[0],
+          animalIds: dto.animalIds || animalIds[0], // Required field - use legacy or single ID
           farmId: dtoFarmId || farmId,
           vaccinationDate: new Date(dto.vaccinationDate),
           nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : null,
