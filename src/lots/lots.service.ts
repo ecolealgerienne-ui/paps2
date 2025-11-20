@@ -25,6 +25,8 @@ export class LotsService {
     };
 
     if (query.type) where.type = query.type;
+    if (query.status) where.status = query.status;
+    if (query.completed !== undefined) where.completed = query.completed;
     if (query.isActive !== undefined) where.isActive = query.isActive;
     if (query.search) {
       where.name = { contains: query.search, mode: 'insensitive' };

@@ -86,6 +86,8 @@ let MovementsService = class MovementsService {
         };
         if (query.movementType)
             where.movementType = query.movementType;
+        if (query.status)
+            where.status = query.status;
         if (query.fromDate || query.toDate) {
             where.movementDate = {};
             if (query.fromDate)
@@ -98,6 +100,8 @@ let MovementsService = class MovementsService {
                 some: { animalId: query.animalId },
             };
         }
+        const page = query.page || 1;
+        const limit = query.limit || 50;
         return this.prisma.movement.findMany({
             where,
             include: {
@@ -116,6 +120,8 @@ let MovementsService = class MovementsService {
                 _count: { select: { movementAnimals: true } },
             },
             orderBy: { movementDate: 'desc' },
+            skip: (page - 1) * limit,
+            take: limit,
         });
     }
     async findOne(farmId, id) {
