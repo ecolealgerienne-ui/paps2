@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ExecutionContext } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
@@ -25,12 +26,12 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(APP_GUARD)
+      .useValue(new MockGuard())
+      .compile();
 
     app = moduleFixture.createNestApplication();
-
-    // Override all global guards with mock that allows everything
-    app.useGlobalGuards(new MockGuard());
 
     prisma = app.get<PrismaService>(PrismaService);
     await app.init();
