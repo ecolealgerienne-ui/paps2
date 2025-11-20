@@ -46,12 +46,14 @@ export class PayloadNormalizerService {
     }
 
     // === STEP 2: Special Case - Animal ===
-    // Animal: Only convert farmId, other fields are already snake_case
+    // Animal: Accept farm_id (snake_case) and convert TO farmId (camelCase) for Prisma
+    // Prisma model field is "farmId" not "farm_id"
     if (entityType === 'animal') {
-      if (payload.farmId) {
-        normalized.farm_id = payload.farmId;
-        delete normalized.farmId;
+      if (payload.farm_id && !payload.farmId) {
+        normalized.farmId = payload.farm_id;
+        delete normalized.farm_id;
       }
+      // If farmId is already provided, keep it as-is
     }
 
     // === STEP 3: Special Case - Lot.animalIds ===
@@ -106,16 +108,16 @@ export class PayloadNormalizerService {
         break;
 
       case 'breeding':
-        // Convert breeding method
-        if (payload.method) {
-          payload.method = convertEnumValue('breeding_method', payload.method);
+        // Convert breeding method (field is breeding_method after camelToSnake)
+        if (payload.breeding_method) {
+          payload.breeding_method = convertEnumValue('breeding_method', payload.breeding_method);
         }
         break;
 
       case 'document':
-        // Convert document type
-        if (payload.type) {
-          payload.type = convertEnumValue('document_type', payload.type);
+        // Convert document type (field is document_type after camelToSnake)
+        if (payload.document_type) {
+          payload.document_type = convertEnumValue('document_type', payload.document_type);
         }
         break;
 
