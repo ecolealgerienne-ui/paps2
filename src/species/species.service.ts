@@ -16,9 +16,6 @@ export class SpeciesService {
    */
   async findAll() {
     return this.prisma.species.findMany({
-      where: {
-        isActive: true,
-      },
       orderBy: {
         displayOrder: 'asc',
       },
