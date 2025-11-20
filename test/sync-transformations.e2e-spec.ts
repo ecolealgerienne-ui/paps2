@@ -145,11 +145,11 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
       const lotId = 'lot-test-camel-transform';
       const payload = {
         farmId: testFarmId,
-        lotNumber: 'L001',
-        lotType: 'fattening',
-        startDate: '2024-01-01',
-        plannedEndDate: '2024-06-01',
-        estimatedCount: 50,
+        name: 'Test Lot L001',
+        type: 'treatment',
+        description: 'Test lot for transformation',
+        treatmentDate: '2024-01-01',
+        notes: 'Testing camelCase to snake_case conversion',
       };
 
       const response = await request(app.getHttpServer())
@@ -176,11 +176,11 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
 
       const lot = await prisma.lot.findUnique({ where: { id: lotId } });
       expect(lot).toBeDefined();
-      expect(lot.lotNumber).toBe('L001');
-      expect(lot.lotType).toBe('fattening');
-      expect(lot.startDate).toBeDefined();
-      expect(lot.plannedEndDate).toBeDefined();
-      expect(lot.estimatedCount).toBe(50);
+      expect(lot.name).toBe('Test Lot L001');
+      expect(lot.type).toBe('treatment');
+      expect(lot.description).toBe('Test lot for transformation');
+      expect(lot.treatmentDate).toBeDefined();
+      expect(lot.notes).toBe('Testing camelCase to snake_case conversion');
     });
 
     it('should convert Breeding from camelCase to snake_case', async () => {
@@ -620,9 +620,9 @@ describe('Sync Transformations (e2e) - BACKEND_DELTA.md', () => {
       const lotId = 'lot-with-junction';
       const payload = {
         farmId: testFarmId,
-        lotNumber: 'LJ001',
-        lotType: 'breeding',
-        startDate: '2024-01-01',
+        name: 'Junction Test Lot',
+        type: 'treatment',
+        treatmentDate: '2024-01-01',
         animalIds: [animal1Id, animal2Id], // Should create junction records
       };
 
