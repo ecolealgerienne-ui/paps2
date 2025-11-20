@@ -1,9 +1,9 @@
 // src/common/utils/logger.service.ts
 
-import { Logger as NestLogger } from '@nestjs/common';
+import { ConsoleLogger } from '@nestjs/common';
 import { LoggingConfigService } from '../config/logging.config';
 
-export class AppLogger extends NestLogger {
+export class AppLogger extends ConsoleLogger {
   /**
    * Logs de DEBUG : détails techniques (activable/désactivable)
    * Usage : Développement uniquement
