@@ -103,6 +103,9 @@ let SyncService = SyncService_1 = class SyncService {
                 };
             }
             const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
+            if (item.entityType === 'lot' && normalizedPayload._animalIds) {
+                return this.handleLotCreateWithAnimals(item.entityId, normalizedPayload);
+            }
             const created = await model.create({
                 data: {
                     ...normalizedPayload,
@@ -148,6 +151,9 @@ let SyncService = SyncService_1 = class SyncService {
                 };
             }
             const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
+            if (item.entityType === 'lot' && normalizedPayload._animalIds) {
+                return this.handleLotUpdateWithAnimals(item.entityId, normalizedPayload, existing);
+            }
             const updated = await model.update({
                 where: { id: item.entityId },
                 data: {
@@ -245,6 +251,85 @@ let SyncService = SyncService_1 = class SyncService {
             serverTimestamp: new Date().toISOString(),
             hasMore,
         };
+    }
+    async handleLotCreateWithAnimals(lotId, payload) {
+        try {
+            const { _animalIds, ...lotData } = payload;
+            const animalIds = _animalIds;
+            const lot = await this.prisma.lot.create({
+                data: {
+                    ...lotData,
+                    id: lotId,
+                    version: 1,
+                },
+            });
+            if (animalIds && animalIds.length > 0) {
+                await this.prisma.lotAnimal.createMany({
+                    data: animalIds.map(animalId => ({
+                        lotId: lot.id,
+                        animalId,
+                        farmId: lot.farm_id,
+                        joinedAt: new Date(),
+                    })),
+                    skipDuplicates: true,
+                });
+            }
+            return {
+                entityId: lotId,
+                success: true,
+                serverVersion: lot.version,
+                error: null,
+            };
+        }
+        catch (error) {
+            return {
+                entityId: lotId,
+                success: false,
+                error: error.message,
+            };
+        }
+    }
+    async handleLotUpdateWithAnimals(lotId, payload, existing) {
+        try {
+            const { _animalIds, ...lotData } = payload;
+            const animalIds = _animalIds;
+            const lot = await this.prisma.lot.update({
+                where: { id: lotId },
+                data: {
+                    ...lotData,
+                    version: (existing.version || 1) + 1,
+                },
+            });
+            if (animalIds !== undefined) {
+                await this.prisma.lotAnimal.deleteMany({
+                    where: { lotId },
+                });
+                if (animalIds.length > 0) {
+                    await this.prisma.lotAnimal.createMany({
+                        data: animalIds.map(animalId => ({
+                            lotId: lot.id,
+                            animalId,
+                            farmId: lot.farm_id,
+                            joinedAt: new Date(),
+                        })),
+                        skipDuplicates: true,
+                    });
+                }
+            }
+            return {
+                entityId: lotId,
+                success: true,
+                serverVersion: lot.version,
+                error: null,
+            };
+        }
+        catch (error) {
+            return {
+                entityId: lotId,
+                success: false,
+                error: error.message,
+            };
+        }
     }
     getModelName(entityType) {
         const mapping = {

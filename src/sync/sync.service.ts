@@ -118,6 +118,11 @@ export class SyncService {
       // Normalize payload from camelCase to snake_case
       const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
 
+      // === SPECIAL CASE: Lot with animalIds ===
+      if (item.entityType === 'lot' && normalizedPayload._animalIds) {
+        return this.handleLotCreateWithAnimals(item.entityId, normalizedPayload);
+      }
+
       // Create the entity
       const created = await model.create({
         data: {
@@ -171,6 +176,11 @@ export class SyncService {
 
       // Normalize payload from camelCase to snake_case
       const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
+
+      // === SPECIAL CASE: Lot with animalIds ===
+      if (item.entityType === 'lot' && normalizedPayload._animalIds) {
+        return this.handleLotUpdateWithAnimals(item.entityId, normalizedPayload, existing);
+      }
 
       // Update with incremented version
       const updated = await model.update({
@@ -285,6 +295,115 @@ export class SyncService {
       serverTimestamp: new Date().toISOString(),
       hasMore,
     };
+  }
+
+  /**
+   * Handle Lot creation with animalIds
+   * Creates Lot + LotAnimal junction records
+   * Based on BACKEND_DELTA.md section 6
+   */
+  private async handleLotCreateWithAnimals(
+    lotId: string,
+    payload: any,
+  ): Promise<SyncItemResultDto> {
+    try {
+      const { _animalIds, ...lotData } = payload;
+      const animalIds = _animalIds as string[];
+
+      // Create the lot
+      const lot = await this.prisma.lot.create({
+        data: {
+          ...lotData,
+          id: lotId,
+          version: 1,
+        },
+      });
+
+      // Create LotAnimal relations
+      if (animalIds && animalIds.length > 0) {
+        await this.prisma.lotAnimal.createMany({
+          data: animalIds.map(animalId => ({
+            lotId: lot.id,
+            animalId,
+            farmId: lot.farm_id,
+            joinedAt: new Date(),
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      return {
+        entityId: lotId,
+        success: true,
+        serverVersion: lot.version,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        entityId: lotId,
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Handle Lot update with animalIds
+   * Updates Lot + synchronizes LotAnimal relations
+   * Based on BACKEND_DELTA.md section 6
+   */
+  private async handleLotUpdateWithAnimals(
+    lotId: string,
+    payload: any,
+    existing: any,
+  ): Promise<SyncItemResultDto> {
+    try {
+      const { _animalIds, ...lotData } = payload;
+      const animalIds = _animalIds as string[];
+
+      // Update the lot
+      const lot = await this.prisma.lot.update({
+        where: { id: lotId },
+        data: {
+          ...lotData,
+          version: (existing.version || 1) + 1,
+        },
+      });
+
+      // Synchronize animalIds if provided
+      if (animalIds !== undefined) {
+        // Delete old relations
+        await this.prisma.lotAnimal.deleteMany({
+          where: { lotId },
+        });
+
+        // Create new relations
+        if (animalIds.length > 0) {
+          await this.prisma.lotAnimal.createMany({
+            data: animalIds.map(animalId => ({
+              lotId: lot.id,
+              animalId,
+              farmId: lot.farm_id,
+              joinedAt: new Date(),
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      return {
+        entityId: lotId,
+        success: true,
+        serverVersion: lot.version,
+        error: null,
+      };
+    } catch (error) {
+      return {
+        entityId: lotId,
+        success: false,
+        error: error.message,
+      };
+    }
   }
 
   private getModelName(entityType: EntityType): string {
