@@ -1,0 +1,11 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateVeterinarianDto, UpdateVeterinarianDto, QueryVeterinarianDto } from './dto';
+export declare class VeterinariansService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    create(farmId: string, dto: CreateVeterinarianDto): Promise<any>;
+    findAll(farmId: string, query: QueryVeterinarianDto): Promise<any>;
+    findOne(farmId: string, id: string): Promise<any>;
+    update(farmId: string, id: string, dto: UpdateVeterinarianDto): Promise<any>;
+    remove(farmId: string, id: string): Promise<any>;
+}

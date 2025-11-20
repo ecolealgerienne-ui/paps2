@@ -7,6 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================
+// TABLES DE RÉFÉRENCE (Backend)
+// ============================================================
+
 // Table de référence - Espèces
 model Species {
   id           String @id
@@ -39,6 +43,171 @@ model Breed {
   @@map("breeds")
 }
 
+// Vétérinaires (multi-tenant)
+model Veterinarian {
+  id                    String    @id @default(uuid())
+  farmId                String    @map("farm_id")
+  firstName             String    @map("first_name")
+  lastName              String    @map("last_name")
+  title                 String?
+  licenseNumber         String    @map("license_number")
+  specialties           String    // comma-separated or JSON string
+  clinic                String?
+  phone                 String
+  mobile                String?
+  email                 String?
+  address               String?
+  city                  String?
+  postalCode            String?   @map("postal_code")
+  country               String?
+  isAvailable           Boolean   @default(true) @map("is_available")
+  emergencyService      Boolean   @default(false) @map("emergency_service")
+  workingHours          String?   @map("working_hours")
+  consultationFee       Float?    @map("consultation_fee")
+  emergencyFee          Float?    @map("emergency_fee")
+  currency              String?
+  notes                 String?
+  isPreferred           Boolean   @default(false) @map("is_preferred")
+  isDefault             Boolean   @default(false) @map("is_default")
+  rating                Int       @default(5)
+  totalInterventions    Int       @default(0) @map("total_interventions")
+  lastInterventionDate  DateTime? @map("last_intervention_date")
+  isActive              Boolean   @default(true) @map("is_active")
+  version               Int       @default(1)
+  deletedAt             DateTime? @map("deleted_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  treatments Treatment[]
+  vaccinations Vaccination[]
+
+  @@index([farmId])
+  @@index([deletedAt])
+  @@map("veterinarians")
+}
+
+// Produits médicaux (multi-tenant)
+model MedicalProduct {
+  id                        String    @id @default(uuid())
+  farmId                    String    @map("farm_id")
+  name                      String
+  commercialName            String?   @map("commercial_name")
+  category                  String    // antibiotic, anti-inflammatory, vitamin, etc.
+  activeIngredient          String?   @map("active_ingredient")
+  manufacturer              String?
+  form                      String?   // tablet, injection, powder, etc.
+  dosage                    Float?
+  dosageUnit                String?   @map("dosage_unit")
+  withdrawalPeriodMeat      Int       @map("withdrawal_period_meat") // jours
+  withdrawalPeriodMilk      Int       @map("withdrawal_period_milk") // jours
+  currentStock              Float     @default(0) @map("current_stock")
+  minStock                  Float     @default(0) @map("min_stock")
+  stockUnit                 String    @map("stock_unit")
+  unitPrice                 Float?    @map("unit_price")
+  currency                  String?
+  batchNumber               String?   @map("batch_number")
+  expiryDate                DateTime? @map("expiry_date")
+  storageConditions         String?   @map("storage_conditions")
+  prescription              String?   // prescription notes/requirements
+  type                      String    @default("treatment") // treatment, vaccine
+  targetSpecies             String    @default("") @map("target_species")
+  standardCureDays          Int?      @map("standard_cure_days")
+  administrationFrequency   String?   @map("administration_frequency")
+  dosageFormula             String?   @map("dosage_formula")
+  vaccinationProtocol       String?   @map("vaccination_protocol")
+  reminderDays              String?   @map("reminder_days") // comma-separated
+  defaultAdministrationRoute String?  @map("default_administration_route")
+  defaultInjectionSite      String?   @map("default_injection_site")
+  notes                     String?
+  isActive                  Boolean   @default(true) @map("is_active")
+  version                   Int       @default(1)
+  deletedAt                 DateTime? @map("deleted_at")
+  createdAt                 DateTime  @default(now()) @map("created_at")
+  updatedAt                 DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  treatments Treatment[]
+
+  @@index([farmId])
+  @@index([deletedAt])
+  @@map("medical_products")
+}
+
+// Vaccins (multi-tenant)
+model Vaccine {
+  id                    String    @id @default(uuid())
+  farmId                String    @map("farm_id")
+  name                  String
+  description           String?
+  manufacturer          String?
+  targetSpecies         Json?     @map("target_species") // JSON array
+  targetDiseases        Json?     @map("target_diseases") // JSON array
+  standardDose          Float?    @map("standard_dose")
+  injectionsRequired    Int       @default(1) @map("injections_required")
+  injectionIntervalDays Int?      @map("injection_interval_days")
+  meatWithdrawalDays    Int?      @map("meat_withdrawal_days")
+  milkWithdrawalDays    Int?      @map("milk_withdrawal_days")
+  administrationRoute   String?   @map("administration_route")
+  isActive              Boolean   @default(true) @map("is_active")
+  version               Int       @default(1)
+  deletedAt             DateTime? @map("deleted_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@index([farmId])
+  @@index([deletedAt])
+  @@map("vaccines")
+}
+
+// Table de référence - Voies d'administration
+model AdministrationRoute {
+  id           String @id
+  nameFr       String @map("name_fr")
+  nameEn       String @map("name_en")
+  nameAr       String @map("name_ar")
+  displayOrder Int    @default(0) @map("display_order")
+
+  treatments Treatment[]
+
+  @@map("administration_routes")
+}
+
+// Table de référence - Configuration des alertes
+model AlertConfiguration {
+  id              String    @id @default(uuid())
+  farmId          String    @map("farm_id")
+  evaluationType  String    @map("evaluation_type")
+  type            String    // urgent, important, routine
+  category        String
+  titleKey        String    @map("title_key") // i18n key
+  messageKey      String    @map("message_key") // i18n key
+  severity        Int       @default(5)
+  iconName        String    @map("icon_name")
+  colorHex        String    @map("color_hex")
+  enabled         Boolean   @default(true)
+  alertType       String?   @map("alert_type") // vaccination_due, treatment_due, etc.
+  isEnabled       Boolean   @default(true) @map("is_enabled")
+  daysBeforeDue   Int       @default(7) @map("days_before_due")
+  priority        String    @default("medium")
+  version         Int       @default(1)
+  deletedAt       DateTime? @map("deleted_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@index([farmId])
+  @@index([deletedAt])
+  @@map("alert_configurations")
+}
+
+// ============================================================
+// TABLES PRINCIPALES
+// ============================================================
+
 // Ferme
 model Farm {
   id            String   @id
@@ -53,6 +222,20 @@ model Farm {
   updatedAt     DateTime @updatedAt @map("updated_at")
 
   animals Animal[]
+  lots Lot[]
+  movements Movement[]
+  campaigns Campaign[]
+  documents Document[]
+  weights Weight[]
+  treatments Treatment[]
+  vaccinations Vaccination[]
+  breedings Breeding[]
+  lotAnimals LotAnimal[]
+  veterinarians Veterinarian[]
+  medicalProducts MedicalProduct[]
+  vaccines Vaccine[]
+  preferences FarmPreferences?
+  alertConfigurations AlertConfiguration[]
 
   @@map("farms")
 }
@@ -69,12 +252,14 @@ model Animal {
   birthDate             DateTime  @map("birth_date")
   sex                   String
   motherId              String?   @map("mother_id")
+  fatherId              String?   @map("father_id")
   speciesId             String?   @map("species_id")
   breedId               String?   @map("breed_id")
   status                String    @default("alive")
   validatedAt           DateTime? @map("validated_at")
   photoUrl              String?   @map("photo_url")
   notes                 String?
+  days                  Int?
   version               Int       @default(1)
   deletedAt             DateTime? @map("deleted_at")
   createdAt             DateTime  @default(now()) @map("created_at")
@@ -86,10 +271,416 @@ model Animal {
   mother   Animal?  @relation("Parentage", fields: [motherId], references: [id])
   children Animal[] @relation("Parentage")
 
+  lotAnimals LotAnimal[]
+  treatments Treatment[]
+  vaccinations Vaccination[]
+  weights Weight[]
+  breedingsAsMother Breeding[] @relation("BreedingMother")
+  breedingsAsFather Breeding[] @relation("BreedingFather")
+  movementAnimals MovementAnimal[]
+
   @@unique([farmId, currentEid])
   @@unique([farmId, officialNumber])
   @@index([farmId])
   @@index([status])
   @@index([deletedAt])
   @@map("animals")
+}
+
+// ============================================================
+// TABLES APP (Données utilisateur)
+// ============================================================
+
+// Lot (groupe d'animaux)
+model Lot {
+  id                String    @id @default(uuid())
+  farmId            String    @map("farm_id")
+  name              String
+  type              String?   // treatment, sale, slaughter, purchase
+  status            String    @default("open") // open, closed, archived
+  description       String?
+  completed         Boolean   @default(false)
+  completedAt       DateTime? @map("completed_at")
+  productId         String?   @map("product_id")
+  productName       String?   @map("product_name")
+  treatmentDate     DateTime? @map("treatment_date")
+  withdrawalEndDate DateTime? @map("withdrawal_end_date")
+  veterinarianId    String?   @map("veterinarian_id")
+  veterinarianName  String?   @map("veterinarian_name")
+  priceTotal        Float?    @map("price_total")
+  buyerName         String?   @map("buyer_name")
+  sellerName        String?   @map("seller_name")
+  notes             String?
+  isActive          Boolean   @default(true) @map("is_active")
+  version           Int       @default(1)
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  lotAnimals LotAnimal[]
+  campaigns Campaign[]
+
+  @@index([farmId])
+  @@index([deletedAt])
+  @@map("lots")
+}
+
+// Association Animal-Lot
+model LotAnimal {
+  id        String   @id @default(uuid())
+  farmId    String   @map("farm_id")
+  lotId     String   @map("lot_id")
+  animalId  String   @map("animal_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+  leftAt    DateTime? @map("left_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  lot Lot @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@unique([lotId, animalId, joinedAt])
+  @@index([farmId])
+  @@index([lotId])
+  @@index([animalId])
+  @@map("lot_animals")
+}
+
+// Traitement médical
+model Treatment {
+  id                  String   @id @default(uuid())
+  farmId              String   @map("farm_id")
+  animalId            String   @map("animal_id")
+  productId           String   @map("product_id")
+  productName         String   @map("product_name")
+  veterinarianId      String?  @map("veterinarian_id")
+  veterinarianName    String?  @map("veterinarian_name")
+  campaignId          String?  @map("campaign_id")
+  routeId             String?  @map("route_id")
+  diagnosis           String?
+  treatmentDate       DateTime @map("treatment_date")
+  dose                Float
+  dosage              Float?
+  dosageUnit          String?  @map("dosage_unit")
+  duration            Int?     // jours
+  status              String   @default("completed")
+  withdrawalEndDate   DateTime @map("withdrawal_end_date")
+  cost                Float?
+  notes               String?
+  version             Int      @default(1)
+  deletedAt           DateTime? @map("deleted_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  product MedicalProduct? @relation(fields: [productId], references: [id])
+  veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id])
+  route AdministrationRoute? @relation(fields: [routeId], references: [id])
+
+  @@index([farmId])
+  @@index([animalId])
+  @@index([treatmentDate])
+  @@index([deletedAt])
+  @@map("treatments")
+}
+
+// Vaccination
+model Vaccination {
+  id                    String    @id @default(uuid())
+  farmId                String    @map("farm_id")
+  animalId              String?   @map("animal_id") // nullable for group vaccinations
+  animalIds             String    @map("animal_ids") // comma-separated or JSON string
+  protocolId            String?   @map("protocol_id")
+  vaccineName           String    @map("vaccine_name")
+  type                  String    // obligatoire, recommandee, optionnelle
+  disease               String
+  vaccinationDate       DateTime  @map("vaccination_date")
+  batchNumber           String?   @map("batch_number")
+  expiryDate            DateTime? @map("expiry_date")
+  dose                  String
+  administrationRoute   String    @map("administration_route")
+  nextDueDate           DateTime? @map("next_due_date")
+  veterinarianId        String?   @map("veterinarian_id")
+  veterinarianName      String?   @map("veterinarian_name")
+  withdrawalPeriodDays  Int       @map("withdrawal_period_days")
+  dosage                Float?
+  cost                  Float?
+  notes                 String?
+  version               Int       @default(1)
+  deletedAt             DateTime? @map("deleted_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  animal Animal? @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id])
+
+  @@index([farmId])
+  @@index([animalId])
+  @@index([vaccinationDate])
+  @@index([deletedAt])
+  @@map("vaccinations")
+}
+
+// Mouvement (entrée/sortie)
+model Movement {
+  id                  String    @id @default(uuid())
+  farmId              String    @map("farm_id")
+  lotId               String?   @map("lot_id")
+  movementType        String    @map("movement_type") // birth, purchase, sale, death, slaughter, temporary_out, temporary_return
+  movementDate        DateTime  @map("movement_date")
+  reason              String?
+  status              String    @default("ongoing") // ongoing, closed, archived
+
+  // Pour les ventes
+  buyerName           String?   @map("buyer_name")
+  buyerType           String?   @map("buyer_type")
+  buyerContact        String?   @map("buyer_contact")
+  buyerFarmId         String?   @map("buyer_farm_id")
+  buyerQrSignature    String?   @map("buyer_qr_signature")
+  salePrice           Float?    @map("sale_price")
+
+  // Pour les achats
+  sellerName          String?   @map("seller_name")
+  purchasePrice       Float?    @map("purchase_price")
+
+  // Pour les transferts
+  destinationFarmId   String?   @map("destination_farm_id")
+  originFarmId        String?   @map("origin_farm_id")
+
+  // Pour les abattages
+  slaughterhouseName  String?   @map("slaughterhouse_name")
+  slaughterhouseId    String?   @map("slaughterhouse_id")
+
+  // Pour les mouvements temporaires
+  isTemporary         Boolean   @default(false) @map("is_temporary")
+  temporaryType       String?   @map("temporary_type") // loan, transhumance, boarding, quarantine, exhibition
+  expectedReturnDate  DateTime? @map("expected_return_date")
+  returnDate          DateTime? @map("return_date")
+  returnNotes         String?   @map("return_notes")
+  relatedMovementId   String?   @map("related_movement_id")
+
+  documentNumber      String?   @map("document_number")
+  notes               String?
+  version             Int       @default(1)
+  deletedAt           DateTime? @map("deleted_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  movementAnimals MovementAnimal[]
+
+  @@index([farmId])
+  @@index([movementDate])
+  @@index([movementType])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("movements")
+}
+
+// Association Movement-Animal
+model MovementAnimal {
+  id         String @id @default(uuid())
+  movementId String @map("movement_id")
+  animalId   String @map("animal_id")
+
+  movement Movement @relation(fields: [movementId], references: [id], onDelete: Cascade)
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@unique([movementId, animalId])
+  @@map("movement_animals")
+}
+
+// Pesée
+model Weight {
+  id          String   @id @default(uuid())
+  farmId      String   @map("farm_id")
+  animalId    String   @map("animal_id")
+  weight      Float    // kg
+  weightDate  DateTime @map("weight_date")
+  source      String   @default("manual") // manual, scale, estimated
+  notes       String?
+  version     Int      @default(1)
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([farmId])
+  @@index([animalId])
+  @@index([weightDate])
+  @@index([deletedAt])
+  @@map("weights")
+}
+
+// Reproduction
+model Breeding {
+  id                     String    @id @default(uuid())
+  farmId                 String    @map("farm_id")
+  motherId               String    @map("mother_id")
+  fatherId               String?   @map("father_id")
+  fatherName             String?   @map("father_name") // for external males
+  method                 String    // natural, artificial_insemination, embryo_transfer
+  breedingDate           DateTime  @map("breeding_date")
+  expectedBirthDate      DateTime  @map("expected_birth_date")
+  actualBirthDate        DateTime? @map("actual_birth_date")
+  expectedOffspringCount Int?      @map("expected_offspring_count")
+  offspringIds           Json?     @map("offspring_ids") // JSON array
+  veterinarianId         String?   @map("veterinarian_id")
+  veterinarianName       String?   @map("veterinarian_name")
+  status                 String    @default("planned") // planned, in_progress, confirmed, failed, delivered
+  notes                  String?
+  version                Int       @default(1)
+  deletedAt              DateTime? @map("deleted_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  mother Animal @relation("BreedingMother", fields: [motherId], references: [id], onDelete: Cascade)
+  father Animal? @relation("BreedingFather", fields: [fatherId], references: [id])
+
+  @@index([farmId])
+  @@index([motherId])
+  @@index([breedingDate])
+  @@index([deletedAt])
+  @@map("breedings")
+}
+
+// Campagne (vaccination de masse, traitement collectif, etc.)
+model Campaign {
+  id                String    @id @default(uuid())
+  farmId            String    @map("farm_id")
+  lotId             String?   @map("lot_id")
+  name              String
+  productId         String    @map("product_id")
+  productName       String    @map("product_name")
+  type              String?   // vaccination, treatment, weighing, identification
+  campaignDate      DateTime  @map("campaign_date")
+  withdrawalEndDate DateTime  @map("withdrawal_end_date")
+  veterinarianId    String?   @map("veterinarian_id")
+  veterinarianName  String?   @map("veterinarian_name")
+  animalIdsJson     String    @map("animal_ids_json") // JSON string of animal IDs
+  status            String    @default("planned") // planned, in_progress, completed, cancelled
+  startDate         DateTime? @map("start_date")
+  endDate           DateTime? @map("end_date")
+  targetCount       Int?      @map("target_count")
+  completedCount    Int       @default(0) @map("completed_count")
+  completed         Boolean   @default(false)
+  notes             String?
+  version           Int       @default(1)
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  lot Lot? @relation(fields: [lotId], references: [id])
+
+  @@index([farmId])
+  @@index([startDate])
+  @@index([deletedAt])
+  @@map("campaigns")
+}
+
+// Document
+model Document {
+  id             String    @id @default(uuid())
+  farmId         String    @map("farm_id")
+  animalId       String?   @map("animal_id")
+  type           String    // health_certificate, movement_permit, passport, invoice, etc.
+  title          String?
+  fileName       String    @map("file_name")
+  fileUrl        String    @map("file_url")
+  fileSizeBytes  Int?      @map("file_size_bytes")
+  mimeType       String?   @map("mime_type")
+  uploadDate     DateTime  @map("upload_date")
+  documentNumber String?   @map("document_number")
+  issueDate      DateTime? @map("issue_date")
+  expiryDate     DateTime? @map("expiry_date")
+  uploadedBy     String?   @map("uploaded_by")
+  notes          String?
+  version        Int       @default(1)
+  deletedAt      DateTime? @map("deleted_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@index([farmId])
+  @@index([animalId])
+  @@index([type])
+  @@index([deletedAt])
+  @@map("documents")
+}
+
+// Préférences de la ferme
+model FarmPreferences {
+  id                     String    @id @default(uuid())
+  farmId                 String    @unique @map("farm_id")
+  defaultVeterinarianId  String?   @map("default_veterinarian_id")
+  defaultSpeciesId       String    @map("default_species_id")
+  defaultBreedId         String?   @map("default_breed_id")
+  weightUnit             String    @default("kg") @map("weight_unit")
+  currency               String    @default("DZD")
+  language               String    @default("fr")
+  dateFormat             String    @default("DD/MM/YYYY") @map("date_format")
+  enableNotifications    Boolean   @default(true) @map("enable_notifications")
+  version                Int       @default(1)
+  deletedAt              DateTime? @map("deleted_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+
+  @@index([deletedAt])
+  @@map("farm_preferences")
+}
+
+// ============================================================
+// SYNCHRONISATION
+// ============================================================
+
+// Queue de synchronisation
+model SyncQueueItem {
+  id              String   @id @default(uuid())
+  farmId          String   @map("farm_id")
+  entityType      String   @map("entity_type") // animal, treatment, vaccination, etc.
+  entityId        String   @map("entity_id")
+  action          String   // create, update, delete
+  payload         Json     // données de l'entité
+  clientTimestamp DateTime @map("client_timestamp")
+  serverTimestamp DateTime? @map("server_timestamp")
+  status          String   @default("pending") // pending, synced, conflict, failed
+  conflictData    Json?    @map("conflict_data") // données serveur en cas de conflit
+  errorMessage    String?  @map("error_message")
+  retryCount      Int      @default(0) @map("retry_count")
+  createdAt       DateTime @default(now()) @map("created_at")
+  processedAt     DateTime? @map("processed_at")
+
+  @@index([farmId])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("sync_queue_items")
+}
+
+// Log de synchronisation (historique)
+model SyncLog {
+  id              String   @id @default(uuid())
+  farmId          String   @map("farm_id")
+  syncType        String   @map("sync_type") // push, pull
+  itemsCount      Int      @map("items_count")
+  successCount    Int      @map("success_count")
+  failureCount    Int      @map("failure_count")
+  conflictCount   Int      @map("conflict_count")
+  duration        Int      // millisecondes
+  deviceInfo      String?  @map("device_info")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([farmId])
+  @@index([createdAt])
+  @@map("sync_logs")
 }

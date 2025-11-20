@@ -10,11 +10,11 @@ import { CreateAnimalDto, QueryAnimalDto, UpdateAnimalDto } from './dto';
 export class AnimalsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateAnimalDto) {
+  async create(farmId: string, dto: CreateAnimalDto) {
     return this.prisma.animal.create({
       data: {
         id: dto.id,
-        farmId: dto.farmId,
+        farmId,
         currentEid: dto.currentEid,
         officialNumber: dto.officialNumber,
         visualId: dto.visualId,

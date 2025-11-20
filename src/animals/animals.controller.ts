@@ -34,7 +34,7 @@ export class AnimalsController {
     @Param('farmId') farmId: string,
     @Body() createAnimalDto: CreateAnimalDto,
   ) {
-    return this.animalsService.create({ ...createAnimalDto, farmId });
+    return this.animalsService.create(farmId, createAnimalDto);
   }
 
   @Get()

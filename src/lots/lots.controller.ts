@@ -1,0 +1,85 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { LotsService } from './lots.service';
+import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto } from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { FarmGuard } from '../auth/guards/farm.guard';
+
+@ApiTags('lots')
+@ApiBearerAuth()
+@UseGuards(AuthGuard, FarmGuard)
+@Controller('farms/:farmId/lots')
+export class LotsController {
+  constructor(private readonly lotsService: LotsService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Create a lot' })
+  @ApiResponse({ status: 201, description: 'Lot created' })
+  create(@Param('farmId') farmId: string, @Body() dto: CreateLotDto) {
+    return this.lotsService.create(farmId, dto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all lots' })
+  @ApiResponse({ status: 200, description: 'List of lots' })
+  findAll(@Param('farmId') farmId: string, @Query() query: QueryLotDto) {
+    return this.lotsService.findAll(farmId, query);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a lot by ID' })
+  @ApiResponse({ status: 200, description: 'Lot details with animals' })
+  findOne(@Param('farmId') farmId: string, @Param('id') id: string) {
+    return this.lotsService.findOne(farmId, id);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update a lot' })
+  @ApiResponse({ status: 200, description: 'Lot updated' })
+  update(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateLotDto,
+  ) {
+    return this.lotsService.update(farmId, id, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a lot (soft delete)' })
+  @ApiResponse({ status: 200, description: 'Lot deleted' })
+  remove(@Param('farmId') farmId: string, @Param('id') id: string) {
+    return this.lotsService.remove(farmId, id);
+  }
+
+  @Post(':id/animals')
+  @ApiOperation({ summary: 'Add animals to lot' })
+  @ApiResponse({ status: 200, description: 'Animals added' })
+  addAnimals(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+    @Body() dto: AddAnimalsToLotDto,
+  ) {
+    return this.lotsService.addAnimals(farmId, id, dto);
+  }
+
+  @Delete(':id/animals')
+  @ApiOperation({ summary: 'Remove animals from lot' })
+  @ApiResponse({ status: 200, description: 'Animals removed' })
+  removeAnimals(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+    @Body() dto: AddAnimalsToLotDto,
+  ) {
+    return this.lotsService.removeAnimals(farmId, id, dto.animalIds);
+  }
+}

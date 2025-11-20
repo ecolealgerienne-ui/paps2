@@ -1,0 +1,38 @@
+import { Controller, Get, Put, Body, Param, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { AlertConfigurationsService } from './alert-configurations.service';
+import { UpdateAlertConfigurationDto, QueryAlertConfigurationDto } from './dto';
+
+@ApiTags('Alert Configurations')
+@Controller('farms/:farmId/alert-configurations')
+export class AlertConfigurationsController {
+  constructor(private readonly alertConfigurationsService: AlertConfigurationsService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'List alert configurations' })
+  findAll(
+    @Param('farmId') farmId: string,
+    @Query() query: QueryAlertConfigurationDto,
+  ) {
+    return this.alertConfigurationsService.findAll(farmId, query);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get alert configuration by ID' })
+  findOne(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+  ) {
+    return this.alertConfigurationsService.findOne(farmId, id);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update alert configuration' })
+  update(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateAlertConfigurationDto,
+  ) {
+    return this.alertConfigurationsService.update(farmId, id, dto);
+  }
+}

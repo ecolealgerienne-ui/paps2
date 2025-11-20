@@ -13,9 +13,22 @@ export class CreateAnimalDto {
   @IsUUID()
   id: string;
 
-  @ApiProperty({ description: 'ID de la ferme' })
+  @ApiProperty({ description: 'ID de la ferme (camelCase)', required: false })
+  @IsOptional()
   @IsUUID()
-  farmId: string;
+  farmId?: string;
+
+  @ApiProperty({ description: 'ID de la ferme (snake_case)', required: false })
+  @IsOptional()
+  @IsUUID()
+  farm_id?: string;
+
+  /**
+   * Normalized farmId - accepts either farmId or farm_id
+   */
+  get normalizedFarmId(): string {
+    return this.farmId || this.farm_id || '';
+  }
 
   @ApiPropertyOptional({ description: 'EID électronique (15 caractères max)' })
   @IsOptional()
