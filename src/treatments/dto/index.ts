@@ -1,16 +1,34 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { TreatmentStatus } from '../../common/enums';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateTreatmentDto {
+/**
+ * DTO for creating a Treatment
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ * Supports both single and batch treatments (animal_ids array)
+ */
+export class CreateTreatmentDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Treatment ID (UUID)', required: false })
   @IsOptional()
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: 'Animal ID' })
+  @ApiProperty({ description: 'Animal ID (single treatment)', required: false })
+  @IsOptional()
   @IsString()
-  animalId: string;
+  animalId?: string;
+
+  @ApiProperty({
+    description: 'Animal IDs (batch treatment - for mass treatment)',
+    type: [String],
+    required: false,
+    example: ['animal-uuid-1', 'animal-uuid-2', 'animal-uuid-3']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  animal_ids?: string[];
 
   @ApiProperty({ description: 'Medical product ID' })
   @IsString()
@@ -88,7 +106,11 @@ export class CreateTreatmentDto {
   notes?: string;
 }
 
-export class UpdateTreatmentDto {
+/**
+ * DTO for updating a Treatment
+ * Extends BaseSyncEntityDto to support offline-first architecture
+ */
+export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Medical product ID', required: false })
   @IsOptional()
   @IsString()

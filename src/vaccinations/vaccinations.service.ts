@@ -15,46 +15,107 @@ export class VaccinationsService {
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateVaccinationDto) {
-    this.logger.debug(`Creating vaccination in farm ${farmId}`, {
-      animalId: dto.animalId,
+    // Determine which animals to vaccinate: batch (animal_ids) or single (animalId) or legacy (animalIds)
+    const animalIds = dto.animal_ids?.length
+      ? dto.animal_ids
+      : dto.animalId
+        ? [dto.animalId]
+        : dto.animalIds
+          ? JSON.parse(dto.animalIds)
+          : [];
+
+    if (animalIds.length === 0) {
+      this.logger.warn('No animal ID provided for vaccination', { farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.VACCINATION_ANIMAL_NOT_FOUND,
+        'At least one animal ID must be provided (animalId, animal_ids, or animalIds)',
+        { farmId },
+      );
+    }
+
+    const isBatchVaccination = animalIds.length > 1;
+    this.logger.debug(`Creating ${isBatchVaccination ? 'batch' : 'single'} vaccination for ${animalIds.length} animal(s) in farm ${farmId}`, {
       type: dto.type
     });
 
-    // Verify single animal if provided
-    if (dto.animalId) {
-      const animal = await this.prisma.animal.findFirst({
-        where: { id: dto.animalId, farmId, deletedAt: null },
-      });
+    // Verify all animals belong to farm
+    const animals = await this.prisma.animal.findMany({
+      where: { id: { in: animalIds }, farmId, deletedAt: null },
+    });
 
-      if (!animal) {
-        this.logger.warn('Animal not found for vaccination', { animalId: dto.animalId, farmId });
-        throw new EntityNotFoundException(
-          ERROR_CODES.VACCINATION_ANIMAL_NOT_FOUND,
-          `Animal ${dto.animalId} not found`,
-          { animalId: dto.animalId, farmId },
-        );
-      }
+    if (animals.length !== animalIds.length) {
+      this.logger.warn('One or more animals not found for vaccination', {
+        farmId,
+        expected: animalIds.length,
+        found: animals.length
+      });
+      throw new EntityNotFoundException(
+        ERROR_CODES.VACCINATION_ANIMAL_NOT_FOUND,
+        `One or more animals not found (expected ${animalIds.length}, found ${animals.length})`,
+        { farmId, expectedCount: animalIds.length, foundCount: animals.length },
+      );
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
+      const { farmId: dtoFarmId, created_at, updated_at, animal_ids, animalId, animalIds: legacyAnimalIds, id, ...vaccinationData } = dto;
+
+      // For batch vaccinations, create one vaccination per animal in a transaction
+      if (isBatchVaccination) {
+        const vaccinations = await this.prisma.$transaction(
+          animalIds.map((animalId, index) =>
+            this.prisma.vaccination.create({
+              data: {
+                // Generate unique ID for each vaccination if base ID provided
+                ...(id && { id: `${id}-${index}` }),
+                ...vaccinationData,
+                animalId,
+                farmId: dtoFarmId || farmId,
+                vaccinationDate: new Date(dto.vaccinationDate),
+                nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : null,
+                expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
+                // CRITICAL: Use client timestamps if provided (offline-first)
+                ...(created_at && { createdAt: new Date(created_at) }),
+                ...(updated_at && { updatedAt: new Date(updated_at) }),
+              },
+            })
+          )
+        );
+
+        this.logger.audit('Batch vaccinations created', {
+          count: vaccinations.length,
+          farmId,
+          type: dto.type,
+          animalIds
+        });
+        return vaccinations;
+      }
+
+      // Single vaccination
       const vaccination = await this.prisma.vaccination.create({
         data: {
-          ...dto,
-          farmId,
+          ...(id && { id }),
+          ...vaccinationData,
+          animalId: animalIds[0],
+          farmId: dtoFarmId || farmId,
           vaccinationDate: new Date(dto.vaccinationDate),
           nextDueDate: dto.nextDueDate ? new Date(dto.nextDueDate) : null,
           expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
+          // CRITICAL: Use client timestamps if provided (offline-first)
+          ...(created_at && { createdAt: new Date(created_at) }),
+          ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
       });
 
       this.logger.audit('Vaccination created', {
         vaccinationId: vaccination.id,
-        animalId: dto.animalId,
-        farmId
+        animalId: animalIds[0],
+        farmId,
+        type: dto.type
       });
       return vaccination;
     } catch (error) {
-      this.logger.error(`Failed to create vaccination in farm ${farmId}`, error.stack);
+      this.logger.error(`Failed to create vaccination${isBatchVaccination ? 's' : ''} in farm ${farmId}`, error.stack);
       throw error;
     }
   }
@@ -140,14 +201,19 @@ export class VaccinationsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields
+      const { farmId: dtoFarmId, created_at, updated_at, version, ...vaccinationData } = dto;
+
       const updateData: any = {
-        ...dto,
+        ...vaccinationData,
         version: existing.version + 1,
       };
 
       if (dto.vaccinationDate) updateData.vaccinationDate = new Date(dto.vaccinationDate);
       if (dto.nextDueDate) updateData.nextDueDate = new Date(dto.nextDueDate);
       if (dto.expiryDate) updateData.expiryDate = new Date(dto.expiryDate);
+      // CRITICAL: Use client timestamp if provided (offline-first)
+      if (updated_at) updateData.updatedAt = new Date(updated_at);
 
       const updated = await this.prisma.vaccination.update({
         where: { id },

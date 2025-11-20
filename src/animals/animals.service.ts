@@ -24,7 +24,7 @@ export class AnimalsService {
       const animal = await this.prisma.animal.create({
         data: {
           id: dto.id,
-          farmId,
+          farmId: dto.farmId || farmId,
           currentEid: dto.currentEid,
           officialNumber: dto.officialNumber,
           visualId: dto.visualId,
@@ -35,6 +35,9 @@ export class AnimalsService {
           breedId: dto.breedId,
           notes: dto.notes,
           status: 'alive',
+          // CRITICAL: Use client timestamps if provided (offline-first)
+          ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
+          ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
         },
         include: {
           species: true,
@@ -174,6 +177,8 @@ export class AnimalsService {
           ...(dto.speciesId !== undefined && { speciesId: dto.speciesId }),
           ...(dto.breedId !== undefined && { breedId: dto.breedId }),
           ...(dto.notes !== undefined && { notes: dto.notes }),
+          // CRITICAL: Use client timestamp if provided (offline-first)
+          ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
           version: { increment: 1 },
         },
         include: {

@@ -1,8 +1,14 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString, IsNumber, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { LotType } from '../../common/enums';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateLotDto {
+/**
+ * DTO for creating a Lot
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ * Supports creating lot with initial animals via animalIds array
+ */
+export class CreateLotDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Lot ID (UUID)', required: false })
   @IsOptional()
   @IsString()
@@ -11,6 +17,17 @@ export class CreateLotDto {
   @ApiProperty({ description: 'Lot name' })
   @IsString()
   name: string;
+
+  @ApiProperty({
+    description: 'Animal IDs to add to lot during creation',
+    type: [String],
+    required: false,
+    example: ['animal-uuid-1', 'animal-uuid-2']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  animalIds?: string[];
 
   @ApiProperty({ enum: LotType, description: 'Type of lot', required: false })
   @IsOptional()
@@ -83,7 +100,11 @@ export class CreateLotDto {
   isActive?: boolean;
 }
 
-export class UpdateLotDto {
+/**
+ * DTO for updating a Lot
+ * Extends BaseSyncEntityDto to support offline-first architecture
+ */
+export class UpdateLotDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Lot name', required: false })
   @IsOptional()
   @IsString()

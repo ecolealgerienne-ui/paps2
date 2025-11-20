@@ -1,8 +1,13 @@
 import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { MovementType, TemporaryMovementType, BuyerType } from '../../common/enums';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateMovementDto {
+/**
+ * DTO for creating a Movement
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ */
+export class CreateMovementDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Movement ID (UUID)', required: false })
   @IsOptional()
   @IsString()
@@ -91,7 +96,11 @@ export class CreateMovementDto {
   notes?: string;
 }
 
-export class UpdateMovementDto {
+/**
+ * DTO for updating a Movement
+ * Extends BaseSyncEntityDto to support offline-first architecture
+ */
+export class UpdateMovementDto extends BaseSyncEntityDto {
   @ApiProperty({ enum: MovementType, required: false })
   @IsOptional()
   @IsEnum(MovementType)

@@ -32,11 +32,17 @@ export class WeightsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
+      const { farmId: dtoFarmId, created_at, updated_at, ...weightData } = dto;
+
       const weight = await this.prisma.weight.create({
         data: {
-          ...dto,
-          farmId,
+          ...weightData,
+          farmId: dtoFarmId || farmId,
           weightDate: new Date(dto.weightDate),
+          // CRITICAL: Use client timestamps if provided (offline-first)
+          ...(created_at && { createdAt: new Date(created_at) }),
+          ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
         include: {
           animal: { select: { id: true, visualId: true, currentEid: true } },
@@ -138,12 +144,17 @@ export class WeightsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields
+      const { farmId: dtoFarmId, created_at, updated_at, version, ...weightData } = dto;
+
       const updateData: any = {
-        ...dto,
+        ...weightData,
         version: existing.version + 1,
       };
 
       if (dto.weightDate) updateData.weightDate = new Date(dto.weightDate);
+      // CRITICAL: Use client timestamp if provided (offline-first)
+      if (updated_at) updateData.updatedAt = new Date(updated_at);
 
       const updated = await this.prisma.weight.update({
         where: { id },
