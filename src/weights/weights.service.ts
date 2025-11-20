@@ -1,31 +1,54 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWeightDto, UpdateWeightDto, QueryWeightDto } from './dto';
+import { AppLogger } from '../common/utils/logger.service';
+import {
+  EntityNotFoundException,
+  EntityConflictException,
+} from '../common/exceptions';
+import { ERROR_CODES } from '../common/constants/error-codes';
 
 @Injectable()
 export class WeightsService {
+  private readonly logger = new AppLogger(WeightsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateWeightDto) {
+    this.logger.debug(`Creating weight for animal ${dto.animalId} in farm ${farmId}`);
+
     // Verify animal belongs to farm
     const animal = await this.prisma.animal.findFirst({
       where: { id: dto.animalId, farmId, deletedAt: null },
     });
 
     if (!animal) {
-      throw new NotFoundException(`Animal ${dto.animalId} not found`);
+      this.logger.warn('Animal not found for weight', { animalId: dto.animalId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.WEIGHT_ANIMAL_NOT_FOUND,
+        `Animal ${dto.animalId} not found`,
+        { animalId: dto.animalId, farmId },
+      );
     }
 
-    return this.prisma.weight.create({
-      data: {
-        ...dto,
-        farmId,
-        weightDate: new Date(dto.weightDate),
-      },
-      include: {
-        animal: { select: { id: true, visualId: true, currentEid: true } },
-      },
-    });
+    try {
+      const weight = await this.prisma.weight.create({
+        data: {
+          ...dto,
+          farmId,
+          weightDate: new Date(dto.weightDate),
+        },
+        include: {
+          animal: { select: { id: true, visualId: true, currentEid: true } },
+        },
+      });
+
+      this.logger.audit('Weight created', { weightId: weight.id, animalId: dto.animalId, farmId });
+      return weight;
+    } catch (error) {
+      this.logger.error(`Failed to create weight for animal ${dto.animalId}`, error.stack);
+      throw error;
+    }
   }
 
   async findAll(farmId: string, query: QueryWeightDto) {
@@ -64,13 +87,20 @@ export class WeightsService {
     });
 
     if (!weight) {
-      throw new NotFoundException(`Weight ${id} not found`);
+      this.logger.warn('Weight not found', { weightId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.WEIGHT_NOT_FOUND,
+        `Weight ${id} not found`,
+        { weightId: id, farmId },
+      );
     }
 
     return weight;
   }
 
   async update(farmId: string, id: string, dto: UpdateWeightDto) {
+    this.logger.debug(`Updating weight ${id} (version ${dto.version})`);
+
     const existing = await this.prisma.weight.findFirst({
       where: {
         id,
@@ -80,34 +110,65 @@ export class WeightsService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Weight ${id} not found`);
+      this.logger.warn('Weight not found', { weightId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.WEIGHT_NOT_FOUND,
+        `Weight ${id} not found`,
+        { weightId: id, farmId },
+      );
     }
 
+    // Version conflict check
     if (dto.version && existing.version > dto.version) {
-      throw new ConflictException({
-        message: 'Version conflict',
+      this.logger.warn('Version conflict detected', {
+        weightId: id,
         serverVersion: existing.version,
-        serverData: existing,
+        clientVersion: dto.version,
       });
+
+      throw new EntityConflictException(
+        ERROR_CODES.VERSION_CONFLICT,
+        'Version conflict detected',
+        {
+          weightId: id,
+          serverVersion: existing.version,
+          clientVersion: dto.version,
+        },
+      );
     }
 
-    const updateData: any = {
-      ...dto,
-      version: existing.version + 1,
-    };
+    try {
+      const updateData: any = {
+        ...dto,
+        version: existing.version + 1,
+      };
 
-    if (dto.weightDate) updateData.weightDate = new Date(dto.weightDate);
+      if (dto.weightDate) updateData.weightDate = new Date(dto.weightDate);
 
-    return this.prisma.weight.update({
-      where: { id },
-      data: updateData,
-      include: {
-        animal: { select: { id: true, visualId: true, currentEid: true } },
-      },
-    });
+      const updated = await this.prisma.weight.update({
+        where: { id },
+        data: updateData,
+        include: {
+          animal: { select: { id: true, visualId: true, currentEid: true } },
+        },
+      });
+
+      this.logger.audit('Weight updated', {
+        weightId: id,
+        farmId,
+        version: `${existing.version} → ${updated.version}`,
+      });
+
+      return updated;
+    } catch (error) {
+      this.logger.error(`Failed to update weight ${id}`, error.stack);
+      throw error;
+    }
   }
 
   async remove(farmId: string, id: string) {
+    this.logger.debug(`Soft deleting weight ${id}`);
+
     const existing = await this.prisma.weight.findFirst({
       where: {
         id,
@@ -117,20 +178,35 @@ export class WeightsService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Weight ${id} not found`);
+      this.logger.warn('Weight not found', { weightId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.WEIGHT_NOT_FOUND,
+        `Weight ${id} not found`,
+        { weightId: id, farmId },
+      );
     }
 
-    return this.prisma.weight.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        version: existing.version + 1,
-      },
-    });
+    try {
+      const deleted = await this.prisma.weight.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          version: existing.version + 1,
+        },
+      });
+
+      this.logger.audit('Weight soft deleted', { weightId: id, farmId });
+      return deleted;
+    } catch (error) {
+      this.logger.error(`Failed to delete weight ${id}`, error.stack);
+      throw error;
+    }
   }
 
   // Get weight history for an animal with gain calculation
   async getAnimalWeightHistory(farmId: string, animalId: string) {
+    this.logger.debug(`Getting weight history for animal ${animalId}`);
+
     const weights = await this.prisma.weight.findMany({
       where: {
         animalId,

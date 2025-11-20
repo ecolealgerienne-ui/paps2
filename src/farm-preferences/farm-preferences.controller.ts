@@ -1,10 +1,13 @@
-import { Controller, Get, Put, Body, Param } from '@nestjs/common';
+import { Controller, Get, Put, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { FarmPreferencesService } from './farm-preferences.service';
 import { UpdateFarmPreferencesDto } from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { FarmGuard } from '../auth/guards/farm.guard';
 
 @ApiTags('Farm Preferences')
 @Controller('farms/:farmId/preferences')
+@UseGuards(AuthGuard, FarmGuard)
 export class FarmPreferencesController {
   constructor(private readonly farmPreferencesService: FarmPreferencesService) {}
 

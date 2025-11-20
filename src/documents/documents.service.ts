@@ -1,21 +1,39 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDocumentDto, UpdateDocumentDto, QueryDocumentDto } from './dto';
+import { AppLogger } from '../common/utils/logger.service';
+import {
+  EntityNotFoundException,
+  EntityConflictException,
+} from '../common/exceptions';
+import { ERROR_CODES } from '../common/constants/error-codes';
 
 @Injectable()
 export class DocumentsService {
+  private readonly logger = new AppLogger(DocumentsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateDocumentDto) {
-    return this.prisma.document.create({
-      data: {
-        ...dto,
-        farmId,
-        uploadDate: new Date(dto.uploadDate),
-        issueDate: dto.issueDate ? new Date(dto.issueDate) : null,
-        expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
-      },
-    });
+    this.logger.debug(`Creating document in farm ${farmId}`, { title: dto.title, type: dto.type });
+
+    try {
+      const document = await this.prisma.document.create({
+        data: {
+          ...dto,
+          farmId,
+          uploadDate: new Date(dto.uploadDate),
+          issueDate: dto.issueDate ? new Date(dto.issueDate) : null,
+          expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
+        },
+      });
+
+      this.logger.audit('Document created', { documentId: document.id, farmId, type: dto.type });
+      return document;
+    } catch (error) {
+      this.logger.error(`Failed to create document in farm ${farmId}`, error.stack);
+      throw error;
+    }
   }
 
   async findAll(farmId: string, query: QueryDocumentDto) {
@@ -49,64 +67,117 @@ export class DocumentsService {
     });
 
     if (!document) {
-      throw new NotFoundException(`Document ${id} not found`);
+      this.logger.warn('Document not found', { documentId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.DOCUMENT_NOT_FOUND,
+        `Document ${id} not found`,
+        { documentId: id, farmId },
+      );
     }
 
     return document;
   }
 
   async update(farmId: string, id: string, dto: UpdateDocumentDto) {
+    this.logger.debug(`Updating document ${id} (version ${dto.version})`);
+
     const existing = await this.prisma.document.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      throw new NotFoundException(`Document ${id} not found`);
+      this.logger.warn('Document not found', { documentId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.DOCUMENT_NOT_FOUND,
+        `Document ${id} not found`,
+        { documentId: id, farmId },
+      );
     }
 
+    // Version conflict check
     if (dto.version && existing.version > dto.version) {
-      throw new ConflictException({
-        message: 'Version conflict',
+      this.logger.warn('Version conflict detected', {
+        documentId: id,
         serverVersion: existing.version,
-        serverData: existing,
+        clientVersion: dto.version,
       });
+
+      throw new EntityConflictException(
+        ERROR_CODES.VERSION_CONFLICT,
+        'Version conflict detected',
+        {
+          documentId: id,
+          serverVersion: existing.version,
+          clientVersion: dto.version,
+        },
+      );
     }
 
-    const updateData: any = {
-      ...dto,
-      version: existing.version + 1,
-    };
+    try {
+      const updateData: any = {
+        ...dto,
+        version: existing.version + 1,
+      };
 
-    if (dto.uploadDate) updateData.uploadDate = new Date(dto.uploadDate);
-    if (dto.issueDate) updateData.issueDate = new Date(dto.issueDate);
-    if (dto.expiryDate) updateData.expiryDate = new Date(dto.expiryDate);
+      if (dto.uploadDate) updateData.uploadDate = new Date(dto.uploadDate);
+      if (dto.issueDate) updateData.issueDate = new Date(dto.issueDate);
+      if (dto.expiryDate) updateData.expiryDate = new Date(dto.expiryDate);
 
-    return this.prisma.document.update({
-      where: { id },
-      data: updateData,
-    });
+      const updated = await this.prisma.document.update({
+        where: { id },
+        data: updateData,
+      });
+
+      this.logger.audit('Document updated', {
+        documentId: id,
+        farmId,
+        version: `${existing.version} → ${updated.version}`,
+      });
+
+      return updated;
+    } catch (error) {
+      this.logger.error(`Failed to update document ${id}`, error.stack);
+      throw error;
+    }
   }
 
   async remove(farmId: string, id: string) {
+    this.logger.debug(`Soft deleting document ${id}`);
+
     const existing = await this.prisma.document.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      throw new NotFoundException(`Document ${id} not found`);
+      this.logger.warn('Document not found', { documentId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.DOCUMENT_NOT_FOUND,
+        `Document ${id} not found`,
+        { documentId: id, farmId },
+      );
     }
 
-    return this.prisma.document.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        version: existing.version + 1,
-      },
-    });
+    try {
+      const deleted = await this.prisma.document.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          version: existing.version + 1,
+        },
+      });
+
+      this.logger.audit('Document soft deleted', { documentId: id, farmId });
+      return deleted;
+    } catch (error) {
+      this.logger.error(`Failed to delete document ${id}`, error.stack);
+      throw error;
+    }
   }
 
   // Get expiring documents
   async getExpiringDocuments(farmId: string, days: number = 30) {
+    this.logger.debug(`Finding documents expiring in ${days} days for farm ${farmId}`);
+
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + days);
 
@@ -125,6 +196,8 @@ export class DocumentsService {
 
   // Get expired documents
   async getExpiredDocuments(farmId: string) {
+    this.logger.debug(`Finding expired documents for farm ${farmId}`);
+
     return this.prisma.document.findMany({
       where: {
         farmId,

@@ -1,23 +1,47 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBreedingDto, UpdateBreedingDto, QueryBreedingDto } from './dto';
+import { AppLogger } from '../common/utils/logger.service';
+import {
+  EntityNotFoundException,
+  EntityConflictException,
+  BusinessRuleException,
+} from '../common/exceptions';
+import { ERROR_CODES } from '../common/constants/error-codes';
 
 @Injectable()
 export class BreedingsService {
+  private readonly logger = new AppLogger(BreedingsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateBreedingDto) {
+    this.logger.debug(`Creating breeding in farm ${farmId}`, {
+      motherId: dto.motherId,
+      fatherId: dto.fatherId
+    });
+
     // Verify mother belongs to farm
     const mother = await this.prisma.animal.findFirst({
       where: { id: dto.motherId, farmId, deletedAt: null },
     });
 
     if (!mother) {
-      throw new NotFoundException(`Mother animal ${dto.motherId} not found`);
+      this.logger.warn('Mother animal not found for breeding', { motherId: dto.motherId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MOTHER_NOT_FOUND,
+        `Mother animal ${dto.motherId} not found`,
+        { motherId: dto.motherId, farmId },
+      );
     }
 
     if (mother.sex !== 'female') {
-      throw new BadRequestException('Animal must be female');
+      this.logger.warn('Breeding mother must be female', { motherId: dto.motherId, sex: mother.sex });
+      throw new BusinessRuleException(
+        ERROR_CODES.ANIMAL_MUST_BE_FEMALE,
+        'Animal must be female',
+        { animalId: dto.motherId, sex: mother.sex },
+      );
     }
 
     // Verify father if provided
@@ -27,26 +51,49 @@ export class BreedingsService {
       });
 
       if (!father) {
-        throw new NotFoundException(`Father animal ${dto.fatherId} not found`);
+        this.logger.warn('Father animal not found for breeding', { fatherId: dto.fatherId, farmId });
+        throw new EntityNotFoundException(
+          ERROR_CODES.FATHER_NOT_FOUND,
+          `Father animal ${dto.fatherId} not found`,
+          { fatherId: dto.fatherId, farmId },
+        );
       }
 
       if (father.sex !== 'male') {
-        throw new BadRequestException('Animal must be male');
+        this.logger.warn('Breeding father must be male', { fatherId: dto.fatherId, sex: father.sex });
+        throw new BusinessRuleException(
+          ERROR_CODES.ANIMAL_MUST_BE_MALE,
+          'Animal must be male',
+          { animalId: dto.fatherId, sex: father.sex },
+        );
       }
     }
 
-    return this.prisma.breeding.create({
-      data: {
-        ...dto,
-        farmId,
-        breedingDate: new Date(dto.breedingDate),
-        expectedBirthDate: new Date(dto.expectedBirthDate),
-      },
-      include: {
-        mother: { select: { id: true, visualId: true, currentEid: true } },
-        father: { select: { id: true, visualId: true, currentEid: true } },
-      },
-    });
+    try {
+      const breeding = await this.prisma.breeding.create({
+        data: {
+          ...dto,
+          farmId,
+          breedingDate: new Date(dto.breedingDate),
+          expectedBirthDate: new Date(dto.expectedBirthDate),
+        },
+        include: {
+          mother: { select: { id: true, visualId: true, currentEid: true } },
+          father: { select: { id: true, visualId: true, currentEid: true } },
+        },
+      });
+
+      this.logger.audit('Breeding created', {
+        breedingId: breeding.id,
+        motherId: dto.motherId,
+        fatherId: dto.fatherId,
+        farmId
+      });
+      return breeding;
+    } catch (error) {
+      this.logger.error(`Failed to create breeding in farm ${farmId}`, error.stack);
+      throw error;
+    }
   }
 
   async findAll(farmId: string, query: QueryBreedingDto) {
@@ -88,13 +135,20 @@ export class BreedingsService {
     });
 
     if (!breeding) {
-      throw new NotFoundException(`Breeding ${id} not found`);
+      this.logger.warn('Breeding not found', { breedingId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.BREEDING_NOT_FOUND,
+        `Breeding ${id} not found`,
+        { breedingId: id, farmId },
+      );
     }
 
     return breeding;
   }
 
   async update(farmId: string, id: string, dto: UpdateBreedingDto) {
+    this.logger.debug(`Updating breeding ${id} (version ${dto.version})`);
+
     const existing = await this.prisma.breeding.findFirst({
       where: {
         id,
@@ -104,37 +158,68 @@ export class BreedingsService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Breeding ${id} not found`);
+      this.logger.warn('Breeding not found', { breedingId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.BREEDING_NOT_FOUND,
+        `Breeding ${id} not found`,
+        { breedingId: id, farmId },
+      );
     }
 
+    // Version conflict check
     if (dto.version && existing.version > dto.version) {
-      throw new ConflictException({
-        message: 'Version conflict',
+      this.logger.warn('Version conflict detected', {
+        breedingId: id,
         serverVersion: existing.version,
-        serverData: existing,
+        clientVersion: dto.version,
       });
+
+      throw new EntityConflictException(
+        ERROR_CODES.VERSION_CONFLICT,
+        'Version conflict detected',
+        {
+          breedingId: id,
+          serverVersion: existing.version,
+          clientVersion: dto.version,
+        },
+      );
     }
 
-    const updateData: any = {
-      ...dto,
-      version: existing.version + 1,
-    };
+    try {
+      const updateData: any = {
+        ...dto,
+        version: existing.version + 1,
+      };
 
-    if (dto.breedingDate) updateData.breedingDate = new Date(dto.breedingDate);
-    if (dto.expectedBirthDate) updateData.expectedBirthDate = new Date(dto.expectedBirthDate);
-    if (dto.actualBirthDate) updateData.actualBirthDate = new Date(dto.actualBirthDate);
+      if (dto.breedingDate) updateData.breedingDate = new Date(dto.breedingDate);
+      if (dto.expectedBirthDate) updateData.expectedBirthDate = new Date(dto.expectedBirthDate);
+      if (dto.actualBirthDate) updateData.actualBirthDate = new Date(dto.actualBirthDate);
 
-    return this.prisma.breeding.update({
-      where: { id },
-      data: updateData,
-      include: {
-        mother: { select: { id: true, visualId: true, currentEid: true } },
-        father: { select: { id: true, visualId: true, currentEid: true } },
-      },
-    });
+      const updated = await this.prisma.breeding.update({
+        where: { id },
+        data: updateData,
+        include: {
+          mother: { select: { id: true, visualId: true, currentEid: true } },
+          father: { select: { id: true, visualId: true, currentEid: true } },
+        },
+      });
+
+      this.logger.audit('Breeding updated', {
+        breedingId: id,
+        farmId,
+        version: `${existing.version} → ${updated.version}`,
+      });
+
+      return updated;
+    } catch (error) {
+      this.logger.error(`Failed to update breeding ${id}`, error.stack);
+      throw error;
+    }
   }
 
   async remove(farmId: string, id: string) {
+    this.logger.debug(`Soft deleting breeding ${id}`);
+
     const existing = await this.prisma.breeding.findFirst({
       where: {
         id,
@@ -144,20 +229,35 @@ export class BreedingsService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Breeding ${id} not found`);
+      this.logger.warn('Breeding not found', { breedingId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.BREEDING_NOT_FOUND,
+        `Breeding ${id} not found`,
+        { breedingId: id, farmId },
+      );
     }
 
-    return this.prisma.breeding.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        version: existing.version + 1,
-      },
-    });
+    try {
+      const deleted = await this.prisma.breeding.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          version: existing.version + 1,
+        },
+      });
+
+      this.logger.audit('Breeding soft deleted', { breedingId: id, farmId });
+      return deleted;
+    } catch (error) {
+      this.logger.error(`Failed to delete breeding ${id}`, error.stack);
+      throw error;
+    }
   }
 
   // Get upcoming birth dates
   async getUpcomingBirthDates(farmId: string, days: number = 30) {
+    this.logger.debug(`Finding upcoming birth dates for farm ${farmId} (${days} days)`);
+
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + days);
 
