@@ -822,7 +822,173 @@ Après avoir appliqué ces modifications, vérifier :
 
 ---
 
-## 9. Résumé des Fichiers à Modifier
+## 9. Détails Complémentaires (Vérification Approfondie)
+
+### 9.1 Format des Réponses d'Erreur
+
+L'App parse les erreurs de deux manières selon le contexte :
+
+**Erreur globale (400, 500, etc.) :**
+```json
+{
+  "message": "Description de l'erreur",
+  // OU
+  "error": "Description de l'erreur"
+}
+```
+
+**Erreur par item dans un batch :**
+```json
+{
+  "success": true,
+  "results": [
+    {
+      "entityId": "uuid-1",
+      "success": true,
+      "serverVersion": 1
+    },
+    {
+      "entityId": "uuid-2",
+      "success": false,
+      "error": "Validation failed: officialNumber required"
+    }
+  ]
+}
+```
+
+⚠️ **Important** : Utiliser `error` (pas `message`) pour les erreurs par item.
+
+### 9.2 Documents et Upload de Fichiers
+
+**Pas d'endpoint d'upload dédié requis.**
+
+L'App stocke les fichiers séparément (stockage local ou cloud) et ne transmet que les métadonnées via sync :
+
+```typescript
+// Le payload Document contient uniquement les métadonnées
+{
+  "id": "doc-uuid",
+  "farmId": "farm-uuid",
+  "animalId": "animal-uuid",  // optionnel
+  "type": "passport",
+  "fileName": "passport_FR1234.pdf",
+  "fileUrl": "file:///local/path/or/https://storage.com/...",
+  "fileSizeBytes": 245000,
+  "mimeType": "application/pdf",
+  // ...
+}
+```
+
+Si vous souhaitez implémenter un stockage côté serveur, ajoutez un endpoint séparé :
+```typescript
+POST /api/v1/documents/upload
+Content-Type: multipart/form-data
+
+// Retourne l'URL du fichier stocké
+{
+  "fileUrl": "https://storage.yourserver.com/documents/abc123.pdf"
+}
+```
+
+### 9.3 Pagination - NON REQUISE
+
+Les endpoints Species et Breeds doivent retourner **TOUTES** les données en une seule réponse :
+
+```typescript
+// GET /api/v1/species
+{
+  "success": true,
+  "data": [
+    // Toutes les espèces, triées par displayOrder
+  ]
+}
+
+// GET /api/v1/breeds
+{
+  "success": true,
+  "data": [
+    // Toutes les races, triées par displayOrder
+  ]
+}
+
+// GET /api/v1/breeds?speciesId=sheep
+{
+  "success": true,
+  "data": [
+    // Races filtrées par espèce
+  ]
+}
+```
+
+Ces données de référence sont peu nombreuses (< 100 items) et chargées au démarrage de l'App.
+
+### 9.4 Keycloak - Refresh Token Flow
+
+Le backend doit supporter le refresh token flow standard OAuth2 :
+
+**Endpoint** : `POST /realms/{realm}/protocol/openid-connect/token`
+
+**Request :**
+```
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=refresh_token
+client_id=mobile-app
+client_secret=xxx (optionnel)
+refresh_token=eyJhbG...
+```
+
+**Response Success (200) :**
+```json
+{
+  "access_token": "eyJhbG...",
+  "refresh_token": "eyJhbG...",
+  "expires_in": 300,
+  "token_type": "Bearer"
+}
+```
+
+**Response Error (400/401) :**
+L'App efface tous les tokens et l'utilisateur doit se reconnecter.
+
+### 9.5 Codes HTTP Attendus
+
+| Code | Signification | Action App |
+|------|---------------|------------|
+| 200/201 | Succès | Parse résultats |
+| 400 | Validation error | Marque item en erreur, ne retry pas |
+| 401 | Token expiré | Tente refresh, puis re-auth |
+| 403 | Accès refusé | Affiche erreur, ne retry pas |
+| 409 | Conflit de version | Parse résultats pour détails |
+| 500/502/503 | Erreur serveur | Retry avec backoff |
+
+### 9.6 DocumentType Enum Values
+
+L'App envoie ces valeurs exactes (camelCase) :
+```typescript
+type DocumentType =
+  | 'passport'       // Passeport bovin
+  | 'certificate'    // Certificat sanitaire
+  | 'invoice'        // Facture
+  | 'transportCert'  // Certificat de transport
+  | 'breedingCert'   // Certificat de saillie
+  | 'vetReport'      // Rapport vétérinaire
+  | 'other';         // Autre
+```
+
+Convertir en snake_case pour Prisma :
+```typescript
+const documentTypeMap: Record<string, string> = {
+  'transportCert': 'transport_cert',
+  'breedingCert': 'breeding_cert',
+  'vetReport': 'vet_report',
+  // autres sont identiques
+};
+```
+
+---
+
+## 10. Résumé des Fichiers à Modifier
 
 | Fichier | Modifications |
 |---------|---------------|
@@ -838,5 +1004,5 @@ Après avoir appliqué ces modifications, vérifier :
 
 ---
 
-*Document généré le 2025-11-19*
+*Document généré le 2025-11-19, mis à jour le 2025-11-20*
 *À utiliser avec BACKEND_SPECS.md*
