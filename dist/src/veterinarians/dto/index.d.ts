@@ -28,7 +28,7 @@ export declare class UpdateVeterinarianDto {
     lastName?: string;
     title?: string;
     licenseNumber?: string;
-    specialties?: string[];
+    specialties?: string;
     clinic?: string;
     phone?: string;
     mobile?: string;

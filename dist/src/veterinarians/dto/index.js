@@ -224,10 +224,10 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateVeterinarianDto.prototype, "licenseNumber", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Specialties (JSON array)', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Specialties (comma-separated or JSON string)', required: false }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsArray)(),
-    __metadata("design:type", Array)
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], UpdateVeterinarianDto.prototype, "specialties", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Clinic name', required: false }),
