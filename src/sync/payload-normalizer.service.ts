@@ -75,12 +75,48 @@ export class PayloadNormalizerService {
     // === STEP 5: Enum Conversions ===
     normalized = this.convertEnums(entityType, normalized);
 
-    // === STEP 6: Remove Client-Only Fields ===
+    // === STEP 6: Convert Date Strings to Date Objects ===
+    // Prisma requires Date objects, not ISO strings
+    normalized = this.convertDates(normalized);
+
+    // === STEP 7: Remove Client-Only Fields ===
     delete normalized.synced;
     delete normalized.last_synced_at;
     delete normalized.server_version;
 
     return normalized;
+  }
+
+  /**
+   * Convert date strings to Date objects
+   * Prisma requires Date objects for DateTime fields
+   */
+  private convertDates(payload: any): any {
+    const dateFields = [
+      'birthDate', 'birth_date',
+      'startDate', 'start_date',
+      'endDate', 'end_date',
+      'plannedEndDate', 'planned_end_date',
+      'actualEndDate', 'actual_end_date',
+      'breedingDate', 'breeding_date',
+      'expectedBirthDate', 'expected_birth_date',
+      'actualBirthDate', 'actual_birth_date',
+      'movementDate', 'movement_date',
+      'returnDate', 'return_date',
+      'weightDate', 'weight_date',
+      'treatmentDate', 'treatment_date',
+      'vaccinationDate', 'vaccination_date',
+      'issueDate', 'issue_date',
+      'expiryDate', 'expiry_date',
+    ];
+
+    for (const field of dateFields) {
+      if (payload[field] && typeof payload[field] === 'string') {
+        payload[field] = new Date(payload[field]);
+      }
+    }
+
+    return payload;
   }
 
   /**
