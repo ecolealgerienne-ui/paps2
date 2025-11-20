@@ -46,12 +46,17 @@ export class FarmPreferencesService {
     if (!existing) {
       this.logger.debug(`Creating new preferences for farm ${farmId}`);
       try {
+        // Filter out undefined values to avoid Prisma validation issues
+        const cleanData = Object.fromEntries(
+          Object.entries(dto).filter(([_, value]) => value !== undefined)
+        );
+
         const created = await this.prisma.farmPreferences.create({
           data: {
             farmId,
-            ...dto,
+            ...cleanData,
             version: 1,
-          },
+          } as any, // Type assertion needed until Prisma client is regenerated
         });
 
         this.logger.audit('Farm preferences created', { farmId });
