@@ -8,7 +8,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PayloadNormalizerService = void 0;
 const common_1 = require("@nestjs/common");
-const case_converter_1 = require("../common/utils/case-converter");
 const enum_converter_1 = require("../common/utils/enum-converter");
 let PayloadNormalizerService = class PayloadNormalizerService {
     normalize(entityType, payload) {
@@ -16,60 +15,70 @@ let PayloadNormalizerService = class PayloadNormalizerService {
             return payload;
         }
         let normalized = { ...payload };
-        const camelCaseEntities = [
-            'lot',
-            'breeding',
-            'document',
-            'campaign',
-            'veterinarian',
-            'medicalProduct',
-        ];
-        if (camelCaseEntities.includes(entityType)) {
-            normalized = (0, case_converter_1.camelToSnake)(payload);
-        }
         if (entityType === 'animal') {
-            if (payload.farmId) {
-                normalized.farm_id = payload.farmId;
-                delete normalized.farmId;
+            if (payload.farm_id && !payload.farmId) {
+                normalized.farmId = payload.farm_id;
+                delete normalized.farm_id;
             }
         }
-        if (entityType === 'lot' && (payload.animalIds || normalized.animal_ids)) {
-            normalized._animalIds = payload.animalIds || normalized.animal_ids;
-            delete normalized.animal_ids;
+        if (entityType === 'lot' && payload.animalIds) {
+            normalized._animalIds = payload.animalIds;
+            delete normalized.animalIds;
         }
-        if (entityType === 'campaign' && (payload.animalIds || normalized.animal_ids)) {
-            const animalIdsArray = payload.animalIds || normalized.animal_ids;
-            normalized.animal_ids_json = JSON.stringify(animalIdsArray);
-            delete normalized.animal_ids;
+        if (entityType === 'campaign' && payload.animalIds) {
+            normalized.animalIdsJson = JSON.stringify(payload.animalIds);
+            delete normalized.animalIds;
         }
         normalized = this.convertEnums(entityType, normalized);
+        normalized = this.convertDates(normalized);
         delete normalized.synced;
         delete normalized.last_synced_at;
         delete normalized.server_version;
         return normalized;
     }
+    convertDates(payload) {
+        const dateFields = [
+            'birthDate', 'birth_date',
+            'startDate', 'start_date',
+            'endDate', 'end_date',
+            'plannedEndDate', 'planned_end_date',
+            'actualEndDate', 'actual_end_date',
+            'breedingDate', 'breeding_date',
+            'expectedBirthDate', 'expected_birth_date',
+            'actualBirthDate', 'actual_birth_date',
+            'movementDate', 'movement_date',
+            'returnDate', 'return_date',
+            'weightDate', 'weight_date',
+            'treatmentDate', 'treatment_date',
+            'vaccinationDate', 'vaccination_date',
+            'issueDate', 'issue_date',
+            'expiryDate', 'expiry_date',
+        ];
+        for (const field of dateFields) {
+            if (payload[field] && typeof payload[field] === 'string') {
+                payload[field] = new Date(payload[field]);
+            }
+        }
+        return payload;
+    }
     convertEnums(entityType, payload) {
         switch (entityType) {
             case 'movement':
-                if (payload.movement_type || payload.movementType) {
-                    const typeField = payload.movement_type || payload.movementType;
-                    payload.movement_type = (0, enum_converter_1.convertEnumValue)('movement_type', typeField);
-                    delete payload.movementType;
+                if (payload.movementType) {
+                    payload.movementType = (0, enum_converter_1.convertEnumValue)('movement_type', payload.movementType);
                 }
-                if (payload.temporary_type || payload.temporaryType) {
-                    const tempField = payload.temporary_type || payload.temporaryType;
-                    payload.temporary_type = (0, enum_converter_1.convertEnumValue)('temporary_type', tempField);
-                    delete payload.temporaryType;
+                if (payload.temporaryType) {
+                    payload.temporaryType = (0, enum_converter_1.convertEnumValue)('temporary_type', payload.temporaryType);
                 }
                 break;
             case 'breeding':
-                if (payload.method) {
-                    payload.method = (0, enum_converter_1.convertEnumValue)('breeding_method', payload.method);
+                if (payload.breedingMethod) {
+                    payload.breedingMethod = (0, enum_converter_1.convertEnumValue)('breeding_method', payload.breedingMethod);
                 }
                 break;
             case 'document':
-                if (payload.type) {
-                    payload.type = (0, enum_converter_1.convertEnumValue)('document_type', payload.type);
+                if (payload.documentType) {
+                    payload.documentType = (0, enum_converter_1.convertEnumValue)('document_type', payload.documentType);
                 }
                 break;
             case 'animal':
