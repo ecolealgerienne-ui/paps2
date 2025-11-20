@@ -3,13 +3,13 @@ export declare class CreateWeightDto {
     id?: string;
     animalId: string;
     weight: number;
-    recordedAt: string;
+    weightDate: string;
     source?: WeightSource;
     notes?: string;
 }
 export declare class UpdateWeightDto {
     weight?: number;
-    recordedAt?: string;
+    weightDate?: string;
     source?: WeightSource;
     notes?: string;
     version?: number;

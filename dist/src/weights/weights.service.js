@@ -28,7 +28,7 @@ let WeightsService = class WeightsService {
             data: {
                 ...dto,
                 farmId,
-                recordedAt: new Date(dto.recordedAt),
+                weightDate: new Date(dto.weightDate),
             },
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
@@ -45,18 +45,18 @@ let WeightsService = class WeightsService {
         if (query.source)
             where.source = query.source;
         if (query.fromDate || query.toDate) {
-            where.recordedAt = {};
+            where.weightDate = {};
             if (query.fromDate)
-                where.recordedAt.gte = new Date(query.fromDate);
+                where.weightDate.gte = new Date(query.fromDate);
             if (query.toDate)
-                where.recordedAt.lte = new Date(query.toDate);
+                where.weightDate.lte = new Date(query.toDate);
         }
         return this.prisma.weight.findMany({
             where,
             include: {
                 animal: { select: { id: true, visualId: true, currentEid: true } },
             },
-            orderBy: { recordedAt: 'desc' },
+            orderBy: { weightDate: 'desc' },
         });
     }
     async findOne(farmId, id) {
@@ -97,8 +97,8 @@ let WeightsService = class WeightsService {
             ...dto,
             version: existing.version + 1,
         };
-        if (dto.recordedAt)
-            updateData.recordedAt = new Date(dto.recordedAt);
+        if (dto.weightDate)
+            updateData.weightDate = new Date(dto.weightDate);
         return this.prisma.weight.update({
             where: { id },
             data: updateData,
@@ -133,13 +133,13 @@ let WeightsService = class WeightsService {
                 farmId,
                 deletedAt: null,
             },
-            orderBy: { recordedAt: 'asc' },
+            orderBy: { weightDate: 'asc' },
         });
         const history = weights.map((w, i) => {
             let dailyGain = null;
             if (i > 0) {
                 const prevWeight = weights[i - 1];
-                const daysDiff = Math.ceil((w.recordedAt.getTime() - prevWeight.recordedAt.getTime()) / (1000 * 60 * 60 * 24));
+                const daysDiff = Math.ceil((w.weightDate.getTime() - prevWeight.weightDate.getTime()) / (1000 * 60 * 60 * 24));
                 if (daysDiff > 0) {
                     dailyGain = (w.weight - prevWeight.weight) / daysDiff;
                 }

@@ -16,9 +16,9 @@ export class CreateWeightDto {
   @IsNumber()
   weight: number;
 
-  @ApiProperty({ description: 'Date when weight was recorded' })
+  @ApiProperty({ description: 'Weight date' })
   @IsDateString()
-  recordedAt: string;
+  weightDate: string;
 
   @ApiProperty({ enum: WeightSource, default: 'manual', required: false })
   @IsOptional()
@@ -37,10 +37,10 @@ export class UpdateWeightDto {
   @IsNumber()
   weight?: number;
 
-  @ApiProperty({ description: 'Date when weight was recorded', required: false })
+  @ApiProperty({ description: 'Weight date', required: false })
   @IsOptional()
   @IsDateString()
-  recordedAt?: string;
+  weightDate?: string;
 
   @ApiProperty({ enum: WeightSource, required: false })
   @IsOptional()

@@ -20,7 +20,7 @@ export class WeightsService {
       data: {
         ...dto,
         farmId,
-        recordedAt: new Date(dto.recordedAt),
+        weightDate: new Date(dto.weightDate),
       },
       include: {
         animal: { select: { id: true, visualId: true, currentEid: true } },
@@ -37,9 +37,9 @@ export class WeightsService {
     if (query.animalId) where.animalId = query.animalId;
     if (query.source) where.source = query.source;
     if (query.fromDate || query.toDate) {
-      where.recordedAt = {};
-      if (query.fromDate) where.recordedAt.gte = new Date(query.fromDate);
-      if (query.toDate) where.recordedAt.lte = new Date(query.toDate);
+      where.weightDate = {};
+      if (query.fromDate) where.weightDate.gte = new Date(query.fromDate);
+      if (query.toDate) where.weightDate.lte = new Date(query.toDate);
     }
 
     return this.prisma.weight.findMany({
@@ -47,7 +47,7 @@ export class WeightsService {
       include: {
         animal: { select: { id: true, visualId: true, currentEid: true } },
       },
-      orderBy: { recordedAt: 'desc' },
+      orderBy: { weightDate: 'desc' },
     });
   }
 
@@ -96,7 +96,7 @@ export class WeightsService {
       version: existing.version + 1,
     };
 
-    if (dto.recordedAt) updateData.recordedAt = new Date(dto.recordedAt);
+    if (dto.weightDate) updateData.weightDate = new Date(dto.weightDate);
 
     return this.prisma.weight.update({
       where: { id },
@@ -137,7 +137,7 @@ export class WeightsService {
         farmId,
         deletedAt: null,
       },
-      orderBy: { recordedAt: 'asc' },
+      orderBy: { weightDate: 'asc' },
     });
 
     // Calculate daily gain between consecutive weights
@@ -146,7 +146,7 @@ export class WeightsService {
       if (i > 0) {
         const prevWeight = weights[i - 1];
         const daysDiff = Math.ceil(
-          (w.recordedAt.getTime() - prevWeight.recordedAt.getTime()) / (1000 * 60 * 60 * 24)
+          (w.weightDate.getTime() - prevWeight.weightDate.getTime()) / (1000 * 60 * 60 * 24)
         );
         if (daysDiff > 0) {
           dailyGain = (w.weight - prevWeight.weight) / daysDiff;
