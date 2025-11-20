@@ -786,8 +786,8 @@ Write-Test "PUT /farms/$FarmId/preferences - Update preferences"
 $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/preferences" -Body @{
     language = "fr"
     currency = "DZD"
-    timezone = "Africa/Algiers"
     dateFormat = "DD/MM/YYYY"
+    weightUnit = "kg"
 }
 if (-not (Test-ApiError $response)) {
     Write-Success "Updated farm preferences"
