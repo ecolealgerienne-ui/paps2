@@ -1,6 +1,8 @@
 export declare class CreateAnimalDto {
     id: string;
-    farmId: string;
+    farmId?: string;
+    farm_id?: string;
+    get normalizedFarmId(): string;
     currentEid?: string;
     officialNumber?: string;
     visualId?: string;

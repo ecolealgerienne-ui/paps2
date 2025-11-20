@@ -13,12 +13,16 @@ import {
   SyncPullResponseDto,
   SyncChangeDto,
 } from './dto/sync-response.dto';
+import { PayloadNormalizerService } from './payload-normalizer.service';
 
 @Injectable()
 export class SyncService {
   private readonly logger = new Logger(SyncService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private normalizer: PayloadNormalizerService,
+  ) {}
 
   async pushChanges(dto: SyncPushDto): Promise<SyncPushResponseDto> {
     const results: SyncItemResultDto[] = [];
@@ -31,19 +35,18 @@ export class SyncService {
       } catch (error) {
         this.logger.error(`Failed to process sync item ${item.id}:`, error);
         results.push({
-          id: item.id,
           entityId: item.entityId,
-          status: 'failed',
-          errorMessage: error.message,
+          success: false,
+          error: error.message,
         });
       }
     }
 
     const summary = {
       total: results.length,
-      synced: results.filter(r => r.status === 'synced').length,
-      conflicts: results.filter(r => r.status === 'conflict').length,
-      failed: results.filter(r => r.status === 'failed').length,
+      synced: results.filter(r => r.success && !r.error).length,
+      conflicts: results.filter(r => r.error && r.error.includes('conflict')).length,
+      failed: results.filter(r => !r.success).length,
     };
 
     // Log sync operation
@@ -60,9 +63,8 @@ export class SyncService {
     });
 
     return {
+      success: true,
       results,
-      serverTimestamp: new Date().toISOString(),
-      summary,
     };
   }
 
@@ -72,10 +74,9 @@ export class SyncService {
 
     if (!model) {
       return {
-        id: item.id,
         entityId: item.entityId,
-        status: 'failed',
-        errorMessage: `Unknown entity type: ${item.entityType}`,
+        success: false,
+        error: `Unknown entity type: ${item.entityType}`,
       };
     }
 
@@ -88,10 +89,9 @@ export class SyncService {
         return this.handleDelete(item, model);
       default:
         return {
-          id: item.id,
           entityId: item.entityId,
-          status: 'failed',
-          errorMessage: `Unknown action: ${item.action}`,
+          success: false,
+          error: `Unknown action: ${item.action}`,
         };
     }
   }
@@ -106,35 +106,38 @@ export class SyncService {
       if (existing) {
         // Entity exists - this is a conflict
         return {
-          id: item.id,
           entityId: item.entityId,
-          status: 'conflict',
-          serverData: existing,
+          success: false,
           serverVersion: existing.version || 1,
+          error: `Entity already exists (conflict)`,
+          _internalStatus: 'conflict',
+          _internalServerData: existing,
         };
       }
+
+      // Normalize payload from camelCase to snake_case
+      const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
 
       // Create the entity
       const created = await model.create({
         data: {
-          ...item.payload,
+          ...normalizedPayload,
           id: item.entityId,
           version: 1,
         },
       });
 
       return {
-        id: item.id,
         entityId: item.entityId,
-        status: 'synced',
-        newVersion: created.version || 1,
+        success: true,
+        serverVersion: created.version || 1,
+        error: null,
       };
     } catch (error) {
       return {
-        id: item.id,
         entityId: item.entityId,
-        status: 'failed',
-        errorMessage: error.message,
+        success: false,
+        error: error.message,
       };
     }
   }
@@ -148,45 +151,47 @@ export class SyncService {
 
       if (!existing) {
         return {
-          id: item.id,
           entityId: item.entityId,
-          status: 'failed',
-          errorMessage: 'Entity not found',
+          success: false,
+          error: 'Entity not found',
         };
       }
 
       // Check for version conflict
       if (item.clientVersion && existing.version > item.clientVersion) {
         return {
-          id: item.id,
           entityId: item.entityId,
-          status: 'conflict',
-          serverData: existing,
+          success: false,
           serverVersion: existing.version,
+          error: `Version conflict (server: ${existing.version}, client: ${item.clientVersion})`,
+          _internalStatus: 'conflict',
+          _internalServerData: existing,
         };
       }
+
+      // Normalize payload from camelCase to snake_case
+      const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
 
       // Update with incremented version
       const updated = await model.update({
         where: { id: item.entityId },
         data: {
-          ...item.payload,
+          ...normalizedPayload,
           version: (existing.version || 1) + 1,
         },
       });
 
       return {
-        id: item.id,
         entityId: item.entityId,
-        status: 'synced',
-        newVersion: updated.version,
+        success: true,
+        serverVersion: updated.version,
+        error: null,
       };
     } catch (error) {
       return {
-        id: item.id,
         entityId: item.entityId,
-        status: 'failed',
-        errorMessage: error.message,
+        success: false,
+        error: error.message,
       };
     }
   }
@@ -200,14 +205,14 @@ export class SyncService {
       if (!existing) {
         // Already deleted - consider it synced
         return {
-          id: item.id,
           entityId: item.entityId,
-          status: 'synced',
+          success: true,
+          error: null,
         };
       }
 
       // Soft delete
-      await model.update({
+      const deleted = await model.update({
         where: { id: item.entityId },
         data: {
           deletedAt: new Date(),
@@ -216,16 +221,16 @@ export class SyncService {
       });
 
       return {
-        id: item.id,
         entityId: item.entityId,
-        status: 'synced',
+        success: true,
+        serverVersion: deleted.version,
+        error: null,
       };
     } catch (error) {
       return {
-        id: item.id,
         entityId: item.entityId,
-        status: 'failed',
-        errorMessage: error.message,
+        success: false,
+        error: error.message,
       };
     }
   }

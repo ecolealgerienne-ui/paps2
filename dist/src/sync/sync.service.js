@@ -14,11 +14,14 @@ exports.SyncService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const dto_1 = require("./dto");
+const payload_normalizer_service_1 = require("./payload-normalizer.service");
 let SyncService = SyncService_1 = class SyncService {
     prisma;
+    normalizer;
     logger = new common_1.Logger(SyncService_1.name);
-    constructor(prisma) {
+    constructor(prisma, normalizer) {
         this.prisma = prisma;
+        this.normalizer = normalizer;
     }
     async pushChanges(dto) {
         const results = [];
@@ -31,18 +34,17 @@ let SyncService = SyncService_1 = class SyncService {
             catch (error) {
                 this.logger.error(`Failed to process sync item ${item.id}:`, error);
                 results.push({
-                    id: item.id,
                     entityId: item.entityId,
-                    status: 'failed',
-                    errorMessage: error.message,
+                    success: false,
+                    error: error.message,
                 });
             }
         }
         const summary = {
             total: results.length,
-            synced: results.filter(r => r.status === 'synced').length,
-            conflicts: results.filter(r => r.status === 'conflict').length,
-            failed: results.filter(r => r.status === 'failed').length,
+            synced: results.filter(r => r.success && !r.error).length,
+            conflicts: results.filter(r => r.error && r.error.includes('conflict')).length,
+            failed: results.filter(r => !r.success).length,
         };
         await this.prisma.syncLog.create({
             data: {
@@ -56,9 +58,8 @@ let SyncService = SyncService_1 = class SyncService {
             },
         });
         return {
+            success: true,
             results,
-            serverTimestamp: new Date().toISOString(),
-            summary,
         };
     }
     async processItem(item) {
@@ -66,10 +67,9 @@ let SyncService = SyncService_1 = class SyncService {
         const model = this.prisma[modelName];
         if (!model) {
             return {
-                id: item.id,
                 entityId: item.entityId,
-                status: 'failed',
-                errorMessage: `Unknown entity type: ${item.entityType}`,
+                success: false,
+                error: `Unknown entity type: ${item.entityType}`,
             };
         }
         switch (item.action) {
@@ -81,10 +81,9 @@ let SyncService = SyncService_1 = class SyncService {
                 return this.handleDelete(item, model);
             default:
                 return {
-                    id: item.id,
                     entityId: item.entityId,
-                    status: 'failed',
-                    errorMessage: `Unknown action: ${item.action}`,
+                    success: false,
+                    error: `Unknown action: ${item.action}`,
                 };
         }
     }
@@ -95,33 +94,34 @@ let SyncService = SyncService_1 = class SyncService {
             });
             if (existing) {
                 return {
-                    id: item.id,
                     entityId: item.entityId,
-                    status: 'conflict',
-                    serverData: existing,
+                    success: false,
                     serverVersion: existing.version || 1,
+                    error: `Entity already exists (conflict)`,
+                    _internalStatus: 'conflict',
+                    _internalServerData: existing,
                 };
             }
+            const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
             const created = await model.create({
                 data: {
-                    ...item.payload,
+                    ...normalizedPayload,
                     id: item.entityId,
                     version: 1,
                 },
             });
             return {
-                id: item.id,
                 entityId: item.entityId,
-                status: 'synced',
-                newVersion: created.version || 1,
+                success: true,
+                serverVersion: created.version || 1,
+                error: null,
             };
         }
         catch (error) {
             return {
-                id: item.id,
                 entityId: item.entityId,
-                status: 'failed',
-                errorMessage: error.message,
+                success: false,
+                error: error.message,
             };
         }
     }
@@ -132,41 +132,41 @@ let SyncService = SyncService_1 = class SyncService {
             });
             if (!existing) {
                 return {
-                    id: item.id,
                     entityId: item.entityId,
-                    status: 'failed',
-                    errorMessage: 'Entity not found',
+                    success: false,
+                    error: 'Entity not found',
                 };
             }
             if (item.clientVersion && existing.version > item.clientVersion) {
                 return {
-                    id: item.id,
                     entityId: item.entityId,
-                    status: 'conflict',
-                    serverData: existing,
+                    success: false,
                     serverVersion: existing.version,
+                    error: `Version conflict (server: ${existing.version}, client: ${item.clientVersion})`,
+                    _internalStatus: 'conflict',
+                    _internalServerData: existing,
                 };
             }
+            const normalizedPayload = this.normalizer.normalize(item.entityType, item.payload);
             const updated = await model.update({
                 where: { id: item.entityId },
                 data: {
-                    ...item.payload,
+                    ...normalizedPayload,
                     version: (existing.version || 1) + 1,
                 },
             });
             return {
-                id: item.id,
                 entityId: item.entityId,
-                status: 'synced',
-                newVersion: updated.version,
+                success: true,
+                serverVersion: updated.version,
+                error: null,
             };
         }
         catch (error) {
             return {
-                id: item.id,
                 entityId: item.entityId,
-                status: 'failed',
-                errorMessage: error.message,
+                success: false,
+                error: error.message,
             };
         }
     }
@@ -177,12 +177,12 @@ let SyncService = SyncService_1 = class SyncService {
             });
             if (!existing) {
                 return {
-                    id: item.id,
                     entityId: item.entityId,
-                    status: 'synced',
+                    success: true,
+                    error: null,
                 };
             }
-            await model.update({
+            const deleted = await model.update({
                 where: { id: item.entityId },
                 data: {
                     deletedAt: new Date(),
@@ -190,17 +190,17 @@ let SyncService = SyncService_1 = class SyncService {
                 },
             });
             return {
-                id: item.id,
                 entityId: item.entityId,
-                status: 'synced',
+                success: true,
+                serverVersion: deleted.version,
+                error: null,
             };
         }
         catch (error) {
             return {
-                id: item.id,
                 entityId: item.entityId,
-                status: 'failed',
-                errorMessage: error.message,
+                success: false,
+                error: error.message,
             };
         }
     }
@@ -265,6 +265,7 @@ let SyncService = SyncService_1 = class SyncService {
 exports.SyncService = SyncService;
 exports.SyncService = SyncService = SyncService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        payload_normalizer_service_1.PayloadNormalizerService])
 ], SyncService);
 //# sourceMappingURL=sync.service.js.map

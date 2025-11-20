@@ -12,61 +12,43 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SyncPullResponseDto = exports.SyncChangeDto = exports.SyncPushResponseDto = exports.SyncItemResultDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 class SyncItemResultDto {
-    id;
     entityId;
-    status;
-    newVersion;
-    serverData;
+    success;
     serverVersion;
-    errorMessage;
+    error;
+    _internalStatus;
+    _internalServerData;
 }
 exports.SyncItemResultDto = SyncItemResultDto;
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Queue item ID' }),
-    __metadata("design:type", String)
-], SyncItemResultDto.prototype, "id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Entity ID' }),
     __metadata("design:type", String)
 ], SyncItemResultDto.prototype, "entityId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Sync status', enum: ['synced', 'conflict', 'failed'] }),
-    __metadata("design:type", String)
-], SyncItemResultDto.prototype, "status", void 0);
+    (0, swagger_1.ApiProperty)({ description: 'Whether sync succeeded for this item' }),
+    __metadata("design:type", Boolean)
+], SyncItemResultDto.prototype, "success", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'New version after sync', required: false }),
-    __metadata("design:type", Number)
-], SyncItemResultDto.prototype, "newVersion", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Server data in case of conflict', required: false }),
-    __metadata("design:type", Object)
-], SyncItemResultDto.prototype, "serverData", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Server version in case of conflict', required: false }),
+    (0, swagger_1.ApiProperty)({ description: 'Server version after sync', required: false }),
     __metadata("design:type", Number)
 ], SyncItemResultDto.prototype, "serverVersion", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Error message if failed', required: false }),
-    __metadata("design:type", String)
-], SyncItemResultDto.prototype, "errorMessage", void 0);
+    __metadata("design:type", Object)
+], SyncItemResultDto.prototype, "error", void 0);
 class SyncPushResponseDto {
+    success;
     results;
-    serverTimestamp;
-    summary;
 }
 exports.SyncPushResponseDto = SyncPushResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Overall success indicator' }),
+    __metadata("design:type", Boolean)
+], SyncPushResponseDto.prototype, "success", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Results for each sync item', type: [SyncItemResultDto] }),
     __metadata("design:type", Array)
 ], SyncPushResponseDto.prototype, "results", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Server timestamp of this sync' }),
-    __metadata("design:type", String)
-], SyncPushResponseDto.prototype, "serverTimestamp", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Summary of sync results' }),
-    __metadata("design:type", Object)
-], SyncPushResponseDto.prototype, "summary", void 0);
 class SyncChangeDto {
     entityType;
     entityId;

@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BreedingsModule } from './breedings/breedings.module';
+import { BreedsModule } from './breeds/breeds.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
@@ -16,6 +17,7 @@ import { LotsModule } from './lots/lots.module';
 import { MedicalProductsModule } from './medical-products/medical-products.module';
 import { MovementsModule } from './movements/movements.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { SpeciesModule } from './species/species.module';
 import { SyncModule } from './sync/sync.module';
 import { TreatmentsModule } from './treatments/treatments.module';
 import { VaccinationsModule } from './vaccinations/vaccinations.module';
@@ -61,6 +63,8 @@ import { WeightsModule } from './weights/weights.module';
     MedicalProductsModule,
     VaccinesModule,
     AdministrationRoutesModule,
+    SpeciesModule,
+    BreedsModule,
     // Farm settings
     AlertConfigurationsModule,
     FarmPreferencesModule,

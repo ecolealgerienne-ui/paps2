@@ -15,6 +15,10 @@ const class_validator_1 = require("class-validator");
 class CreateAnimalDto {
     id;
     farmId;
+    farm_id;
+    get normalizedFarmId() {
+        return this.farmId || this.farm_id || '';
+    }
     currentEid;
     officialNumber;
     visualId;
@@ -32,10 +36,17 @@ __decorate([
     __metadata("design:type", String)
 ], CreateAnimalDto.prototype, "id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'ID de la ferme' }),
+    (0, swagger_1.ApiProperty)({ description: 'ID de la ferme (camelCase)', required: false }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateAnimalDto.prototype, "farmId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID de la ferme (snake_case)', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateAnimalDto.prototype, "farm_id", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ description: 'EID électronique (15 caractères max)' }),
     (0, class_validator_1.IsOptional)(),

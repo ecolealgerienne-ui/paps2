@@ -1,42 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SyncItemResultDto {
-  @ApiProperty({ description: 'Queue item ID' })
-  id: string;
-
   @ApiProperty({ description: 'Entity ID' })
   entityId: string;
 
-  @ApiProperty({ description: 'Sync status', enum: ['synced', 'conflict', 'failed'] })
-  status: 'synced' | 'conflict' | 'failed';
+  @ApiProperty({ description: 'Whether sync succeeded for this item' })
+  success: boolean;
 
-  @ApiProperty({ description: 'New version after sync', required: false })
-  newVersion?: number;
-
-  @ApiProperty({ description: 'Server data in case of conflict', required: false })
-  serverData?: Record<string, any>;
-
-  @ApiProperty({ description: 'Server version in case of conflict', required: false })
+  @ApiProperty({ description: 'Server version after sync', required: false })
   serverVersion?: number;
 
   @ApiProperty({ description: 'Error message if failed', required: false })
-  errorMessage?: string;
+  error?: string | null;
+
+  // Internal fields used during processing (not sent to client)
+  _internalStatus?: 'synced' | 'conflict' | 'failed';
+  _internalServerData?: Record<string, any>;
 }
 
 export class SyncPushResponseDto {
+  @ApiProperty({ description: 'Overall success indicator' })
+  success: boolean;
+
   @ApiProperty({ description: 'Results for each sync item', type: [SyncItemResultDto] })
   results: SyncItemResultDto[];
-
-  @ApiProperty({ description: 'Server timestamp of this sync' })
-  serverTimestamp: string;
-
-  @ApiProperty({ description: 'Summary of sync results' })
-  summary: {
-    total: number;
-    synced: number;
-    conflicts: number;
-    failed: number;
-  };
 }
 
 export class SyncChangeDto {

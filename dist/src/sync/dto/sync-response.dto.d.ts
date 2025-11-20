@@ -1,21 +1,14 @@
 export declare class SyncItemResultDto {
-    id: string;
     entityId: string;
-    status: 'synced' | 'conflict' | 'failed';
-    newVersion?: number;
-    serverData?: Record<string, any>;
+    success: boolean;
     serverVersion?: number;
-    errorMessage?: string;
+    error?: string | null;
+    _internalStatus?: 'synced' | 'conflict' | 'failed';
+    _internalServerData?: Record<string, any>;
 }
 export declare class SyncPushResponseDto {
+    success: boolean;
     results: SyncItemResultDto[];
-    serverTimestamp: string;
-    summary: {
-        total: number;
-        synced: number;
-        conflicts: number;
-        failed: number;
-    };
 }
 export declare class SyncChangeDto {
     entityType: string;

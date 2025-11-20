@@ -6,22 +6,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SyncModule = void 0;
+exports.BreedsModule = void 0;
 const common_1 = require("@nestjs/common");
-const sync_controller_1 = require("./sync.controller");
-const sync_service_1 = require("./sync.service");
-const payload_normalizer_service_1 = require("./payload-normalizer.service");
+const breeds_controller_1 = require("./breeds.controller");
+const breeds_service_1 = require("./breeds.service");
 const prisma_module_1 = require("../prisma/prisma.module");
-const auth_module_1 = require("../auth/auth.module");
-let SyncModule = class SyncModule {
+let BreedsModule = class BreedsModule {
 };
-exports.SyncModule = SyncModule;
-exports.SyncModule = SyncModule = __decorate([
+exports.BreedsModule = BreedsModule;
+exports.BreedsModule = BreedsModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, auth_module_1.AuthModule],
-        controllers: [sync_controller_1.SyncController],
-        providers: [sync_service_1.SyncService, payload_normalizer_service_1.PayloadNormalizerService],
-        exports: [sync_service_1.SyncService],
+        imports: [prisma_module_1.PrismaModule],
+        controllers: [breeds_controller_1.BreedsController],
+        providers: [breeds_service_1.BreedsService],
+        exports: [breeds_service_1.BreedsService],
     })
-], SyncModule);
-//# sourceMappingURL=sync.module.js.map
+], BreedsModule);
+//# sourceMappingURL=breeds.module.js.map
