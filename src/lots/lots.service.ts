@@ -1,21 +1,40 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto } from './dto';
+import { AppLogger } from '../common/utils/logger.service';
+import {
+  EntityNotFoundException,
+  EntityConflictException,
+} from '../common/exceptions';
+import { ERROR_CODES } from '../common/constants/error-codes';
 
 @Injectable()
 export class LotsService {
+  private readonly logger = new AppLogger(LotsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateLotDto) {
-    return this.prisma.lot.create({
-      data: {
-        ...dto,
-        farmId,
-      },
-      include: {
-        _count: { select: { lotAnimals: true } },
-      },
-    });
+    this.logger.debug(`Creating lot in farm ${farmId}`, { name: dto.name });
+
+    try {
+      const lot = await this.prisma.lot.create({
+        data: {
+          ...dto,
+          farmId,
+        },
+        include: {
+          _count: { select: { lotAnimals: true } },
+        },
+      });
+
+      this.logger.audit('Lot created', { lotId: lot.id, farmId, name: lot.name });
+
+      return lot;
+    } catch (error) {
+      this.logger.error(`Failed to create lot in farm ${farmId}`, error.stack);
+      throw error;
+    }
   }
 
   async findAll(farmId: string, query: QueryLotDto) {
@@ -42,6 +61,8 @@ export class LotsService {
   }
 
   async findOne(farmId: string, id: string) {
+    this.logger.debug(`Finding lot ${id} in farm ${farmId}`);
+
     const lot = await this.prisma.lot.findFirst({
       where: { id, farmId, deletedAt: null },
       include: {
@@ -65,129 +86,231 @@ export class LotsService {
     });
 
     if (!lot) {
-      throw new NotFoundException(`Lot ${id} not found`);
+      this.logger.warn('Lot not found', { lotId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${id} not found`,
+        { lotId: id, farmId },
+      );
     }
 
     return lot;
   }
 
   async update(farmId: string, id: string, dto: UpdateLotDto) {
+    this.logger.debug(`Updating lot ${id} (version ${dto.version})`);
+
     const existing = await this.prisma.lot.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      throw new NotFoundException(`Lot ${id} not found`);
+      this.logger.warn('Lot not found', { lotId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${id} not found`,
+        { lotId: id, farmId },
+      );
     }
 
     // Version conflict check
     if (dto.version && existing.version > dto.version) {
-      throw new ConflictException({
-        message: 'Version conflict',
+      this.logger.warn('Version conflict detected', {
+        lotId: id,
         serverVersion: existing.version,
-        serverData: existing,
+        clientVersion: dto.version,
       });
+
+      throw new EntityConflictException(
+        ERROR_CODES.VERSION_CONFLICT,
+        'Version conflict detected',
+        {
+          lotId: id,
+          serverVersion: existing.version,
+          clientVersion: dto.version,
+        },
+      );
     }
 
-    return this.prisma.lot.update({
-      where: { id },
-      data: {
-        ...dto,
-        version: existing.version + 1,
-      },
-      include: {
-        _count: { select: { lotAnimals: true } },
-      },
-    });
+    try {
+      const updated = await this.prisma.lot.update({
+        where: { id },
+        data: {
+          ...dto,
+          version: existing.version + 1,
+        },
+        include: {
+          _count: { select: { lotAnimals: true } },
+        },
+      });
+
+      this.logger.audit('Lot updated', {
+        lotId: id,
+        farmId,
+        version: `${existing.version} → ${updated.version}`,
+      });
+
+      return updated;
+    } catch (error) {
+      this.logger.error(`Failed to update lot ${id}`, error.stack);
+      throw error;
+    }
   }
 
   async remove(farmId: string, id: string) {
+    this.logger.debug(`Soft deleting lot ${id}`);
+
     const existing = await this.prisma.lot.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      throw new NotFoundException(`Lot ${id} not found`);
+      this.logger.warn('Lot not found', { lotId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${id} not found`,
+        { lotId: id, farmId },
+      );
     }
 
-    // Soft delete
-    return this.prisma.lot.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        version: existing.version + 1,
-      },
-    });
+    try {
+      const deleted = await this.prisma.lot.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          version: existing.version + 1,
+        },
+      });
+
+      this.logger.audit('Lot soft deleted', { lotId: id, farmId });
+
+      return deleted;
+    } catch (error) {
+      this.logger.error(`Failed to delete lot ${id}`, error.stack);
+      throw error;
+    }
   }
 
   async addAnimals(farmId: string, lotId: string, dto: AddAnimalsToLotDto) {
+    this.logger.debug(`Adding ${dto.animalIds.length} animals to lot ${lotId}`);
+
     const lot = await this.prisma.lot.findFirst({
       where: { id: lotId, farmId, deletedAt: null },
     });
 
     if (!lot) {
-      throw new NotFoundException(`Lot ${lotId} not found`);
+      this.logger.warn('Lot not found', { lotId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${lotId} not found`,
+        { lotId, farmId },
+      );
     }
 
-    // Add animals to lot
-    const creates = dto.animalIds.map(animalId => ({
-      farmId,
-      lotId,
-      animalId,
-      joinedAt: new Date(),
-    }));
+    try {
+      // Add animals to lot
+      const creates = dto.animalIds.map(animalId => ({
+        farmId,
+        lotId,
+        animalId,
+        joinedAt: new Date(),
+      }));
 
-    await this.prisma.lotAnimal.createMany({
-      data: creates,
-      skipDuplicates: true,
-    });
+      await this.prisma.lotAnimal.createMany({
+        data: creates,
+        skipDuplicates: true,
+      });
 
-    return this.findOne(farmId, lotId);
+      this.logger.audit('Animals added to lot', {
+        lotId,
+        farmId,
+        count: dto.animalIds.length,
+      });
+
+      return this.findOne(farmId, lotId);
+    } catch (error) {
+      this.logger.error(`Failed to add animals to lot ${lotId}`, error.stack);
+      throw error;
+    }
   }
 
   async removeAnimals(farmId: string, lotId: string, animalIds: string[]) {
+    this.logger.debug(`Removing ${animalIds.length} animals from lot ${lotId}`);
+
     const lot = await this.prisma.lot.findFirst({
       where: { id: lotId, farmId, deletedAt: null },
     });
 
     if (!lot) {
-      throw new NotFoundException(`Lot ${lotId} not found`);
+      this.logger.warn('Lot not found', { lotId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${lotId} not found`,
+        { lotId, farmId },
+      );
     }
 
-    // Mark animals as left
-    await this.prisma.lotAnimal.updateMany({
-      where: {
-        lotId,
-        animalId: { in: animalIds },
-        leftAt: null,
-      },
-      data: {
-        leftAt: new Date(),
-      },
-    });
+    try {
+      // Mark animals as left
+      await this.prisma.lotAnimal.updateMany({
+        where: {
+          lotId,
+          animalId: { in: animalIds },
+          leftAt: null,
+        },
+        data: {
+          leftAt: new Date(),
+        },
+      });
 
-    return this.findOne(farmId, lotId);
+      this.logger.audit('Animals removed from lot', {
+        lotId,
+        farmId,
+        count: animalIds.length,
+      });
+
+      return this.findOne(farmId, lotId);
+    } catch (error) {
+      this.logger.error(`Failed to remove animals from lot ${lotId}`, error.stack);
+      throw error;
+    }
   }
 
   async finalize(farmId: string, lotId: string) {
+    this.logger.debug(`Finalizing lot ${lotId}`);
+
     const lot = await this.prisma.lot.findFirst({
       where: { id: lotId, farmId, deletedAt: null },
     });
 
     if (!lot) {
-      throw new NotFoundException(`Lot ${lotId} not found`);
+      this.logger.warn('Lot not found', { lotId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${lotId} not found`,
+        { lotId, farmId },
+      );
     }
 
-    return this.prisma.lot.update({
-      where: { id: lotId },
-      data: {
-        completed: true,
-        status: 'closed',
-        version: lot.version + 1,
-      },
-      include: {
-        _count: { select: { lotAnimals: true } },
-      },
-    });
+    try {
+      const finalized = await this.prisma.lot.update({
+        where: { id: lotId },
+        data: {
+          completed: true,
+          status: 'closed',
+          version: lot.version + 1,
+        },
+        include: {
+          _count: { select: { lotAnimals: true } },
+        },
+      });
+
+      this.logger.audit('Lot finalized', { lotId, farmId });
+
+      return finalized;
+    } catch (error) {
+      this.logger.error(`Failed to finalize lot ${lotId}`, error.stack);
+      throw error;
+    }
   }
 }

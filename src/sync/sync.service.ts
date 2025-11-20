@@ -28,12 +28,17 @@ export class SyncService {
     const results: SyncItemResultDto[] = [];
     const startTime = Date.now();
 
+    this.logger.log(`📤 Push sync started: ${dto.items.length} items`);
+
     for (const item of dto.items) {
       try {
         const result = await this.processItem(item);
         results.push(result);
       } catch (error) {
-        this.logger.error(`Failed to process sync item ${item.id}:`, error);
+        this.logger.error(
+          `Failed to process sync item ${item.entityId}:`,
+          error.stack,
+        );
         results.push({
           entityId: item.entityId,
           success: false,
@@ -44,23 +49,35 @@ export class SyncService {
 
     const summary = {
       total: results.length,
-      synced: results.filter(r => r.success && !r.error).length,
-      conflicts: results.filter(r => r.error && r.error.includes('conflict')).length,
-      failed: results.filter(r => !r.success).length,
+      synced: results.filter((r) => r.success && !r.error).length,
+      conflicts: results.filter(
+        (r) => r.error && r.error.includes('conflict'),
+      ).length,
+      failed: results.filter((r) => !r.success).length,
     };
 
-    // Log sync operation
-    await this.prisma.syncLog.create({
-      data: {
-        farmId: dto.items[0]?.farmId || 'unknown',
-        syncType: 'push',
-        itemsCount: summary.total,
-        successCount: summary.synced,
-        failureCount: summary.failed,
-        conflictCount: summary.conflicts,
-        duration: Date.now() - startTime,
-      },
-    });
+    // Log sync operation to database
+    try {
+      await this.prisma.syncLog.create({
+        data: {
+          farmId: dto.items[0]?.farmId || 'unknown',
+          syncType: 'push',
+          itemsCount: summary.total,
+          successCount: summary.synced,
+          failureCount: summary.failed,
+          conflictCount: summary.conflicts,
+          duration: Date.now() - startTime,
+        },
+      });
+    } catch (error) {
+      this.logger.error('Failed to log sync operation', error.stack);
+    }
+
+    this.logger.log(
+      `📤 Push sync completed: ${summary.synced}/${summary.total} synced, ` +
+        `${summary.conflicts} conflicts, ${summary.failed} failed ` +
+        `(${Date.now() - startTime}ms)`,
+    );
 
     return {
       success: true,
@@ -302,6 +319,10 @@ export class SyncService {
    * Creates Lot + LotAnimal junction records
    * Based on BACKEND_DELTA.md section 6
    */
+  /**
+   * Create Lot with Animals - ATOMIC TRANSACTION
+   * ✅ CRITICAL: Lot + LotAnimal must succeed or fail together
+   */
   private async handleLotCreateWithAnimals(
     lotId: string,
     payload: any,
@@ -310,27 +331,46 @@ export class SyncService {
       const { _animalIds, ...lotData } = payload;
       const animalIds = _animalIds as string[];
 
-      // Create the lot
-      const lot = await this.prisma.lot.create({
-        data: {
-          ...lotData,
-          id: lotId,
-          version: 1,
-        },
-      });
+      this.logger.debug(
+        `Creating lot ${lotId} with ${animalIds?.length || 0} animals`,
+      );
 
-      // Create LotAnimal relations
-      if (animalIds && animalIds.length > 0) {
-        await this.prisma.lotAnimal.createMany({
-          data: animalIds.map(animalId => ({
-            lotId: lot.id,
-            animalId,
-            farmId: lot.farmId,
-            joinedAt: new Date(),
-          })),
-          skipDuplicates: true,
-        });
-      }
+      // ✅ TRANSACTION: Lot + LotAnimal atomique
+      const lot = await this.prisma.$transaction(
+        async (tx) => {
+          // 1. Create the lot
+          const createdLot = await tx.lot.create({
+            data: {
+              ...lotData,
+              id: lotId,
+              version: 1,
+            },
+          });
+
+          // 2. Create LotAnimal relations (in same transaction)
+          if (animalIds && animalIds.length > 0) {
+            await tx.lotAnimal.createMany({
+              data: animalIds.map((animalId) => ({
+                lotId: createdLot.id,
+                animalId,
+                farmId: createdLot.farmId,
+                joinedAt: new Date(),
+              })),
+              skipDuplicates: true,
+            });
+          }
+
+          return createdLot;
+        },
+        {
+          maxWait: 5000, // Wait max 5s to start transaction
+          timeout: 10000, // Transaction max 10s
+        },
+      );
+
+      this.logger.log(
+        `Lot created: ${lotId} with ${animalIds?.length || 0} animals`,
+      );
 
       return {
         entityId: lotId,
@@ -339,6 +379,11 @@ export class SyncService {
         error: null,
       };
     } catch (error) {
+      this.logger.error(
+        `Failed to create lot ${lotId}: ${error.message}`,
+        error.stack,
+      );
+
       return {
         entityId: lotId,
         success: false,
@@ -348,9 +393,8 @@ export class SyncService {
   }
 
   /**
-   * Handle Lot update with animalIds
-   * Updates Lot + synchronizes LotAnimal relations
-   * Based on BACKEND_DELTA.md section 6
+   * Update Lot with Animals - ATOMIC TRANSACTION
+   * ✅ CRITICAL: Update Lot + Resync LotAnimal must succeed or fail together
    */
   private async handleLotUpdateWithAnimals(
     lotId: string,
@@ -361,35 +405,56 @@ export class SyncService {
       const { _animalIds, ...lotData } = payload;
       const animalIds = _animalIds as string[];
 
-      // Update the lot
-      const lot = await this.prisma.lot.update({
-        where: { id: lotId },
-        data: {
-          ...lotData,
-          version: (existing.version || 1) + 1,
-        },
-      });
+      this.logger.debug(
+        `Updating lot ${lotId} (version ${existing.version})` +
+          `${animalIds !== undefined ? ` with ${animalIds.length} animals` : ''}`,
+      );
 
-      // Synchronize animalIds if provided
-      if (animalIds !== undefined) {
-        // Delete old relations
-        await this.prisma.lotAnimal.deleteMany({
-          where: { lotId },
-        });
-
-        // Create new relations
-        if (animalIds.length > 0) {
-          await this.prisma.lotAnimal.createMany({
-            data: animalIds.map(animalId => ({
-              lotId: lot.id,
-              animalId,
-              farmId: lot.farmId,
-              joinedAt: new Date(),
-            })),
-            skipDuplicates: true,
+      // ✅ TRANSACTION: Update Lot + Resync LotAnimal atomique
+      const lot = await this.prisma.$transaction(
+        async (tx) => {
+          // 1. Update the lot
+          const updatedLot = await tx.lot.update({
+            where: { id: lotId },
+            data: {
+              ...lotData,
+              version: (existing.version || 1) + 1,
+            },
           });
-        }
-      }
+
+          // 2. Synchronize animalIds if provided
+          if (animalIds !== undefined) {
+            // 2a. Delete old relations
+            await tx.lotAnimal.deleteMany({
+              where: { lotId },
+            });
+
+            // 2b. Create new relations
+            if (animalIds.length > 0) {
+              await tx.lotAnimal.createMany({
+                data: animalIds.map((animalId) => ({
+                  lotId: updatedLot.id,
+                  animalId,
+                  farmId: updatedLot.farmId,
+                  joinedAt: new Date(),
+                })),
+                skipDuplicates: true,
+              });
+            }
+          }
+
+          return updatedLot;
+        },
+        {
+          maxWait: 5000,
+          timeout: 10000,
+        },
+      );
+
+      this.logger.log(
+        `Lot updated: ${lotId} (version ${existing.version} → ${lot.version})` +
+          `${animalIds !== undefined ? ` with ${animalIds.length} animals` : ''}`,
+      );
 
       return {
         entityId: lotId,
@@ -398,6 +463,11 @@ export class SyncService {
         error: null,
       };
     } catch (error) {
+      this.logger.error(
+        `Failed to update lot ${lotId}: ${error.message}`,
+        error.stack,
+      );
+
       return {
         entityId: lotId,
         success: false,
