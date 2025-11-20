@@ -50,7 +50,7 @@ export class MovementsService {
         const movement = await tx.movement.create({
           data: {
             id: dto.id,
-            farmId,
+            farmId: dto.farmId || farmId,
             movementType: dto.movementType,
             movementDate: new Date(dto.movementDate),
             reason: dto.reason,
@@ -66,6 +66,9 @@ export class MovementsService {
             expectedReturnDate: dto.expectedReturnDate ? new Date(dto.expectedReturnDate) : null,
             documentNumber: dto.documentNumber,
             notes: dto.notes,
+            // CRITICAL: Use client timestamps if provided (offline-first)
+            ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
+            ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
           },
         });
 
@@ -240,12 +243,17 @@ export class MovementsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields
+      const { farmId: dtoFarmId, created_at, updated_at, version, ...movementData } = dto;
+
       const updateData: any = {
-        ...dto,
+        ...movementData,
         version: existing.version + 1,
       };
 
       if (dto.movementDate) updateData.movementDate = new Date(dto.movementDate);
+      // CRITICAL: Use client timestamp if provided (offline-first)
+      if (updated_at) updateData.updatedAt = new Date(updated_at);
 
       const updated = await this.prisma.movement.update({
         where: { id },

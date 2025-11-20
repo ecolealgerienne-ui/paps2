@@ -1,20 +1,38 @@
-import { IsString, IsOptional, IsDateString, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateVaccinationDto {
+/**
+ * DTO for creating a Vaccination
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ * Supports both single and batch vaccinations (animal_ids array)
+ */
+export class CreateVaccinationDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Vaccination ID (UUID)', required: false })
   @IsOptional()
   @IsString()
   id?: string;
 
-  @ApiProperty({ description: 'Animal ID', required: false })
+  @ApiProperty({ description: 'Animal ID (single vaccination)', required: false })
   @IsOptional()
   @IsString()
   animalId?: string;
 
-  @ApiProperty({ description: 'Animal IDs (comma-separated or JSON string)' })
+  @ApiProperty({ description: 'Animal IDs (legacy - comma-separated or JSON string)', required: false })
+  @IsOptional()
   @IsString()
-  animalIds: string;
+  animalIds?: string;
+
+  @ApiProperty({
+    description: 'Animal IDs (batch vaccination - for mass vaccination)',
+    type: [String],
+    required: false,
+    example: ['animal-uuid-1', 'animal-uuid-2', 'animal-uuid-3']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  animal_ids?: string[];
 
   @ApiProperty({ description: 'Vaccine name' })
   @IsString()
@@ -85,7 +103,11 @@ export class CreateVaccinationDto {
   notes?: string;
 }
 
-export class UpdateVaccinationDto {
+/**
+ * DTO for updating a Vaccination
+ * Extends BaseSyncEntityDto to support offline-first architecture
+ */
+export class UpdateVaccinationDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Vaccine name', required: false })
   @IsOptional()
   @IsString()

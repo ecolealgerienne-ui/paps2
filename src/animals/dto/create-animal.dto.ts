@@ -6,29 +6,19 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  IsArray,
+  IsInt,
 } from 'class-validator';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateAnimalDto {
+/**
+ * DTO for creating an Animal
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ */
+export class CreateAnimalDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'UUID généré par le client' })
   @IsUUID()
   id: string;
-
-  @ApiProperty({ description: 'ID de la ferme (camelCase)', required: false })
-  @IsOptional()
-  @IsUUID()
-  farmId?: string;
-
-  @ApiProperty({ description: 'ID de la ferme (snake_case)', required: false })
-  @IsOptional()
-  @IsUUID()
-  farm_id?: string;
-
-  /**
-   * Normalized farmId - accepts either farmId or farm_id
-   */
-  get normalizedFarmId(): string {
-    return this.farmId || this.farm_id || '';
-  }
 
   @ApiPropertyOptional({ description: 'EID électronique (15 caractères max)' })
   @IsOptional()
@@ -76,4 +66,63 @@ export class CreateAnimalDto {
   @IsString()
   @MaxLength(1000)
   notes?: string;
+
+  // ===== Champs ajoutés selon API_SIGNATURES.md =====
+
+  @ApiPropertyOptional({ description: 'Current location farm ID' })
+  @IsOptional()
+  @IsString()
+  currentLocationFarmId?: string;
+
+  @ApiPropertyOptional({
+    description: 'EID history (array of EID changes)',
+    type: 'array',
+    example: [
+      {
+        id: 'uuid',
+        oldEid: '250123456789012',
+        newEid: '250987654321098',
+        changedAt: '2024-01-15T10:00:00Z',
+        reason: 'Lost chip',
+        notes: 'Replaced during checkup'
+      }
+    ]
+  })
+  @IsOptional()
+  @IsArray()
+  eidHistory?: Array<{
+    id: string;
+    oldEid: string;
+    newEid: string;
+    changedAt: string;
+    reason: string;
+    notes?: string;
+  }>;
+
+  @ApiPropertyOptional({
+    description: 'Validation timestamp (NULL = draft status, NOT NULL = validated)',
+    example: '2024-01-20T14:30:00Z'
+  })
+  @IsOptional()
+  @IsDateString()
+  validatedAt?: string;
+
+  @ApiPropertyOptional({
+    enum: ['draft', 'alive', 'sold', 'dead', 'slaughtered', 'onTemporaryMovement'],
+    description: 'Animal status lifecycle',
+    default: 'draft'
+  })
+  @IsOptional()
+  @IsEnum(['draft', 'alive', 'sold', 'dead', 'slaughtered', 'onTemporaryMovement'])
+  status?: string;
+
+  @ApiPropertyOptional({ description: 'Photo URL' })
+  @IsOptional()
+  @IsString()
+  photoUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Age in days (calculated field)' })
+  @IsOptional()
+  @IsInt()
+  days?: number;
 }

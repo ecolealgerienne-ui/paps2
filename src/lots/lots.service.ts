@@ -15,20 +15,74 @@ export class LotsService {
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateLotDto) {
-    this.logger.debug(`Creating lot in farm ${farmId}`, { name: dto.name });
+    this.logger.debug(`Creating lot in farm ${farmId}`, {
+      name: dto.name,
+      withAnimals: !!dto.animalIds?.length
+    });
 
-    try {
-      const lot = await this.prisma.lot.create({
-        data: {
-          ...dto,
-          farmId,
-        },
-        include: {
-          _count: { select: { lotAnimals: true } },
-        },
+    // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
+    const { farmId: dtoFarmId, created_at, updated_at, animalIds, ...lotData } = dto;
+
+    // If animalIds provided, verify all animals exist and belong to farm
+    if (animalIds && animalIds.length > 0) {
+      const animals = await this.prisma.animal.findMany({
+        where: { id: { in: animalIds }, farmId, deletedAt: null },
       });
 
-      this.logger.audit('Lot created', { lotId: lot.id, farmId, name: lot.name });
+      if (animals.length !== animalIds.length) {
+        this.logger.warn('One or more animals not found for lot', {
+          farmId,
+          expected: animalIds.length,
+          found: animals.length
+        });
+        throw new EntityNotFoundException(
+          ERROR_CODES.ANIMAL_NOT_FOUND,
+          `One or more animals not found (expected ${animalIds.length}, found ${animals.length})`,
+          { farmId, expectedCount: animalIds.length, foundCount: animals.length },
+        );
+      }
+    }
+
+    try {
+      // Create lot with animals in a transaction
+      const lot = await this.prisma.$transaction(async (tx) => {
+        // Create the lot
+        const newLot = await tx.lot.create({
+          data: {
+            ...lotData,
+            farmId: dtoFarmId || farmId,
+            // CRITICAL: Use client timestamps if provided (offline-first)
+            ...(created_at && { createdAt: new Date(created_at) }),
+            ...(updated_at && { updatedAt: new Date(updated_at) }),
+          },
+        });
+
+        // Add animals to lot if provided
+        if (animalIds && animalIds.length > 0) {
+          await tx.lotAnimal.createMany({
+            data: animalIds.map(animalId => ({
+              lotId: newLot.id,
+              animalId,
+              joinedAt: new Date(),
+            })),
+          });
+        }
+
+        // Return lot with animal count
+        return tx.lot.findUnique({
+          where: { id: newLot.id },
+          include: {
+            _count: { select: { lotAnimals: true } },
+          },
+        });
+      });
+
+      this.logger.audit('Lot created', {
+        lotId: lot.id,
+        farmId,
+        name: lot.name,
+        animalCount: animalIds?.length || 0
+      });
 
       return lot;
     } catch (error) {
@@ -133,11 +187,16 @@ export class LotsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields
+      const { farmId: dtoFarmId, created_at, updated_at, version, ...lotData } = dto;
+
       const updated = await this.prisma.lot.update({
         where: { id },
         data: {
-          ...dto,
+          ...lotData,
           version: existing.version + 1,
+          // CRITICAL: Use client timestamp if provided (offline-first)
+          ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
         include: {
           _count: { select: { lotAnimals: true } },

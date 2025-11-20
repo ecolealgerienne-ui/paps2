@@ -1,8 +1,13 @@
 import { IsString, IsOptional, IsDateString, IsNumber, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { WeightSource } from '../../common/enums';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateWeightDto {
+/**
+ * DTO for creating a Weight
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ */
+export class CreateWeightDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Weight ID (UUID)', required: false })
   @IsOptional()
   @IsString()
@@ -31,7 +36,11 @@ export class CreateWeightDto {
   notes?: string;
 }
 
-export class UpdateWeightDto {
+/**
+ * DTO for updating a Weight
+ * Extends BaseSyncEntityDto to support offline-first architecture
+ */
+export class UpdateWeightDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Weight in kg', required: false })
   @IsOptional()
   @IsNumber()

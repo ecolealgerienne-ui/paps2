@@ -18,13 +18,19 @@ export class DocumentsService {
     this.logger.debug(`Creating document in farm ${farmId}`, { title: dto.title, type: dto.type });
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
+      const { farmId: dtoFarmId, created_at, updated_at, ...documentData } = dto;
+
       const document = await this.prisma.document.create({
         data: {
-          ...dto,
-          farmId,
+          ...documentData,
+          farmId: dtoFarmId || farmId,
           uploadDate: new Date(dto.uploadDate),
           issueDate: dto.issueDate ? new Date(dto.issueDate) : null,
           expiryDate: dto.expiryDate ? new Date(dto.expiryDate) : null,
+          // CRITICAL: Use client timestamps if provided (offline-first)
+          ...(created_at && { createdAt: new Date(created_at) }),
+          ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
       });
 
@@ -114,14 +120,19 @@ export class DocumentsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields
+      const { farmId: dtoFarmId, created_at, updated_at, version, ...documentData } = dto;
+
       const updateData: any = {
-        ...dto,
+        ...documentData,
         version: existing.version + 1,
       };
 
       if (dto.uploadDate) updateData.uploadDate = new Date(dto.uploadDate);
       if (dto.issueDate) updateData.issueDate = new Date(dto.issueDate);
       if (dto.expiryDate) updateData.expiryDate = new Date(dto.expiryDate);
+      // CRITICAL: Use client timestamp if provided (offline-first)
+      if (updated_at) updateData.updatedAt = new Date(updated_at);
 
       const updated = await this.prisma.document.update({
         where: { id },

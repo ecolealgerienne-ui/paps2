@@ -70,12 +70,18 @@ export class BreedingsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
+      const { farmId: dtoFarmId, created_at, updated_at, ...breedingData } = dto;
+
       const breeding = await this.prisma.breeding.create({
         data: {
-          ...dto,
-          farmId,
+          ...breedingData,
+          farmId: dtoFarmId || farmId,
           breedingDate: new Date(dto.breedingDate),
           expectedBirthDate: new Date(dto.expectedBirthDate),
+          // CRITICAL: Use client timestamps if provided (offline-first)
+          ...(created_at && { createdAt: new Date(created_at) }),
+          ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
         include: {
           mother: { select: { id: true, visualId: true, currentEid: true } },
@@ -186,14 +192,19 @@ export class BreedingsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields
+      const { farmId: dtoFarmId, created_at, updated_at, version, ...breedingData } = dto;
+
       const updateData: any = {
-        ...dto,
+        ...breedingData,
         version: existing.version + 1,
       };
 
       if (dto.breedingDate) updateData.breedingDate = new Date(dto.breedingDate);
       if (dto.expectedBirthDate) updateData.expectedBirthDate = new Date(dto.expectedBirthDate);
       if (dto.actualBirthDate) updateData.actualBirthDate = new Date(dto.actualBirthDate);
+      // CRITICAL: Use client timestamp if provided (offline-first)
+      if (updated_at) updateData.updatedAt = new Date(updated_at);
 
       const updated = await this.prisma.breeding.update({
         where: { id },

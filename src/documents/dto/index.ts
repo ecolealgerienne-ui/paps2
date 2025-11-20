@@ -1,8 +1,13 @@
 import { IsString, IsOptional, IsDateString, IsEnum, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { DocumentType } from '../../common/enums';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateDocumentDto {
+/**
+ * DTO for creating a Document
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ */
+export class CreateDocumentDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Document ID (UUID)', required: false })
   @IsOptional()
   @IsString()
@@ -70,7 +75,11 @@ export class CreateDocumentDto {
   notes?: string;
 }
 
-export class UpdateDocumentDto {
+/**
+ * DTO for updating a Document
+ * Extends BaseSyncEntityDto to support offline-first architecture
+ */
+export class UpdateDocumentDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Animal ID', required: false })
   @IsOptional()
   @IsString()

@@ -15,29 +15,94 @@ export class TreatmentsService {
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateTreatmentDto) {
-    this.logger.debug(`Creating treatment for animal ${dto.animalId} in farm ${farmId}`);
+    // Determine which animals to treat: batch (animal_ids) or single (animalId)
+    const animalIds = dto.animal_ids?.length
+      ? dto.animal_ids
+      : dto.animalId
+        ? [dto.animalId]
+        : [];
 
-    // Verify animal belongs to farm
-    const animal = await this.prisma.animal.findFirst({
-      where: { id: dto.animalId, farmId, deletedAt: null },
-    });
-
-    if (!animal) {
-      this.logger.warn('Animal not found for treatment', { animalId: dto.animalId, farmId });
+    if (animalIds.length === 0) {
+      this.logger.warn('No animal ID provided for treatment', { farmId });
       throw new EntityNotFoundException(
         ERROR_CODES.TREATMENT_ANIMAL_NOT_FOUND,
-        `Animal ${dto.animalId} not found`,
-        { animalId: dto.animalId, farmId },
+        'At least one animal ID must be provided (animalId or animal_ids)',
+        { farmId },
+      );
+    }
+
+    const isBatchTreatment = animalIds.length > 1;
+    this.logger.debug(`Creating ${isBatchTreatment ? 'batch' : 'single'} treatment for ${animalIds.length} animal(s) in farm ${farmId}`);
+
+    // Verify all animals belong to farm
+    const animals = await this.prisma.animal.findMany({
+      where: { id: { in: animalIds }, farmId, deletedAt: null },
+    });
+
+    if (animals.length !== animalIds.length) {
+      this.logger.warn('One or more animals not found for treatment', {
+        farmId,
+        expected: animalIds.length,
+        found: animals.length
+      });
+      throw new EntityNotFoundException(
+        ERROR_CODES.TREATMENT_ANIMAL_NOT_FOUND,
+        `One or more animals not found (expected ${animalIds.length}, found ${animals.length})`,
+        { farmId, expectedCount: animalIds.length, foundCount: animals.length },
       );
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
+      const { farmId: dtoFarmId, created_at, updated_at, animal_ids, animalId, id, ...treatmentData } = dto;
+
+      // For batch treatments, create one treatment per animal in a transaction
+      if (isBatchTreatment) {
+        const treatments = await this.prisma.$transaction(
+          animalIds.map((animalId, index) =>
+            this.prisma.treatment.create({
+              data: {
+                // Generate unique ID for each treatment if base ID provided
+                ...(id && { id: `${id}-${index}` }),
+                ...treatmentData,
+                animalId,
+                farmId: dtoFarmId || farmId,
+                treatmentDate: new Date(dto.treatmentDate),
+                withdrawalEndDate: new Date(dto.withdrawalEndDate),
+                // CRITICAL: Use client timestamps if provided (offline-first)
+                ...(created_at && { createdAt: new Date(created_at) }),
+                ...(updated_at && { updatedAt: new Date(updated_at) }),
+              },
+              include: {
+                animal: { select: { id: true, visualId: true, currentEid: true } },
+                product: true,
+                veterinarian: true,
+                route: true,
+              },
+            })
+          )
+        );
+
+        this.logger.audit('Batch treatments created', {
+          count: treatments.length,
+          farmId,
+          animalIds
+        });
+        return treatments;
+      }
+
+      // Single treatment
       const treatment = await this.prisma.treatment.create({
         data: {
-          ...dto,
-          farmId,
+          ...(id && { id }),
+          ...treatmentData,
+          animalId: animalIds[0],
+          farmId: dtoFarmId || farmId,
           treatmentDate: new Date(dto.treatmentDate),
           withdrawalEndDate: new Date(dto.withdrawalEndDate),
+          // CRITICAL: Use client timestamps if provided (offline-first)
+          ...(created_at && { createdAt: new Date(created_at) }),
+          ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
         include: {
           animal: { select: { id: true, visualId: true, currentEid: true } },
@@ -47,10 +112,10 @@ export class TreatmentsService {
         },
       });
 
-      this.logger.audit('Treatment created', { treatmentId: treatment.id, animalId: dto.animalId, farmId });
+      this.logger.audit('Treatment created', { treatmentId: treatment.id, animalId: animalIds[0], farmId });
       return treatment;
     } catch (error) {
-      this.logger.error(`Failed to create treatment for animal ${dto.animalId}`, error.stack);
+      this.logger.error(`Failed to create treatment${isBatchTreatment ? 's' : ''} in farm ${farmId}`, error.stack);
       throw error;
     }
   }
@@ -147,13 +212,18 @@ export class TreatmentsService {
     }
 
     try {
+      // Destructure to exclude BaseSyncEntityDto fields
+      const { farmId: dtoFarmId, created_at, updated_at, version, ...treatmentData } = dto;
+
       const updateData: any = {
-        ...dto,
+        ...treatmentData,
         version: existing.version + 1,
       };
 
       if (dto.treatmentDate) updateData.treatmentDate = new Date(dto.treatmentDate);
       if (dto.withdrawalEndDate) updateData.withdrawalEndDate = new Date(dto.withdrawalEndDate);
+      // CRITICAL: Use client timestamp if provided (offline-first)
+      if (updated_at) updateData.updatedAt = new Date(updated_at);
 
       const updated = await this.prisma.treatment.update({
         where: { id },

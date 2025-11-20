@@ -2,8 +2,13 @@ import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray } from 'c
 import { ApiProperty } from '@nestjs/swagger';
 import { BreedingMethod, BreedingStatus } from '../../common/enums';
 import { Type } from 'class-transformer';
+import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
-export class CreateBreedingDto {
+/**
+ * DTO for creating a Breeding
+ * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
+ */
+export class CreateBreedingDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Breeding ID (UUID)', required: false })
   @IsOptional()
   @IsString()
@@ -62,7 +67,11 @@ export class CreateBreedingDto {
   notes?: string;
 }
 
-export class UpdateBreedingDto {
+/**
+ * DTO for updating a Breeding
+ * Extends BaseSyncEntityDto to support offline-first architecture
+ */
+export class UpdateBreedingDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Father animal ID', required: false })
   @IsOptional()
   @IsString()
