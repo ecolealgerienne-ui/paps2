@@ -381,7 +381,7 @@ if ($animalId) {
     $weightResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/weights" -Body @{
         animalId = $animalId
         weight = 45.5
-        measurementDate = "2024-01-15"
+        weightDate = "2024-01-15"
     }
     $weightId = Get-ResponseData $weightResponse "id"
     Write-Success "Created: $weightId"
@@ -390,7 +390,7 @@ if ($animalId) {
     $response = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/weights" -Body @{
         animalId = $animalId
         weight = 52.3
-        measurementDate = "2024-02-15"
+        weightDate = "2024-02-15"
     }
     Write-Success "Created second weight"
 
@@ -430,10 +430,10 @@ if ($animalId) {
     Write-Test "POST /farms/$FarmId/treatments - Create"
     $treatmentResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/treatments" -Body @{
         animalId = $animalId
+        productId = "test-ivermectine-id"
+        productName = "Ivermectine 1%"
         treatmentDate = "2024-01-20"
-        reason = "Parasitisme interne"
         diagnosis = "Strongylose digestive"
-        dosage = 5
     }
     $treatmentId = Get-ResponseData $treatmentResponse "id"
     Write-Success "Created: $treatmentId"
@@ -450,9 +450,9 @@ if ($animalId) {
 
         Write-Test "PUT /farms/$FarmId/treatments/$treatmentId - Update"
         $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/treatments/$treatmentId" -Body @{
-            dosage = 6
+            diagnosis = "Strongylose digestive confirmée"
         }
-        Write-Success "Updated dosage"
+        Write-Success "Updated diagnosis"
 
         Write-Test "DELETE /farms/$FarmId/treatments/$treatmentId - Delete"
         $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/treatments/$treatmentId"
@@ -468,7 +468,10 @@ Write-Header "Vaccinations API - 5 endpoints"
 if ($animalId) {
     Write-Test "POST /farms/$FarmId/vaccinations - Create"
     $vaccinationResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/vaccinations" -Body @{
-        animalId = $animalId
+        animalIds = $animalId
+        vaccineName = "Enterotoxemie"
+        type = "obligatoire"
+        disease = "Enterotoxemie"
         vaccinationDate = "2024-01-25"
         nextDueDate = "2024-07-25"
     }
@@ -590,11 +593,11 @@ Write-Header "Campaigns API - 7 endpoints"
 
 Write-Test "POST /farms/$FarmId/campaigns - Create"
 $campaignResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/campaigns" -Body @{
-    name = "Campagne Enterotoxemie 2024"
-    campaignType = "vaccination"
-    startDate = "2024-03-01"
-    endDate = "2024-03-15"
-    targetCount = 100
+    name = "Campagne Traitement 2024"
+    productId = "test-product-id"
+    productName = "Ivermectine"
+    campaignDate = "2024-03-01"
+    withdrawalEndDate = "2024-03-15"
 }
 $campaignId = Get-ResponseData $campaignResponse "id"
 Write-Success "Created: $campaignId"
@@ -620,9 +623,9 @@ if ($campaignId) {
 
     Write-Test "PUT /farms/$FarmId/campaigns/$campaignId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/campaigns/$campaignId" -Body @{
-        targetCount = 150
+        name = "Campagne Traitement 2024 - Updated"
     }
-    Write-Success "Updated target count"
+    Write-Success "Updated campaign name"
 
     Write-Test "DELETE /farms/$FarmId/campaigns/$campaignId - Delete"
     $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/campaigns/$campaignId"
@@ -636,11 +639,10 @@ Write-Header "Documents API - 7 endpoints"
 
 Write-Test "POST /farms/$FarmId/documents - Create"
 $documentResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/documents" -Body @{
-    documentType = "health_certificate"
-    documentNumber = "CERT-2024-001"
-    issueDate = "2024-01-15"
-    expiryDate = "2024-07-15"
-    issuingAuthority = "DSA Djelfa"
+    type = "health_certificate"
+    fileName = "certificate-2024-001.pdf"
+    fileUrl = "https://example.com/docs/certificate-2024-001.pdf"
+    uploadDate = "2024-01-15"
 }
 $documentId = Get-ResponseData $documentResponse "id"
 Write-Success "Created: $documentId"
@@ -667,9 +669,9 @@ if ($documentId) {
 
     Write-Test "PUT /farms/$FarmId/documents/$documentId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/documents/$documentId" -Body @{
-        expiryDate = "2024-12-31"
+        fileName = "certificate-2024-001-updated.pdf"
     }
-    Write-Success "Updated expiry date"
+    Write-Success "Updated file name"
 
     Write-Test "DELETE /farms/$FarmId/documents/$documentId - Delete"
     $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/documents/$documentId"
