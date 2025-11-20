@@ -86,7 +86,17 @@ export class MovementsService {
           });
         }
 
-        return this.findOne(farmId, movement.id);
+        // Return movement with relations (use tx, not this.prisma)
+        return tx.movement.findUnique({
+          where: { id: movement.id },
+          include: {
+            animals: {
+              include: {
+                animal: true,
+              },
+            },
+          },
+        });
       });
 
       this.logger.audit('Movement created', {
