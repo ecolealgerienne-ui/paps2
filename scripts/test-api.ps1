@@ -39,7 +39,8 @@ function Invoke-Api {
     param(
         [string]$Method,
         [string]$Endpoint,
-        [object]$Body = $null
+        [object]$Body = $null,
+        [switch]$NoDelay
     )
 
     $headers = @{
@@ -56,22 +57,47 @@ function Invoke-Api {
         } else {
             $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers
         }
+
+        # Rate limiting: wait 350ms between requests (max 3 req/sec)
+        if (-not $NoDelay) {
+            Start-Sleep -Milliseconds 350
+        }
+
         return $response
     } catch {
+        $statusCode = $_.Exception.Response.StatusCode.value__
         $errorResponse = $_.ErrorDetails.Message | ConvertFrom-Json -ErrorAction SilentlyContinue
+
         if ($errorResponse) {
+            # Add status code to error object
+            $errorResponse | Add-Member -NotePropertyName "statusCode" -NotePropertyValue $statusCode -Force
             return $errorResponse
         }
-        return @{ success = $false; error = $_.Exception.Message }
+
+        return @{
+            success = $false
+            error = $_.Exception.Message
+            statusCode = $statusCode
+        }
     }
 }
 
 # Helper to get data from response
 function Get-ResponseData {
     param($response, $field)
+
+    # Check if response has error
+    if ($response.error -or $response.statusCode -ge 400) {
+        Write-ErrorMsg "API Error: $($response.error) (HTTP $($response.statusCode))"
+        return $null
+    }
+
+    # Handle wrapped response {data: ...}
     if ($response.data) {
         return $response.data.$field
     }
+
+    # Handle direct response {id, name, ...}
     return $response.$field
 }
 
@@ -733,17 +759,19 @@ if ($maleAnimalId) {
 # =============================================================================
 Write-Header "Rate Limiting Test"
 
-Write-Test "Testing rate limit - 5 rapid requests..."
+Write-Test "Testing rate limit - 5 rapid requests (no delay)..."
 for ($i = 1; $i -le 5; $i++) {
     try {
-        $response = Invoke-Api -Method GET -Endpoint "/veterinarians"
-        if ($response.success -eq $false) {
-            Write-ErrorMsg "Request $i - Rate limited"
+        $response = Invoke-Api -Method GET -Endpoint "/veterinarians" -NoDelay
+        if ($response.statusCode -eq 429) {
+            Write-ErrorMsg "Request $i - Rate limited (expected)"
+        } elseif ($response.error) {
+            Write-ErrorMsg "Request $i - Error: $($response.error)"
         } else {
             Write-Success "Request $i - OK"
         }
     } catch {
-        Write-ErrorMsg "Request $i - Error"
+        Write-ErrorMsg "Request $i - Exception: $($_.Exception.Message)"
     }
 }
 
