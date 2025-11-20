@@ -34,6 +34,28 @@ function Write-ErrorMsg {
     Write-Host "  ERROR: $Text" -ForegroundColor Red
 }
 
+function Write-Warning {
+    param([string]$Text)
+    Write-Host "  WARNING: $Text" -ForegroundColor Yellow
+}
+
+# Check if API response has error
+function Test-ApiError {
+    param($response)
+
+    if ($response.error -or ($response.statusCode -and $response.statusCode -ge 400)) {
+        if ($response.errors) {
+            Write-ErrorMsg "API Error: $($response.message) - Details: $($response.errors | ConvertTo-Json -Compress) (HTTP $($response.statusCode))"
+        } elseif ($response.code) {
+            Write-ErrorMsg "API Error: $($response.code) - $($response.message) (HTTP $($response.statusCode))"
+        } else {
+            Write-ErrorMsg "API Error: $($response.error) (HTTP $($response.statusCode))"
+        }
+        return $true
+    }
+    return $false
+}
+
 # Generic API call function
 function Invoke-Api {
     param(
@@ -319,7 +341,9 @@ if ($animalId) {
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/animals/$animalId" -Body @{
         visualId = "OV-2024-001-Updated"
     }
-    Write-Success "Updated visualId"
+    if (-not (Test-ApiError $response)) {
+        Write-Success "Updated visualId"
+    }
 }
 
 # =============================================================================
@@ -350,7 +374,9 @@ if ($lotId) {
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/lots/$lotId" -Body @{
         name = "Lot Engraissement 2024 - Updated"
     }
-    Write-Success "Updated name"
+    if (-not (Test-ApiError $response)) {
+        Write-Success "Updated name"
+    }
 
     if ($animalId) {
         Write-Test "POST /farms/$FarmId/lots/$lotId/animals - Add animal"
@@ -413,7 +439,9 @@ if ($animalId) {
         $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/weights/$weightId" -Body @{
             weight = 46.0
         }
-        Write-Success "Updated weight"
+        if (-not (Test-ApiError $response)) {
+            Write-Success "Updated weight"
+        }
 
         Write-Test "DELETE /farms/$FarmId/weights/$weightId - Delete"
         $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/weights/$weightId"
@@ -468,7 +496,9 @@ if ($animalId -and $testProductId) {
         $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/treatments/$treatmentId" -Body @{
             diagnosis = "Strongylose digestive confirmée"
         }
-        Write-Success "Updated diagnosis"
+        if (-not (Test-ApiError $response)) {
+            Write-Success "Updated diagnosis"
+        }
 
         Write-Test "DELETE /farms/$FarmId/treatments/$treatmentId - Delete"
         $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/treatments/$treatmentId"
@@ -511,7 +541,9 @@ if ($animalId) {
         $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/vaccinations/$vaccinationId" -Body @{
             nextDueDate = "2024-08-25"
         }
-        Write-Success "Updated next due date"
+        if (-not (Test-ApiError $response)) {
+            Write-Success "Updated next due date"
+        }
 
         Write-Test "DELETE /farms/$FarmId/vaccinations/$vaccinationId - Delete"
         $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/vaccinations/$vaccinationId"
@@ -553,7 +585,9 @@ if ($animalId) {
         $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/movements/$movementId" -Body @{
             notes = "Movement updated via test script"
         }
-        Write-Success "Updated notes"
+        if (-not (Test-ApiError $response)) {
+            Write-Success "Updated notes"
+        }
 
         Write-Test "DELETE /farms/$FarmId/movements/$movementId - Delete"
         $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/movements/$movementId"
@@ -597,7 +631,9 @@ if ($animalId -and $maleAnimalId) {
         $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/breedings/$breedingId" -Body @{
             notes = "Breeding updated via test script"
         }
-        Write-Success "Updated notes"
+        if (-not (Test-ApiError $response)) {
+            Write-Success "Updated notes"
+        }
 
         Write-Test "DELETE /farms/$FarmId/breedings/$breedingId - Delete"
         $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/breedings/$breedingId"
@@ -649,7 +685,9 @@ if ($campaignId) {
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/campaigns/$campaignId" -Body @{
         name = "Campagne Traitement 2024 - Updated"
     }
-    Write-Success "Updated campaign name"
+    if (-not (Test-ApiError $response)) {
+        Write-Success "Updated campaign name"
+    }
 
     Write-Test "DELETE /farms/$FarmId/campaigns/$campaignId - Delete"
     $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/campaigns/$campaignId"
@@ -695,7 +733,9 @@ if ($documentId) {
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/documents/$documentId" -Body @{
         fileName = "certificate-2024-001-updated.pdf"
     }
-    Write-Success "Updated file name"
+    if (-not (Test-ApiError $response)) {
+        Write-Success "Updated file name"
+    }
 
     Write-Test "DELETE /farms/$FarmId/documents/$documentId - Delete"
     $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/documents/$documentId"
@@ -728,7 +768,9 @@ if ($alertConfigId) {
         enabled = $true
         notificationDaysBefore = 7
     }
-    Write-Success "Updated alert configuration"
+    if (-not (Test-ApiError $response)) {
+        Write-Success "Updated alert configuration"
+    }
 }
 
 # =============================================================================
@@ -747,7 +789,9 @@ $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/preferences" -Body 
     timezone = "Africa/Algiers"
     dateFormat = "DD/MM/YYYY"
 }
-Write-Success "Updated farm preferences"
+if (-not (Test-ApiError $response)) {
+    Write-Success "Updated farm preferences"
+}
 
 # =============================================================================
 # Sync API - 2 endpoints
@@ -758,7 +802,9 @@ Write-Test "POST /sync - Push changes"
 $response = Invoke-Api -Method POST -Endpoint "/sync" -Body @{
     items = @()
 }
-Write-Success "Sync pushed"
+if (-not (Test-ApiError $response)) {
+    Write-Success "Sync pushed"
+}
 
 Write-Test "GET /sync/changes - Get changes"
 $response = Invoke-Api -Method GET -Endpoint "/sync/changes?farmId=$FarmId&since=2024-01-01T00:00:00Z"
