@@ -279,26 +279,24 @@ Write-Header "Animals API - 5 endpoints"
 
 Write-Test "POST /farms/$FarmId/animals - Create female animal"
 $animalResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/animals" -Body @{
-    identifier = "OV-2024-001"
-    name = "Bella"
+    id = [guid]::NewGuid().ToString()
+    visualId = "OV-2024-001"
     speciesId = "sheep"
     breedId = "ouled-djellal"
     sex = "female"
     birthDate = "2023-01-15"
-    status = "active"
 }
 $animalId = Get-ResponseData $animalResponse "id"
 Write-Success "Created: $animalId"
 
 Write-Test "POST /farms/$FarmId/animals - Create male animal for breeding tests"
 $maleAnimalResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/animals" -Body @{
-    identifier = "OV-2024-002"
-    name = "Rambo"
+    id = [guid]::NewGuid().ToString()
+    visualId = "OV-2024-002"
     speciesId = "sheep"
     breedId = "ouled-djellal"
     sex = "male"
     birthDate = "2022-06-10"
-    status = "active"
 }
 $maleAnimalId = Get-ResponseData $maleAnimalResponse "id"
 Write-Success "Created: $maleAnimalId"
@@ -316,9 +314,9 @@ if ($animalId) {
 
     Write-Test "PUT /farms/$FarmId/animals/$animalId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/animals/$animalId" -Body @{
-        name = "Bella Updated"
+        visualId = "OV-2024-001-Updated"
     }
-    Write-Success "Updated name"
+    Write-Success "Updated visualId"
 }
 
 # =============================================================================
