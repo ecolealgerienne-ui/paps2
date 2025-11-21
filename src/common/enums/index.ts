@@ -1,6 +1,3 @@
-// ========== LANGUAGE ==========
-export { Language, DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from './language.enum';
-
 // ========== ANIMAL STATUS ==========
 export enum AnimalStatus {
   ALIVE = 'alive',

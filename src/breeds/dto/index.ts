@@ -1,7 +1,6 @@
-import { IsString, IsOptional, IsInt, Min, IsBoolean, IsIn } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { SUPPORTED_LANGUAGES } from '../../common/enums';
 
 /**
  * DTO for creating a Breed
@@ -16,18 +15,17 @@ export class CreateBreedDto {
   @IsString()
   speciesId: string;
 
-  @ApiProperty({ description: 'Breed name in the specified language' })
+  @ApiProperty({ description: 'Breed name in French' })
   @IsString()
-  name: string;
+  nameFr: string;
 
-  @ApiProperty({
-    description: 'Language code for the name',
-    enum: ['fr', 'en', 'ar'],
-    example: 'fr'
-  })
+  @ApiProperty({ description: 'Breed name in English' })
   @IsString()
-  @IsIn(SUPPORTED_LANGUAGES)
-  lang: string;
+  nameEn: string;
+
+  @ApiProperty({ description: 'Breed name in Arabic' })
+  @IsString()
+  nameAr: string;
 
   @ApiProperty({ description: 'Breed description', required: false })
   @IsOptional()
@@ -57,21 +55,20 @@ export class UpdateBreedDto {
   @IsString()
   speciesId?: string;
 
-  @ApiProperty({ description: 'Breed name in the specified language', required: false })
+  @ApiProperty({ description: 'Breed name in French', required: false })
   @IsOptional()
   @IsString()
-  name?: string;
+  nameFr?: string;
 
-  @ApiProperty({
-    description: 'Language code for the name (required if name is provided)',
-    enum: ['fr', 'en', 'ar'],
-    example: 'fr',
-    required: false
-  })
+  @ApiProperty({ description: 'Breed name in English', required: false })
   @IsOptional()
   @IsString()
-  @IsIn(SUPPORTED_LANGUAGES)
-  lang?: string;
+  nameEn?: string;
+
+  @ApiProperty({ description: 'Breed name in Arabic', required: false })
+  @IsOptional()
+  @IsString()
+  nameAr?: string;
 
   @ApiProperty({ description: 'Breed description', required: false })
   @IsOptional()

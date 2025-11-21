@@ -1,9 +1,7 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SpeciesService } from './species.service';
 import { CreateSpeciesDto, UpdateSpeciesDto } from './dto';
-import { Lang } from '../common/decorators';
-import { getLocalizedName } from '../common/utils/i18n.helper';
 
 /**
  * Controller for species reference data
@@ -15,21 +13,19 @@ export class SpeciesController {
   constructor(private readonly speciesService: SpeciesService) {}
 
   @Post()
-  @ApiOperation({
-    summary: 'Create a new species (Admin only)',
-    description: 'Creates a species with name in one language. Use lang field to specify which language.'
-  })
+  @ApiOperation({ summary: 'Create a new species (Admin only)' })
   @ApiResponse({ status: 201, description: 'Species created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
-  @ApiQuery({ name: 'lang', required: false, enum: ['fr', 'en', 'ar'], description: 'Language for response (default: fr)' })
-  async create(@Body() createSpeciesDto: CreateSpeciesDto, @Lang() lang: string) {
+  async create(@Body() createSpeciesDto: CreateSpeciesDto) {
     const species = await this.speciesService.create(createSpeciesDto);
 
     return {
       success: true,
       data: {
         id: species.id,
-        name: getLocalizedName(species, lang),
+        name_fr: species.nameFr,
+        name_en: species.nameEn,
+        name_ar: species.nameAr,
         icon: species.icon,
         display_order: species.displayOrder,
       },
@@ -37,11 +33,7 @@ export class SpeciesController {
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Get all species',
-    description: 'Returns species names in the requested language only'
-  })
-  @ApiQuery({ name: 'lang', required: false, enum: ['fr', 'en', 'ar'], description: 'Language for response (default: fr)' })
+  @ApiOperation({ summary: 'Get all species' })
   @ApiResponse({
     status: 200,
     description: 'List of all active species',
@@ -55,7 +47,9 @@ export class SpeciesController {
             type: 'object',
             properties: {
               id: { type: 'string' },
-              name: { type: 'string' },
+              name_fr: { type: 'string' },
+              name_en: { type: 'string' },
+              name_ar: { type: 'string' },
               icon: { type: 'string' },
               display_order: { type: 'number' },
             },
@@ -64,14 +58,16 @@ export class SpeciesController {
       },
     },
   })
-  async findAll(@Lang() lang: string) {
+  async findAll() {
     const species = await this.speciesService.findAll();
 
     return {
       success: true,
       data: species.map(s => ({
         id: s.id,
-        name: getLocalizedName(s, lang),
+        name_fr: s.nameFr,
+        name_en: s.nameEn,
+        name_ar: s.nameAr,
         icon: s.icon,
         display_order: s.displayOrder,
       })),
@@ -79,21 +75,19 @@ export class SpeciesController {
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Get a species by ID',
-    description: 'Returns species name in the requested language only'
-  })
-  @ApiQuery({ name: 'lang', required: false, enum: ['fr', 'en', 'ar'], description: 'Language for response (default: fr)' })
+  @ApiOperation({ summary: 'Get a species by ID' })
   @ApiResponse({ status: 200, description: 'Species found' })
   @ApiResponse({ status: 404, description: 'Species not found' })
-  async findOne(@Param('id') id: string, @Lang() lang: string) {
+  async findOne(@Param('id') id: string) {
     const species = await this.speciesService.findOne(id);
 
     return {
       success: true,
       data: {
         id: species.id,
-        name: getLocalizedName(species, lang),
+        name_fr: species.nameFr,
+        name_en: species.nameEn,
+        name_ar: species.nameAr,
         icon: species.icon,
         display_order: species.displayOrder,
       },
@@ -101,21 +95,19 @@ export class SpeciesController {
   }
 
   @Put(':id')
-  @ApiOperation({
-    summary: 'Update a species (Admin only)',
-    description: 'Update species name in one language. Provide name and lang fields to update a specific language.'
-  })
-  @ApiQuery({ name: 'lang', required: false, enum: ['fr', 'en', 'ar'], description: 'Language for response (default: fr)' })
+  @ApiOperation({ summary: 'Update a species (Admin only)' })
   @ApiResponse({ status: 200, description: 'Species updated successfully' })
   @ApiResponse({ status: 404, description: 'Species not found' })
-  async update(@Param('id') id: string, @Body() updateSpeciesDto: UpdateSpeciesDto, @Lang() lang: string) {
+  async update(@Param('id') id: string, @Body() updateSpeciesDto: UpdateSpeciesDto) {
     const species = await this.speciesService.update(id, updateSpeciesDto);
 
     return {
       success: true,
       data: {
         id: species.id,
-        name: getLocalizedName(species, lang),
+        name_fr: species.nameFr,
+        name_en: species.nameEn,
+        name_ar: species.nameAr,
         icon: species.icon,
         display_order: species.displayOrder,
       },
