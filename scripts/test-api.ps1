@@ -134,9 +134,10 @@ $response | ConvertTo-Json -Depth 5
 
 Write-Test "GET /health - Health check with DB connection test"
 $response = Invoke-Api -Method GET -Endpoint "/health"
-if ($response.status -eq "ok" -and $response.database -eq "connected") {
+# Health check returns: {success, data: {status, timestamp, database}, timestamp}
+if ($response.data.status -eq "ok" -and $response.data.database -eq "connected") {
     Write-Success "Health check OK - Database connected"
-} elseif ($response.status -eq "error") {
+} elseif ($response.data.status -eq "error") {
     Write-ErrorMsg "Health check FAILED - Database disconnected"
 } else {
     Write-Warning "Health check returned unexpected response"
@@ -175,8 +176,8 @@ if ($testFarmId) {
         Write-Warning "Stats were included (unexpected)"
     }
 
-    Write-Test "GET /api/farms/$testFarmId?includeStats=true - Get farm with stats (slower)"
-    $response = Invoke-Api -Method GET -Endpoint "/api/farms/$testFarmId?includeStats=true"
+    Write-Test "GET /api/farms/$testFarmId`?includeStats=true - Get farm with stats (slower)"
+    $response = Invoke-Api -Method GET -Endpoint "/api/farms/$testFarmId`?includeStats=true"
     if ($response.data._count) {
         Write-Success "Retrieved farm WITH stats (13 counts)"
         Write-Host "  Stats: animals=$($response.data._count.animals), lots=$($response.data._count.lots), treatments=$($response.data._count.treatments)" -ForegroundColor Cyan
@@ -207,7 +208,13 @@ Write-Header "Species API - 1 endpoint (NEW)"
 
 Write-Test "GET /api/v1/species - Get all species"
 $response = Invoke-Api -Method GET -Endpoint "/api/v1/species"
-if ($response.data) { $count = $response.data.Count } else { $count = 0 }
+if ($response.data -and $response.data.Count) {
+    $count = $response.data.Count
+} elseif ($response -is [array]) {
+    $count = $response.Count
+} else {
+    $count = 0
+}
 Write-Success "Found: $count species"
 
 # =============================================================================
@@ -217,12 +224,24 @@ Write-Header "Breeds API - 2 endpoints (NEW)"
 
 Write-Test "GET /api/v1/breeds - Get all breeds"
 $response = Invoke-Api -Method GET -Endpoint "/api/v1/breeds"
-if ($response.data) { $count = $response.data.Count } else { $count = 0 }
+if ($response.data -and $response.data.Count) {
+    $count = $response.data.Count
+} elseif ($response -is [array]) {
+    $count = $response.Count
+} else {
+    $count = 0
+}
 Write-Success "Found: $count breeds"
 
-Write-Test "GET /api/v1/breeds?speciesId=sheep - Filter by species"
-$response = Invoke-Api -Method GET -Endpoint "/api/v1/breeds?speciesId=sheep"
-if ($response.data) { $count = $response.data.Count } else { $count = 0 }
+Write-Test "GET /api/v1/breeds`?speciesId=sheep - Filter by species"
+$response = Invoke-Api -Method GET -Endpoint "/api/v1/breeds`?speciesId=sheep"
+if ($response.data -and $response.data.Count) {
+    $count = $response.data.Count
+} elseif ($response -is [array]) {
+    $count = $response.Count
+} else {
+    $count = 0
+}
 Write-Success "Found: $count breeds for sheep"
 
 # =============================================================================
@@ -605,7 +624,7 @@ Write-Header "Vaccinations API - 6 endpoints"
 if ($animalId) {
     Write-Test "POST /farms/$FarmId/vaccinations - Create"
     $vaccinationResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/vaccinations" -Body @{
-        animalIds = $animalId
+        animal_ids = @($animalId)
         vaccineName = "Enterotoxemie"
         type = "obligatoire"
         disease = "Enterotoxemie"
