@@ -1,23 +1,25 @@
-import { IsString, IsOptional, IsInt, Min } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { SUPPORTED_LANGUAGES } from '../../common/enums';
 
 export class CreateAdministrationRouteDto {
   @ApiProperty({ description: 'Route ID (e.g., IM, IV, SC, PO)' })
   @IsString()
   id: string;
 
-  @ApiProperty({ description: 'Name in French' })
+  @ApiProperty({ description: 'Route name in the specified language' })
   @IsString()
-  nameFr: string;
+  name: string;
 
-  @ApiProperty({ description: 'Name in English' })
+  @ApiProperty({
+    description: 'Language code for the name',
+    enum: ['fr', 'en', 'ar'],
+    example: 'fr'
+  })
   @IsString()
-  nameEn: string;
-
-  @ApiProperty({ description: 'Name in Arabic' })
-  @IsString()
-  nameAr: string;
+  @IsIn(SUPPORTED_LANGUAGES)
+  lang: string;
 
   @ApiProperty({ description: 'Display order', required: false, default: 0 })
   @IsOptional()
@@ -28,20 +30,21 @@ export class CreateAdministrationRouteDto {
 }
 
 export class UpdateAdministrationRouteDto {
-  @ApiProperty({ description: 'Name in French', required: false })
+  @ApiProperty({ description: 'Route name in the specified language', required: false })
   @IsOptional()
   @IsString()
-  nameFr?: string;
+  name?: string;
 
-  @ApiProperty({ description: 'Name in English', required: false })
+  @ApiProperty({
+    description: 'Language code for the name (required if name is provided)',
+    enum: ['fr', 'en', 'ar'],
+    example: 'fr',
+    required: false
+  })
   @IsOptional()
   @IsString()
-  nameEn?: string;
-
-  @ApiProperty({ description: 'Name in Arabic', required: false })
-  @IsOptional()
-  @IsString()
-  nameAr?: string;
+  @IsIn(SUPPORTED_LANGUAGES)
+  lang?: string;
 
   @ApiProperty({ description: 'Display order', required: false })
   @IsOptional()

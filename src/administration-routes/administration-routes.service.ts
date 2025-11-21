@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAdministrationRouteDto, UpdateAdministrationRouteDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
@@ -7,6 +7,7 @@ import {
   EntityConflictException,
 } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { createLangUpdateData } from '../common/utils/i18n.helper';
 
 @Injectable()
 export class AdministrationRoutesService {
@@ -32,11 +33,22 @@ export class AdministrationRoutesService {
     }
 
     try {
+      // Map language to correct column
+      const langData = createLangUpdateData(dto.name, dto.lang);
+
       const route = await this.prisma.administrationRoute.create({
-        data: dto,
+        data: {
+          id: dto.id,
+          ...langData,
+          // Initialize other languages as empty strings if not provided
+          nameFr: langData.nameFr || '',
+          nameEn: langData.nameEn || '',
+          nameAr: langData.nameAr || '',
+          displayOrder: dto.displayOrder ?? 0,
+        },
       });
 
-      this.logger.audit('Administration route created', { routeId: route.id });
+      this.logger.audit('Administration route created', { routeId: route.id, lang: dto.lang });
       return route;
     } catch (error) {
       this.logger.error(`Failed to create administration route ${dto.id}`, error.stack);
@@ -83,13 +95,30 @@ export class AdministrationRoutesService {
       );
     }
 
+    // Validate: if name is provided, lang must be provided too
+    if (dto.name && !dto.lang) {
+      throw new BadRequestException('Language code (lang) is required when updating name');
+    }
+
     try {
+      // Build update data
+      const updateData: any = {};
+
+      // Handle language-specific name update
+      if (dto.name && dto.lang) {
+        const langData = createLangUpdateData(dto.name, dto.lang);
+        Object.assign(updateData, langData);
+      }
+
+      // Handle other fields
+      if (dto.displayOrder !== undefined) updateData.displayOrder = dto.displayOrder;
+
       const updated = await this.prisma.administrationRoute.update({
         where: { id },
-        data: dto,
+        data: updateData,
       });
 
-      this.logger.audit('Administration route updated', { routeId: id });
+      this.logger.audit('Administration route updated', { routeId: id, lang: dto.lang });
       return updated;
     } catch (error) {
       this.logger.error(`Failed to update administration route ${id}`, error.stack);

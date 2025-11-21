@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBreedDto, UpdateBreedDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
+import { createLangUpdateData } from '../common/utils/i18n.helper';
 
 /**
  * Service for managing breeds reference data
@@ -19,23 +20,28 @@ export class BreedsService {
    * @returns Created breed
    */
   async create(dto: CreateBreedDto) {
-    this.logger.debug(`Creating breed`, { id: dto.id, nameFr: dto.nameFr, speciesId: dto.speciesId });
+    this.logger.debug(`Creating breed`, { id: dto.id, name: dto.name, lang: dto.lang, speciesId: dto.speciesId });
 
     try {
+      // Map language to correct column
+      const langData = createLangUpdateData(dto.name, dto.lang);
+
       const breed = await this.prisma.breed.create({
         data: {
           id: dto.id,
           speciesId: dto.speciesId,
-          nameFr: dto.nameFr,
-          nameEn: dto.nameEn,
-          nameAr: dto.nameAr,
+          ...langData,
+          // Initialize other languages as empty strings if not provided
+          nameFr: langData.nameFr || '',
+          nameEn: langData.nameEn || '',
+          nameAr: langData.nameAr || '',
           description: dto.description,
           displayOrder: dto.displayOrder ?? 0,
           isActive: dto.isActive ?? true,
         },
       });
 
-      this.logger.audit('Breed created', { breedId: breed.id, nameFr: breed.nameFr });
+      this.logger.audit('Breed created', { breedId: breed.id, lang: dto.lang });
       return breed;
     } catch (error) {
       this.logger.error(`Failed to create breed`, error.stack);
@@ -106,21 +112,33 @@ export class BreedsService {
     // Check if breed exists
     await this.findOne(id);
 
+    // Validate: if name is provided, lang must be provided too
+    if (dto.name && !dto.lang) {
+      throw new BadRequestException('Language code (lang) is required when updating name');
+    }
+
     try {
+      // Build update data
+      const updateData: any = {};
+
+      // Handle language-specific name update
+      if (dto.name && dto.lang) {
+        const langData = createLangUpdateData(dto.name, dto.lang);
+        Object.assign(updateData, langData);
+      }
+
+      // Handle other fields
+      if (dto.speciesId !== undefined) updateData.speciesId = dto.speciesId;
+      if (dto.description !== undefined) updateData.description = dto.description;
+      if (dto.displayOrder !== undefined) updateData.displayOrder = dto.displayOrder;
+      if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
+
       const breed = await this.prisma.breed.update({
         where: { id },
-        data: {
-          speciesId: dto.speciesId,
-          nameFr: dto.nameFr,
-          nameEn: dto.nameEn,
-          nameAr: dto.nameAr,
-          description: dto.description,
-          displayOrder: dto.displayOrder,
-          isActive: dto.isActive,
-        },
+        data: updateData,
       });
 
-      this.logger.audit('Breed updated', { breedId: breed.id, nameFr: breed.nameFr });
+      this.logger.audit('Breed updated', { breedId: breed.id, lang: dto.lang });
       return breed;
     } catch (error) {
       this.logger.error(`Failed to update breed`, error.stack);

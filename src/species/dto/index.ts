@@ -1,6 +1,7 @@
-import { IsString, IsOptional, IsInt, Min } from 'class-validator';
+import { IsString, IsOptional, IsInt, Min, IsIn } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { SUPPORTED_LANGUAGES } from '../../common/enums';
 
 /**
  * DTO for creating a Species
@@ -11,17 +12,18 @@ export class CreateSpeciesDto {
   @IsString()
   id: string;
 
-  @ApiProperty({ description: 'Species name in French' })
+  @ApiProperty({ description: 'Species name in the specified language' })
   @IsString()
-  nameFr: string;
+  name: string;
 
-  @ApiProperty({ description: 'Species name in English' })
+  @ApiProperty({
+    description: 'Language code for the name',
+    enum: ['fr', 'en', 'ar'],
+    example: 'fr'
+  })
   @IsString()
-  nameEn: string;
-
-  @ApiProperty({ description: 'Species name in Arabic' })
-  @IsString()
-  nameAr: string;
+  @IsIn(SUPPORTED_LANGUAGES)
+  lang: string;
 
   @ApiProperty({ description: 'Icon identifier', required: false })
   @IsOptional()
@@ -41,20 +43,21 @@ export class CreateSpeciesDto {
  * Timestamps managed server-side (Reference entity - Option A)
  */
 export class UpdateSpeciesDto {
-  @ApiProperty({ description: 'Species name in French', required: false })
+  @ApiProperty({ description: 'Species name in the specified language', required: false })
   @IsOptional()
   @IsString()
-  nameFr?: string;
+  name?: string;
 
-  @ApiProperty({ description: 'Species name in English', required: false })
+  @ApiProperty({
+    description: 'Language code for the name (required if name is provided)',
+    enum: ['fr', 'en', 'ar'],
+    example: 'fr',
+    required: false
+  })
   @IsOptional()
   @IsString()
-  nameEn?: string;
-
-  @ApiProperty({ description: 'Species name in Arabic', required: false })
-  @IsOptional()
-  @IsString()
-  nameAr?: string;
+  @IsIn(SUPPORTED_LANGUAGES)
+  lang?: string;
 
   @ApiProperty({ description: 'Icon identifier', required: false })
   @IsOptional()

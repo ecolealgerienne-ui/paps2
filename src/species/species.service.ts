@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSpeciesDto, UpdateSpeciesDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
+import { createLangUpdateData } from '../common/utils/i18n.helper';
 
 /**
  * Service for managing species reference data
@@ -19,21 +20,26 @@ export class SpeciesService {
    * @returns Created species
    */
   async create(dto: CreateSpeciesDto) {
-    this.logger.debug(`Creating species`, { id: dto.id, nameFr: dto.nameFr });
+    this.logger.debug(`Creating species`, { id: dto.id, name: dto.name, lang: dto.lang });
 
     try {
+      // Map language to correct column
+      const langData = createLangUpdateData(dto.name, dto.lang);
+
       const species = await this.prisma.species.create({
         data: {
           id: dto.id,
-          nameFr: dto.nameFr,
-          nameEn: dto.nameEn,
-          nameAr: dto.nameAr,
+          ...langData,
+          // Initialize other languages as empty strings if not provided
+          nameFr: langData.nameFr || '',
+          nameEn: langData.nameEn || '',
+          nameAr: langData.nameAr || '',
           icon: dto.icon || '',
           displayOrder: dto.displayOrder ?? 0,
         },
       });
 
-      this.logger.audit('Species created', { speciesId: species.id, nameFr: species.nameFr });
+      this.logger.audit('Species created', { speciesId: species.id, lang: dto.lang });
       return species;
     } catch (error) {
       this.logger.error(`Failed to create species`, error.stack);
@@ -91,19 +97,31 @@ export class SpeciesService {
     // Check if species exists
     await this.findOne(id);
 
+    // Validate: if name is provided, lang must be provided too
+    if (dto.name && !dto.lang) {
+      throw new BadRequestException('Language code (lang) is required when updating name');
+    }
+
     try {
+      // Build update data
+      const updateData: any = {};
+
+      // Handle language-specific name update
+      if (dto.name && dto.lang) {
+        const langData = createLangUpdateData(dto.name, dto.lang);
+        Object.assign(updateData, langData);
+      }
+
+      // Handle other fields
+      if (dto.icon !== undefined) updateData.icon = dto.icon;
+      if (dto.displayOrder !== undefined) updateData.displayOrder = dto.displayOrder;
+
       const species = await this.prisma.species.update({
         where: { id },
-        data: {
-          nameFr: dto.nameFr,
-          nameEn: dto.nameEn,
-          nameAr: dto.nameAr,
-          icon: dto.icon,
-          displayOrder: dto.displayOrder,
-        },
+        data: updateData,
       });
 
-      this.logger.audit('Species updated', { speciesId: species.id, nameFr: species.nameFr });
+      this.logger.audit('Species updated', { speciesId: species.id, lang: dto.lang });
       return species;
     } catch (error) {
       this.logger.error(`Failed to update species`, error.stack);
