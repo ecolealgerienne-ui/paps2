@@ -35,12 +35,20 @@ export class FarmsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a farm by ID' })
+  @ApiOperation({
+    summary: 'Get a farm by ID',
+    description: 'Use ?includeStats=true to include entity counts (slower with large datasets)'
+  })
   @ApiParam({ name: 'id', description: 'Farm ID' })
   @ApiResponse({ status: 200, description: 'Farm details' })
   @ApiResponse({ status: 404, description: 'Farm not found' })
-  findOne(@Param('id') id: string) {
-    return this.farmsService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Query('includeStats') includeStats?: string
+  ) {
+    // Parse includeStats: 'true' -> true, undefined/false -> false
+    const withStats = includeStats === 'true';
+    return this.farmsService.findOne(id, withStats);
   }
 
   @Put(':id')

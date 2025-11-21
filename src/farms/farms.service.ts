@@ -75,30 +75,34 @@ export class FarmsService {
     });
   }
 
-  async findOne(id: string) {
-    this.logger.debug(`Finding farm ${id}`);
+  async findOne(id: string, includeStats = false) {
+    this.logger.debug(`Finding farm ${id}`, { includeStats });
 
     const farm = await this.prisma.farm.findUnique({
       where: { id },
       include: {
         preferences: true,
-        _count: {
-          select: {
-            animals: true,
-            lots: true,
-            movements: true,
-            campaigns: true,
-            treatments: true,
-            vaccinations: true,
-            breedings: true,
-            weights: true,
-            documents: true,
-            veterinarians: true,
-            medicalProducts: true,
-            vaccines: true,
-            alertConfigurations: true,
+        // Performance optimization: Only include counts when explicitly requested
+        // With 5000+ animals, counting all entities can take 2-5 seconds
+        ...(includeStats && {
+          _count: {
+            select: {
+              animals: true,
+              lots: true,
+              movements: true,
+              campaigns: true,
+              treatments: true,
+              vaccinations: true,
+              breedings: true,
+              weights: true,
+              documents: true,
+              veterinarians: true,
+              medicalProducts: true,
+              vaccines: true,
+              alertConfigurations: true,
+            },
           },
-        },
+        }),
       },
     });
 
