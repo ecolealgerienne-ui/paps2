@@ -61,7 +61,12 @@ services:
         condition: service_healthy
     networks:
       - anitra-network
-    command: sh -c "npx prisma generate && npx prisma migrate deploy && npm run start:dev"
+    # Le script docker-entrypoint.sh gère automatiquement :
+    # 1. Vérification des fichiers (package.json, schema.prisma)
+    # 2. Génération du client Prisma
+    # 3. Attente de PostgreSQL
+    # 4. Application des migrations
+    # 5. Démarrage de l'application en mode dev
 
 networks:
   anitra-network:

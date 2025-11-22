@@ -13,8 +13,14 @@ COPY package*.json ./
 # Installer toutes les dépendances (y compris devDependencies pour le dev)
 RUN npm install
 
+# Copier le script d'entrypoint
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Exposer le port de l'API
 EXPOSE 3000
 
 # Note: Les sources (src, prisma, etc.) seront montées via volumes
-# Le client Prisma sera généré au démarrage du container
+# Prisma generate et migrate seront exécutés au lancement via entrypoint
+
+ENTRYPOINT ["docker-entrypoint.sh"]
