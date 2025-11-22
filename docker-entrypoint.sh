@@ -22,7 +22,7 @@ npx prisma generate
 
 # Attendre que PostgreSQL soit prêt (au cas où)
 echo "⏳ Waiting for PostgreSQL..."
-until npx prisma db execute --stdin <<< "SELECT 1" > /dev/null 2>&1; do
+until echo "SELECT 1" | npx prisma db execute --stdin > /dev/null 2>&1; do
   echo "   PostgreSQL is unavailable - sleeping"
   sleep 2
 done
