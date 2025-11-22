@@ -25,7 +25,7 @@ services:
   # API NestJS avec hot reload
   api:
     build:
-      context: .
+      context: ./anitra-backend/api
       dockerfile: Dockerfile.dev
     container_name: anitra-api
     restart: unless-stopped
@@ -43,15 +43,15 @@ services:
       - CORS_ORIGIN=http://localhost:4200,http://localhost:3001,http://localhost:5173
     volumes:
       # Mount source code for hot reload
-      - ./src:/app/src
-      - ./prisma:/app/prisma
-      - ./test:/app/test
+      - ./anitra-backend/api/src:/app/src
+      - ./anitra-backend/api/prisma:/app/prisma
+      - ./anitra-backend/api/test:/app/test
 
       # Mount config files
-      - ./tsconfig.json:/app/tsconfig.json
-      - ./tsconfig.build.json:/app/tsconfig.build.json
-      - ./nest-cli.json:/app/nest-cli.json
-      - ./package.json:/app/package.json
+      - ./anitra-backend/api/tsconfig.json:/app/tsconfig.json
+      - ./anitra-backend/api/tsconfig.build.json:/app/tsconfig.build.json
+      - ./anitra-backend/api/nest-cli.json:/app/nest-cli.json
+      - ./anitra-backend/api/package.json:/app/package.json
 
       # Prevent overwriting node_modules
       - /app/node_modules
