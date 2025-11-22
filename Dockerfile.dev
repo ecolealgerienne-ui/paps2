@@ -1,0 +1,27 @@
+# Dockerfile pour développement avec hot reload
+FROM node:20-alpine
+
+# Installer les dépendances système nécessaires
+RUN apk add --no-cache openssl
+
+# Créer le répertoire de l'application
+WORKDIR /app
+
+# Copier package.json et package-lock.json
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Installer toutes les dépendances (y compris devDependencies pour le dev)
+RUN npm install
+
+# Copier le reste des fichiers (sera override par le volume en dev)
+COPY . .
+
+# Générer le client Prisma
+RUN npx prisma generate
+
+# Exposer le port de l'API
+EXPOSE 3000
+
+# Commande pour lancer en mode développement avec hot reload
+CMD ["npm", "run", "start:dev"]
