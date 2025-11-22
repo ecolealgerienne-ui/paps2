@@ -15,7 +15,7 @@ services:
 
   api:
     build:
-      context: ./api
+      context: .
       dockerfile: Dockerfile.dev
     container_name: anitra-api
     ports:

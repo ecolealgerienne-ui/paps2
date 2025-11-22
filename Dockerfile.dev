@@ -7,13 +7,13 @@ RUN apk add --no-cache openssl
 # Créer le répertoire de l'application
 WORKDIR /app
 
-# Copier seulement package.json pour installer les dépendances
-COPY package*.json ./
+# Copier seulement package.json pour installer les dépendances (depuis ./api)
+COPY api/package*.json ./
 
 # Installer toutes les dépendances (y compris devDependencies pour le dev)
 RUN npm install
 
-# Copier le script d'entrypoint
+# Copier le script d'entrypoint (depuis la racine du projet)
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
