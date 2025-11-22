@@ -34,7 +34,6 @@ services:
       - ./api/nest-cli.json:/app/nest-cli.json
       - ./api/package.json:/app/package.json
       - /app/node_modules
-      - /app/dist
     depends_on:
       - postgres
 
