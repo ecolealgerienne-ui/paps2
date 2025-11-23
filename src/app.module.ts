@@ -32,6 +32,7 @@ import { VaccinesModule } from './vaccines/vaccines.module';
 import { VaccinesGlobalModule } from './vaccines-global/vaccines-global.module';
 import { VeterinariansModule } from './veterinarians/veterinarians.module';
 import { WeightsModule } from './weights/weights.module';
+import { VaccineCountriesModule } from './vaccine-countries/vaccine-countries.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { WeightsModule } from './weights/weights.module';
     AlertConfigurationsModule,
     FarmPreferencesModule,
     SyncModule,
+    VaccineCountriesModule,
   ],
   controllers: [AppController],
   providers: [
