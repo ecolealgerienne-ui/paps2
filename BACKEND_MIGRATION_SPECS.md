@@ -1639,6 +1639,205 @@ model AlertTemplate {
 
 ---
 
+## 4.5. countries (Pays)
+
+### 4.5.1. Vue d'ensemble
+
+| Propriété | Valeur |
+|-----------|---------|
+| **Nom table** | `countries` |
+| **Type** | Référentiel global (partagé toutes fermes) |
+| **Rôle** | Catalogue officiel des pays (codes ISO) |
+| **Complément** | Utilisé pour validation codes pays + UI (listes déroulantes) |
+| **Seed data** | ✅ OUI - Liste complète pays (ISO 3166-1) |
+
+### 4.5.2. Structure complète
+
+| Champ | Type DB | Obligatoire | Défaut | Description |
+|-------|---------|-------------|--------|-------------|
+| `code` | VARCHAR(2) | ✅ | - | Code pays ISO 3166-1 alpha-2 (PRIMARY KEY) |
+| `nameFr` | VARCHAR | ✅ | - | Nom pays en français |
+| `nameEn` | VARCHAR | ✅ | - | Nom pays en anglais |
+| `nameAr` | VARCHAR | ✅ | - | Nom pays en arabe |
+| `region` | VARCHAR | ❌ | `null` | Région (Europe, Africa, Asia, etc.) |
+| `isActive` | BOOLEAN | ✅ | `true` | Pays actif dans le système |
+| `createdAt` | TIMESTAMP | ✅ | `now()` | Date création |
+| `updatedAt` | TIMESTAMP | ✅ | `now()` | Date modification |
+
+### 4.5.3. Schema Prisma
+
+```prisma
+model Country {
+  code      String   @id           // ISO 3166-1 alpha-2
+  nameFr    String   @map("name_fr")
+  nameEn    String   @map("name_en")
+  nameAr    String   @map("name_ar")
+  region    String?  // Europe, Africa, Asia, Americas, Oceania
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  breedCountries   BreedCountry[]
+  productCountries ProductCountry[]
+  vaccineCountries VaccineCountry[]
+  campaignCountries CampaignCountry[]
+
+  @@index([isActive])
+  @@index([region])
+  @@map("countries")
+}
+```
+
+### 4.5.4. Relations
+
+| Relation | Type | Description |
+|----------|------|-------------|
+| `breedCountries` | One-to-Many | Disponibilité races par pays |
+| `productCountries` | One-to-Many | Disponibilité produits par pays |
+| `vaccineCountries` | One-to-Many | Homologation vaccins par pays |
+| `campaignCountries` | One-to-Many | Campagnes nationales par pays |
+
+### 4.5.5. Exemples seed data
+
+```json
+[
+  {
+    "code": "FR",
+    "nameFr": "France",
+    "nameEn": "France",
+    "nameAr": "فرنسا",
+    "region": "Europe",
+    "isActive": true
+  },
+  {
+    "code": "DZ",
+    "nameFr": "Algérie",
+    "nameEn": "Algeria",
+    "nameAr": "الجزائر",
+    "region": "Africa",
+    "isActive": true
+  },
+  {
+    "code": "MA",
+    "nameFr": "Maroc",
+    "nameEn": "Morocco",
+    "nameAr": "المغرب",
+    "region": "Africa",
+    "isActive": true
+  },
+  {
+    "code": "TN",
+    "nameFr": "Tunisie",
+    "nameEn": "Tunisia",
+    "nameAr": "تونس",
+    "region": "Africa",
+    "isActive": true
+  },
+  {
+    "code": "ES",
+    "nameFr": "Espagne",
+    "nameEn": "Spain",
+    "nameAr": "إسبانيا",
+    "region": "Europe",
+    "isActive": true
+  },
+  {
+    "code": "IT",
+    "nameFr": "Italie",
+    "nameEn": "Italy",
+    "nameAr": "إيطاليا",
+    "region": "Europe",
+    "isActive": true
+  },
+  {
+    "code": "PT",
+    "nameFr": "Portugal",
+    "nameEn": "Portugal",
+    "nameAr": "البرتغال",
+    "region": "Europe",
+    "isActive": true
+  },
+  {
+    "code": "DE",
+    "nameFr": "Allemagne",
+    "nameEn": "Germany",
+    "nameAr": "ألمانيا",
+    "region": "Europe",
+    "isActive": true
+  },
+  {
+    "code": "BE",
+    "nameFr": "Belgique",
+    "nameEn": "Belgium",
+    "nameAr": "بلجيكا",
+    "region": "Europe",
+    "isActive": true
+  },
+  {
+    "code": "CH",
+    "nameFr": "Suisse",
+    "nameEn": "Switzerland",
+    "nameAr": "سويسرا",
+    "region": "Europe",
+    "isActive": true
+  }
+]
+```
+
+### 4.5.6. Script migration
+
+```sql
+-- Créer table countries
+CREATE TABLE countries (
+  code VARCHAR(2) PRIMARY KEY,
+  name_fr VARCHAR(100) NOT NULL,
+  name_en VARCHAR(100) NOT NULL,
+  name_ar VARCHAR(100) NOT NULL,
+  region VARCHAR(50),
+  is_active BOOLEAN DEFAULT TRUE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- Créer indexes
+CREATE INDEX idx_countries_is_active ON countries(is_active);
+CREATE INDEX idx_countries_region ON countries(region);
+
+-- Trigger updated_at
+CREATE TRIGGER update_countries_updated_at
+  BEFORE UPDATE ON countries
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Seed data (10 pays principaux)
+INSERT INTO countries (code, name_fr, name_en, name_ar, region, is_active) VALUES
+  ('FR', 'France', 'France', 'فرنسا', 'Europe', TRUE),
+  ('DZ', 'Algérie', 'Algeria', 'الجزائر', 'Africa', TRUE),
+  ('MA', 'Maroc', 'Morocco', 'المغرب', 'Africa', TRUE),
+  ('TN', 'Tunisie', 'Tunisia', 'تونس', 'Africa', TRUE),
+  ('ES', 'Espagne', 'Spain', 'إسبانيا', 'Europe', TRUE),
+  ('IT', 'Italie', 'Italy', 'إيطاليا', 'Europe', TRUE),
+  ('PT', 'Portugal', 'Portugal', 'البرتغال', 'Europe', TRUE),
+  ('DE', 'Allemagne', 'Germany', 'ألمانيا', 'Europe', TRUE),
+  ('BE', 'Belgique', 'Belgium', 'بلجيكا', 'Europe', TRUE),
+  ('CH', 'Suisse', 'Switzerland', 'سويسرا', 'Europe', TRUE);
+
+-- Ajouter d'autres pays selon besoins...
+```
+
+### 4.5.7. Notes techniques
+
+- **Multi-tenant** : ❌ NON (référentiel global)
+- **Seed data** : ✅ OUI (liste officielle ISO 3166-1)
+- **Modifiable** : ❌ NON (sauf admin système)
+- **Utilisation** :
+  - Validation codes pays dans Farms, Veterinarians
+  - Listes déroulantes UI (avec i18n)
+  - Filtrage géographique références (breeds, products, vaccines)
+- **Maintenance** : Très rare (changements ISO)
+
+---
+
 # 5. Tables liaison pays nouvelles
 
 ## 5.1. breed_countries
@@ -2421,60 +2620,67 @@ async function getAnimal(animalId: string, farmId: string) {
 
 # 8. Plan de migration & priorités
 
-## 8.1. Ordre d'exécution (CRITIQUE)
+## 8.1. Ordre d'exécution (CRITIQUE - OPTIMISÉ POUR PARALLÉLISATION)
 
-### **PHASE 1: Corrections tables existantes** (🔴 URGENT - Semaine 1)
+### ⚡ **ÉTAPE 1 : PARALLÈLE (Semaine 1-2) - 3 ÉQUIPES EN PARALLÈLE**
+
+**🔴 ÉQUIPE A : Corrections tables existantes (Phase 1)**
 
 ```
-Jour 1-2: Species + Breeds
-├── Ajouter champs manquants (deletedAt, timestamps, version, isActive)
-├── Créer indexes
+Semaine 1 Jour 1-2: Species + Breeds
+├── Species: Ajouter deletedAt, timestamps, version, isActive
+├── Breeds: Ajouter deletedAt, timestamps, version
+├── Breeds: Ajouter champ `code` unique 🆕
+├── Créer indexes (simples + composites) 🆕
 ├── Script migration SQL
 └── Tests validation
 
-Jour 3-4: Farms
+Semaine 1 Jour 3-4: Farms
 ├── Ajouter geo fields (country, department, commune)
+├── Ajouter contraintes CHECK sur codes géo 🆕
 ├── Ajouter isActive, version, deletedAt
-├── Créer indexes
+├── Créer indexes (simples + composites) 🆕
+├── Script migration SQL
 └── Tests validation
 
-Jour 5: Veterinarians + AlertConfiguration
-├── Veterinarians: department, commune, specialties JSON
-├── AlertConfiguration: supprimer doublon enabled
+Semaine 2 Jour 1-2: Veterinarians + AlertConfiguration + FarmPreferences
+├── Veterinarians: department, commune, specialties JSON, indexes composites 🆕
+├── AlertConfiguration: supprimer doublon enabled, ajouter ENUM
+├── FarmPreferences: ajouter ENUM (Language, WeightUnit, Currency) 🆕
 ├── Créer indexes
 └── Tests validation
 ```
 
-**Validation Phase 1:**
-- ✅ Toutes tables existantes corrigées
-- ✅ Migrations SQL testées en DEV
-- ✅ Aucune perte données
-- ✅ Backward compatible (soft changes)
+**Validation Équipe A:**
+- ✅ Toutes corrections appliquées
+- ✅ 5 recommandations supplémentaires intégrées 🆕
+- ✅ Index composites optimisés 🆕
+- ✅ Contraintes CHECK et ENUM actives 🆕
 
 ---
 
-### **PHASE 2: Renommer tables recyclées** (🟡 IMPORTANT - Semaine 2)
+**🟡 ÉQUIPE B : Renommer tables recyclées (Phase 2) - PARALLÈLE**
 
 ```
-Jour 1: Renommages
+Semaine 1 Jour 1: Renommages
 ├── medical_products → custom_medical_products
 ├── vaccines → custom_vaccines
 ├── campaigns → personal_campaigns
 └── Update FK relations (Prisma migrations gère)
 
-Jour 2: Tests
+Semaine 1 Jour 2-3: ENUM ajout
+├── PersonalCampaign.type, status (ENUM)
+├── AlertConfiguration.type, priority (ENUM)
+├── FarmPreferences.language, weightUnit, currency (ENUM) 🆕
+└── Tests contraintes
+
+Semaine 1 Jour 4-5: Tests validation
 ├── Vérifier relations intactes
 ├── Vérifier données accessibles
 └── Validation multi-tenant
-
-Jour 3: ENUM ajout
-├── PersonalCampaign.type, status
-├── AlertConfiguration.type, priority
-├── FarmPreferences.language, weightUnit
-└── Tests contraintes
 ```
 
-**Validation Phase 2:**
+**Validation Équipe B:**
 - ✅ Tables renommées correctement
 - ✅ Relations FK fonctionnelles
 - ✅ ENUM contraintes actives
@@ -2482,43 +2688,56 @@ Jour 3: ENUM ajout
 
 ---
 
-### **PHASE 3: Créer référentiels globaux** (🟡 IMPORTANT - Semaine 3-4)
+**🟢 ÉQUIPE C : Créer référentiels globaux (Phase 3) - PARALLÈLE**
 
 ```
-Semaine 3 Jour 1-2: medical_products (globale)
+Semaine 1 Jour 1-2: medical_products (globale)
 ├── Créer table structure
-├── Seed data: 50-100 produits officiels France
+├── Seed data: 50-100 produits officiels
 ├── Indexes
 └── Tests queries
 
-Semaine 3 Jour 3-4: vaccines (globale)
+Semaine 1 Jour 3-4: vaccines (globale)
 ├── Créer table structure
 ├── Seed data: 20-30 vaccins officiels
 ├── Indexes
 └── Tests queries
 
-Semaine 3 Jour 5: national_campaigns
-├── Créer table structure
-├── Seed data: Campagnes 2025 France (FCO, etc.)
+Semaine 2 Jour 1-2: national_campaigns + alert_templates
+├── Créer tables structures
+├── Seed data: Campagnes 2025 + templates alertes
 ├── Indexes
 └── Tests queries
 
-Semaine 4 Jour 1-2: alert_templates
+Semaine 2 Jour 3-4: countries (globale) 🆕
 ├── Créer table structure
-├── Seed data: 10-15 templates alertes
+├── Seed data: Pays ISO 3166-1 (FR, DZ, MA, TN, ES, IT, etc.)
 ├── Indexes
 └── Tests queries
+
+Semaine 2 Jour 5: Validation globale
+├── Tests queries toutes tables globales
+├── Performance checks
+└── Seed data exhaustif validé
 ```
 
-**Validation Phase 3:**
-- ✅ Tables globales créées
+**Validation Équipe C:**
+- ✅ 5 tables globales créées (dont countries 🆕)
 - ✅ Seed data complet et cohérent
 - ✅ Indexes performance OK
 - ✅ Queries globales testées
 
 ---
 
-### **PHASE 4: Créer liaisons pays** (🟡 IMPORTANT - Semaine 5)
+**⏱️ Durée Étape 1 : 2 semaines (au lieu de 4 en séquentiel) = GAIN 50%** 🚀
+
+---
+
+### ⚡ **ÉTAPE 2 : SÉQUENTIELLE (Semaine 3) - APRÈS ÉTAPE 1**
+
+**Dépendances** : Attend fin Étape 1 (Breeds, Farms, tables globales)
+
+**🟡 Créer liaisons pays (Phase 4)**
 
 ```
 Jour 1: breed_countries
@@ -2547,15 +2766,21 @@ Jour 5: Tests intégration
 └── Performance checks
 ```
 
-**Validation Phase 4:**
-- ✅ Liaisons créées
-- ✅ Seed data exhaustif
-- ✅ Filtrage pays fonctionne
+**Validation Étape 2:**
+- ✅ 4 tables de liaison créées
+- ✅ Seed data exhaustif (100+ races × pays)
+- ✅ Filtrage géographique fonctionne
 - ✅ Performance acceptable
+
+**⏱️ Durée Étape 2 : 1 semaine (5 jours)** 🚀
 
 ---
 
-### **PHASE 5: Créer préférences ferme** (🟢 AMÉLIORATION - Semaine 6-7)
+### ⚡ **ÉTAPE 3 : SÉQUENTIELLE (Semaine 4-5) - APRÈS ÉTAPE 2**
+
+**Dépendances** : Attend fin Étape 2 (liaisons pays)
+
+**🟢 Créer préférences ferme (Phase 5)**
 
 ```
 Semaine 6 Jour 1-2: farm_breed_preferences
@@ -2593,15 +2818,21 @@ Semaine 7 Jour 3-5: Tests intégration complète
 └── Tests offline-first
 ```
 
-**Validation Phase 5:**
-- ✅ Toutes préférences créées
-- ✅ Workflow setup fonctionnel
-- ✅ Queries transactionnelles rapides
-- ✅ Offline sync opérationnel
+**Validation Étape 3:**
+- ✅ 5 tables préférences créées
+- ✅ Workflow setup ferme fonctionnel
+- ✅ Queries transactionnelles rapides (pas de JOIN)
+- ✅ Offline sync 100% opérationnel
+
+**⏱️ Durée Étape 3 : 2 semaines (10 jours)** 🚀
 
 ---
 
-### **PHASE 6: Scripts migration données** (🟢 AMÉLIORATION - Semaine 8)
+### ⚡ **ÉTAPE 4 : FINALE (Semaine 6) - APRÈS ÉTAPE 3**
+
+**Dépendances** : Attend fin Étape 3 (préférences ferme)
+
+**🟢 Scripts migration données + Tests régression (Phase 6)**
 
 ```
 Jour 1: Veterinarians.specialties VARCHAR → JSON
@@ -2623,11 +2854,43 @@ Jour 4-5: Tests régression complète
 └── Validation MVP ready
 ```
 
-**Validation Phase 6:**
+**Validation Étape 4:**
 - ✅ Données migrées sans perte
-- ✅ Fermes existantes initialisées
-- ✅ Tests régression passés
-- ✅ **MIGRATION COMPLÈTE**
+- ✅ Fermes existantes initialisées (préférences)
+- ✅ Tests régression complets passés
+- ✅ **MIGRATION COMPLÈTE** 🎉
+
+**⏱️ Durée Étape 4 : 1 semaine (5 jours)** 🚀
+
+---
+
+### 📊 **RÉSUMÉ TIMELINE OPTIMISÉ**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PLAN OPTIMISÉ (6 SEMAINES)                │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Semaine 1-2 : ÉTAPE 1 - PARALLÈLE (3 équipes)             │
+│  ├─ Équipe A : Corrections tables existantes                │
+│  ├─ Équipe B : Renommer tables recyclées                    │
+│  └─ Équipe C : Créer référentiels globaux                   │
+│                                                              │
+│  Semaine 3 : ÉTAPE 2 - SÉQUENTIELLE                        │
+│  └─ Créer liaisons pays (breed_, product_, vaccine_, etc.) │
+│                                                              │
+│  Semaine 4-5 : ÉTAPE 3 - SÉQUENTIELLE                      │
+│  └─ Créer préférences ferme (5 tables)                     │
+│                                                              │
+│  Semaine 6 : ÉTAPE 4 - FINALE                              │
+│  └─ Migration données + Tests régression                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+📉 PLAN ORIGINAL     : 8 semaines (séquentiel)
+📈 PLAN OPTIMISÉ    : 6 semaines (parallèle)
+🚀 GAIN DE TEMPS    : 2 semaines (25% plus rapide)
+```
 
 ---
 
