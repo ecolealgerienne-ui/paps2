@@ -1,52 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateAdministrationRouteDto, UpdateAdministrationRouteDto } from './dto';
-import { AppLogger } from '../common/utils/logger.service';
-import {
-  EntityNotFoundException,
-  EntityConflictException,
-} from '../common/exceptions';
-import { ERROR_CODES } from '../common/constants/error-codes';
+import { CreateAdministrationRouteDto } from './dto/create-administration-route.dto';
+import { UpdateAdministrationRouteDto } from './dto/update-administration-route.dto';
 
 @Injectable()
 export class AdministrationRoutesService {
-  private readonly logger = new AppLogger(AdministrationRoutesService.name);
-
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateAdministrationRouteDto) {
-    this.logger.debug(`Creating administration route ${dto.id}`);
-
-    // Check if ID already exists
+    // Vérifier code unique
     const existing = await this.prisma.administrationRoute.findUnique({
-      where: { id: dto.id },
+      where: { code: dto.code },
     });
 
-    if (existing) {
-      this.logger.warn('Administration route already exists', { routeId: dto.id });
-      throw new EntityConflictException(
-        ERROR_CODES.ADMINISTRATION_ROUTE_ALREADY_EXISTS,
-        `Administration route ${dto.id} already exists`,
-        { routeId: dto.id },
-      );
+    if (existing && !existing.deletedAt) {
+      throw new ConflictException(`Administration route with code "${dto.code}" already exists`);
     }
 
-    try {
-      const route = await this.prisma.administrationRoute.create({
-        data: dto,
+    // Si soft-deleted, restaurer
+    if (existing && existing.deletedAt) {
+      return this.prisma.administrationRoute.update({
+        where: { id: existing.id },
+        data: {
+          ...dto,
+          deletedAt: null,
+          version: existing.version + 1,
+        },
       });
-
-      this.logger.audit('Administration route created', { routeId: route.id });
-      return route;
-    } catch (error) {
-      this.logger.error(`Failed to create administration route ${dto.id}`, error.stack);
-      throw error;
     }
+
+    return this.prisma.administrationRoute.create({ data: dto });
   }
 
-  async findAll() {
+  async findAll(includeDeleted = false) {
     return this.prisma.administrationRoute.findMany({
-      orderBy: { displayOrder: 'asc' },
+      where: includeDeleted ? {} : { deletedAt: null },
+      orderBy: { code: 'asc' },
     });
   }
 
@@ -55,74 +44,84 @@ export class AdministrationRoutesService {
       where: { id },
     });
 
-    if (!route) {
-      this.logger.warn('Administration route not found', { routeId: id });
-      throw new EntityNotFoundException(
-        ERROR_CODES.ADMINISTRATION_ROUTE_NOT_FOUND,
-        `Administration route ${id} not found`,
-        { routeId: id },
-      );
+    if (!route || route.deletedAt) {
+      throw new NotFoundException(`Administration route with id "${id}" not found`);
+    }
+
+    return route;
+  }
+
+  async findByCode(code: string) {
+    const route = await this.prisma.administrationRoute.findUnique({
+      where: { code },
+    });
+
+    if (!route || route.deletedAt) {
+      throw new NotFoundException(`Administration route with code "${code}" not found`);
     }
 
     return route;
   }
 
   async update(id: string, dto: UpdateAdministrationRouteDto) {
-    this.logger.debug(`Updating administration route ${id}`);
+    const existing = await this.findOne(id);
 
-    const existing = await this.prisma.administrationRoute.findUnique({
+    // Optimistic locking
+    if (dto.version !== undefined && existing.version !== dto.version) {
+      throw new ConflictException('Version conflict: the resource has been modified by another user');
+    }
+
+    return this.prisma.administrationRoute.update({
       where: { id },
+      data: {
+        ...dto,
+        version: existing.version + 1,
+      },
     });
-
-    if (!existing) {
-      this.logger.warn('Administration route not found', { routeId: id });
-      throw new EntityNotFoundException(
-        ERROR_CODES.ADMINISTRATION_ROUTE_NOT_FOUND,
-        `Administration route ${id} not found`,
-        { routeId: id },
-      );
-    }
-
-    try {
-      const updated = await this.prisma.administrationRoute.update({
-        where: { id },
-        data: dto,
-      });
-
-      this.logger.audit('Administration route updated', { routeId: id });
-      return updated;
-    } catch (error) {
-      this.logger.error(`Failed to update administration route ${id}`, error.stack);
-      throw error;
-    }
   }
 
   async remove(id: string) {
-    this.logger.debug(`Deleting administration route ${id}`);
+    const existing = await this.findOne(id);
 
-    const existing = await this.prisma.administrationRoute.findUnique({
-      where: { id },
+    // Vérifier utilisation dans treatments
+    const usageCount = await this.prisma.treatment.count({
+      where: { routeId: id, deletedAt: null },
     });
 
-    if (!existing) {
-      this.logger.warn('Administration route not found', { routeId: id });
-      throw new EntityNotFoundException(
-        ERROR_CODES.ADMINISTRATION_ROUTE_NOT_FOUND,
-        `Administration route ${id} not found`,
-        { routeId: id },
+    if (usageCount > 0) {
+      throw new ConflictException(
+        `Cannot delete: ${usageCount} active treatment(s) use this route`
       );
     }
 
-    try {
-      const deleted = await this.prisma.administrationRoute.delete({
-        where: { id },
-      });
+    return this.prisma.administrationRoute.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        version: existing.version + 1,
+      },
+    });
+  }
 
-      this.logger.audit('Administration route deleted', { routeId: id });
-      return deleted;
-    } catch (error) {
-      this.logger.error(`Failed to delete administration route ${id}`, error.stack);
-      throw error;
+  async restore(id: string) {
+    const route = await this.prisma.administrationRoute.findUnique({
+      where: { id },
+    });
+
+    if (!route) {
+      throw new NotFoundException('Administration route not found');
     }
+
+    if (!route.deletedAt) {
+      throw new ConflictException('Administration route is not deleted');
+    }
+
+    return this.prisma.administrationRoute.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        version: route.version + 1,
+      },
+    });
   }
 }
