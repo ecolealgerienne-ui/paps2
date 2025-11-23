@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVaccineDto, UpdateVaccineDto, QueryVaccineDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import { EntityNotFoundException } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
 
+/**
+ * Service for managing Custom Vaccines (PHASE_10)
+ */
 @Injectable()
 export class VaccinesService {
   private readonly logger = new AppLogger(VaccinesService.name);
@@ -12,20 +15,20 @@ export class VaccinesService {
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateVaccineDto) {
-    this.logger.debug(`Creating vaccine in farm ${farmId}`);
+    this.logger.debug(`Creating custom vaccine in farm ${farmId}`);
 
     try {
-      const vaccine = await this.prisma.vaccine.create({
+      const vaccine = await this.prisma.customVaccine.create({
         data: {
           ...dto,
           farmId,
         },
       });
 
-      this.logger.audit('Vaccine created', { vaccineId: vaccine.id, farmId });
+      this.logger.audit('Custom vaccine created', { vaccineId: vaccine.id, farmId });
       return vaccine;
     } catch (error) {
-      this.logger.error(`Failed to create vaccine in farm ${farmId}`, error.stack);
+      this.logger.error(`Failed to create custom vaccine in farm ${farmId}`, error.stack);
       throw error;
     }
   }
@@ -33,32 +36,34 @@ export class VaccinesService {
   async findAll(farmId: string, query: QueryVaccineDto) {
     const where: any = {
       farmId,
-      deletedAt: null,
     };
 
+    // Soft delete filter
+    if (!query.includeDeleted) {
+      where.deletedAt = null;
+    }
+
+    // Search filter
     if (query.search) {
       where.name = { contains: query.search, mode: 'insensitive' };
     }
-    if (query.isActive !== undefined) {
-      where.isActive = query.isActive;
-    }
 
-    return this.prisma.vaccine.findMany({
+    return this.prisma.customVaccine.findMany({
       where,
       orderBy: { name: 'asc' },
     });
   }
 
   async findOne(farmId: string, id: string) {
-    const vaccine = await this.prisma.vaccine.findFirst({
+    const vaccine = await this.prisma.customVaccine.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!vaccine) {
-      this.logger.warn('Vaccine not found', { vaccineId: id, farmId });
+      this.logger.warn('Custom vaccine not found', { vaccineId: id, farmId });
       throw new EntityNotFoundException(
         ERROR_CODES.VACCINE_NOT_FOUND,
-        `Vaccine ${id} not found`,
+        `Custom vaccine ${id} not found`,
         { vaccineId: id, farmId },
       );
     }
@@ -67,56 +72,65 @@ export class VaccinesService {
   }
 
   async update(farmId: string, id: string, dto: UpdateVaccineDto) {
-    this.logger.debug(`Updating vaccine ${id}`);
+    this.logger.debug(`Updating custom vaccine ${id}`);
 
-    const existing = await this.prisma.vaccine.findFirst({
+    const existing = await this.prisma.customVaccine.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      this.logger.warn('Vaccine not found', { vaccineId: id, farmId });
+      this.logger.warn('Custom vaccine not found', { vaccineId: id, farmId });
       throw new EntityNotFoundException(
         ERROR_CODES.VACCINE_NOT_FOUND,
-        `Vaccine ${id} not found`,
+        `Custom vaccine ${id} not found`,
         { vaccineId: id, farmId },
       );
     }
 
+    // Optimistic locking (PHASE_10)
+    if (dto.version !== undefined && existing.version !== dto.version) {
+      throw new ConflictException(
+        'Version conflict: the vaccine has been modified by another user',
+      );
+    }
+
     try {
-      const updated = await this.prisma.vaccine.update({
+      const { version, ...updateData } = dto;
+
+      const updated = await this.prisma.customVaccine.update({
         where: { id },
         data: {
-          ...dto,
+          ...updateData,
           version: existing.version + 1,
         },
       });
 
-      this.logger.audit('Vaccine updated', { vaccineId: id, farmId });
+      this.logger.audit('Custom vaccine updated', { vaccineId: id, farmId });
       return updated;
     } catch (error) {
-      this.logger.error(`Failed to update vaccine ${id}`, error.stack);
+      this.logger.error(`Failed to update custom vaccine ${id}`, error.stack);
       throw error;
     }
   }
 
   async remove(farmId: string, id: string) {
-    this.logger.debug(`Soft deleting vaccine ${id}`);
+    this.logger.debug(`Soft deleting custom vaccine ${id}`);
 
-    const existing = await this.prisma.vaccine.findFirst({
+    const existing = await this.prisma.customVaccine.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
     if (!existing) {
-      this.logger.warn('Vaccine not found', { vaccineId: id, farmId });
+      this.logger.warn('Custom vaccine not found', { vaccineId: id, farmId });
       throw new EntityNotFoundException(
         ERROR_CODES.VACCINE_NOT_FOUND,
-        `Vaccine ${id} not found`,
+        `Custom vaccine ${id} not found`,
         { vaccineId: id, farmId },
       );
     }
 
     try {
-      const deleted = await this.prisma.vaccine.update({
+      const deleted = await this.prisma.customVaccine.update({
         where: { id },
         data: {
           deletedAt: new Date(),
@@ -124,10 +138,10 @@ export class VaccinesService {
         },
       });
 
-      this.logger.audit('Vaccine soft deleted', { vaccineId: id, farmId });
+      this.logger.audit('Custom vaccine soft deleted', { vaccineId: id, farmId });
       return deleted;
     } catch (error) {
-      this.logger.error(`Failed to delete vaccine ${id}`, error.stack);
+      this.logger.error(`Failed to delete custom vaccine ${id}`, error.stack);
       throw error;
     }
   }
