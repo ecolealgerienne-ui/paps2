@@ -54,6 +54,28 @@ model Breed {
   @@map("breeds")
 }
 
+// Table de référence - Pays (ISO 3166-1)
+model Country {
+  code      String   @id           // ISO 3166-1 alpha-2 (ex: "FR", "DZ")
+  nameFr    String   @map("name_fr")
+  nameEn    String   @map("name_en")
+  nameAr    String   @map("name_ar")
+  region    String?  // "Europe", "Africa", "Asia", "Americas", "Oceania"
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations (seront ajoutées dans BLOC 3 - Phases 16-19)
+  // breedCountries    BreedCountry[]
+  // productCountries  ProductCountry[]
+  // vaccineCountries  VaccineCountry[]
+  // campaignCountries CampaignCountry[]
+
+  @@index([isActive])
+  @@index([region])
+  @@map("countries")
+}
+
 // Vétérinaires (multi-tenant)
 model Veterinarian {
   id                    String    @id @default(uuid())
