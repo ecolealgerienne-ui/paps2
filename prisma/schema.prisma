@@ -221,17 +221,39 @@ model AlertConfiguration {
 
 // Ferme
 model Farm {
-  id            String   @id
+  id            String    @id
+  ownerId       String    @map("owner_id")
+  groupId       String?   @map("group_id")
   name          String
-  location      String
-  ownerId       String   @map("owner_id")
-  cheptelNumber String?  @map("cheptel_number")
-  groupId       String?  @map("group_id")
-  groupName     String?  @map("group_name")
-  isDefault     Boolean  @default(false) @map("is_default")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  address       String?
+  postalCode    String?   @map("postal_code")
+  city          String?
 
+  // Champs géographiques
+  country       String?   // Code ISO 3166-1 alpha-2 (ex: "FR", "DZ")
+  department    String?   // Code département (ex: "81", "2A")
+  commune       String?   // Code INSEE commune (ex: "81004")
+
+  latitude      Float?
+  longitude     Float?
+
+  // Champs existants (compatibilité)
+  location      String
+  cheptelNumber String?   @map("cheptel_number")
+  groupName     String?   @map("group_name")
+
+  isDefault     Boolean   @default(false) @map("is_default")
+
+  // Activation/désactivation
+  isActive      Boolean   @default(true) @map("is_active")
+
+  // Soft delete, versioning, timestamps
+  version       Int       @default(1)
+  deletedAt     DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
   animals Animal[]
   lots Lot[]
   movements Movement[]
@@ -247,6 +269,20 @@ model Farm {
   vaccines Vaccine[]
   preferences FarmPreferences?
   alertConfigurations AlertConfiguration[]
+
+  // Indexes
+  @@index([ownerId])
+  @@index([groupId])
+  @@index([isDefault])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([country])
+  @@index([department])
+
+  // Index composites (RECOMMENDATIONS)
+  @@index([ownerId, isActive, deletedAt])
+  @@index([country, department])
+  @@index([ownerId, isDefault])
 
   @@map("farms")
 }
