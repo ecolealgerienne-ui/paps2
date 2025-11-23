@@ -15,7 +15,7 @@ export class MedicalProductsService {
     this.logger.debug(`Creating medical product in farm ${farmId}`);
 
     try {
-      const product = await this.prisma.medicalProduct.create({
+      const product = await this.prisma.customMedicalProduct.create({
         data: {
           ...dto,
           farmId,
@@ -49,14 +49,14 @@ export class MedicalProductsService {
       where.isActive = query.isActive;
     }
 
-    return this.prisma.medicalProduct.findMany({
+    return this.prisma.customMedicalProduct.findMany({
       where,
       orderBy: { name: 'asc' },
     });
   }
 
   async findOne(farmId: string, id: string) {
-    const product = await this.prisma.medicalProduct.findFirst({
+    const product = await this.prisma.customMedicalProduct.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
@@ -75,7 +75,7 @@ export class MedicalProductsService {
   async update(farmId: string, id: string, dto: UpdateMedicalProductDto) {
     this.logger.debug(`Updating medical product ${id}`);
 
-    const existing = await this.prisma.medicalProduct.findFirst({
+    const existing = await this.prisma.customMedicalProduct.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
@@ -89,7 +89,7 @@ export class MedicalProductsService {
     }
 
     try {
-      const updated = await this.prisma.medicalProduct.update({
+      const updated = await this.prisma.customMedicalProduct.update({
         where: { id },
         data: {
           ...dto,
@@ -108,7 +108,7 @@ export class MedicalProductsService {
   async remove(farmId: string, id: string) {
     this.logger.debug(`Soft deleting medical product ${id}`);
 
-    const existing = await this.prisma.medicalProduct.findFirst({
+    const existing = await this.prisma.customMedicalProduct.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
@@ -122,7 +122,7 @@ export class MedicalProductsService {
     }
 
     try {
-      const deleted = await this.prisma.medicalProduct.update({
+      const deleted = await this.prisma.customMedicalProduct.update({
         where: { id },
         data: {
           deletedAt: new Date(),
