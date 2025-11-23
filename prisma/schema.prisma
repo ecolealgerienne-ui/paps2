@@ -8,6 +8,25 @@ datasource db {
 }
 
 // ============================================================
+// ENUMS
+// ============================================================
+
+// ENUM pour les maladies ciblées par les vaccins
+enum VaccineTargetDisease {
+  brucellosis
+  bluetongue
+  foot_and_mouth
+  rabies
+  anthrax
+  lumpy_skin
+  ppr          // Peste Petits Ruminants
+  sheep_pox
+  enterotoxemia
+  pasteurellosis
+  other
+}
+
+// ============================================================
 // TABLES DE RÉFÉRENCE (Backend)
 // ============================================================
 
@@ -74,6 +93,34 @@ model Country {
   @@index([isActive])
   @@index([region])
   @@map("countries")
+}
+
+// Table de référence - Vaccins globaux (PHASE_06)
+model VaccineGlobal {
+  id                String               @id @default(uuid())
+  code              String               @unique
+  nameFr            String               @map("name_fr")
+  nameEn            String               @map("name_en")
+  nameAr            String               @map("name_ar")
+  description       String?
+  targetDisease     VaccineTargetDisease @map("target_disease")
+  laboratoire       String?
+  numeroAMM         String?              @map("numero_amm")
+  dosageRecommande  String?              @map("dosage_recommande")
+  dureeImmunite     Int?                 @map("duree_immunite")  // En jours
+  version           Int                  @default(1)
+  deletedAt         DateTime?            @map("deleted_at")
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+
+  // Relations (seront ajoutées dans BLOC 3 & BLOC 4)
+  // vaccineCountries  VaccineCountry[]        // PHASE_18
+  // farmPreferences   FarmVaccinePreference[] // PHASE_22
+
+  @@index([code])
+  @@index([targetDisease])
+  @@index([deletedAt])
+  @@map("vaccines_global")
 }
 
 // Vétérinaires (multi-tenant)
