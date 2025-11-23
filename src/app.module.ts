@@ -12,6 +12,8 @@ import { AuthModule } from './auth/auth.module';
 import { BreedingsModule } from './breedings/breedings.module';
 import { BreedsModule } from './breeds/breeds.module';
 import { PersonalCampaignsModule } from './personal-campaigns/personal-campaigns.module';
+import { CountriesModule } from './countries/countries.module';
+import { ProductCountriesModule } from './product-countries/product-countries.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
 import { FarmsModule } from './farms/farms.module';
@@ -71,6 +73,8 @@ import { WeightsModule } from './weights/weights.module';
     // Global catalog
     GlobalMedicalProductsModule,
     AlertTemplatesModule,
+    CountriesModule,
+    ProductCountriesModule,
     // Farm settings
     FarmsModule,
     AlertConfigurationsModule,
