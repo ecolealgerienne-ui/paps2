@@ -11,8 +11,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BreedingsModule } from './breedings/breedings.module';
 import { BreedsModule } from './breeds/breeds.module';
-import { CampaignsModule } from './campaigns/campaigns.module';
-import { CountriesModule } from './countries/countries.module';
+import { PersonalCampaignsModule } from './personal-campaigns/personal-campaigns.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
 import { FarmsModule } from './farms/farms.module';
@@ -62,7 +61,7 @@ import { WeightsModule } from './weights/weights.module';
     WeightsModule,
     MovementsModule,
     BreedingsModule,
-    CampaignsModule,
+    PersonalCampaignsModule,
     DocumentsModule,
     // Reference tables (admin)
     VeterinariansModule,
