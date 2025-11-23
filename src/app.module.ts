@@ -25,6 +25,7 @@ import { SyncModule } from './sync/sync.module';
 import { TreatmentsModule } from './treatments/treatments.module';
 import { VaccinationsModule } from './vaccinations/vaccinations.module';
 import { VaccinesModule } from './vaccines/vaccines.module';
+import { VaccinesGlobalModule } from './vaccines-global/vaccines-global.module';
 import { VeterinariansModule } from './veterinarians/veterinarians.module';
 import { WeightsModule } from './weights/weights.module';
 
@@ -65,6 +66,7 @@ import { WeightsModule } from './weights/weights.module';
     VeterinariansModule,
     MedicalProductsModule,
     VaccinesModule,
+    VaccinesGlobalModule,
     AdministrationRoutesModule,
     SpeciesModule,
     BreedsModule,
