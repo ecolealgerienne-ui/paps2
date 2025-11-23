@@ -298,93 +298,23 @@ model AdministrationRoute {
   @@map("administration_routes")
 }
 
-// ============================================================
-// TABLES GLOBALES (Catalogue International)
-// ============================================================
-
-// Produits médicaux (catalogue global)
-model GlobalMedicalProduct {
-  id            String              @id @default(uuid())
-  code          String              @unique               // Code unique (ex: "enrofloxacine_100")
-  nameFr        String              @map("name_fr")
-  nameEn        String              @map("name_en")
-  nameAr        String              @map("name_ar")
-  description   String?
-  type          MedicalProductType
-  principeActif String?             @map("principe_actif")
-  laboratoire   String?
-  numeroAMM     String?             @map("numero_amm")    // Autorisation Mise sur le Marché
-  version       Int                 @default(1)
-  deletedAt     DateTime?           @map("deleted_at")
-  createdAt     DateTime            @default(now()) @map("created_at")
-  updatedAt     DateTime            @updatedAt @map("updated_at")
-
-  // Relations (à implémenter dans phases futures)
-  // productCountries  ProductCountry[]          // Phase 17
-  // farmPreferences   FarmProductPreference[]   // Phase 21
-
-  @@index([code])
-  @@index([type])
-  @@index([laboratoire])
-  @@index([deletedAt])
-  @@map("global_medical_products")
-}
-
-// Templates d'alertes (catalogue global)
-model AlertTemplate {
-  id              String         @id @default(uuid())
-  code            String         @unique
-  nameFr          String         @map("name_fr")
-  nameEn          String         @map("name_en")
-  nameAr          String         @map("name_ar")
-  descriptionFr   String?        @map("description_fr")
-  descriptionEn   String?        @map("description_en")
-  descriptionAr   String?        @map("description_ar")
-  category        AlertCategory
-  priority        AlertPriority  @default(medium)
-  isActive        Boolean        @default(true) @map("is_active")
-  version         Int            @default(1)
-  deletedAt       DateTime?      @map("deleted_at")
-  createdAt       DateTime       @default(now()) @map("created_at")
-  updatedAt       DateTime       @updatedAt @map("updated_at")
-
-  @@index([code])
-  @@index([category])
-  @@index([priority])
-  @@index([isActive])
-  @@index([deletedAt])
-  @@map("alert_templates")
-}
-
-// ============================================================
-// TABLES DE RÉFÉRENCE (Configuration)
-// ============================================================
-
-// Table de référence - Configuration des alertes
+// Configuration des alertes (PHASE_14)
 model AlertConfiguration {
-  id              String    @id @default(uuid())
-  farmId          String    @map("farm_id")
-  evaluationType  String    @map("evaluation_type")
-  type            String    // urgent, important, routine
-  category        String
-  titleKey        String    @map("title_key") // i18n key
-  messageKey      String    @map("message_key") // i18n key
-  severity        Int       @default(5)
-  iconName        String    @map("icon_name")
-  colorHex        String    @map("color_hex")
-  enabled         Boolean   @default(true)
-  alertType       String?   @map("alert_type") // vaccination_due, treatment_due, etc.
-  isEnabled       Boolean   @default(true) @map("is_enabled")
-  daysBeforeDue   Int       @default(7) @map("days_before_due")
-  priority        String    @default("medium")
-  version         Int       @default(1)
-  deletedAt       DateTime? @map("deleted_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  id                      String    @id @default(uuid())
+  farmId                  String    @unique @map("farm_id")
+  enableEmailAlerts       Boolean   @default(true) @map("enable_email_alerts")
+  enableSmsAlerts         Boolean   @default(false) @map("enable_sms_alerts")
+  enablePushAlerts        Boolean   @default(true) @map("enable_push_alerts")
+  vaccinationReminderDays Int       @default(7) @map("vaccination_reminder_days")
+  treatmentReminderDays   Int       @default(3) @map("treatment_reminder_days")
+  healthCheckReminderDays Int       @default(30) @map("health_check_reminder_days")
+  version                 Int       @default(1)
+  deletedAt               DateTime? @map("deleted_at")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
 
-  @@index([farmId])
   @@index([deletedAt])
   @@map("alert_configurations")
 }

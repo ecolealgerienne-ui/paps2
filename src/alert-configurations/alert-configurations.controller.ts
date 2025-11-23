@@ -1,20 +1,37 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AlertConfigurationsService } from './alert-configurations.service';
-import { CreateAlertConfigurationDto, UpdateAlertConfigurationDto, QueryAlertConfigurationDto } from './dto';
+import { CreateAlertConfigurationDto, UpdateAlertConfigurationDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { FarmGuard } from '../auth/guards/farm.guard';
 
+/**
+ * Controller for Alert Configurations (PHASE_14)
+ * Gère 1 configuration unique par ferme
+ */
 @ApiTags('Alert Configurations')
-@Controller('farms/:farmId/alert-configurations')
-@UseGuards(AuthGuard, FarmGuard)
+@ApiBearerAuth()
+@UseGuards(AuthGuard)
+@Controller('farms/:farmId/alert-configuration')
 export class AlertConfigurationsController {
   constructor(private readonly alertConfigurationsService: AlertConfigurationsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new alert configuration (Admin only)' })
+  @ApiOperation({
+    summary: 'Create alert configuration for a farm (PHASE_14)',
+    description: 'Creates alert configuration. Only 1 per farm allowed (farmId @unique).',
+  })
   @ApiResponse({ status: 201, description: 'Alert configuration created successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 409, description: 'Conflict - Configuration already exists for this farm' })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
   create(
     @Param('farmId') farmId: string,
     @Body() dto: CreateAlertConfigurationDto,
@@ -23,30 +40,49 @@ export class AlertConfigurationsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List alert configurations' })
-  findAll(
-    @Param('farmId') farmId: string,
-    @Query() query: QueryAlertConfigurationDto,
-  ) {
-    return this.alertConfigurationsService.findAll(farmId, query);
+  @ApiOperation({
+    summary: 'Get alert configuration for a farm (PHASE_14)',
+    description: 'Returns the alert configuration for the specified farm.',
+  })
+  @ApiResponse({ status: 200, description: 'Alert configuration found' })
+  @ApiResponse({ status: 404, description: 'Not found - No configuration for this farm' })
+  findByFarm(@Param('farmId') farmId: string) {
+    return this.alertConfigurationsService.findByFarm(farmId);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get alert configuration by ID' })
-  findOne(
-    @Param('farmId') farmId: string,
-    @Param('id') id: string,
-  ) {
-    return this.alertConfigurationsService.findOne(farmId, id);
+  @Get('or-create')
+  @ApiOperation({
+    summary: 'Get or create alert configuration for a farm (PHASE_14)',
+    description: 'Returns existing configuration or creates one with default values if none exists.',
+  })
+  @ApiResponse({ status: 200, description: 'Alert configuration returned (existing or newly created)' })
+  findOrCreate(@Param('farmId') farmId: string) {
+    return this.alertConfigurationsService.findOrCreate(farmId);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update alert configuration' })
+  @Put()
+  @ApiOperation({
+    summary: 'Update alert configuration for a farm (PHASE_14)',
+    description: 'Updates the alert configuration. Supports optimistic locking via version field.',
+  })
+  @ApiResponse({ status: 200, description: 'Alert configuration updated successfully' })
+  @ApiResponse({ status: 404, description: 'Not found - No configuration for this farm' })
+  @ApiResponse({ status: 409, description: 'Conflict - Version mismatch (optimistic locking)' })
   update(
     @Param('farmId') farmId: string,
-    @Param('id') id: string,
     @Body() dto: UpdateAlertConfigurationDto,
   ) {
-    return this.alertConfigurationsService.update(farmId, id, dto);
+    return this.alertConfigurationsService.update(farmId, dto);
+  }
+
+  @Delete()
+  @ApiOperation({
+    summary: 'Soft delete alert configuration for a farm (PHASE_14)',
+    description: 'Soft deletes the alert configuration (sets deletedAt timestamp).',
+  })
+  @ApiResponse({ status: 200, description: 'Alert configuration soft deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Not found - No configuration for this farm' })
+  remove(@Param('farmId') farmId: string) {
+    return this.alertConfigurationsService.remove(farmId);
   }
 }

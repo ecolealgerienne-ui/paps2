@@ -1,129 +1,108 @@
-import { IsString, IsOptional, IsBoolean, IsInt, Min, Max } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsInt, IsOptional, IsNumber, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
- * DTO for creating an AlertConfiguration
- * Timestamps managed server-side (Reference entity - Option A)
+ * DTO for creating Alert Configuration (PHASE_14)
+ * 1 configuration unique par ferme
  */
 export class CreateAlertConfigurationDto {
-  @ApiProperty({ description: 'Alert configuration ID (UUID)', required: false })
-  @IsOptional()
-  @IsString()
-  id?: string;
-
-  @ApiProperty({ description: 'Farm ID' })
-  @IsString()
-  farmId: string;
-
-  @ApiProperty({ description: 'Evaluation type' })
-  @IsString()
-  evaluationType: string;
-
-  @ApiProperty({ description: 'Type (urgent, important, routine)' })
-  @IsString()
-  type: string;
-
-  @ApiProperty({ description: 'Category' })
-  @IsString()
-  category: string;
-
-  @ApiProperty({ description: 'Title i18n key' })
-  @IsString()
-  titleKey: string;
-
-  @ApiProperty({ description: 'Message i18n key' })
-  @IsString()
-  messageKey: string;
-
-  @ApiProperty({ description: 'Severity level (1-10)', required: false, default: 5 })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(10)
-  severity?: number;
-
-  @ApiProperty({ description: 'Icon name' })
-  @IsString()
-  iconName: string;
-
-  @ApiProperty({ description: 'Color hex code' })
-  @IsString()
-  colorHex: string;
-
-  @ApiProperty({ description: 'Is enabled', required: false, default: true })
+  @ApiPropertyOptional({
+    description: 'Enable email alerts',
+    default: true,
+    example: true,
+  })
   @IsOptional()
   @IsBoolean()
-  enabled?: boolean;
+  enableEmailAlerts?: boolean;
 
-  @ApiProperty({ description: 'Alert type (vaccination_due, treatment_due, etc.)', required: false })
-  @IsOptional()
-  @IsString()
-  alertType?: string;
-
-  @ApiProperty({ description: 'Is enabled (alternative)', required: false, default: true })
+  @ApiPropertyOptional({
+    description: 'Enable SMS alerts',
+    default: false,
+    example: false,
+  })
   @IsOptional()
   @IsBoolean()
-  isEnabled?: boolean;
+  enableSmsAlerts?: boolean;
 
-  @ApiProperty({ description: 'Days before due to alert', required: false, default: 7 })
+  @ApiPropertyOptional({
+    description: 'Enable push notifications',
+    default: true,
+    example: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  enablePushAlerts?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Days before vaccination due to send reminder',
+    default: 7,
+    example: 7,
+  })
   @IsOptional()
   @IsInt()
   @Min(0)
-  daysBeforeDue?: number;
+  vaccinationReminderDays?: number;
 
-  @ApiProperty({ description: 'Priority (low, medium, high)', required: false, default: 'medium' })
+  @ApiPropertyOptional({
+    description: 'Days before treatment due to send reminder',
+    default: 3,
+    example: 3,
+  })
   @IsOptional()
-  @IsString()
-  priority?: string;
+  @IsInt()
+  @Min(0)
+  treatmentReminderDays?: number;
+
+  @ApiPropertyOptional({
+    description: 'Days before health check due to send reminder',
+    default: 30,
+    example: 30,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  healthCheckReminderDays?: number;
 }
 
+/**
+ * DTO for updating Alert Configuration (PHASE_14)
+ */
 export class UpdateAlertConfigurationDto {
-  @ApiProperty({ description: 'Is enabled', required: false })
+  @ApiPropertyOptional({ description: 'Enable email alerts' })
   @IsOptional()
   @IsBoolean()
-  enabled?: boolean;
+  enableEmailAlerts?: boolean;
 
-  @ApiProperty({ description: 'Is enabled (alternative)', required: false })
+  @ApiPropertyOptional({ description: 'Enable SMS alerts' })
   @IsOptional()
   @IsBoolean()
-  isEnabled?: boolean;
+  enableSmsAlerts?: boolean;
 
-  @ApiProperty({ description: 'Severity level (1-10)', required: false })
+  @ApiPropertyOptional({ description: 'Enable push notifications' })
   @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(10)
-  severity?: number;
+  @IsBoolean()
+  enablePushAlerts?: boolean;
 
-  @ApiProperty({ description: 'Days before due to alert', required: false })
+  @ApiPropertyOptional({ description: 'Days before vaccination due to send reminder' })
   @IsOptional()
   @IsInt()
   @Min(0)
-  daysBeforeDue?: number;
+  vaccinationReminderDays?: number;
 
-  @ApiProperty({ description: 'Priority (low, medium, high)', required: false })
+  @ApiPropertyOptional({ description: 'Days before treatment due to send reminder' })
   @IsOptional()
-  @IsString()
-  priority?: string;
+  @IsInt()
+  @Min(0)
+  treatmentReminderDays?: number;
 
-  @ApiProperty({ description: 'Version for conflict detection', required: false })
+  @ApiPropertyOptional({ description: 'Days before health check due to send reminder' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  healthCheckReminderDays?: number;
+
+  @ApiPropertyOptional({ description: 'Version for optimistic locking', example: 1 })
+  @IsNumber()
   @IsOptional()
   version?: number;
-}
-
-export class QueryAlertConfigurationDto {
-  @ApiProperty({ description: 'Filter by type', required: false })
-  @IsOptional()
-  @IsString()
-  type?: string;
-
-  @ApiProperty({ description: 'Filter by category', required: false })
-  @IsOptional()
-  @IsString()
-  category?: string;
-
-  @ApiProperty({ description: 'Filter by enabled status', required: false })
-  @IsOptional()
-  @IsBoolean()
-  enabled?: boolean;
 }
