@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBreedDto, UpdateBreedDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 
 /**
  * Service for managing breeds reference data
- * Based on BACKEND_DELTA.md section 5.2
+ * PHASE_12: Enhanced with soft delete, versioning, code field
  */
 @Injectable()
 export class BreedsService {
@@ -19,12 +19,12 @@ export class BreedsService {
    * @returns Created breed
    */
   async create(dto: CreateBreedDto) {
-    this.logger.debug(`Creating breed`, { id: dto.id, nameFr: dto.nameFr, speciesId: dto.speciesId });
+    this.logger.debug(`Creating breed`, { code: dto.code, nameFr: dto.nameFr, speciesId: dto.speciesId });
 
     try {
       const breed = await this.prisma.breed.create({
         data: {
-          id: dto.id,
+          code: dto.code,
           speciesId: dto.speciesId,
           nameFr: dto.nameFr,
           nameEn: dto.nameEn,
@@ -35,7 +35,7 @@ export class BreedsService {
         },
       });
 
-      this.logger.audit('Breed created', { breedId: breed.id, nameFr: breed.nameFr });
+      this.logger.audit('Breed created', { breedId: breed.id, code: breed.code, nameFr: breed.nameFr });
       return breed;
     } catch (error) {
       this.logger.error(`Failed to create breed`, error.stack);
@@ -46,14 +46,20 @@ export class BreedsService {
   /**
    * Get all breeds, optionally filtered by speciesId
    * Ordered by displayOrder
-   * Used for UI dropdowns
+   * Excludes soft deleted breeds (PHASE_12)
    * @param speciesId - Optional filter by species ID
-   * @returns All active breeds with i18n fields
+   * @param includeDeleted - Include soft deleted breeds
+   * @returns All active non-deleted breeds with i18n fields
    */
-  async findAll(speciesId?: string) {
+  async findAll(speciesId?: string, includeDeleted = false) {
     const where: any = {
       isActive: true,
     };
+
+    // PHASE_12: Exclude soft deleted
+    if (!includeDeleted) {
+      where.deletedAt = null;
+    }
 
     if (speciesId) {
       where.speciesId = speciesId;
@@ -66,6 +72,7 @@ export class BreedsService {
       },
       select: {
         id: true,
+        code: true,
         speciesId: true,
         nameFr: true,
         nameEn: true,
@@ -73,18 +80,52 @@ export class BreedsService {
         description: true,
         displayOrder: true,
         isActive: true,
+        version: true,
+        deletedAt: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  /**
+   * Get breeds by species (uses composite index for performance)
+   * PHASE_12: Uses idx_breeds_species_active index
+   * @param speciesId - Species ID
+   * @param activeOnly - Filter only active breeds
+   * @returns Breeds for the specified species
+   */
+  async findBySpecies(speciesId: string, activeOnly = true) {
+    const where: any = {
+      speciesId,
+      deletedAt: null,
+    };
+
+    if (activeOnly) {
+      where.isActive = true;
+    }
+
+    // This query uses composite index: idx_breeds_species_active (speciesId, isActive, deletedAt)
+    return this.prisma.breed.findMany({
+      where,
+      orderBy: {
+        displayOrder: 'asc',
       },
     });
   }
 
   /**
    * Get a single breed by ID
+   * PHASE_12: Excludes soft deleted
    * @param id - Breed ID
    * @returns Breed or throws NotFoundException
    */
   async findOne(id: string) {
-    const breed = await this.prisma.breed.findUnique({
-      where: { id },
+    const breed = await this.prisma.breed.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
     });
 
     if (!breed) {
@@ -96,20 +137,30 @@ export class BreedsService {
 
   /**
    * Update a breed
+   * PHASE_12: Implements versioning (optimistic locking)
    * @param id - Breed ID
    * @param dto - Update data
+   * @param currentVersion - Current version for optimistic locking
    * @returns Updated breed
    */
-  async update(id: string, dto: UpdateBreedDto) {
+  async update(id: string, dto: UpdateBreedDto, currentVersion?: number) {
     this.logger.debug(`Updating breed`, { id });
 
-    // Check if breed exists
-    await this.findOne(id);
+    // Check if breed exists and get current version
+    const existing = await this.findOne(id);
+
+    // PHASE_12: Versioning optimiste
+    if (currentVersion !== undefined && existing.version !== currentVersion) {
+      throw new ConflictException(
+        `Version mismatch: expected ${currentVersion}, got ${existing.version}`,
+      );
+    }
 
     try {
       const breed = await this.prisma.breed.update({
         where: { id },
         data: {
+          code: dto.code,
           speciesId: dto.speciesId,
           nameFr: dto.nameFr,
           nameEn: dto.nameEn,
@@ -117,10 +168,11 @@ export class BreedsService {
           description: dto.description,
           displayOrder: dto.displayOrder,
           isActive: dto.isActive,
+          version: { increment: 1 }, // PHASE_12: Auto-increment version
         },
       });
 
-      this.logger.audit('Breed updated', { breedId: breed.id, nameFr: breed.nameFr });
+      this.logger.audit('Breed updated', { breedId: breed.id, code: breed.code, nameFr: breed.nameFr });
       return breed;
     } catch (error) {
       this.logger.error(`Failed to update breed`, error.stack);
@@ -129,23 +181,30 @@ export class BreedsService {
   }
 
   /**
-   * Delete a breed
+   * Soft delete a breed
+   * PHASE_12: Implements soft delete instead of hard delete
    * @param id - Breed ID
+   * @returns Soft deleted breed
    */
   async remove(id: string) {
-    this.logger.debug(`Deleting breed`, { id });
+    this.logger.debug(`Soft deleting breed`, { id });
 
     // Check if breed exists
-    await this.findOne(id);
+    const existing = await this.findOne(id);
 
     try {
-      await this.prisma.breed.delete({
+      const breed = await this.prisma.breed.update({
         where: { id },
+        data: {
+          deletedAt: new Date(),
+          version: { increment: 1 },
+        },
       });
 
-      this.logger.audit('Breed deleted', { breedId: id });
+      this.logger.audit('Breed soft deleted', { breedId: id, code: existing.code });
+      return breed;
     } catch (error) {
-      this.logger.error(`Failed to delete breed`, error.stack);
+      this.logger.error(`Failed to soft delete breed`, error.stack);
       throw error;
     }
   }

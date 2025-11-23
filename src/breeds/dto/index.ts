@@ -5,11 +5,16 @@ import { Type } from 'class-transformer';
 /**
  * DTO for creating a Breed
  * Timestamps managed server-side (Reference entity - Option A)
+ * PHASE_12: Added code field
  */
 export class CreateBreedDto {
   @ApiProperty({ description: 'Breed ID' })
   @IsString()
   id: string;
+
+  @ApiProperty({ description: 'Unique breed code (e.g., lacaune, holstein)' })
+  @IsString()
+  code: string;
 
   @ApiProperty({ description: 'Species ID' })
   @IsString()
@@ -48,8 +53,14 @@ export class CreateBreedDto {
 /**
  * DTO for updating a Breed
  * Timestamps managed server-side (Reference entity - Option A)
+ * PHASE_12: Added code field and version for optimistic locking
  */
 export class UpdateBreedDto {
+  @ApiProperty({ description: 'Unique breed code', required: false })
+  @IsOptional()
+  @IsString()
+  code?: string;
+
   @ApiProperty({ description: 'Species ID', required: false })
   @IsOptional()
   @IsString()
@@ -86,4 +97,10 @@ export class UpdateBreedDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ description: 'Current version for optimistic locking', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  version?: number;
 }
