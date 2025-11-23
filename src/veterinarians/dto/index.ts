@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsEmail, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEmail, IsNumber, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateVeterinarianDto {
@@ -61,6 +61,19 @@ export class CreateVeterinarianDto {
   @IsOptional()
   @IsString()
   country?: string;
+
+  // 🆕 PHASE_13: Champs géographiques
+  @ApiProperty({ description: 'Department code (2-3 chars, e.g., "81", "2A")', required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9A-Z]{2,3}$/, { message: 'Department must be 2-3 alphanumeric characters' })
+  department?: string;
+
+  @ApiProperty({ description: 'Commune code (5 digits, e.g., "81004")', required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9]{5}$/, { message: 'Commune must be exactly 5 digits' })
+  commune?: string;
 
   @ApiProperty({ description: 'Is available', required: false, default: true })
   @IsOptional()
@@ -178,6 +191,19 @@ export class UpdateVeterinarianDto {
   @IsOptional()
   @IsString()
   country?: string;
+
+  // 🆕 PHASE_13: Champs géographiques
+  @ApiProperty({ description: 'Department code (2-3 chars, e.g., "81", "2A")', required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9A-Z]{2,3}$/, { message: 'Department must be 2-3 alphanumeric characters' })
+  department?: string;
+
+  @ApiProperty({ description: 'Commune code (5 digits, e.g., "81004")', required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9]{5}$/, { message: 'Commune must be exactly 5 digits' })
+  commune?: string;
 
   @ApiProperty({ description: 'Is available', required: false })
   @IsOptional()
