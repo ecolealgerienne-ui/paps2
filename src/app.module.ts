@@ -18,6 +18,7 @@ import { CountriesModule } from './countries/countries.module';
 import { ProductCountriesModule } from './product-countries/product-countries.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
+import { FarmProductPreferencesModule } from './farm-product-preferences/farm-product-preferences.module';
 import { FarmsModule } from './farms/farms.module';
 import { GlobalMedicalProductsModule } from './global-medical-products/global-medical-products.module';
 import { LotsModule } from './lots/lots.module';
@@ -86,6 +87,7 @@ import { FarmVaccinePreferencesModule } from './farm-vaccine-preferences/farm-va
     FarmsModule,
     AlertConfigurationsModule,
     FarmPreferencesModule,
+    FarmProductPreferencesModule,
     SyncModule,
     VaccineCountriesModule,
     FarmVaccinePreferencesModule,
