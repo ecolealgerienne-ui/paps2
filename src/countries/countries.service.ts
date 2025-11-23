@@ -1,34 +1,12 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCountryDto } from './dto/create-country.dto';
-import { UpdateCountryDto } from './dto/update-country.dto';
+import { CreateCountryDto, UpdateCountryDto } from './dto';
 
-// Type temporaire pour Country jusqu'à régénération du client Prisma
-type Country = {
-  code: string;
-  nameFr: string;
-  nameEn: string;
-  nameAr: string;
-  region: string | null;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-/**
- * Service for managing countries reference data
- * PHASE_04: ISO 3166-1 countries with multi-language support
- */
 @Injectable()
 export class CountriesService {
   constructor(private prisma: PrismaService) {}
 
-  /**
-   * Create a new country
-   * @param dto - Country creation data
-   * @returns Created country
-   */
-  async create(dto: CreateCountryDto): Promise<Country> {
+  async create(dto: CreateCountryDto) {
     // Vérifier code unique
     const existing = await this.prisma.country.findUnique({
       where: { code: dto.code.toUpperCase() },
@@ -46,13 +24,7 @@ export class CountriesService {
     });
   }
 
-  /**
-   * Get all countries with optional filters
-   * @param region - Filter by region
-   * @param includeInactive - Include inactive countries
-   * @returns List of countries
-   */
-  async findAll(region?: string, includeInactive = false): Promise<Country[]> {
+  async findAll(region?: string, includeInactive = false) {
     const where: any = {};
 
     if (!includeInactive) {
@@ -72,24 +44,14 @@ export class CountriesService {
     });
   }
 
-  /**
-   * Get countries by region
-   * @param region - Region name
-   * @returns Countries in the specified region
-   */
-  async findByRegion(region: string): Promise<Country[]> {
+  async findByRegion(region: string) {
     return this.prisma.country.findMany({
       where: { region, isActive: true },
       orderBy: { nameFr: 'asc' },
     });
   }
 
-  /**
-   * Get a single country by code
-   * @param code - ISO 3166-1 alpha-2 code
-   * @returns Country or throws NotFoundException
-   */
-  async findOne(code: string): Promise<Country> {
+  async findOne(code: string) {
     const country = await this.prisma.country.findUnique({
       where: { code: code.toUpperCase() },
     });
@@ -101,13 +63,7 @@ export class CountriesService {
     return country;
   }
 
-  /**
-   * Update a country
-   * @param code - ISO 3166-1 alpha-2 code
-   * @param dto - Update data
-   * @returns Updated country
-   */
-  async update(code: string, dto: UpdateCountryDto): Promise<Country> {
+  async update(code: string, dto: UpdateCountryDto) {
     await this.findOne(code);
 
     return this.prisma.country.update({
@@ -116,13 +72,7 @@ export class CountriesService {
     });
   }
 
-  /**
-   * Toggle active status of a country
-   * @param code - ISO 3166-1 alpha-2 code
-   * @param isActive - New active status
-   * @returns Updated country
-   */
-  async toggleActive(code: string, isActive: boolean): Promise<Country> {
+  async toggleActive(code: string, isActive: boolean) {
     await this.findOne(code);
 
     return this.prisma.country.update({
@@ -131,12 +81,7 @@ export class CountriesService {
     });
   }
 
-  /**
-   * Delete a country (hard delete)
-   * @param code - ISO 3166-1 alpha-2 code
-   * @returns Deleted country
-   */
-  async remove(code: string): Promise<Country> {
+  async remove(code: string) {
     const country = await this.findOne(code);
 
     // Vérifier utilisation dans les tables de liaison
@@ -144,7 +89,7 @@ export class CountriesService {
 
     if (usageCount > 0) {
       throw new ConflictException(
-        `Cannot delete country "${code}": used in ${usageCount} breed/product/vaccine/campaign liaisons. Deactivate instead.`
+        `Cannot delete country "${code}": used in ${usageCount} product/breed/vaccine/campaign liaisons. Deactivate instead.`
       );
     }
 
@@ -153,32 +98,24 @@ export class CountriesService {
     });
   }
 
-  /**
-   * Check if country is used in liaison tables
-   * @param code - ISO 3166-1 alpha-2 code
-   * @returns Total usage count
-   */
   private async checkUsage(code: string): Promise<number> {
-    // Note: Tables de liaison seront créées dans BLOC 3 (Phases 16-19)
-    // Pour l'instant, on retourne 0
-    // TODO: Activer ces vérifications après PHASE_16, 17, 18, 19
+    // Pour l'instant, seul ProductCountry existe
+    const products = await this.prisma.productCountry.count({
+      where: { countryCode: code }
+    });
 
-    // const [breeds, products, vaccines, campaigns] = await Promise.all([
-    //   this.prisma.breedCountry.count({ where: { countryCode: code } }),
-    //   this.prisma.productCountry.count({ where: { countryCode: code } }),
-    //   this.prisma.vaccineCountry.count({ where: { countryCode: code } }),
-    //   this.prisma.campaignCountry.count({ where: { countryCode: code } }),
-    // ]);
-    // return breeds + products + vaccines + campaigns;
+    // TODO: Ajouter les autres compteurs quand les phases seront implémentées
+    // const breeds = await this.prisma.breedCountry.count({ where: { countryCode: code } });
+    // const vaccines = await this.prisma.vaccineCountry.count({ where: { countryCode: code } });
+    // const campaigns = await this.prisma.campaignCountry.count({ where: { countryCode: code } });
 
-    return 0; // Temporaire jusqu'à création des tables de liaison
+    return products;
   }
 
   /**
-   * Get list of available regions
-   * @returns Distinct list of regions
+   * Retourner régions disponibles
    */
-  async getRegions(): Promise<string[]> {
+  async getRegions() {
     const regions = await this.prisma.country.findMany({
       where: { isActive: true },
       select: { region: true },
