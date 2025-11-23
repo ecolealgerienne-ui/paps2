@@ -17,6 +17,7 @@ import { FarmsModule } from './farms/farms.module';
 import { LotsModule } from './lots/lots.module';
 import { MedicalProductsModule } from './medical-products/medical-products.module';
 import { MovementsModule } from './movements/movements.module';
+import { NationalCampaignsModule } from './national-campaigns/national-campaigns.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SpeciesModule } from './species/species.module';
 import { SyncModule } from './sync/sync.module';
@@ -66,6 +67,7 @@ import { WeightsModule } from './weights/weights.module';
     AdministrationRoutesModule,
     SpeciesModule,
     BreedsModule,
+    NationalCampaignsModule,
     // Farm settings
     FarmsModule,
     AlertConfigurationsModule,
