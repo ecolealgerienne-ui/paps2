@@ -175,13 +175,25 @@ model Vaccine {
 
 // Table de référence - Voies d'administration
 model AdministrationRoute {
-  id           String @id
-  nameFr       String @map("name_fr")
-  nameEn       String @map("name_en")
-  nameAr       String @map("name_ar")
-  displayOrder Int    @default(0) @map("display_order")
+  id          String    @id @default(uuid())
+  code        String    @unique                // "oral", "injectable", etc.
+  nameFr      String    @map("name_fr")
+  nameEn      String    @map("name_en")
+  nameAr      String    @map("name_ar")
+  description String?
 
-  treatments Treatment[]
+  // Nouveaux champs
+  version     Int       @default(1)
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  treatments  Treatment[]
+
+  // Indexes
+  @@index([code])
+  @@index([deletedAt])
 
   @@map("administration_routes")
 }
