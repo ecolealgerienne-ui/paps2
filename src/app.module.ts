@@ -11,7 +11,9 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BreedingsModule } from './breedings/breedings.module';
 import { BreedsModule } from './breeds/breeds.module';
-import { PersonalCampaignsModule } from './personal-campaigns/personal-campaigns.module';
+import { BreedCountriesModule } from './breed-countries/breed-countries.module';
+import { CampaignsModule } from './campaigns/campaigns.module';
+import { CampaignCountriesModule } from './campaign-countries/campaign-countries.module';
 import { CountriesModule } from './countries/countries.module';
 import { ProductCountriesModule } from './product-countries/product-countries.module';
 import { DocumentsModule } from './documents/documents.module';
@@ -73,9 +75,8 @@ import { WeightsModule } from './weights/weights.module';
     AdministrationRoutesModule,
     SpeciesModule,
     BreedsModule,
-    // Global catalog
-    GlobalMedicalProductsModule,
-    AlertTemplatesModule,
+    BreedCountriesModule,
+    CampaignCountriesModule,
     CountriesModule,
     ProductCountriesModule,
     // Farm settings
