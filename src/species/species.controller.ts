@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SpeciesService } from './species.service';
 import { CreateSpeciesDto, UpdateSpeciesDto } from './dto';
+import { SpeciesResponseDto } from './dto/species-response.dto';
 
 /**
  * Controller for species reference data
- * Based on BACKEND_DELTA.md section 5.1
+ * PHASE_01: Added soft delete, versioning, restore endpoint
  */
 @ApiTags('species')
 @Controller('api/v1/species')
@@ -14,8 +15,9 @@ export class SpeciesController {
 
   @Post()
   @ApiOperation({ summary: 'Create a new species (Admin only)' })
-  @ApiResponse({ status: 201, description: 'Species created successfully' })
+  @ApiResponse({ status: 201, description: 'Species created successfully', type: SpeciesResponseDto })
   @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 409, description: 'Species already exists' })
   async create(@Body() createSpeciesDto: CreateSpeciesDto) {
     const species = await this.speciesService.create(createSpeciesDto);
 
@@ -28,38 +30,21 @@ export class SpeciesController {
         name_ar: species.nameAr,
         icon: species.icon,
         display_order: species.displayOrder,
+        description: species.description,
+        version: species.version,
+        created_at: species.createdAt,
+        updated_at: species.updatedAt,
+        deleted_at: species.deletedAt,
       },
     };
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all species' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of all active species',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              name_fr: { type: 'string' },
-              name_en: { type: 'string' },
-              name_ar: { type: 'string' },
-              icon: { type: 'string' },
-              display_order: { type: 'number' },
-            },
-          },
-        },
-      },
-    },
-  })
-  async findAll() {
-    const species = await this.speciesService.findAll();
+  @ApiQuery({ name: 'includeDeleted', required: false, type: Boolean, description: 'Include soft-deleted species' })
+  @ApiResponse({ status: 200, description: 'List of species', type: [SpeciesResponseDto] })
+  async findAll(@Query('includeDeleted') includeDeleted?: string) {
+    const species = await this.speciesService.findAll(includeDeleted === 'true');
 
     return {
       success: true,
@@ -70,13 +55,18 @@ export class SpeciesController {
         name_ar: s.nameAr,
         icon: s.icon,
         display_order: s.displayOrder,
+        description: s.description,
+        version: s.version,
+        created_at: s.createdAt,
+        updated_at: s.updatedAt,
+        deleted_at: s.deletedAt,
       })),
     };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a species by ID' })
-  @ApiResponse({ status: 200, description: 'Species found' })
+  @ApiResponse({ status: 200, description: 'Species found', type: SpeciesResponseDto })
   @ApiResponse({ status: 404, description: 'Species not found' })
   async findOne(@Param('id') id: string) {
     const species = await this.speciesService.findOne(id);
@@ -90,14 +80,20 @@ export class SpeciesController {
         name_ar: species.nameAr,
         icon: species.icon,
         display_order: species.displayOrder,
+        description: species.description,
+        version: species.version,
+        created_at: species.createdAt,
+        updated_at: species.updatedAt,
+        deleted_at: species.deletedAt,
       },
     };
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Update a species (Admin only)' })
-  @ApiResponse({ status: 200, description: 'Species updated successfully' })
+  @ApiResponse({ status: 200, description: 'Species updated successfully', type: SpeciesResponseDto })
   @ApiResponse({ status: 404, description: 'Species not found' })
+  @ApiResponse({ status: 409, description: 'Version conflict' })
   async update(@Param('id') id: string, @Body() updateSpeciesDto: UpdateSpeciesDto) {
     const species = await this.speciesService.update(id, updateSpeciesDto);
 
@@ -110,16 +106,48 @@ export class SpeciesController {
         name_ar: species.nameAr,
         icon: species.icon,
         display_order: species.displayOrder,
+        description: species.description,
+        version: species.version,
+        created_at: species.createdAt,
+        updated_at: species.updatedAt,
+        deleted_at: species.deletedAt,
       },
     };
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a species (Admin only)' })
-  @ApiResponse({ status: 204, description: 'Species deleted successfully' })
+  @ApiOperation({ summary: 'Soft delete a species (Admin only)' })
+  @ApiResponse({ status: 204, description: 'Species soft deleted successfully' })
   @ApiResponse({ status: 404, description: 'Species not found' })
+  @ApiResponse({ status: 409, description: 'Species is used by active breeds' })
   async remove(@Param('id') id: string) {
     await this.speciesService.remove(id);
+  }
+
+  @Post(':id/restore')
+  @ApiOperation({ summary: 'Restore a soft-deleted species (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Species restored successfully', type: SpeciesResponseDto })
+  @ApiResponse({ status: 404, description: 'Species not found' })
+  @ApiResponse({ status: 409, description: 'Species is not deleted' })
+  async restore(@Param('id') id: string) {
+    const species = await this.speciesService.restore(id);
+
+    return {
+      success: true,
+      data: {
+        id: species.id,
+        name_fr: species.nameFr,
+        name_en: species.nameEn,
+        name_ar: species.nameAr,
+        icon: species.icon,
+        display_order: species.displayOrder,
+        description: species.description,
+        version: species.version,
+        created_at: species.createdAt,
+        updated_at: species.updatedAt,
+        deleted_at: species.deletedAt,
+      },
+    };
   }
 }

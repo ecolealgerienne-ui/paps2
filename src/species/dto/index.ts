@@ -34,6 +34,11 @@ export class CreateSpeciesDto {
   @IsInt()
   @Min(0)
   displayOrder?: number;
+
+  @ApiProperty({ description: 'Species description', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
 }
 
 /**
@@ -67,4 +72,15 @@ export class UpdateSpeciesDto {
   @IsInt()
   @Min(0)
   displayOrder?: number;
+
+  @ApiProperty({ description: 'Species description', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ description: 'Version for optimistic locking', required: false })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  version?: number;
 }
