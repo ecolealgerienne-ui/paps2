@@ -10,6 +10,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BreedingsModule } from './breedings/breedings.module';
 import { BreedsModule } from './breeds/breeds.module';
+import { BreedCountriesModule } from './breed-countries/breed-countries.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { CountriesModule } from './countries/countries.module';
 import { DocumentsModule } from './documents/documents.module';
@@ -69,6 +70,7 @@ import { WeightsModule } from './weights/weights.module';
     AdministrationRoutesModule,
     SpeciesModule,
     BreedsModule,
+    BreedCountriesModule,
     CountriesModule,
     // Farm settings
     FarmsModule,
