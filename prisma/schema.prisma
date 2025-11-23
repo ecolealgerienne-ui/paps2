@@ -22,6 +22,24 @@ enum MedicalProductType {
   other
 }
 
+enum AlertCategory {
+  health
+  reproduction
+  feeding
+  vaccination
+  treatment
+  administrative
+  weather
+  other
+}
+
+enum AlertPriority {
+  low
+  medium
+  high
+  critical
+}
+
 // ============================================================
 // TABLES DE RÉFÉRENCE (Backend)
 // ============================================================
@@ -232,6 +250,32 @@ model GlobalMedicalProduct {
   @@index([laboratoire])
   @@index([deletedAt])
   @@map("global_medical_products")
+}
+
+// Templates d'alertes (catalogue global)
+model AlertTemplate {
+  id              String         @id @default(uuid())
+  code            String         @unique
+  nameFr          String         @map("name_fr")
+  nameEn          String         @map("name_en")
+  nameAr          String         @map("name_ar")
+  descriptionFr   String?        @map("description_fr")
+  descriptionEn   String?        @map("description_en")
+  descriptionAr   String?        @map("description_ar")
+  category        AlertCategory
+  priority        AlertPriority  @default(medium)
+  isActive        Boolean        @default(true) @map("is_active")
+  version         Int            @default(1)
+  deletedAt       DateTime?      @map("deleted_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@index([category])
+  @@index([priority])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("alert_templates")
 }
 
 // ============================================================

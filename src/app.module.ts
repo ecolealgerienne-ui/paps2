@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AdministrationRoutesModule } from './administration-routes/administration-routes.module';
 import { AlertConfigurationsModule } from './alert-configurations/alert-configurations.module';
+import { AlertTemplatesModule } from './alert-templates/alert-templates.module';
 import { AnimalsModule } from './animals/animals.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -69,6 +70,7 @@ import { WeightsModule } from './weights/weights.module';
     BreedsModule,
     // Global catalog
     GlobalMedicalProductsModule,
+    AlertTemplatesModule,
     // Farm settings
     FarmsModule,
     AlertConfigurationsModule,
