@@ -352,7 +352,110 @@ model AdministrationRoute {
   @@map("administration_routes")
 }
 
-// Configuration des alertes (PHASE_14)
+// ============================================================
+// TABLES GLOBALES (Catalogue International)
+// ============================================================
+
+// Pays (référentiel international ISO 3166-1)
+model Country {
+  code      String   @id           // ISO 3166-1 alpha-2 (ex: "FR", "DZ")
+  nameFr    String   @map("name_fr")
+  nameEn    String   @map("name_en")
+  nameAr    String   @map("name_ar")
+  region    String?  // "Europe", "Africa", "Asia", "Americas", "Oceania"
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations (tables de liaison pays)
+  // breedCountries    BreedCountry[]       // Phase 16
+  productCountries  ProductCountry[]       // Phase 17
+  // vaccineCountries  VaccineCountry[]     // Phase 18
+  // campaignCountries CampaignCountry[]    // Phase 19
+
+  @@index([isActive])
+  @@index([region])
+  @@map("countries")
+}
+
+// Produits médicaux (catalogue global)
+model GlobalMedicalProduct {
+  id            String              @id @default(uuid())
+  code          String              @unique               // Code unique (ex: "enrofloxacine_100")
+  nameFr        String              @map("name_fr")
+  nameEn        String              @map("name_en")
+  nameAr        String              @map("name_ar")
+  description   String?
+  type          MedicalProductType
+  principeActif String?             @map("principe_actif")
+  laboratoire   String?
+  numeroAMM     String?             @map("numero_amm")    // Autorisation Mise sur le Marché
+  version       Int                 @default(1)
+  deletedAt     DateTime?           @map("deleted_at")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  // Relations (à implémenter dans phases futures)
+  productCountries  ProductCountry[]          // Phase 17
+  // farmPreferences   FarmProductPreference[]   // Phase 21
+
+  @@index([code])
+  @@index([type])
+  @@index([laboratoire])
+  @@index([deletedAt])
+  @@map("global_medical_products")
+}
+
+// Table de liaison - Produits médicaux ↔ Pays (Phase 17)
+model ProductCountry {
+  id          String    @id @default(uuid())
+  productId   String    @map("product_id")
+  countryCode String    @map("country_code")
+  numeroAMM   String?   @map("numero_amm")    // AMM spécifique au pays
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  product GlobalMedicalProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  country Country              @relation(fields: [countryCode], references: [code], onDelete: Cascade)
+
+  @@unique([productId, countryCode])
+  @@index([productId])
+  @@index([countryCode])
+  @@map("product_countries")
+}
+
+// Templates d'alertes (catalogue global)
+model AlertTemplate {
+  id              String         @id @default(uuid())
+  code            String         @unique
+  nameFr          String         @map("name_fr")
+  nameEn          String         @map("name_en")
+  nameAr          String         @map("name_ar")
+  descriptionFr   String?        @map("description_fr")
+  descriptionEn   String?        @map("description_en")
+  descriptionAr   String?        @map("description_ar")
+  category        AlertCategory
+  priority        AlertPriority  @default(medium)
+  isActive        Boolean        @default(true) @map("is_active")
+  version         Int            @default(1)
+  deletedAt       DateTime?      @map("deleted_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@index([category])
+  @@index([priority])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("alert_templates")
+}
+
+// ============================================================
+// TABLES DE RÉFÉRENCE (Configuration)
+// ============================================================
+
+// Table de référence - Configuration des alertes
 model AlertConfiguration {
   id                      String    @id @default(uuid())
   farmId                  String    @unique @map("farm_id")
