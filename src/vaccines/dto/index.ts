@@ -1,158 +1,80 @@
-import { IsString, IsOptional, IsBoolean, IsInt, IsNumber, Min, IsArray } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+/**
+ * DTO for creating a Custom Vaccine (PHASE_10)
+ */
 export class CreateVaccineDto {
-  @ApiProperty({ description: 'Vaccine name' })
+  @ApiProperty({ description: 'Vaccine name', example: 'Vaccin Brucellose B19' })
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'Description', required: false })
+  @ApiPropertyOptional({ description: 'Description', example: 'Vaccin contre la brucellose bovine' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'Manufacturer', required: false })
+  @ApiPropertyOptional({ description: 'Target disease', example: 'Brucellose' })
   @IsOptional()
   @IsString()
-  manufacturer?: string;
+  targetDisease?: string;
 
-  @ApiProperty({ description: 'Target species (JSON array)', required: false })
-  @IsOptional()
-  @IsArray()
-  targetSpecies?: string[];
-
-  @ApiProperty({ description: 'Target diseases (JSON array)', required: false })
-  @IsOptional()
-  @IsArray()
-  targetDiseases?: string[];
-
-  @ApiProperty({ description: 'Standard dose', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  standardDose?: number;
-
-  @ApiProperty({ description: 'Number of injections required', required: false, default: 1 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  injectionsRequired?: number;
-
-  @ApiProperty({ description: 'Interval between injections (days)', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  injectionIntervalDays?: number;
-
-  @ApiProperty({ description: 'Meat withdrawal days', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  meatWithdrawalDays?: number;
-
-  @ApiProperty({ description: 'Milk withdrawal days', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  milkWithdrawalDays?: number;
-
-  @ApiProperty({ description: 'Administration route', required: false })
+  @ApiPropertyOptional({ description: 'Laboratory/manufacturer', example: 'SAIDAL' })
   @IsOptional()
   @IsString()
-  administrationRoute?: string;
+  laboratoire?: string;
 
-  @ApiProperty({ description: 'Is active', required: false, default: true })
+  @ApiPropertyOptional({ description: 'Dosage information', example: '2ml par animal' })
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  @IsString()
+  dosage?: string;
 }
 
+/**
+ * DTO for updating a Custom Vaccine (PHASE_10)
+ */
 export class UpdateVaccineDto {
-  @ApiProperty({ description: 'Vaccine name', required: false })
+  @ApiPropertyOptional({ description: 'Vaccine name' })
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiProperty({ description: 'Description', required: false })
+  @ApiPropertyOptional({ description: 'Description' })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'Manufacturer', required: false })
+  @ApiPropertyOptional({ description: 'Target disease' })
   @IsOptional()
   @IsString()
-  manufacturer?: string;
+  targetDisease?: string;
 
-  @ApiProperty({ description: 'Target species (JSON array)', required: false })
+  @ApiPropertyOptional({ description: 'Laboratory/manufacturer' })
   @IsOptional()
-  @IsArray()
-  targetSpecies?: string[];
+  @IsString()
+  laboratoire?: string;
 
-  @ApiProperty({ description: 'Target diseases (JSON array)', required: false })
+  @ApiPropertyOptional({ description: 'Dosage information' })
   @IsOptional()
-  @IsArray()
-  targetDiseases?: string[];
+  @IsString()
+  dosage?: string;
 
-  @ApiProperty({ description: 'Standard dose', required: false })
-  @IsOptional()
-  @Type(() => Number)
+  @ApiPropertyOptional({ description: 'Version for optimistic locking', example: 1 })
   @IsNumber()
-  @Min(0)
-  standardDose?: number;
-
-  @ApiProperty({ description: 'Number of injections required', required: false })
   @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  injectionsRequired?: number;
-
-  @ApiProperty({ description: 'Interval between injections (days)', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  injectionIntervalDays?: number;
-
-  @ApiProperty({ description: 'Meat withdrawal days', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  meatWithdrawalDays?: number;
-
-  @ApiProperty({ description: 'Milk withdrawal days', required: false })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  milkWithdrawalDays?: number;
-
-  @ApiProperty({ description: 'Administration route', required: false })
-  @IsOptional()
-  @IsString()
-  administrationRoute?: string;
-
-  @ApiProperty({ description: 'Is active', required: false })
-  @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  version?: number;
 }
 
+/**
+ * DTO for querying Custom Vaccines (PHASE_10)
+ */
 export class QueryVaccineDto {
-  @ApiProperty({ description: 'Search by name', required: false })
+  @ApiPropertyOptional({ description: 'Search by name', example: 'Brucellose' })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiProperty({ description: 'Filter by active status', required: false })
+  @ApiPropertyOptional({ description: 'Include deleted vaccines', default: false })
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  includeDeleted?: boolean;
 }

@@ -235,32 +235,26 @@ model CustomMedicalProduct {
   @@map("custom_medical_products")
 }
 
-// Vaccins (multi-tenant)
-model Vaccine {
-  id                    String    @id @default(uuid())
-  farmId                String    @map("farm_id")
-  name                  String
-  description           String?
-  manufacturer          String?
-  targetSpecies         Json?     @map("target_species") // JSON array
-  targetDiseases        Json?     @map("target_diseases") // JSON array
-  standardDose          Float?    @map("standard_dose")
-  injectionsRequired    Int       @default(1) @map("injections_required")
-  injectionIntervalDays Int?      @map("injection_interval_days")
-  meatWithdrawalDays    Int?      @map("meat_withdrawal_days")
-  milkWithdrawalDays    Int?      @map("milk_withdrawal_days")
-  administrationRoute   String?   @map("administration_route")
-  isActive              Boolean   @default(true) @map("is_active")
-  version               Int       @default(1)
-  deletedAt             DateTime? @map("deleted_at")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
+// Vaccins personnalisés (multi-tenant) - PHASE_10
+model CustomVaccine {
+  id                String    @id @default(uuid())
+  farmId            String    @map("farm_id")
+  name              String
+  description       String?
+  targetDisease     String?   @map("target_disease")
+  laboratoire       String?
+  dosage            String?
+  version           Int       @default(1)
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
-  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  // farmPreferences   FarmVaccinePreference[]  // PHASE_22
 
   @@index([farmId])
   @@index([deletedAt])
-  @@map("vaccines")
+  @@map("custom_vaccines")
 }
 
 // Table de référence - Voies d'administration
@@ -468,8 +462,8 @@ model Farm {
   breedings Breeding[]
   lotAnimals LotAnimal[]
   veterinarians Veterinarian[]
-  customMedicalProducts CustomMedicalProduct[]
-  vaccines Vaccine[]
+  medicalProducts MedicalProduct[]
+  customVaccines CustomVaccine[]
   preferences FarmPreferences?
   alertConfigurations AlertConfiguration[]
 
