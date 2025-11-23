@@ -185,8 +185,8 @@ model Veterinarian {
   @@map("veterinarians")
 }
 
-// Produits médicaux (multi-tenant)
-model MedicalProduct {
+// Produits médicaux personnalisés (multi-tenant) - PHASE_09
+model CustomMedicalProduct {
   id                        String    @id @default(uuid())
   farmId                    String    @map("farm_id")
   name                      String
@@ -227,9 +227,12 @@ model MedicalProduct {
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   treatments Treatment[]
 
+  // Relations (seront ajoutées dans BLOC 4 - PHASE_21)
+  // farmPreferences FarmProductPreference[]
+
   @@index([farmId])
   @@index([deletedAt])
-  @@map("medical_products")
+  @@map("custom_medical_products")
 }
 
 // Vaccins (multi-tenant)
@@ -465,7 +468,7 @@ model Farm {
   breedings Breeding[]
   lotAnimals LotAnimal[]
   veterinarians Veterinarian[]
-  medicalProducts MedicalProduct[]
+  customMedicalProducts CustomMedicalProduct[]
   vaccines Vaccine[]
   preferences FarmPreferences?
   alertConfigurations AlertConfiguration[]
@@ -622,7 +625,7 @@ model Treatment {
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  product MedicalProduct? @relation(fields: [productId], references: [id])
+  product CustomMedicalProduct? @relation(fields: [productId], references: [id])
   veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id])
   route AdministrationRoute? @relation(fields: [routeId], references: [id])
 
