@@ -12,6 +12,7 @@ import { BreedingsModule } from './breedings/breedings.module';
 import { BreedsModule } from './breeds/breeds.module';
 import { BreedCountriesModule } from './breed-countries/breed-countries.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
+import { CampaignCountriesModule } from './campaign-countries/campaign-countries.module';
 import { CountriesModule } from './countries/countries.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
@@ -71,6 +72,7 @@ import { WeightsModule } from './weights/weights.module';
     SpeciesModule,
     BreedsModule,
     BreedCountriesModule,
+    CampaignCountriesModule,
     CountriesModule,
     // Farm settings
     FarmsModule,
