@@ -843,18 +843,37 @@ model Document {
   @@map("documents")
 }
 
-// Préférences de la ferme
+// ENUMs pour FarmPreferences (PHASE_15)
+enum Language {
+  fr
+  en
+  ar
+}
+
+enum WeightUnit {
+  kg
+  lb
+}
+
+enum Currency {
+  DZD  // Dinar algérien
+  EUR  // Euro
+  USD  // Dollar américain
+  MAD  // Dirham marocain
+}
+
+// Préférences de la ferme (PHASE_15)
 model FarmPreferences {
   id                     String    @id @default(uuid())
   farmId                 String    @unique @map("farm_id")
-  defaultVeterinarianId  String?   @map("default_veterinarian_id")
-  defaultSpeciesId       String?   @map("default_species_id")
-  defaultBreedId         String?   @map("default_breed_id")
-  weightUnit             String    @default("kg") @map("weight_unit")
-  currency               String    @default("DZD")
-  language               String    @default("fr")
-  dateFormat             String    @default("DD/MM/YYYY") @map("date_format")
-  enableNotifications    Boolean   @default(true) @map("enable_notifications")
+  defaultVeterinarianId  String?    @map("default_veterinarian_id")
+  defaultSpeciesId       String?    @map("default_species_id")
+  defaultBreedId         String?    @map("default_breed_id")
+  weightUnit             WeightUnit @default(kg) @map("weight_unit")
+  currency               Currency   @default(DZD)
+  language               Language   @default(fr)
+  dateFormat             String     @default("DD/MM/YYYY") @map("date_format")
+  enableNotifications    Boolean    @default(true) @map("enable_notifications")
   version                Int       @default(1)
   deletedAt              DateTime? @map("deleted_at")
   createdAt              DateTime  @default(now()) @map("created_at")
