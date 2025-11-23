@@ -134,4 +134,99 @@ export class VeterinariansService {
       throw error;
     }
   }
+
+  // 🆕 PHASE_13: New methods
+
+  async findByFarm(farmId: string) {
+    this.logger.debug(`Finding veterinarians for farm ${farmId}`);
+    // Uses composite index: idx_vets_farm_active
+    return this.prisma.veterinarian.findMany({
+      where: {
+        farmId,
+        isActive: true,
+        deletedAt: null,
+      },
+      orderBy: { lastName: 'asc' },
+    });
+  }
+
+  async findDefault(farmId: string) {
+    this.logger.debug(`Finding default veterinarian for farm ${farmId}`);
+    // Uses composite index: idx_vets_farm_default
+    const defaultVet = await this.prisma.veterinarian.findFirst({
+      where: {
+        farmId,
+        isDefault: true,
+        deletedAt: null,
+      },
+    });
+
+    if (!defaultVet) {
+      this.logger.warn('No default veterinarian found', { farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.VETERINARIAN_NOT_FOUND,
+        `No default veterinarian found for farm ${farmId}`,
+        { farmId },
+      );
+    }
+
+    return defaultVet;
+  }
+
+  async findByDepartment(department: string) {
+    this.logger.debug(`Finding veterinarians in department ${department}`);
+    // Uses composite index: idx_vets_dept_active
+    return this.prisma.veterinarian.findMany({
+      where: {
+        department,
+        isActive: true,
+        deletedAt: null,
+      },
+      orderBy: { lastName: 'asc' },
+    });
+  }
+
+  async setDefault(farmId: string, id: string) {
+    this.logger.debug(`Setting veterinarian ${id} as default for farm ${farmId}`);
+
+    const vet = await this.prisma.veterinarian.findFirst({
+      where: { id, farmId, deletedAt: null },
+    });
+
+    if (!vet) {
+      this.logger.warn('Veterinarian not found', { veterinarianId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.VETERINARIAN_NOT_FOUND,
+        `Veterinarian ${id} not found`,
+        { veterinarianId: id, farmId },
+      );
+    }
+
+    try {
+      // First, unset all defaults for this farm
+      await this.prisma.veterinarian.updateMany({
+        where: {
+          farmId,
+          isDefault: true,
+          deletedAt: null,
+        },
+        data: { isDefault: false },
+      });
+
+      // Then set the new default
+      const updated = await this.prisma.veterinarian.update({
+        where: { id },
+        data: {
+          isDefault: true,
+          version: vet.version + 1,
+        },
+      });
+
+      this.logger.audit('Default veterinarian set', { veterinarianId: id, farmId });
+      return updated;
+    } catch (error) {
+      this.logger.error(`Failed to set default veterinarian ${id}`, error.stack);
+      throw error;
+    }
+  }
 }

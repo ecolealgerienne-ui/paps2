@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -35,6 +36,13 @@ export class VeterinariansController {
     return this.veterinariansService.findAll(farmId, query);
   }
 
+  @Get('search/department/:dept')
+  @ApiOperation({ summary: 'Search veterinarians by department' })
+  @ApiResponse({ status: 200, description: 'List of veterinarians in department' })
+  findByDepartment(@Param('dept') department: string) {
+    return this.veterinariansService.findByDepartment(department);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a veterinarian by ID' })
   @ApiResponse({ status: 200, description: 'Veterinarian details' })
@@ -58,5 +66,28 @@ export class VeterinariansController {
   @ApiResponse({ status: 200, description: 'Veterinarian deleted' })
   remove(@Param('farmId') farmId: string, @Param('id') id: string) {
     return this.veterinariansService.remove(farmId, id);
+  }
+
+  // 🆕 PHASE_13: New endpoints
+
+  @Get('active')
+  @ApiOperation({ summary: 'Get active veterinarians for a farm' })
+  @ApiResponse({ status: 200, description: 'List of active veterinarians' })
+  findByFarm(@Param('farmId') farmId: string) {
+    return this.veterinariansService.findByFarm(farmId);
+  }
+
+  @Get('default')
+  @ApiOperation({ summary: 'Get default veterinarian for a farm' })
+  @ApiResponse({ status: 200, description: 'Default veterinarian details' })
+  findDefault(@Param('farmId') farmId: string) {
+    return this.veterinariansService.findDefault(farmId);
+  }
+
+  @Patch(':id/set-default')
+  @ApiOperation({ summary: 'Set a veterinarian as default for the farm' })
+  @ApiResponse({ status: 200, description: 'Veterinarian set as default' })
+  setDefault(@Param('farmId') farmId: string, @Param('id') id: string) {
+    return this.veterinariansService.setDefault(farmId, id);
   }
 }
