@@ -8,6 +8,21 @@ datasource db {
 }
 
 // ============================================================
+// ENUMS
+// ============================================================
+
+enum MedicalProductType {
+  antibiotic
+  antiparasitic
+  anti_inflammatory
+  vitamin
+  vaccine
+  anesthetic
+  hormone
+  other
+}
+
+// ============================================================
 // TABLES DE RÉFÉRENCE (Backend)
 // ============================================================
 
@@ -186,6 +201,42 @@ model AdministrationRoute {
 
   @@map("administration_routes")
 }
+
+// ============================================================
+// TABLES GLOBALES (Catalogue International)
+// ============================================================
+
+// Produits médicaux (catalogue global)
+model GlobalMedicalProduct {
+  id            String              @id @default(uuid())
+  code          String              @unique               // Code unique (ex: "enrofloxacine_100")
+  nameFr        String              @map("name_fr")
+  nameEn        String              @map("name_en")
+  nameAr        String              @map("name_ar")
+  description   String?
+  type          MedicalProductType
+  principeActif String?             @map("principe_actif")
+  laboratoire   String?
+  numeroAMM     String?             @map("numero_amm")    // Autorisation Mise sur le Marché
+  version       Int                 @default(1)
+  deletedAt     DateTime?           @map("deleted_at")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @updatedAt @map("updated_at")
+
+  // Relations (à implémenter dans phases futures)
+  // productCountries  ProductCountry[]          // Phase 17
+  // farmPreferences   FarmProductPreference[]   // Phase 21
+
+  @@index([code])
+  @@index([type])
+  @@index([laboratoire])
+  @@index([deletedAt])
+  @@map("global_medical_products")
+}
+
+// ============================================================
+// TABLES DE RÉFÉRENCE (Configuration)
+// ============================================================
 
 // Table de référence - Configuration des alertes
 model AlertConfiguration {

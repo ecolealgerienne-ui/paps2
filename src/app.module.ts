@@ -14,6 +14,7 @@ import { CampaignsModule } from './campaigns/campaigns.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
 import { FarmsModule } from './farms/farms.module';
+import { GlobalMedicalProductsModule } from './global-medical-products/global-medical-products.module';
 import { LotsModule } from './lots/lots.module';
 import { MedicalProductsModule } from './medical-products/medical-products.module';
 import { MovementsModule } from './movements/movements.module';
@@ -66,6 +67,8 @@ import { WeightsModule } from './weights/weights.module';
     AdministrationRoutesModule,
     SpeciesModule,
     BreedsModule,
+    // Global catalog
+    GlobalMedicalProductsModule,
     // Farm settings
     FarmsModule,
     AlertConfigurationsModule,
