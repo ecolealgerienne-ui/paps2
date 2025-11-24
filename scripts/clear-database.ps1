@@ -81,6 +81,9 @@ try {
     Write-Host "[INFO] Execution de la suppression..." -ForegroundColor Cyan
     Write-Host ""
 
+    # Définir DATABASE_URL pour le processus enfant
+    $env:DATABASE_URL = $databaseUrl
+
     # Exécuter le script TypeScript qui utilise Prisma Client
     npx ts-node scripts\clear-database.ts
 
