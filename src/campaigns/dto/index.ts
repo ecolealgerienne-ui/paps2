@@ -20,10 +20,9 @@ export class CreateCampaignDto {
   @IsString()
   productName: string;
 
-  @ApiProperty({ enum: CampaignType, description: 'Type of campaign', required: false })
-  @IsOptional()
+  @ApiProperty({ enum: CampaignType, description: 'Type of campaign' })
   @IsEnum(CampaignType)
-  type?: CampaignType;
+  type: CampaignType;
 
   @ApiProperty({ description: 'Lot ID to target', required: false })
   @IsOptional()
