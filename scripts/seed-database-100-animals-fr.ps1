@@ -376,20 +376,398 @@ if ($farmResponse) {
     Write-Host "    -> $($vetIds.Count) veterinaires crees" -ForegroundColor Green
 }
 
-# TO BE CONTINUED...
-# Le script continue avec les tables de liaison, puis la génération des 100 animaux
-# et leurs données transactionnelles
+# =============================================================================
+# 11. BREED COUNTRIES (Lier toutes les races a la France)
+# =============================================================================
+Write-Host ""
+Write-Host "11. Breed Countries (Races disponibles en France)" -ForegroundColor Cyan
+
+$breedCountryCount = 0
+foreach ($breedId in $breedIds) {
+    $breedCountry = @{
+        breedId = $breedId
+        countryCode = "FR"
+    }
+    $response = Invoke-CurlApi -Method POST -Endpoint "/api/v1/breed-countries" -Body $breedCountry -Silent
+    if ($response) { $breedCountryCount++ }
+}
+Write-Host "    -> $breedCountryCount liaisons race-pays creees" -ForegroundColor Green
+
+# =============================================================================
+# 12. CAMPAIGN COUNTRIES (Lier campagnes a la France)
+# =============================================================================
+Write-Host ""
+Write-Host "12. Campaign Countries (Campagnes en France)" -ForegroundColor Cyan
+
+$campaignCountryCount = 0
+foreach ($campaignId in $nationalCampaignIds) {
+    $campaignCountry = @{
+        campaignId = $campaignId
+        countryCode = "FR"
+    }
+    $response = Invoke-CurlApi -Method POST -Endpoint "/api/v1/campaign-countries" -Body $campaignCountry -Silent
+    if ($response) { $campaignCountryCount++ }
+}
+Write-Host "    -> $campaignCountryCount liaisons campagne-pays creees" -ForegroundColor Green
+
+# =============================================================================
+# 13. PRODUCT COUNTRIES (Lier produits a plusieurs pays)
+# =============================================================================
+Write-Host ""
+Write-Host "13. Product Countries (Produits disponibles par pays)" -ForegroundColor Cyan
+
+$productCountryCount = 0
+foreach ($productId in $globalProductIds) {
+    # Lier chaque produit a 2-3 pays europeens
+    $countryCodes = @("FR", "BE", "DE") | Get-Random -Count (Get-Random -Minimum 2 -Maximum 4)
+    foreach ($countryCode in $countryCodes) {
+        $productCountry = @{
+            productId = $productId
+            countryCode = $countryCode
+            isActive = $true
+        }
+        $response = Invoke-CurlApi -Method POST -Endpoint "/api/v1/product-countries" -Body $productCountry -Silent
+        if ($response) { $productCountryCount++ }
+    }
+}
+Write-Host "    -> $productCountryCount liaisons produit-pays creees" -ForegroundColor Green
+
+# =============================================================================
+# 14. VACCINE COUNTRIES (Lier vaccins a plusieurs pays)
+# =============================================================================
+Write-Host ""
+Write-Host "14. Vaccine Countries (Vaccins disponibles par pays)" -ForegroundColor Cyan
+
+$vaccineCountryCount = 0
+foreach ($vaccineId in $globalVaccineIds) {
+    $countryCodes = @("FR", "BE", "ES") | Get-Random -Count (Get-Random -Minimum 2 -Maximum 4)
+    foreach ($countryCode in $countryCodes) {
+        $vaccineCountry = @{
+            vaccineId = $vaccineId
+            countryCode = $countryCode
+            isActive = $true
+        }
+        $response = Invoke-CurlApi -Method POST -Endpoint "/api/v1/vaccine-countries" -Body $vaccineCountry -Silent
+        if ($response) { $vaccineCountryCount++ }
+    }
+}
+Write-Host "    -> $vaccineCountryCount liaisons vaccin-pays creees" -ForegroundColor Green
+
+# =============================================================================
+# 15. FARM CONFIGURATION
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "15. Alert Configuration & Farm Preferences" -ForegroundColor Cyan
+
+    # Alert Configuration
+    $alertConfig = @{
+        enableEmailAlerts = $true
+        enableSmsAlerts = $false
+        enablePushAlerts = $true
+        vaccinationReminderDays = 7
+        treatmentReminderDays = 3
+        healthCheckReminderDays = 30
+    }
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/alert-configuration" -Body $alertConfig `
+        -Description "  Configuration alertes"
+
+    # Farm Preferences
+    $farmPreferences = @{
+        weightUnit = "kg"
+        currency = "EUR"
+        language = "fr"
+        dateFormat = "DD/MM/YYYY"
+        enableNotifications = $true
+        defaultVeterinarianId = if ($vetIds.Count -gt 0) { $vetIds[0] } else { $null }
+        defaultBreedId = if ($breedIds.Count -gt 0) { $breedIds[0] } else { $null }
+        defaultSpeciesId = "bovine"
+    }
+    Invoke-CurlApi -Method PUT -Endpoint "/farms/$farmId/preferences" -Body $farmPreferences `
+        -Description "  Preferences ferme"
+}
+
+# =============================================================================
+# 16. FARM PREFERENCES (Produits, Vaccins, Vétérinaires, Races, Campagnes)
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "16. Farm Preferences (Favoris de la ferme)" -ForegroundColor Cyan
+
+    # Farm Product Preferences (5 produits favoris)
+    $productPrefCount = 0
+    for ($i = 0; $i -lt [Math]::Min(5, $medicalProductIds.Count); $i++) {
+        if ($i -lt $globalProductIds.Count) {
+            $productPref = @{
+                globalProductId = $globalProductIds[$i]
+                displayOrder = $i + 1
+                isActive = $true
+            }
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/product-preferences" -Body $productPref -Silent
+            if ($response) { $productPrefCount++ }
+        }
+    }
+
+    # Farm Vaccine Preferences (4 vaccins favoris)
+    $vaccinePrefCount = 0
+    for ($i = 0; $i -lt [Math]::Min(4, $globalVaccineIds.Count); $i++) {
+        $vaccinePref = @{
+            farmId = $farmId
+            globalVaccineId = $globalVaccineIds[$i]
+            displayOrder = $i + 1
+            isActive = $true
+        }
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccine-preferences" -Body $vaccinePref -Silent
+        if ($response) { $vaccinePrefCount++ }
+    }
+
+    # Farm Veterinarian Preferences (3 vétérinaires favoris)
+    $vetPrefCount = 0
+    for ($i = 0; $i -lt [Math]::Min(3, $vetIds.Count); $i++) {
+        $vetPref = @{
+            veterinarianId = $vetIds[$i]
+            displayOrder = $i + 1
+            isActive = $true
+        }
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarian-preferences" -Body $vetPref -Silent
+        if ($response) { $vetPrefCount++ }
+    }
+
+    # Farm Breed Preferences (3 races favorites)
+    $breedPrefCount = 0
+    for ($i = 0; $i -lt [Math]::Min(3, $breedIds.Count); $i++) {
+        $breedPref = @{
+            breedId = $breedIds[$i]
+        }
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breed-preferences" -Body $breedPref -Silent
+        if ($response) { $breedPrefCount++ }
+    }
+
+    # Farm Campaign Preferences (Inscription a 2 campagnes)
+    $campaignPrefCount = 0
+    for ($i = 0; $i -lt [Math]::Min(2, $nationalCampaignIds.Count); $i++) {
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/campaign-preferences/$($nationalCampaignIds[$i])/enroll" -Body @{} -Silent
+        if ($response) { $campaignPrefCount++ }
+    }
+
+    Write-Host "    -> Produits favoris: $productPrefCount" -ForegroundColor Green
+    Write-Host "    -> Vaccins favoris: $vaccinePrefCount" -ForegroundColor Green
+    Write-Host "    -> Veterinaires favoris: $vetPrefCount" -ForegroundColor Green
+    Write-Host "    -> Races favorites: $breedPrefCount" -ForegroundColor Green
+    Write-Host "    -> Campagnes inscrites: $campaignPrefCount" -ForegroundColor Green
+}
+
+# =============================================================================
+# 17. MEDICAL PRODUCTS (Produits de la ferme - 12 produits)
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "17. Medical Products (Stock ferme - 12 produits)" -ForegroundColor Cyan
+
+    $farmProducts = @(
+        @{ name = "Ivomec 1% Stock"; commercialName = "Ivomec Injectable"; category = "antiparasitic"; activeIngredient = "Ivermectine"; manufacturer = "Boehringer Ingelheim"; withdrawalPeriodMeat = 28; withdrawalPeriodMilk = 0; currentStock = 15; minStock = 5; stockUnit = "flacon"; unitPrice = 25.50; batchNumber = "IV2024-001"; expiryDate = "2026-12-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Clamoxyl LA Stock"; commercialName = "Clamoxyl LA"; category = "antibiotic"; activeIngredient = "Amoxicilline"; manufacturer = "Zoetis"; withdrawalPeriodMeat = 14; withdrawalPeriodMilk = 60; currentStock = 20; minStock = 8; stockUnit = "flacon"; unitPrice = 45.00; batchNumber = "CL2024-002"; expiryDate = "2026-06-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Finadyne Stock"; commercialName = "Finadyne"; category = "anti_inflammatory"; activeIngredient = "Flunixine"; manufacturer = "MSD"; withdrawalPeriodMeat = 7; withdrawalPeriodMilk = 24; currentStock = 10; minStock = 5; stockUnit = "flacon"; unitPrice = 32.00; batchNumber = "FI2024-003"; expiryDate = "2026-09-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Panacur Stock"; commercialName = "Panacur"; category = "antiparasitic"; activeIngredient = "Fenbendazole"; manufacturer = "MSD"; withdrawalPeriodMeat = 14; withdrawalPeriodMilk = 0; currentStock = 25; minStock = 10; stockUnit = "sachet"; unitPrice = 8.50; batchNumber = "PA2024-004"; expiryDate = "2027-03-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Calcium Injectable"; commercialName = "Calcium"; category = "vitamin_mineral"; activeIngredient = "Calcium borogluconate"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 12; minStock = 5; stockUnit = "flacon"; unitPrice = 18.00; batchNumber = "CA2024-005"; expiryDate = "2026-11-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Vitamine AD3E"; commercialName = "Vitamine AD3E"; category = "vitamin_mineral"; activeIngredient = "Vitamines A, D3, E"; manufacturer = "CEVA"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 8; minStock = 3; stockUnit = "flacon"; unitPrice = 22.00; batchNumber = "VI2024-006"; expiryDate = "2026-08-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Oxytetracycline LA"; commercialName = "Oxytet"; category = "antibiotic"; activeIngredient = "Oxytetracycline"; manufacturer = "CEVA"; withdrawalPeriodMeat = 21; withdrawalPeriodMilk = 96; currentStock = 18; minStock = 8; stockUnit = "flacon"; unitPrice = 38.00; batchNumber = "OX2024-007"; expiryDate = "2026-07-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Metacam Stock"; commercialName = "Metacam"; category = "anti_inflammatory"; activeIngredient = "Meloxicam"; manufacturer = "Boehringer Ingelheim"; withdrawalPeriodMeat = 15; withdrawalPeriodMilk = 120; currentStock = 14; minStock = 6; stockUnit = "flacon"; unitPrice = 42.00; batchNumber = "ME2024-008"; expiryDate = "2026-10-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Betadine Stock"; commercialName = "Betadine"; category = "antiseptic"; activeIngredient = "Povidone iodee"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 30; minStock = 10; stockUnit = "flacon"; unitPrice = 12.00; batchNumber = "BE2024-009"; expiryDate = "2027-12-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Spray Cicatrisant"; commercialName = "Spray Oxy"; category = "antiseptic"; activeIngredient = "Oxytetracycline"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 7; withdrawalPeriodMilk = 0; currentStock = 22; minStock = 8; stockUnit = "bombe"; unitPrice = 16.00; batchNumber = "SP2024-010"; expiryDate = "2027-06-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Oxytocine Stock"; commercialName = "Oxytocine"; category = "hormone"; activeIngredient = "Oxytocine"; manufacturer = "CEVA"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 12; currentStock = 10; minStock = 5; stockUnit = "flacon"; unitPrice = 28.00; batchNumber = "OT2024-011"; expiryDate = "2026-04-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ name = "Prostaglandine Stock"; commercialName = "PGF2alpha"; category = "hormone"; activeIngredient = "Prostaglandine"; manufacturer = "Zoetis"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 24; currentStock = 8; minStock = 4; stockUnit = "flacon"; unitPrice = 52.00; batchNumber = "PG2024-012"; expiryDate = "2026-05-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+    )
+
+    foreach ($product in $farmProducts) {
+        $productResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/medical-products" -Body $product -Silent
+        $productId = Get-IdFromResponse $productResponse
+        if ($productId) {
+            $medicalProductIds += $productId
+        }
+    }
+    Write-Host "    -> $($medicalProductIds.Count) produits en stock crees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 18. CUSTOM VACCINES (Vaccins personnalises - 3 vaccins)
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "18. Custom Vaccines (3 vaccins personnalises)" -ForegroundColor Cyan
+
+    $customVaccines = @(
+        @{ name = "Vaccin Brucellose B19 Local"; description = "Vaccin contre la brucellose bovine - formule locale"; targetDisease = "Brucellose"; laboratoire = "Laboratoire Regional"; dosage = "2ml par animal" }
+        @{ name = "Vaccin Enterotoxemie Ovins"; description = "Vaccin enterotoxemie specifique ovins"; targetDisease = "Enterotoxemie"; laboratoire = "Labo Ovins"; dosage = "1ml par animal" }
+        @{ name = "Vaccin Multivalent Ferme"; description = "Vaccin multivalent formule ferme"; targetDisease = "Multiple"; laboratoire = "Production Locale"; dosage = "2.5ml par animal" }
+    )
+
+    foreach ($vaccine in $customVaccines) {
+        $vaccineResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccines" -Body $vaccine -Silent
+        $vaccineId = Get-IdFromResponse $vaccineResponse
+        if ($vaccineId) {
+            $customVaccineIds += $vaccineId
+        }
+    }
+    Write-Host "    -> $($customVaccineIds.Count) vaccins personnalises crees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 19. LOTS (10 lots varies)
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "19. Lots (10 lots)" -ForegroundColor Cyan
+
+    $lots = @(
+        @{ name = "Lot Vaches Laitieres"; type = "production"; status = "open" }
+        @{ name = "Lot Genisses 2024"; type = "reproduction"; status = "open" }
+        @{ name = "Lot Vente Automne 2024"; type = "sale"; status = "closed" }
+        @{ name = "Lot Traitement Parasites Mars"; type = "treatment"; status = "completed" }
+        @{ name = "Lot Vaccination Printemps"; type = "vaccination"; status = "completed" }
+        @{ name = "Lot Brebis Laitieres"; type = "production"; status = "open" }
+        @{ name = "Lot Agneaux Printemps 2024"; type = "birth"; status = "open" }
+        @{ name = "Lot Reforme 2024"; type = "sale"; status = "open" }
+        @{ name = "Lot Quarantaine"; type = "quarantine"; status = "open" }
+        @{ name = "Lot Engraissement"; type = "fattening"; status = "open" }
+    )
+
+    foreach ($lot in $lots) {
+        $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots" -Body $lot -Silent
+        $lotId = Get-IdFromResponse $lotResponse
+        if ($lotId) {
+            $lotIds += $lotId
+        }
+    }
+    Write-Host "    -> $($lotIds.Count) lots crees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 20. ANIMAUX (100 animaux: 70% bovins, 30% ovins)
+# =============================================================================
+if ($farmResponse -and $breedIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "20. Animals (100 animaux: ~70 bovins, ~30 ovins)" -ForegroundColor Cyan
+    Write-Host "    Statuts: 70-75 vivants, 10-12 vendus, 5-8 morts, 5-8 abattus" -ForegroundColor Gray
+    Write-Host ""
+
+    # Races bovines et ovines
+    $bovineBreeds = $breedIds[0..4]  # 5 premieres races = bovins
+    $ovineBreeds = $breedIds[5..7]   # 3 dernieres races = ovins
+
+    # Statuts et leur répartition
+    $animalStatuses = @(
+        @{ status = "alive"; count = 72 }
+        @{ status = "sold"; count = 11 }
+        @{ status = "dead"; count = 7 }
+        @{ status = "slaughtered"; count = 10 }
+    )
+
+    $animalCounter = 0
+    $birthStartDate = Get-Date "2020-01-01"
+    $birthEndDate = Get-Date "2025-06-01"
+
+    foreach ($statusGroup in $animalStatuses) {
+        $status = $statusGroup.status
+        $count = $statusGroup.count
+
+        for ($i = 0; $i -lt $count; $i++) {
+            $animalCounter++
+
+            # 70% bovins, 30% ovins
+            $isBovine = ($animalCounter % 10) -le 6
+            $speciesId = if ($isBovine) { "bovine" } else { "ovine" }
+            $breedId = if ($isBovine) {
+                $bovineBreeds | Get-Random
+            } else {
+                $ovineBreeds | Get-Random
+            }
+
+            # Sexe aléatoire
+            $sex = if ((Get-Random -Minimum 0 -Maximum 2) -eq 0) { "male" } else { "female" }
+
+            # Date de naissance aléatoire (entre 6 mois et 5 ans)
+            $birthDate = Get-RandomDate -Start $birthStartDate -End $birthEndDate
+
+            # Générer ID électronique et numéro
+            $eidNumber = "2502690" + ("{0:D8}" -f (Get-Random -Minimum 1 -Maximum 99999999))
+            $officialNumber = "FR-{0}-{1:D5}" -f (Get-Date $birthDate -Format "yyyy"), (Get-Random -Minimum 1 -Maximum 99999)
+            $visualId = if ($isBovine) {
+                @("Belle", "Marguerite", "Duchesse", "Fauvette", "Iris", "Lilas", "Noisette", "Pivoine", "Rose", "Tulipe",
+                  "Cesar", "Django", "Elliot", "Faust", "Gaspard", "Hugo", "Igor", "Jules", "Lancelot", "Nestor") | Get-Random
+            } else {
+                @("Blanchette", "Cannelle", "Doucette", "Etoile", "Flocon", "Grisette", "Lulu", "Noisette", "Perle", "Violette",
+                  "Alphonse", "Basile", "Caramel", "Dominique", "Edmond", "Felix", "Gaston", "Leon", "Marius", "Oscar") | Get-Random
+            }
+            $visualId += "-" + $animalCounter.ToString("D3")
+
+            $animal = @{
+                id = [guid]::NewGuid().ToString()
+                birthDate = $birthDate
+                sex = $sex
+                currentEid = $eidNumber
+                officialNumber = $officialNumber
+                visualId = $visualId
+                speciesId = $speciesId
+                breedId = $breedId
+                status = $status
+                notes = "Animal de test - Statut: $status"
+            }
+
+            # Si animal mort/abattu/vendu, ajouter date
+            if ($status -eq "dead") {
+                $deathDate = Get-RandomDate -Start (Get-Date $birthDate).AddMonths(6) -End $endDate
+                $animal.deathDate = $deathDate
+                $animal.deathReason = @("maladie", "accident", "vieillesse") | Get-Random
+            } elseif ($status -eq "slaughtered") {
+                $slaughterDate = Get-RandomDate -Start (Get-Date $birthDate).AddYears(1) -End $endDate
+                $animal.slaughterDate = $slaughterDate
+            } elseif ($status -eq "sold") {
+                $saleDate = Get-RandomDate -Start (Get-Date $birthDate).AddMonths(8) -End $endDate
+                $animal.saleDate = $saleDate
+            }
+
+            $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/animals" -Body $animal -Silent
+            $animalIdResult = Get-IdFromResponse $animalResponse
+
+            if ($animalIdResult) {
+                $animalIds += $animal.id  # Stocker l'ID qu'on a envoyé
+
+                # Afficher progression tous les 10 animaux
+                if ($animalCounter % 10 -eq 0) {
+                    Write-Host "    -> Animaux: $animalCounter/100 crees..." -ForegroundColor Cyan
+                }
+            }
+        }
+    }
+
+    Write-Host ""
+    Write-Host "    -> TOTAL: $($animalIds.Count) animaux crees avec succes!" -ForegroundColor Green
+}
 
 Write-Host ""
-Write-Host "============================================" -ForegroundColor Yellow
-Write-Host "  SCRIPT EN COURS DE CREATION..." -ForegroundColor Yellow
-Write-Host "============================================" -ForegroundColor Yellow
+Write-Host "============================================" -ForegroundColor Green
+Write-Host "  SEED 100 ANIMAUX - TERMINE!" -ForegroundColor Green
+Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Partie 1 terminee: Tables de reference" -ForegroundColor Green
-Write-Host "A venir:" -ForegroundColor Cyan
-Write-Host "  - Tables de liaison (breed/product/vaccine countries)" -ForegroundColor White
-Write-Host "  - Preferences de la ferme" -ForegroundColor White
-Write-Host "  - 100 animaux (bovins/ovins)" -ForegroundColor White
-Write-Host "  - Vaccinations, traitements, pesees, reproductions" -ForegroundColor White
-Write-Host "  - Lots, mouvements, documents" -ForegroundColor White
+Write-Host "Resume:" -ForegroundColor Cyan
+Write-Host "  - 5 pays" -ForegroundColor White
+Write-Host "  - 15 produits globaux" -ForegroundColor White
+Write-Host "  - 10 vaccins globaux" -ForegroundColor White
+Write-Host "  - 8 races (5 bovines + 3 ovines)" -ForegroundColor White
+Write-Host "  - 1 ferme avec 5 veterinaires" -ForegroundColor White
+Write-Host "  - 12 produits en stock" -ForegroundColor White
+Write-Host "  - 3 vaccins personnalises" -ForegroundColor White
+Write-Host "  - 10 lots" -ForegroundColor White
+Write-Host "  - $($animalIds.Count) animaux (bovins/ovins)" -ForegroundColor Green
+Write-Host ""
+Write-Host "Prochaines etapes (a ajouter):" -ForegroundColor Yellow
+Write-Host "  - Lot-Animals (affecter animaux aux lots)" -ForegroundColor White
+Write-Host "  - Vaccinations (~250-300)" -ForegroundColor White
+Write-Host "  - Treatments (~200-250)" -ForegroundColor White
+Write-Host "  - Movements (~150-200)" -ForegroundColor White
+Write-Host "  - Weights (~400-500)" -ForegroundColor White
+Write-Host "  - Breedings (~40-50)" -ForegroundColor White
+Write-Host "  - Documents (~100-120)" -ForegroundColor White
+Write-Host "  - Personal Campaigns (3-5)" -ForegroundColor White
 Write-Host ""
