@@ -34,7 +34,6 @@ function Invoke-CurlApi {
     $headers = @{
         "Content-Type" = "application/json"
         "Authorization" = "Bearer $Token"
-        "Connection" = "close"
     }
 
     try {
