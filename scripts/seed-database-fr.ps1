@@ -354,7 +354,7 @@ $lots = @(
 
 $lotIds = @()
 foreach ($lot in $lots) {
-    $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/api/lots" -Body $lot `
+    $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots" -Body $lot `
         -Description "Lot: $($lot.name)"
     if ($lotResponse -and $lotResponse.id) {
         $lotIds += $lotResponse.id
@@ -417,7 +417,7 @@ for ($i = 1; $i -le 100; $i++) {
         lotId = $lotId
     }
 
-    $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/api/animals" -Body $animal `
+    $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/animals" -Body $animal `
         -Description "Animal $i/100: $name ($earTag)"
 
     if ($animalResponse -and $animalResponse.id) {
@@ -450,7 +450,7 @@ for ($i = 0; $i -lt [Math]::Min(30, $animalIds.Count); $i += 2) {
             notes = "Reproduction normale"
         }
 
-        Invoke-CurlApi -Method POST -Endpoint "/api/breedings" -Body $breeding `
+        Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breedings" -Body $breeding `
             -Description "Reproduction $($breedingCount + 1)/15"
 
         $breedingCount++
@@ -481,7 +481,7 @@ foreach ($animalId in $animalIds) {
             notes = "Vaccination BVD"
         }
 
-        Invoke-CurlApi -Method POST -Endpoint "/api/vaccinations" -Body $vacc1 `
+        Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccinations" -Body $vacc1 `
             -Description "Vaccination $($vaccinationCount + 1): BVD" | Out-Null
 
         $vaccinationCount++
@@ -501,7 +501,7 @@ foreach ($animalId in $animalIds) {
                 notes = "Vaccination IBR"
             }
 
-            Invoke-CurlApi -Method POST -Endpoint "/api/vaccinations" -Body $vacc2 `
+            Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccinations" -Body $vacc2 `
                 -Description "Vaccination $($vaccinationCount + 1): IBR" | Out-Null
 
             $vaccinationCount++
@@ -548,7 +548,7 @@ for ($i = 0; $i -lt [Math]::Min(40, $animalIds.Count); $i++) {
             notes = "Traitement administre sans complications"
         }
 
-        Invoke-CurlApi -Method POST -Endpoint "/api/medical-treatments" -Body $treatment `
+        Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $treatment `
             -Description "Traitement $($treatmentCount + 1)/40: $($selectedTreatment.reason)"
 
         $treatmentCount++
