@@ -52,6 +52,16 @@ function Invoke-CurlApi {
     } catch {
         Write-Host " ERROR" -ForegroundColor Red
         Write-Host "    $($_.Exception.Message)" -ForegroundColor Red
+
+        # Afficher le détail de l'erreur du serveur
+        if ($_.ErrorDetails.Message) {
+            try {
+                $errorObj = $_.ErrorDetails.Message | ConvertFrom-Json
+                Write-Host "    Details: $($errorObj.message)" -ForegroundColor Yellow
+            } catch {
+                Write-Host "    Details: $($_.ErrorDetails.Message)" -ForegroundColor Yellow
+            }
+        }
         return $null
     }
 }
