@@ -22,17 +22,23 @@ ALTER TABLE farms
 -- Note: created_at et updated_at existent déjà dans le schéma, donc pas besoin de les ajouter
 
 -- Étape 2 : Ajouter contraintes CHECK pour validation géographique
-ALTER TABLE farms
-  ADD CONSTRAINT IF NOT EXISTS check_country_format
-  CHECK (country IS NULL OR country ~ '^[A-Z]{2}$');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_country_format') THEN
+    ALTER TABLE farms ADD CONSTRAINT check_country_format
+      CHECK (country IS NULL OR country ~ '^[A-Z]{2}$');
+  END IF;
 
-ALTER TABLE farms
-  ADD CONSTRAINT IF NOT EXISTS check_department_format
-  CHECK (department IS NULL OR department ~ '^[0-9A-Z]{2,3}$');
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_department_format') THEN
+    ALTER TABLE farms ADD CONSTRAINT check_department_format
+      CHECK (department IS NULL OR department ~ '^[0-9A-Z]{2,3}$');
+  END IF;
 
-ALTER TABLE farms
-  ADD CONSTRAINT IF NOT EXISTS check_commune_format
-  CHECK (commune IS NULL OR commune ~ '^[0-9]{5}$');
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'check_commune_format') THEN
+    ALTER TABLE farms ADD CONSTRAINT check_commune_format
+      CHECK (commune IS NULL OR commune ~ '^[0-9]{5}$');
+  END IF;
+END $$;
 
 -- Étape 3 : Créer indexes simples
 CREATE INDEX IF NOT EXISTS idx_farms_owner_id ON farms(owner_id);
