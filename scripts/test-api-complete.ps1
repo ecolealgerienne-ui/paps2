@@ -143,6 +143,25 @@ if ($response.data.status -eq "ok" -and $response.data.database -eq "connected")
 }
 
 # =============================================================================
+# Setup - Create test farm for all tests
+# =============================================================================
+Write-Header "Setup - Create test farm"
+
+Write-Test "POST /api/farms - Create test farm with fixed ID"
+$setupFarmResponse = Invoke-Api -Method POST -Endpoint "/api/farms" -Body @{
+    id = $FarmId
+    name = "Ferme de Test API"
+    location = "Alger, Algerie"
+    ownerId = "test-owner-script"
+    cheptelNumber = "TEST-SCRIPT-001"
+}
+if (-not (Test-ApiError $setupFarmResponse)) {
+    Write-Success "Test farm created: $FarmId"
+} else {
+    Write-Warning "Farm may already exist, continuing tests..."
+}
+
+# =============================================================================
 # Countries - FULL CRUD - 5 endpoints (PHASE 04)
 # =============================================================================
 Write-Header "Countries API - 5 endpoints (FULL CRUD)"
