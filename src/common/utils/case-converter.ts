@@ -4,6 +4,15 @@
  */
 
 /**
+ * Convert camelCase/snake_case object keys to snake_case recursively
+ * @param obj - Object with camelCase or snake_case keys
+ * @returns Object with snake_case keys
+ */
+export function toSnakeCase(obj: Record<string, any>): Record<string, any> {
+  return camelToSnake(obj);
+}
+
+/**
  * Convert camelCase object keys to snake_case recursively
  * @param obj - Object with camelCase keys
  * @returns Object with snake_case keys
