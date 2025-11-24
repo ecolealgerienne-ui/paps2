@@ -100,9 +100,11 @@ export enum CampaignStatus {
 // ========== CAMPAIGN TYPE ==========
 export enum CampaignType {
   VACCINATION = 'vaccination',
+  DEWORMING = 'deworming',
+  SCREENING = 'screening',
   TREATMENT = 'treatment',
-  WEIGHING = 'weighing',
-  IDENTIFICATION = 'identification',
+  CENSUS = 'census',
+  OTHER = 'other',
 }
 
 // ========== DOCUMENT TYPE ==========
