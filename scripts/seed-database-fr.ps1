@@ -796,7 +796,6 @@ if ($globalProductId) {
     $productCountry = @{
         productId = $globalProductId
         countryCode = "FR"
-        displayOrder = 1
         isActive = $true
     }
 
@@ -814,7 +813,6 @@ if ($globalVaccineId) {
     $vaccineCountry = @{
         vaccineId = $globalVaccineId
         countryCode = "FR"
-        displayOrder = 1
         isActive = $true
     }
 
@@ -856,6 +854,7 @@ if ($farmResponse -and $globalVaccineId) {
     Write-Host "31. Farm Vaccine Preferences (Vaccins preferes)" -ForegroundColor Cyan
 
     $farmVaccinePref = @{
+        farmId = $farmId
         globalVaccineId = $globalVaccineId
         displayOrder = 1
         isActive = $true
