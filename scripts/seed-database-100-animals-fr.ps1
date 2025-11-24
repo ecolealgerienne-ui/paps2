@@ -745,29 +745,401 @@ if ($farmResponse -and $breedIds.Count -gt 0) {
     Write-Host "    -> TOTAL: $($animalIds.Count) animaux crees avec succes!" -ForegroundColor Green
 }
 
+# =============================================================================
+# 21. LOT-ANIMALS (Affecter animaux aux lots)
+# =============================================================================
+if ($farmResponse -and $lotIds.Count -gt 0 -and $animalIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "21. Lot-Animals (Affectation aux lots)" -ForegroundColor Cyan
+
+    $lotAnimalCount = 0
+    # Affecter chaque animal a 1-2 lots aleatoires
+    foreach ($animalId in $animalIds) {
+        $numLots = Get-Random -Minimum 1 -Maximum 3
+        $selectedLots = $lotIds | Get-Random -Count $numLots
+
+        foreach ($lotId in $selectedLots) {
+            $lotAnimalDto = @{
+                animalIds = @($animalId)
+            }
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots/$lotId/animals" -Body $lotAnimalDto -Silent
+            if ($response) { $lotAnimalCount++ }
+        }
+    }
+    Write-Host "    -> $lotAnimalCount affectations animal-lot creees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 22. VACCINATIONS (~250-300 vaccinations)
+# =============================================================================
+if ($farmResponse -and $animalIds.Count -gt 0 -and $globalVaccineIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "22. Vaccinations (~250-300 vaccinations)" -ForegroundColor Cyan
+
+    $vaccinationCount = 0
+    $vaccineNames = @("Enterotoxemie", "Brucellose", "Bluetongue", "Fievre Aphteuse", "Rage", "Charbon", "Pasteurellose", "PPR", "Variole", "Multivalent")
+
+    # 2-3 vaccinations par animal
+    foreach ($animalId in $animalIds) {
+        $numVaccinations = Get-Random -Minimum 2 -Maximum 4
+
+        for ($i = 0; $i -lt $numVaccinations; $i++) {
+            $vaccineDate = Get-RandomDate -Start (Get-Date "2023-01-01") -End $endDate
+            $nextDueDate = (Get-Date $vaccineDate).AddYears(1).ToString("yyyy-MM-ddT00:00:00.000Z")
+
+            $vaccination = @{
+                animalId = $animalId
+                vaccineName = $vaccineNames | Get-Random
+                type = @("obligatoire", "recommandee", "preventive") | Get-Random
+                disease = @("enterotoxemia", "brucellosis", "bluetongue", "foot_and_mouth", "rabies", "pasteurellosis", "other") | Get-Random
+                vaccinationDate = $vaccineDate
+                nextDueDate = $nextDueDate
+                dose = @("1ml", "2ml", "2.5ml", "3ml", "5ml") | Get-Random
+                administrationRoute = @("IM", "SC") | Get-Random
+                withdrawalPeriodDays = Get-Random -Minimum 0 -Maximum 30
+                batchNumber = "VAC2024-" + (Get-Random -Minimum 100 -Maximum 999)
+                expiryDate = "2026-12-31T23:59:59.999Z"
+                cost = Get-Random -Minimum 8.0 -Maximum 25.0
+                notes = "Vaccination de routine"
+            }
+
+            if ($vetIds.Count -gt 0) {
+                $vaccination.veterinarianId = $vetIds | Get-Random
+                $vaccination.veterinarianName = "Dr. Veterinaire"
+            }
+
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccinations" -Body $vaccination -Silent
+            if ($response) { $vaccinationCount++ }
+
+            # Afficher progression tous les 50
+            if ($vaccinationCount % 50 -eq 0) {
+                Write-Host "    -> Vaccinations: $vaccinationCount creees..." -ForegroundColor Cyan
+            }
+        }
+    }
+    Write-Host ""
+    Write-Host "    -> TOTAL: $vaccinationCount vaccinations creees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 23. TREATMENTS (~200-250 traitements)
+# =============================================================================
+if ($farmResponse -and $animalIds.Count -gt 0 -and $medicalProductIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "23. Treatments (~200-250 traitements)" -ForegroundColor Cyan
+
+    $treatmentCount = 0
+    $productNames = @("Ivomec", "Clamoxyl", "Finadyne", "Panacur", "Calcium", "Vitamine", "Oxytetracycline", "Metacam", "Betadine", "Spray", "Oxytocine", "Prostaglandine")
+
+    # 2-3 traitements par animal
+    foreach ($animalId in $animalIds) {
+        $numTreatments = Get-Random -Minimum 2 -Maximum 4
+
+        for ($i = 0; $i -lt $numTreatments; $i++) {
+            $treatmentDate = Get-RandomDate -Start (Get-Date "2023-01-01") -End $endDate
+            $withdrawalDays = Get-Random -Minimum 0 -Maximum 60
+            $withdrawalEndDate = (Get-Date $treatmentDate).AddDays($withdrawalDays).ToString("yyyy-MM-ddT00:00:00.000Z")
+
+            $treatment = @{
+                animalId = $animalId
+                productId = $medicalProductIds | Get-Random
+                productName = $productNames | Get-Random
+                treatmentDate = $treatmentDate
+                dose = (Get-Random -Minimum 1.0 -Maximum 10.0)
+                dosage = (Get-Random -Minimum 1.0 -Maximum 10.0)
+                dosageUnit = @("ml", "mg", "g", "comprime") | Get-Random
+                duration = Get-Random -Minimum 1 -Maximum 7
+                status = @("completed", "in_progress", "planned") | Get-Random
+                withdrawalEndDate = $withdrawalEndDate
+                diagnosis = @("Infection respiratoire", "Parasitose", "Boiterie", "Mammite", "Diarrhee", "Fievre", "Plaie", "Reproduction") | Get-Random
+                cost = Get-Random -Minimum 15.0 -Maximum 80.0
+                notes = "Traitement therapeutique"
+            }
+
+            if ($vetIds.Count -gt 0) {
+                $treatment.veterinarianId = $vetIds | Get-Random
+                $treatment.veterinarianName = "Dr. Veterinaire"
+            }
+
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $treatment -Silent
+            if ($response) { $treatmentCount++ }
+
+            if ($treatmentCount % 50 -eq 0) {
+                Write-Host "    -> Traitements: $treatmentCount crees..." -ForegroundColor Cyan
+            }
+        }
+    }
+    Write-Host ""
+    Write-Host "    -> TOTAL: $treatmentCount traitements crees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 24. MOVEMENTS (~150-200 mouvements)
+# =============================================================================
+if ($farmResponse -and $animalIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "24. Movements (~150-200 mouvements)" -ForegroundColor Cyan
+
+    $movementCount = 0
+
+    # 1-2 mouvements par animal
+    foreach ($animalId in $animalIds) {
+        $numMovements = Get-Random -Minimum 1 -Maximum 3
+
+        for ($i = 0; $i -lt $numMovements; $i++) {
+            $movementDate = Get-RandomDate -Start (Get-Date "2023-01-01") -End $endDate
+            $movementType = @("entry", "exit", "transfer", "birth", "purchase") | Get-Random
+
+            $movement = @{
+                movementType = $movementType
+                movementDate = $movementDate
+                animalIds = @($animalId)
+                reason = switch ($movementType) {
+                    "entry" { @("Achat", "Naissance", "Retour") | Get-Random }
+                    "exit" { @("Vente", "Reforme", "Abattage") | Get-Random }
+                    "transfer" { "Changement de batiment" }
+                    "birth" { "Naissance a la ferme" }
+                    "purchase" { "Achat en elevage" }
+                }
+                notes = "Mouvement type $movementType"
+            }
+
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/movements" -Body $movement -Silent
+            if ($response) { $movementCount++ }
+
+            if ($movementCount % 50 -eq 0) {
+                Write-Host "    -> Mouvements: $movementCount crees..." -ForegroundColor Cyan
+            }
+        }
+    }
+    Write-Host ""
+    Write-Host "    -> TOTAL: $movementCount mouvements crees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 25. WEIGHTS (~400-500 pesees)
+# =============================================================================
+if ($farmResponse -and $animalIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "25. Weights (~400-500 pesees)" -ForegroundColor Cyan
+
+    $weightCount = 0
+
+    # 4-5 pesees par animal (suivi de croissance)
+    foreach ($animalId in $animalIds) {
+        $numWeights = Get-Random -Minimum 4 -Maximum 6
+        $baseWeight = Get-Random -Minimum 250 -Maximum 500  # Poids de base
+
+        for ($i = 0; $i -lt $numWeights; $i++) {
+            $weightDate = Get-RandomDate -Start (Get-Date "2023-01-01") -End $endDate
+            $weightValue = $baseWeight + ($i * (Get-Random -Minimum 20 -Maximum 60))  # Croissance
+
+            $weight = @{
+                animalId = $animalId
+                weight = [Math]::Round($weightValue, 1)
+                weightDate = $weightDate
+                source = @("manual", "automatic", "weighbridge") | Get-Random
+                notes = "Pesee periodique #$($i + 1)"
+            }
+
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/weights" -Body $weight -Silent
+            if ($response) { $weightCount++ }
+
+            if ($weightCount % 100 -eq 0) {
+                Write-Host "    -> Pesees: $weightCount creees..." -ForegroundColor Cyan
+            }
+        }
+    }
+    Write-Host ""
+    Write-Host "    -> TOTAL: $weightCount pesees creees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 26. BREEDINGS (~40-50 reproductions)
+# =============================================================================
+if ($farmResponse -and $animalIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "26. Breedings (~40-50 reproductions)" -ForegroundColor Cyan
+
+    $breedingCount = 0
+
+    # Reproductions pour environ 40-50% des animaux (femelles)
+    $numBreedings = [Math]::Min(50, ($animalIds.Count * 0.45))
+    $selectedAnimals = $animalIds | Get-Random -Count $numBreedings
+
+    foreach ($animalId in $selectedAnimals) {
+        $breedingDate = Get-RandomDate -Start (Get-Date "2023-01-01") -End (Get-Date "2024-12-31")
+        $expectedBirthDate = (Get-Date $breedingDate).AddMonths(9).ToString("yyyy-MM-ddT00:00:00.000Z")
+
+        $breeding = @{
+            motherId = $animalId
+            fatherName = @("Taureau Elite", "Taureau Limousin", "Belier Ile-de-France", "Reproducteur IA") | Get-Random
+            method = @("artificial_insemination", "natural_mating") | Get-Random
+            breedingDate = $breedingDate
+            expectedBirthDate = $expectedBirthDate
+            expectedOffspringCount = Get-Random -Minimum 1 -Maximum 3
+            status = @("planned", "confirmed", "delivered", "failed") | Get-Random
+            notes = "Saillie IA ou monte naturelle"
+        }
+
+        if ($vetIds.Count -gt 0) {
+            $breeding.veterinarianId = $vetIds | Get-Random
+            $breeding.veterinarianName = "Dr. Veterinaire"
+        }
+
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breedings" -Body $breeding -Silent
+        if ($response) { $breedingCount++ }
+
+        if ($breedingCount % 10 -eq 0) {
+            Write-Host "    -> Reproductions: $breedingCount creees..." -ForegroundColor Cyan
+        }
+    }
+    Write-Host ""
+    Write-Host "    -> TOTAL: $breedingCount reproductions creees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 27. DOCUMENTS (~100-120 documents)
+# =============================================================================
+if ($farmResponse -and $animalIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "27. Documents (~100-120 documents)" -ForegroundColor Cyan
+
+    $documentCount = 0
+
+    # 1 document par animal
+    foreach ($animalId in $animalIds) {
+        $uploadDate = Get-RandomDate -Start (Get-Date "2023-01-01") -End $endDate
+        $issueDate = $uploadDate
+        $expiryDate = (Get-Date $issueDate).AddYears(1).ToString("yyyy-MM-ddT00:00:00.000Z")
+
+        $docType = @("health_certificate", "movement_permit", "test_results", "pedigree", "insurance", "other") | Get-Random
+        $docTitle = switch ($docType) {
+            "health_certificate" { "Certificat sanitaire" }
+            "movement_permit" { "Autorisation de mouvement" }
+            "test_results" { "Resultats d'analyses" }
+            "pedigree" { "Certificat de genealogie" }
+            "insurance" { "Attestation d'assurance" }
+            "other" { "Document divers" }
+        }
+
+        $document = @{
+            animalId = $animalId
+            type = $docType
+            title = $docTitle
+            fileName = $docTitle.Replace(" ", "-").ToLower() + "-" + (Get-Random -Minimum 1000 -Maximum 9999) + ".pdf"
+            fileUrl = "https://example.com/documents/animal-$animalId/" + $docTitle.Replace(" ", "-").ToLower() + ".pdf"
+            fileSizeBytes = Get-Random -Minimum 50000 -Maximum 500000
+            mimeType = "application/pdf"
+            uploadDate = $uploadDate
+            documentNumber = "DOC-FR-" + (Get-Date $issueDate -Format "yyyy") + "-" + (Get-Random -Minimum 10000 -Maximum 99999)
+            issueDate = $issueDate
+            expiryDate = $expiryDate
+            notes = "Document officiel"
+        }
+
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/documents" -Body $document -Silent
+        if ($response) { $documentCount++ }
+
+        if ($documentCount % 25 -eq 0) {
+            Write-Host "    -> Documents: $documentCount crees..." -ForegroundColor Cyan
+        }
+    }
+    Write-Host ""
+    Write-Host "    -> TOTAL: $documentCount documents crees" -ForegroundColor Green
+}
+
+# =============================================================================
+# 28. PERSONAL CAMPAIGNS (4 campagnes personnelles)
+# =============================================================================
+if ($farmResponse -and $animalIds.Count -gt 0 -and $medicalProductIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "28. Personal Campaigns (4 campagnes personnelles)" -ForegroundColor Cyan
+
+    $campaigns = @(
+        @{ name = "Campagne Deparasitage Printemps 2024"; type = "deworming"; campaignDate = "2024-03-15T00:00:00.000Z"; withdrawalEndDate = "2024-04-15T00:00:00.000Z"; targetCount = 80 }
+        @{ name = "Campagne Vaccination Automne 2024"; type = "vaccination"; campaignDate = "2024-09-01T00:00:00.000Z"; withdrawalEndDate = "2024-10-01T00:00:00.000Z"; targetCount = 95 }
+        @{ name = "Traitement Antiparasitaire Ete"; type = "treatment"; campaignDate = "2024-06-15T00:00:00.000Z"; withdrawalEndDate = "2024-07-15T00:00:00.000Z"; targetCount = 70 }
+        @{ name = "Campagne Depistage Brucellose"; type = "screening"; campaignDate = "2024-05-01T00:00:00.000Z"; withdrawalEndDate = "2024-05-31T00:00:00.000Z"; targetCount = 100 }
+    )
+
+    $campaignCount = 0
+    foreach ($campaignData in $campaigns) {
+        # Selectionner des animaux aleatoires pour la campagne
+        $targetAnimals = $animalIds | Get-Random -Count ([Math]::Min($campaignData.targetCount, $animalIds.Count))
+
+        $personalCampaign = @{
+            name = $campaignData.name
+            description = "Campagne personnalisee de la ferme"
+            productId = $medicalProductIds | Get-Random
+            productName = "Produit medical"
+            type = $campaignData.type
+            campaignDate = $campaignData.campaignDate
+            withdrawalEndDate = $campaignData.withdrawalEndDate
+            animalIdsJson = ($targetAnimals | ConvertTo-Json -Compress)
+            targetCount = $campaignData.targetCount
+            status = @("planned", "in_progress", "completed") | Get-Random
+            notes = "Campagne de gestion sanitaire"
+        }
+
+        if ($vetIds.Count -gt 0) {
+            $personalCampaign.veterinarianId = $vetIds | Get-Random
+            $personalCampaign.veterinarianName = "Dr. Veterinaire"
+        }
+
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/personal-campaigns" -Body $personalCampaign `
+            -Description "  Campagne: $($campaignData.name)"
+        if ($response) { $campaignCount++ }
+    }
+    Write-Host "    -> $campaignCount campagnes personnelles creees" -ForegroundColor Green
+}
+
+# =============================================================================
+# RESUME FINAL
+# =============================================================================
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green
 Write-Host "  SEED 100 ANIMAUX - TERMINE!" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Resume:" -ForegroundColor Cyan
-Write-Host "  - 5 pays" -ForegroundColor White
+Write-Host "Resume complet:" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Tables de reference:" -ForegroundColor Yellow
+Write-Host "  - 5 pays europeens" -ForegroundColor White
+Write-Host "  - 5 routes d'administration" -ForegroundColor White
 Write-Host "  - 15 produits globaux" -ForegroundColor White
 Write-Host "  - 10 vaccins globaux" -ForegroundColor White
+Write-Host "  - 4 campagnes nationales" -ForegroundColor White
+Write-Host "  - 6 templates d'alertes" -ForegroundColor White
+Write-Host "  - 2 especes (bovine, ovine)" -ForegroundColor White
 Write-Host "  - 8 races (5 bovines + 3 ovines)" -ForegroundColor White
-Write-Host "  - 1 ferme avec 5 veterinaires" -ForegroundColor White
-Write-Host "  - 12 produits en stock" -ForegroundColor White
-Write-Host "  - 3 vaccins personnalises" -ForegroundColor White
-Write-Host "  - 10 lots" -ForegroundColor White
-Write-Host "  - $($animalIds.Count) animaux (bovins/ovins)" -ForegroundColor Green
 Write-Host ""
-Write-Host "Prochaines etapes (a ajouter):" -ForegroundColor Yellow
-Write-Host "  - Lot-Animals (affecter animaux aux lots)" -ForegroundColor White
-Write-Host "  - Vaccinations (~250-300)" -ForegroundColor White
-Write-Host "  - Treatments (~200-250)" -ForegroundColor White
-Write-Host "  - Movements (~150-200)" -ForegroundColor White
-Write-Host "  - Weights (~400-500)" -ForegroundColor White
-Write-Host "  - Breedings (~40-50)" -ForegroundColor White
-Write-Host "  - Documents (~100-120)" -ForegroundColor White
-Write-Host "  - Personal Campaigns (3-5)" -ForegroundColor White
+Write-Host "Ferme et configuration:" -ForegroundColor Yellow
+Write-Host "  - 1 ferme (GAEC de la Vallee Verte)" -ForegroundColor White
+Write-Host "  - 5 veterinaires" -ForegroundColor White
+Write-Host "  - Alert configuration complete" -ForegroundColor White
+Write-Host "  - Farm preferences (langue, unite, devise)" -ForegroundColor White
+Write-Host "  - Favoris: 5 produits, 4 vaccins, 3 vets, 3 races" -ForegroundColor White
+Write-Host "  - 2 inscriptions aux campagnes nationales" -ForegroundColor White
+Write-Host ""
+Write-Host "Produits et lots:" -ForegroundColor Yellow
+Write-Host "  - 12 produits medicaux en stock" -ForegroundColor White
+Write-Host "  - 3 vaccins personnalises" -ForegroundColor White
+Write-Host "  - 10 lots varies" -ForegroundColor White
+Write-Host ""
+Write-Host "Animaux et donnees transactionnelles:" -ForegroundColor Yellow
+Write-Host "  - $($animalIds.Count) animaux (70% bovins, 30% ovins)" -ForegroundColor Green
+Write-Host "    * 72 vivants, 11 vendus, 7 morts, 10 abattus" -ForegroundColor White
+Write-Host "  - ~100 affectations lot-animaux" -ForegroundColor Green
+Write-Host "  - ~250-300 vaccinations" -ForegroundColor Green
+Write-Host "  - ~200-250 traitements" -ForegroundColor Green
+Write-Host "  - ~150-200 mouvements" -ForegroundColor Green
+Write-Host "  - ~400-500 pesees" -ForegroundColor Green
+Write-Host "  - ~40-50 reproductions" -ForegroundColor Green
+Write-Host "  - ~100 documents" -ForegroundColor Green
+Write-Host "  - 4 campagnes personnelles" -ForegroundColor Green
+Write-Host ""
+Write-Host "Donnees etalees sur la periode 2023-2025" -ForegroundColor Gray
+Write-Host ""
+Write-Host "Base de donnees prete pour les tests!" -ForegroundColor Green
 Write-Host ""
