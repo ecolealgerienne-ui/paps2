@@ -1,7 +1,7 @@
 # =============================================================================
 # Script de Seed - Donnees de test pour la France
 # Inclut: donnees de reference + donnees transactionnelles (1 entite par table)
-# 20 tables: 8 ref + 12 transactionnelles
+# 24 tables: 8 ref + 12 transactionnelles + 4 config
 # =============================================================================
 
 param(
@@ -586,6 +586,87 @@ if ($farmResponse -and $animalResponse) {
 }
 
 # =============================================================================
+# 21. ALERT CONFIGURATIONS
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "21. Alert Configurations (Configuration des alertes)" -ForegroundColor Cyan
+
+    $alertConfig = @{
+        enableEmailAlerts = $true
+        enableSmsAlerts = $false
+        enablePushAlerts = $true
+        vaccinationReminderDays = 7
+        treatmentReminderDays = 3
+        healthCheckReminderDays = 30
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/alert-configuration" -Body $alertConfig `
+        -Description "Configuration des alertes"
+}
+
+# =============================================================================
+# 22. FARM PREFERENCES
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "22. Farm Preferences (Preferences de la ferme)" -ForegroundColor Cyan
+
+    $farmPreferences = @{
+        weightUnit = "kg"
+        currency = "EUR"
+        language = "fr"
+        dateFormat = "DD/MM/YYYY"
+        enableNotifications = $true
+    }
+
+    if ($vetIds -and $vetIds.Count -gt 0) {
+        $farmPreferences.defaultVeterinarianId = $vetIds[0]
+    }
+    if ($breedId) {
+        $farmPreferences.defaultBreedId = $breedId
+    }
+    $farmPreferences.defaultSpeciesId = "bovine"
+
+    Invoke-CurlApi -Method PUT -Endpoint "/farms/$farmId/preferences" -Body $farmPreferences `
+        -Description "Preferences: langue=$($farmPreferences.language), unite=$($farmPreferences.weightUnit)"
+}
+
+# =============================================================================
+# 23. FARM PRODUCT PREFERENCES
+# =============================================================================
+if ($farmResponse -and $medicalProductId) {
+    Write-Host ""
+    Write-Host "23. Farm Product Preferences (Produits preferes)" -ForegroundColor Cyan
+
+    $productPreference = @{
+        customProductId = $medicalProductId
+        displayOrder = 1
+        isActive = $true
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/product-preferences" -Body $productPreference `
+        -Description "Produit prefere: Ivomec 1% Local"
+}
+
+# =============================================================================
+# 24. FARM VETERINARIAN PREFERENCES
+# =============================================================================
+if ($farmResponse -and $vetIds -and $vetIds.Count -gt 0) {
+    Write-Host ""
+    Write-Host "24. Farm Veterinarian Preferences (Veterinaires preferes)" -ForegroundColor Cyan
+
+    $vetPreference = @{
+        veterinarianId = $vetIds[0]
+        displayOrder = 1
+        isActive = $true
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarian-preferences" -Body $vetPreference `
+        -Description "Veterinaire prefere: Dr. Martin"
+}
+
+# =============================================================================
 # RESUME
 # =============================================================================
 Write-Host ""
@@ -619,5 +700,11 @@ Write-Host "    - Breeding: 1" -ForegroundColor White
 Write-Host "    - Personal Campaign: 1" -ForegroundColor White
 Write-Host "    - Document: 1" -ForegroundColor White
 Write-Host ""
-Write-Host "  TOTAL: 20 tables creees avec succes!" -ForegroundColor Green
+Write-Host "  Tables de configuration:" -ForegroundColor Yellow
+Write-Host "    - Alert Configuration: 1" -ForegroundColor White
+Write-Host "    - Farm Preferences: 1" -ForegroundColor White
+Write-Host "    - Farm Product Preference: 1" -ForegroundColor White
+Write-Host "    - Farm Veterinarian Preference: 1" -ForegroundColor White
+Write-Host ""
+Write-Host "  TOTAL: 24 tables creees avec succes!" -ForegroundColor Green
 Write-Host ""
