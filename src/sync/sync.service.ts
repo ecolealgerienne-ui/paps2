@@ -14,6 +14,7 @@ import {
   SyncChangeDto,
 } from './dto/sync-response.dto';
 import { PayloadNormalizerService } from './payload-normalizer.service';
+import { ERROR_CODES } from '../common/constants/error-codes';
 
 @Injectable()
 export class SyncService {
@@ -23,6 +24,30 @@ export class SyncService {
     private prisma: PrismaService,
     private normalizer: PayloadNormalizerService,
   ) {}
+
+  /**
+   * Format error response with standardized ERROR_CODE
+   * @param entityId Entity ID being processed
+   * @param code Error code from ERROR_CODES enum
+   * @param message Human-readable error message
+   * @param context Additional context (optional)
+   */
+  private formatErrorResult(
+    entityId: string,
+    code: string,
+    message: string,
+    context?: Record<string, any>,
+  ): SyncItemResultDto {
+    return {
+      entityId,
+      success: false,
+      error: {
+        code,
+        message,
+        ...(context && { context }),
+      },
+    };
+  }
 
   async pushChanges(dto: SyncPushDto): Promise<SyncPushResponseDto> {
     const results: SyncItemResultDto[] = [];
@@ -39,11 +64,14 @@ export class SyncService {
           `Failed to process sync item ${item.entityId}:`,
           error.stack,
         );
-        results.push({
-          entityId: item.entityId,
-          success: false,
-          error: error.message,
-        });
+        results.push(
+          this.formatErrorResult(
+            item.entityId,
+            ERROR_CODES.INTERNAL_SERVER_ERROR,
+            `Sync processing failed: ${error.message}`,
+            { action: item.action, entityType: item.entityType },
+          ),
+        );
       }
     }
 
@@ -51,7 +79,7 @@ export class SyncService {
       total: results.length,
       synced: results.filter((r) => r.success && !r.error).length,
       conflicts: results.filter(
-        (r) => r.error && r.error.includes('conflict'),
+        (r) => r.error && typeof r.error === 'object' && r.error.code === ERROR_CODES.VERSION_CONFLICT,
       ).length,
       failed: results.filter((r) => !r.success).length,
     };
@@ -156,11 +184,12 @@ export class SyncService {
         error: null,
       };
     } catch (error) {
-      return {
-        entityId: item.entityId,
-        success: false,
-        error: error.message,
-      };
+      return this.formatErrorResult(
+        item.entityId,
+        ERROR_CODES.SYNC_CREATE_FAILED,
+        `Failed to create ${item.entityType}: ${error.message}`,
+        { entityType: item.entityType },
+      );
     }
   }
 
@@ -215,11 +244,12 @@ export class SyncService {
         error: null,
       };
     } catch (error) {
-      return {
-        entityId: item.entityId,
-        success: false,
-        error: error.message,
-      };
+      return this.formatErrorResult(
+        item.entityId,
+        ERROR_CODES.SYNC_UPDATE_FAILED,
+        `Failed to update ${item.entityType}: ${error.message}`,
+        { entityType: item.entityType },
+      );
     }
   }
 
@@ -254,11 +284,12 @@ export class SyncService {
         error: null,
       };
     } catch (error) {
-      return {
-        entityId: item.entityId,
-        success: false,
-        error: error.message,
-      };
+      return this.formatErrorResult(
+        item.entityId,
+        ERROR_CODES.SYNC_DELETE_FAILED,
+        `Failed to delete ${item.entityType}: ${error.message}`,
+        { entityType: item.entityType },
+      );
     }
   }
 
