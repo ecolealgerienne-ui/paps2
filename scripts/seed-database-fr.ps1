@@ -57,7 +57,11 @@ function Invoke-CurlApi {
         if ($_.ErrorDetails.Message) {
             try {
                 $errorObj = $_.ErrorDetails.Message | ConvertFrom-Json
-                Write-Host "    Details: $($errorObj.message)" -ForegroundColor Yellow
+                if ($errorObj.message -is [array]) {
+                    Write-Host "    Details: $($errorObj.message -join ', ')" -ForegroundColor Yellow
+                } else {
+                    Write-Host "    Details: $($errorObj | ConvertTo-Json -Compress)" -ForegroundColor Yellow
+                }
             } catch {
                 Write-Host "    Details: $($_.ErrorDetails.Message)" -ForegroundColor Yellow
             }
