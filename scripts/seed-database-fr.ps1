@@ -1,7 +1,7 @@
 # =============================================================================
 # Script de Seed - Donnees de test pour la France
 # Inclut: donnees de reference + donnees transactionnelles (1 entite par table)
-# 24 tables: 8 ref + 12 transactionnelles + 4 config
+# 31 tables: 8 ref + 12 transactionnelles + 4 config + 7 liaisons
 # =============================================================================
 
 param(
@@ -118,9 +118,14 @@ $products = @(
     }
 )
 
+$globalProductId = $null
 foreach ($product in $products) {
-    Invoke-CurlApi -Method POST -Endpoint "/global-medical-products" -Body $product `
+    $productResponse = Invoke-CurlApi -Method POST -Endpoint "/global-medical-products" -Body $product `
         -Description "Produit: $($product.nameFr)"
+
+    if ($productResponse -and $productResponse.id) {
+        $globalProductId = $productResponse.id
+    }
 }
 
 # =============================================================================
@@ -139,9 +144,14 @@ $vaccines = @(
     }
 )
 
+$globalVaccineId = $null
 foreach ($vaccine in $vaccines) {
-    Invoke-CurlApi -Method POST -Endpoint "/vaccines-global" -Body $vaccine `
+    $vaccineResponse = Invoke-CurlApi -Method POST -Endpoint "/vaccines-global" -Body $vaccine `
         -Description "Vaccin: $($vaccine.nameFr)"
+
+    if ($vaccineResponse -and $vaccineResponse.id) {
+        $globalVaccineId = $vaccineResponse.id
+    }
 }
 
 # =============================================================================
@@ -163,9 +173,14 @@ $campaigns = @(
     }
 )
 
+$nationalCampaignId = $null
 foreach ($campaign in $campaigns) {
-    Invoke-CurlApi -Method POST -Endpoint "/api/national-campaigns" -Body $campaign `
+    $campaignResponse = Invoke-CurlApi -Method POST -Endpoint "/api/national-campaigns" -Body $campaign `
         -Description "Campagne: $($campaign.nameFr)"
+
+    if ($campaignResponse -and $campaignResponse.id) {
+        $nationalCampaignId = $campaignResponse.id
+    }
 }
 
 # =============================================================================
@@ -667,6 +682,117 @@ if ($farmResponse -and $vetIds -and $vetIds.Count -gt 0) {
 }
 
 # =============================================================================
+# 25. BREED COUNTRIES (Liaison Race-Pays)
+# =============================================================================
+if ($breedId) {
+    Write-Host ""
+    Write-Host "25. Breed Countries (Races par pays)" -ForegroundColor Cyan
+
+    $breedCountry = @{
+        breedId = $breedId
+        countryCode = "FR"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/breed-countries" -Body $breedCountry `
+        -Description "Race disponible en France"
+}
+
+# =============================================================================
+# 26. CAMPAIGN COUNTRIES (Liaison Campagne-Pays)
+# =============================================================================
+if ($nationalCampaignId) {
+    Write-Host ""
+    Write-Host "26. Campaign Countries (Campagnes par pays)" -ForegroundColor Cyan
+
+    $campaignCountry = @{
+        campaignId = $nationalCampaignId
+        countryCode = "FR"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/campaign-countries" -Body $campaignCountry `
+        -Description "Campagne active en France"
+}
+
+# =============================================================================
+# 27. PRODUCT COUNTRIES (Liaison Produit-Pays)
+# =============================================================================
+if ($globalProductId) {
+    Write-Host ""
+    Write-Host "27. Product Countries (Produits par pays)" -ForegroundColor Cyan
+
+    $productCountry = @{
+        productId = $globalProductId
+        countryCode = "FR"
+        displayOrder = 1
+        isActive = $true
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/product-countries" -Body $productCountry `
+        -Description "Produit disponible en France"
+}
+
+# =============================================================================
+# 28. VACCINE COUNTRIES (Liaison Vaccin-Pays)
+# =============================================================================
+if ($globalVaccineId) {
+    Write-Host ""
+    Write-Host "28. Vaccine Countries (Vaccins par pays)" -ForegroundColor Cyan
+
+    $vaccineCountry = @{
+        vaccineId = $globalVaccineId
+        countryCode = "FR"
+        displayOrder = 1
+        isActive = $true
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/vaccine-countries" -Body $vaccineCountry `
+        -Description "Vaccin disponible en France"
+}
+
+# =============================================================================
+# 29. FARM BREED PREFERENCES (Races preferees de la ferme)
+# =============================================================================
+if ($farmResponse -and $breedId) {
+    Write-Host ""
+    Write-Host "29. Farm Breed Preferences (Races preferees)" -ForegroundColor Cyan
+
+    $farmBreedPref = @{
+        breedId = $breedId
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breed-preferences" -Body $farmBreedPref `
+        -Description "Race preferee: Prim'Holstein"
+}
+
+# =============================================================================
+# 30. FARM NATIONAL CAMPAIGN PREFERENCES (Inscription aux campagnes)
+# =============================================================================
+if ($farmResponse -and $nationalCampaignId) {
+    Write-Host ""
+    Write-Host "30. Farm National Campaign Preferences (Inscriptions campagnes)" -ForegroundColor Cyan
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/campaign-preferences/$nationalCampaignId/enroll" -Body @{} `
+        -Description "Inscription a la campagne nationale"
+}
+
+# =============================================================================
+# 31. FARM VACCINE PREFERENCES (Vaccins preferes de la ferme)
+# =============================================================================
+if ($farmResponse -and $globalVaccineId) {
+    Write-Host ""
+    Write-Host "31. Farm Vaccine Preferences (Vaccins preferes)" -ForegroundColor Cyan
+
+    $farmVaccinePref = @{
+        globalVaccineId = $globalVaccineId
+        displayOrder = 1
+        isActive = $true
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccine-preferences" -Body $farmVaccinePref `
+        -Description "Vaccin prefere: Enterotoxemie"
+}
+
+# =============================================================================
 # RESUME
 # =============================================================================
 Write-Host ""
@@ -706,5 +832,14 @@ Write-Host "    - Farm Preferences: 1" -ForegroundColor White
 Write-Host "    - Farm Product Preference: 1" -ForegroundColor White
 Write-Host "    - Farm Veterinarian Preference: 1" -ForegroundColor White
 Write-Host ""
-Write-Host "  TOTAL: 24 tables creees avec succes!" -ForegroundColor Green
+Write-Host "  Tables de liaison (join tables):" -ForegroundColor Yellow
+Write-Host "    - Breed Countries: 1" -ForegroundColor White
+Write-Host "    - Campaign Countries: 1" -ForegroundColor White
+Write-Host "    - Product Countries: 1" -ForegroundColor White
+Write-Host "    - Vaccine Countries: 1" -ForegroundColor White
+Write-Host "    - Farm Breed Preferences: 1" -ForegroundColor White
+Write-Host "    - Farm Campaign Preferences: 1" -ForegroundColor White
+Write-Host "    - Farm Vaccine Preferences: 1" -ForegroundColor White
+Write-Host ""
+Write-Host "  TOTAL: 31 tables creees avec succes!" -ForegroundColor Green
 Write-Host ""
