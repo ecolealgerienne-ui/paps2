@@ -73,11 +73,11 @@ Write-Host ""
 Write-Host "1. Countries (Pays)" -ForegroundColor Cyan
 
 $countries = @(
-    @{ code = "FR"; nameFr = "France"; nameEn = "France"; nameAr = "France"; nameAr = "فرنسا" }
-    @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain"; nameAr = "Spain"; nameAr = "إسبانيا" }
-    @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy"; nameAr = "Italy"; nameAr = "إيطاليا" }
-    @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany"; nameAr = "Germany"; nameAr = "ألمانيا" }
-    @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium"; nameAr = "Belgium"; nameAr = "بلجيكا" }
+    @{ code = "FR"; nameFr = "France"; nameEn = "France"; nameAr = "France" }
+    @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain"; nameAr = "Spain" }
+    @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy"; nameAr = "Italy" }
+    @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany"; nameAr = "Germany" }
+    @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium"; nameAr = "Belgium" }
 )
 
 foreach ($country in $countries) {
@@ -92,11 +92,11 @@ Write-Host ""
 Write-Host "2. Administration Routes (Voies d'administration)" -ForegroundColor Cyan
 
 $routes = @(
-    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular"; nameAr = "Intramuscular"; nameAr = "عضلي" }
-    @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous"; nameAr = "Subcutaneous"; nameAr = "تحت الجلد" }
-    @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous"; nameAr = "Intravenous"; nameAr = "وريدي" }
-    @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral"; nameAr = "Oral"; nameAr = "فموي" }
-    @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical"; nameAr = "Topical"; nameAr = "موضعي" }
+    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular"; nameAr = "Intramuscular" }
+    @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous"; nameAr = "Subcutaneous" }
+    @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous"; nameAr = "Intravenous" }
+    @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral"; nameAr = "Oral" }
+    @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical"; nameAr = "Topical" }
 )
 
 foreach ($route in $routes) {
