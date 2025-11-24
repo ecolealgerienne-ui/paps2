@@ -15,6 +15,7 @@ import { BreedCountriesModule } from './breed-countries/breed-countries.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { CampaignCountriesModule } from './campaign-countries/campaign-countries.module';
 import { CountriesModule } from './countries/countries.module';
+import { FarmBreedPreferencesModule } from './farm-breed-preferences/farm-breed-preferences.module';
 import { ProductCountriesModule } from './product-countries/product-countries.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
@@ -81,6 +82,7 @@ import { FarmVaccinePreferencesModule } from './farm-vaccine-preferences/farm-va
     BreedsModule,
     BreedCountriesModule,
     CampaignCountriesModule,
+    FarmBreedPreferencesModule,
     CountriesModule,
     ProductCountriesModule,
     // Farm settings
