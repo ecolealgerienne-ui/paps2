@@ -23,13 +23,13 @@ import {
  * PHASE_20: FarmBreedPreferences
  */
 @ApiTags('farm-breed-preferences')
-@Controller('api/v1/farm-breed-preferences')
+@Controller('farms/:farmId/breed-preferences')
 export class FarmBreedPreferencesController {
   constructor(
     private readonly farmBreedPreferencesService: FarmBreedPreferencesService,
   ) {}
 
-  @Get('farm/:farmId')
+  @Get()
   @ApiOperation({ summary: 'Get all breed preferences for a farm' })
   @ApiParam({
     name: 'farmId',

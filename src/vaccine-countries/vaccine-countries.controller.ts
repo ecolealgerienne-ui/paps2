@@ -4,7 +4,7 @@ import { VaccineCountriesService } from './vaccine-countries.service';
 import { CreateVaccineCountryDto, UpdateVaccineCountryDto } from './dto';
 
 @ApiTags('vaccine-countries')
-@Controller('vaccine-countries')
+@Controller('api/v1/vaccine-countries')
 export class VaccineCountriesController {
   constructor(private readonly vaccineCountriesService: VaccineCountriesService) {}
 

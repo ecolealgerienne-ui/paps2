@@ -4,7 +4,7 @@ import { FarmVaccinePreferencesService } from './farm-vaccine-preferences.servic
 import { CreateFarmVaccinePreferenceDto, UpdateFarmVaccinePreferenceDto } from './dto';
 
 @ApiTags('farm-vaccine-preferences')
-@Controller('farm-vaccine-preferences')
+@Controller('farms/:farmId/vaccine-preferences')
 export class FarmVaccinePreferencesController {
   constructor(private readonly farmVaccinePreferencesService: FarmVaccinePreferencesService) {}
 
@@ -12,18 +12,11 @@ export class FarmVaccinePreferencesController {
   @ApiOperation({ summary: 'Create farm vaccine preference (XOR: global OR custom)' })
   @ApiResponse({ status: 201, description: 'Preference created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request - XOR constraint violation' })
-  create(@Body() dto: CreateFarmVaccinePreferenceDto) {
+  create(@Param('farmId') farmId: string, @Body() dto: CreateFarmVaccinePreferenceDto) {
     return this.farmVaccinePreferencesService.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all farm vaccine preferences' })
-  @ApiResponse({ status: 200, description: 'List of all preferences' })
-  findAll() {
-    return this.farmVaccinePreferencesService.findAll();
-  }
-
-  @Get('farm/:farmId')
   @ApiOperation({ summary: 'Get all vaccine preferences for a farm' })
   @ApiParam({ name: 'farmId', description: 'Farm UUID' })
   @ApiResponse({ status: 200, description: 'List of preferences for the farm' })
