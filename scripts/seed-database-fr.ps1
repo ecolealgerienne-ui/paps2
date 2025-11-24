@@ -17,6 +17,26 @@ Write-Host "  SEED DATABASE FR - AniTra Backend API" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
+# Helper pour extraire l'ID depuis une réponse API (structure variable)
+function Get-IdFromResponse {
+    param([object]$Response)
+
+    if (-not $Response) { return $null }
+
+    # Cas 1: ID directement dans la réponse
+    if ($Response.id) { return $Response.id }
+
+    # Cas 2: ID dans data.id
+    if ($Response.data -and $Response.data.id) { return $Response.data.id }
+
+    # Cas 3: ID dans data.data.id (double imbrication)
+    if ($Response.data -and $Response.data.data -and $Response.data.data.id) {
+        return $Response.data.data.id
+    }
+
+    return $null
+}
+
 # Helper pour appeler l'API avec Invoke-RestMethod
 function Invoke-CurlApi {
     param(
@@ -72,6 +92,21 @@ function Invoke-CurlApi {
 }
 
 # =============================================================================
+# Variables globales pour stocker les IDs
+# =============================================================================
+$globalProductId = $null
+$globalVaccineId = $null
+$nationalCampaignId = $null
+$breedId = $null
+$farmId = $null
+$farmResponse = $null
+$vetIds = @()
+$lotIds = @()
+$animalId = $null
+$animalResponse = $null
+$medicalProductId = $null
+
+# =============================================================================
 # 1. COUNTRIES
 # =============================================================================
 Write-Host ""
@@ -118,13 +153,13 @@ $products = @(
     }
 )
 
-$globalProductId = $null
 foreach ($product in $products) {
     $productResponse = Invoke-CurlApi -Method POST -Endpoint "/global-medical-products" -Body $product `
         -Description "Produit: $($product.nameFr)"
 
-    if ($productResponse -and $productResponse.id) {
-        $globalProductId = $productResponse.id
+    $globalProductId = Get-IdFromResponse $productResponse
+    if ($globalProductId) {
+        Write-Host "    Global Product ID: $globalProductId" -ForegroundColor Green
     }
 }
 
@@ -144,13 +179,13 @@ $vaccines = @(
     }
 )
 
-$globalVaccineId = $null
 foreach ($vaccine in $vaccines) {
     $vaccineResponse = Invoke-CurlApi -Method POST -Endpoint "/vaccines-global" -Body $vaccine `
         -Description "Vaccin: $($vaccine.nameFr)"
 
-    if ($vaccineResponse -and $vaccineResponse.id) {
-        $globalVaccineId = $vaccineResponse.id
+    $globalVaccineId = Get-IdFromResponse $vaccineResponse
+    if ($globalVaccineId) {
+        Write-Host "    Global Vaccine ID: $globalVaccineId" -ForegroundColor Green
     }
 }
 
@@ -173,13 +208,13 @@ $campaigns = @(
     }
 )
 
-$nationalCampaignId = $null
 foreach ($campaign in $campaigns) {
     $campaignResponse = Invoke-CurlApi -Method POST -Endpoint "/api/national-campaigns" -Body $campaign `
         -Description "Campagne: $($campaign.nameFr)"
 
-    if ($campaignResponse -and $campaignResponse.id) {
-        $nationalCampaignId = $campaignResponse.id
+    $nationalCampaignId = Get-IdFromResponse $campaignResponse
+    if ($nationalCampaignId) {
+        Write-Host "    National Campaign ID: $nationalCampaignId" -ForegroundColor Green
     }
 }
 
@@ -311,12 +346,14 @@ if ($farmResponse) {
         }
     )
 
-    $vetIds = @()
     foreach ($vet in $vets) {
         $vetResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarians" -Body $vet `
             -Description "Veterinaire: Dr. $($vet.lastName)"
-        if ($vetResponse -and $vetResponse.id) {
-            $vetIds += $vetResponse.id
+
+        $vetId = Get-IdFromResponse $vetResponse
+        if ($vetId) {
+            $vetIds += $vetId
+            Write-Host "    Veterinarian ID: $vetId" -ForegroundColor Green
         }
     }
 }
@@ -336,12 +373,14 @@ if ($farmResponse) {
         }
     )
 
-    $lotIds = @()
     foreach ($lot in $lots) {
         $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots" -Body $lot `
             -Description "Lot: $($lot.name)"
-        if ($lotResponse -and $lotResponse.id) {
-            $lotIds += $lotResponse.id
+
+        $lotId = Get-IdFromResponse $lotResponse
+        if ($lotId) {
+            $lotIds += $lotId
+            Write-Host "    Lot ID: $lotId" -ForegroundColor Green
         }
     }
 }
@@ -409,8 +448,8 @@ if ($farmResponse) {
     $medicalProductResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/medical-products" -Body $medicalProduct `
         -Description "Produit medical: $($medicalProduct.name)"
 
-    if ($medicalProductResponse -and $medicalProductResponse.id) {
-        $medicalProductId = $medicalProductResponse.id
+    $medicalProductId = Get-IdFromResponse $medicalProductResponse
+    if ($medicalProductId) {
         Write-Host "    Medical Product ID: $medicalProductId" -ForegroundColor Green
     }
 }
