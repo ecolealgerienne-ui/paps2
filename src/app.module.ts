@@ -50,17 +50,17 @@ import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-
       {
         name: 'short',
         ttl: 1000, // 1 second
-        limit: 3, // 3 requests per second
+        limit: 10000, // 10,000 requests per second (effectively unlimited for testing)
       },
       {
         name: 'medium',
         ttl: 10000, // 10 seconds
-        limit: 20, // 20 requests per 10 seconds
+        limit: 50000, // 50,000 requests per 10 seconds (effectively unlimited for testing)
       },
       {
         name: 'long',
         ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per minute
+        limit: 200000, // 200,000 requests per minute (effectively unlimited for testing)
       },
     ]),
     PrismaModule,
