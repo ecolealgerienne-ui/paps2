@@ -172,15 +172,15 @@ $products = @(
     @{ code = "EXCENEL-001"; nameFr = "Excenel RTU"; nameEn = "Excenel RTU"; nameAr = "Excenel RTU"; type = "antibiotic"; laboratoire = "Zoetis"; principeActif = "Ceftiofur" }
     @{ code = "FINADYNE-001"; nameFr = "Finadyne"; nameEn = "Finadyne"; nameAr = "Finadyne"; type = "anti_inflammatory"; laboratoire = "MSD"; principeActif = "Flunixine" }
     @{ code = "METACAM-001"; nameFr = "Metacam"; nameEn = "Metacam"; nameAr = "Metacam"; type = "anti_inflammatory"; laboratoire = "Boehringer Ingelheim"; principeActif = "Meloxicam" }
-    @{ code = "CALCIUM-001"; nameFr = "Calcium Injectable"; nameEn = "Calcium Injectable"; nameAr = "Calcium Injectable"; type = "vitamin_mineral"; laboratoire = "Vetoquinol"; principeActif = "Calcium borogluconate" }
-    @{ code = "VITAD3-001"; nameFr = "Vitamine AD3E"; nameEn = "Vitamin AD3E"; nameAr = "Vitamin AD3E"; type = "vitamin_mineral"; laboratoire = "CEVA"; principeActif = "Vitamines A, D3, E" }
+    @{ code = "CALCIUM-001"; nameFr = "Calcium Injectable"; nameEn = "Calcium Injectable"; nameAr = "Calcium Injectable"; type = "vitamin"; laboratoire = "Vetoquinol"; principeActif = "Calcium borogluconate" }
+    @{ code = "VITAD3-001"; nameFr = "Vitamine AD3E"; nameEn = "Vitamin AD3E"; nameAr = "Vitamin AD3E"; type = "vitamin"; laboratoire = "CEVA"; principeActif = "Vitamines A, D3, E" }
     @{ code = "OXYTETRA-001"; nameFr = "Oxytetracycline LA"; nameEn = "Oxytetracycline LA"; nameAr = "Oxytetracycline LA"; type = "antibiotic"; laboratoire = "CEVA"; principeActif = "Oxytetracycline" }
     @{ code = "COLICOLI-001"; nameFr = "Coliprotec"; nameEn = "Coliprotec"; nameAr = "Coliprotec"; type = "antibiotic"; laboratoire = "Hipra"; principeActif = "Colistine" }
-    @{ code = "DEXTRO-001"; nameFr = "Dextrose 50%"; nameEn = "Dextrose 50%"; nameAr = "Dextrose 50%"; type = "vitamin_mineral"; laboratoire = "Vetoquinol"; principeActif = "Glucose" }
+    @{ code = "DEXTRO-001"; nameFr = "Dextrose 50%"; nameEn = "Dextrose 50%"; nameAr = "Dextrose 50%"; type = "vitamin"; laboratoire = "Vetoquinol"; principeActif = "Glucose" }
     @{ code = "OXYTOCINE-001"; nameFr = "Oxytocine"; nameEn = "Oxytocin"; nameAr = "Oxytocin"; type = "hormone"; laboratoire = "CEVA"; principeActif = "Oxytocine" }
     @{ code = "PROSTAGLAN-001"; nameFr = "Prostaglandine"; nameEn = "Prostaglandin"; nameAr = "Prostaglandin"; type = "hormone"; laboratoire = "Zoetis"; principeActif = "PGF2alpha" }
-    @{ code = "BETADINE-001"; nameFr = "Betadine"; nameEn = "Betadine"; nameAr = "Betadine"; type = "antiseptic"; laboratoire = "Vetoquinol"; principeActif = "Povidone iodee" }
-    @{ code = "SPRAY-001"; nameFr = "Spray cicatrisant"; nameEn = "Wound spray"; nameAr = "Wound spray"; type = "antiseptic"; laboratoire = "Vetoquinol"; principeActif = "Oxytetracycline" }
+    @{ code = "BETADINE-001"; nameFr = "Betadine"; nameEn = "Betadine"; nameAr = "Betadine"; type = "other"; laboratoire = "Vetoquinol"; principeActif = "Povidone iodee" }
+    @{ code = "SPRAY-001"; nameFr = "Spray cicatrisant"; nameEn = "Wound spray"; nameAr = "Wound spray"; type = "other"; laboratoire = "Vetoquinol"; principeActif = "Oxytetracycline" }
 )
 
 foreach ($product in $products) {
@@ -255,12 +255,12 @@ Write-Host ""
 Write-Host "6. Alert Templates (6 templates)" -ForegroundColor Cyan
 
 $templates = @(
-    @{ code = "vacc-reminder"; nameFr = "Rappel vaccination"; nameEn = "Vaccination reminder"; nameAr = "Vaccination reminder"; descriptionFr = "Rappel pour vaccinations"; descriptionEn = "Vaccination reminder"; category = "vaccination"; daysBeforeAlert = 7; isActive = $true }
-    @{ code = "treat-reminder"; nameFr = "Rappel traitement"; nameEn = "Treatment reminder"; nameAr = "Treatment reminder"; descriptionFr = "Rappel pour traitements"; descriptionEn = "Treatment reminder"; category = "treatment"; daysBeforeAlert = 3; isActive = $true }
-    @{ code = "birth-reminder"; nameFr = "Rappel mise bas"; nameEn = "Birth reminder"; nameAr = "Birth reminder"; descriptionFr = "Rappel mise bas prevue"; descriptionEn = "Expected birth"; category = "reproduction"; daysBeforeAlert = 10; isActive = $true }
-    @{ code = "weight-reminder"; nameFr = "Rappel pesee"; nameEn = "Weight reminder"; nameAr = "Weight reminder"; descriptionFr = "Rappel pesee periodique"; descriptionEn = "Periodic weighing"; category = "health"; daysBeforeAlert = 30; isActive = $true }
-    @{ code = "health-check"; nameFr = "Controle sanitaire"; nameEn = "Health check"; nameAr = "Health check"; descriptionFr = "Controle sanitaire periodique"; descriptionEn = "Periodic health check"; category = "health"; daysBeforeAlert = 60; isActive = $true }
-    @{ code = "campaign-reminder"; nameFr = "Rappel campagne"; nameEn = "Campaign reminder"; nameAr = "Campaign reminder"; descriptionFr = "Rappel campagne nationale"; descriptionEn = "National campaign reminder"; category = "campaign"; daysBeforeAlert = 5; isActive = $true }
+    @{ code = "vacc-reminder"; nameFr = "Rappel vaccination"; nameEn = "Vaccination reminder"; nameAr = "Vaccination reminder"; descriptionFr = "Rappel pour vaccinations"; descriptionEn = "Vaccination reminder"; category = "vaccination"; isActive = $true }
+    @{ code = "treat-reminder"; nameFr = "Rappel traitement"; nameEn = "Treatment reminder"; nameAr = "Treatment reminder"; descriptionFr = "Rappel pour traitements"; descriptionEn = "Treatment reminder"; category = "treatment"; isActive = $true }
+    @{ code = "birth-reminder"; nameFr = "Rappel mise bas"; nameEn = "Birth reminder"; nameAr = "Birth reminder"; descriptionFr = "Rappel mise bas prevue"; descriptionEn = "Expected birth"; category = "reproduction"; isActive = $true }
+    @{ code = "weight-reminder"; nameFr = "Rappel pesee"; nameEn = "Weight reminder"; nameAr = "Weight reminder"; descriptionFr = "Rappel pesee periodique"; descriptionEn = "Periodic weighing"; category = "health"; isActive = $true }
+    @{ code = "health-check"; nameFr = "Controle sanitaire"; nameEn = "Health check"; nameAr = "Health check"; descriptionFr = "Controle sanitaire periodique"; descriptionEn = "Periodic health check"; category = "health"; isActive = $true }
+    @{ code = "campaign-reminder"; nameFr = "Rappel campagne"; nameEn = "Campaign reminder"; nameAr = "Campaign reminder"; descriptionFr = "Rappel campagne nationale"; descriptionEn = "National campaign reminder"; category = "administrative"; isActive = $true }
 )
 
 foreach ($template in $templates) {
