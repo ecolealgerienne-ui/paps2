@@ -83,15 +83,16 @@ export class FarmBreedPreferencesController {
 
   @Post()
   @ApiOperation({ summary: 'Add a breed preference to a farm' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
   @ApiResponse({
     status: 201,
     description: 'Breed preference successfully added',
   })
   @ApiResponse({ status: 404, description: 'Farm or Breed not found' })
   @ApiResponse({ status: 409, description: 'Preference already exists' })
-  async add(@Body() dto: AddFarmBreedPreferenceDto) {
+  async add(@Param('farmId') farmId: string, @Body() dto: { breedId: string }) {
     const preference = await this.farmBreedPreferencesService.add(
-      dto.farmId,
+      farmId,
       dto.breedId,
     );
 
@@ -123,13 +124,14 @@ export class FarmBreedPreferencesController {
   @Delete()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove a breed preference from a farm' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
   @ApiResponse({
     status: 200,
     description: 'Breed preference successfully removed',
   })
   @ApiResponse({ status: 404, description: 'Preference not found' })
-  async remove(@Body() dto: AddFarmBreedPreferenceDto) {
-    await this.farmBreedPreferencesService.remove(dto.farmId, dto.breedId);
+  async remove(@Param('farmId') farmId: string, @Body() dto: { breedId: string }) {
+    await this.farmBreedPreferencesService.remove(farmId, dto.breedId);
 
     return {
       success: true,
@@ -139,14 +141,15 @@ export class FarmBreedPreferencesController {
 
   @Patch('reorder')
   @ApiOperation({ summary: 'Reorder a breed preference for a farm' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
   @ApiResponse({
     status: 200,
     description: 'Breed preference successfully reordered',
   })
   @ApiResponse({ status: 404, description: 'Preference not found' })
-  async reorder(@Body() dto: ReorderFarmBreedPreferenceDto) {
+  async reorder(@Param('farmId') farmId: string, @Body() dto: { breedId: string; displayOrder: number }) {
     const preference = await this.farmBreedPreferencesService.reorder(
-      dto.farmId,
+      farmId,
       dto.breedId,
       dto.displayOrder,
     );
@@ -176,14 +179,15 @@ export class FarmBreedPreferencesController {
 
   @Patch('toggle-active')
   @ApiOperation({ summary: 'Toggle active status of a breed preference' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
   @ApiResponse({
     status: 200,
     description: 'Breed preference active status successfully toggled',
   })
   @ApiResponse({ status: 404, description: 'Preference not found' })
-  async toggleActive(@Body() dto: ToggleActiveFarmBreedPreferenceDto) {
+  async toggleActive(@Param('farmId') farmId: string, @Body() dto: { breedId: string; isActive: boolean }) {
     const preference = await this.farmBreedPreferencesService.toggleActive(
-      dto.farmId,
+      farmId,
       dto.breedId,
       dto.isActive,
     );

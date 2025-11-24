@@ -805,9 +805,9 @@ if ($vaccineId) {
 
     Write-Test "PUT /farms/$FarmId/vaccines/$vaccineId - Update"
     $response = Invoke-Api -Method PUT -Endpoint "/farms/$FarmId/vaccines/$vaccineId" -Body @{
-        injectionIntervalDays = 28
+        dosage = "2ml par animal, rappel après 28 jours"
     }
-    Write-Success "Updated injection interval"
+    Write-Success "Updated dosage"
 
     Write-Test "DELETE /farms/$FarmId/vaccines/$vaccineId - Delete"
     $response = Invoke-Api -Method DELETE -Endpoint "/farms/$FarmId/vaccines/$vaccineId"
@@ -823,8 +823,6 @@ if ($breedId) {
     Write-Test "POST /farms/$FarmId/breed-preferences - Create"
     $farmBreedPrefResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/breed-preferences" -Body @{
         breedId = $breedId
-        displayOrder = 1
-        isActive = $true
     }
     $farmBreedPrefId = Get-ResponseData $farmBreedPrefResponse "id"
     Write-Success "Created: $farmBreedPrefId"
