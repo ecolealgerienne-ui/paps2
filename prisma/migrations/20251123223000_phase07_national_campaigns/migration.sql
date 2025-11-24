@@ -5,15 +5,20 @@
 
 BEGIN;
 
--- Étape 1 : Créer l'ENUM CampaignType
-CREATE TYPE "CampaignType" AS ENUM (
-  'vaccination',
-  'deworming',
-  'screening',
-  'treatment',
-  'census',
-  'other'
-);
+-- Étape 1 : Créer l'ENUM CampaignType (seulement s'il n'existe pas)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'CampaignType') THEN
+    CREATE TYPE "CampaignType" AS ENUM (
+      'vaccination',
+      'deworming',
+      'screening',
+      'treatment',
+      'census',
+      'other'
+    );
+  END IF;
+END $$;
 
 -- Étape 2 : Créer la table national_campaigns
 CREATE TABLE national_campaigns (
