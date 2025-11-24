@@ -290,8 +290,8 @@ $testProductResponse = Invoke-Api -Method POST -Endpoint "/global-medical-produc
     nameEn = "Test Product"
     nameAr = "Test Product AR"
     type = "antibiotic"
-    manufacturer = "Test Lab"
-    activeIngredient = "Test Ingredient"
+    laboratoire = "Test Lab"
+    principeActif = "Test Ingredient"
 }
 $testGlobalProductId = Get-ResponseData $testProductResponse "id"
 Write-Success "Created: $testGlobalProductId"
@@ -345,9 +345,8 @@ $testVaccineResponse = Invoke-Api -Method POST -Endpoint "/vaccines-global" -Bod
     nameFr = "Vaccin Test"
     nameEn = "Test Vaccine"
     nameAr = "Test Vaccine AR"
-    type = "obligatoire"
-    targetDiseases = @("Test Disease")
-    manufacturer = "Test Lab"
+    targetDisease = "brucellosis"
+    laboratoire = "Test Lab"
 }
 $testGlobalVaccineId = Get-ResponseData $testVaccineResponse "id"
 Write-Success "Created: $testGlobalVaccineId"
@@ -397,7 +396,7 @@ Write-Header "National Campaigns API - 5 endpoints (FULL CRUD)"
 
 Write-Test "POST /api/national-campaigns - Create test campaign"
 $testCampaignResponse = Invoke-Api -Method POST -Endpoint "/api/national-campaigns" -Body @{
-    code = "TEST-CAMP-001"
+    code = "test-camp-001"
     nameFr = "Campagne Test"
     nameEn = "Test Campaign"
     nameAr = "Test Campaign AR"
@@ -454,15 +453,12 @@ Write-Header "Alert Templates API - 5 endpoints (FULL CRUD)"
 
 Write-Test "POST /alert-templates - Create test template"
 $testTemplateResponse = Invoke-Api -Method POST -Endpoint "/alert-templates" -Body @{
-    code = "TEST-TEMPLATE-001"
+    code = "test-template-001"
     nameFr = "Template Test"
     nameEn = "Test Template"
     nameAr = "Test Template AR"
     category = "health"
     priority = "medium"
-    messageFr = "Message test"
-    messageEn = "Test message"
-    messageAr = "Test message AR"
 }
 $testAlertTemplateId = Get-ResponseData $testTemplateResponse "id"
 Write-Success "Created: $testAlertTemplateId"
@@ -753,9 +749,7 @@ Write-Header "Custom Medical Products API - 5 endpoints"
 Write-Test "POST /farms/$FarmId/medical-products - Create"
 $productResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/medical-products" -Body @{
     name = "Ivermectine 1%"
-    type = "antibiotic"
-    activeIngredient = "Ivermectine"
-    manufacturer = "MSD Animal Health"
+    category = "antiparasitic"
     withdrawalPeriodMeat = 28
     withdrawalPeriodMilk = 0
     stockUnit = "ml"
@@ -793,11 +787,9 @@ Write-Test "POST /farms/$FarmId/vaccines - Create"
 $vaccineResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/vaccines" -Body @{
     name = "Enterotoxemie"
     description = "Vaccin contre l'enterotoxemie"
-    manufacturer = "INMV Algerie"
-    targetDiseases = @("Enterotoxemie")
-    standardDose = 2
-    injectionsRequired = 2
-    injectionIntervalDays = 21
+    laboratoire = "INMV Algerie"
+    targetDisease = "Enterotoxemie"
+    dosage = "2ml par animal"
 }
 $vaccineId = Get-ResponseData $vaccineResponse "id"
 Write-Success "Created: $vaccineId"
