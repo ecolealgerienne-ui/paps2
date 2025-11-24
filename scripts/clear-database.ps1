@@ -17,8 +17,9 @@
 $ErrorActionPreference = "Stop"
 
 Write-Host ""
-Write-Host "🗑️  SUPPRESSION DE TOUTES LES DONNÉES DE LA BASE DE DONNÉES" -ForegroundColor Yellow
-Write-Host "================================================" -ForegroundColor Yellow
+Write-Host "========================================================" -ForegroundColor Yellow
+Write-Host " SUPPRESSION DE TOUTES LES DONNEES DE LA BASE DE DONNEES" -ForegroundColor Yellow
+Write-Host "========================================================" -ForegroundColor Yellow
 Write-Host ""
 
 try {
@@ -33,22 +34,22 @@ try {
                 [Environment]::SetEnvironmentVariable($key, $value, "Process")
             }
         }
-        Write-Host "✅ Variables d'environnement chargées depuis .env" -ForegroundColor Green
+        Write-Host "[OK] Variables d'environnement chargees depuis .env" -ForegroundColor Green
     } else {
-        Write-Host "⚠️  Fichier .env non trouvé, utilisation des variables d'environnement système" -ForegroundColor Yellow
+        Write-Host "[WARN] Fichier .env non trouve, utilisation des variables systeme" -ForegroundColor Yellow
     }
 
     # Récupérer DATABASE_URL
     $databaseUrl = [Environment]::GetEnvironmentVariable("DATABASE_URL", "Process")
 
     if ([string]::IsNullOrEmpty($databaseUrl)) {
-        Write-Host "❌ ERREUR: Variable DATABASE_URL non définie!" -ForegroundColor Red
+        Write-Host "[ERREUR] Variable DATABASE_URL non definie!" -ForegroundColor Red
         exit 1
     }
 
     # Vérifier qu'on n'est pas en production
     if ($databaseUrl -match "production|prod") {
-        Write-Host "❌ ERREUR: Ce script ne peut pas être exécuté en production!" -ForegroundColor Red
+        Write-Host "[ERREUR] Ce script ne peut pas etre execute en production!" -ForegroundColor Red
         exit 1
     }
 
@@ -60,19 +61,19 @@ try {
         $dbPort = $matches[4]
         $dbName = $matches[5]
 
-        Write-Host "📊 Base de données: $dbName @ $dbHost" -ForegroundColor Cyan
+        Write-Host "[INFO] Base de donnees: $dbName @ $dbHost" -ForegroundColor Cyan
     } else {
-        Write-Host "❌ ERREUR: Format DATABASE_URL invalide!" -ForegroundColor Red
+        Write-Host "[ERREUR] Format DATABASE_URL invalide!" -ForegroundColor Red
         exit 1
     }
 
     Write-Host ""
-    Write-Host "⚠️  ATTENTION: Cette opération est IRRÉVERSIBLE!" -ForegroundColor Red
+    Write-Host "[ATTENTION] Cette operation est IRREVERSIBLE!" -ForegroundColor Red
     Write-Host ""
     $confirmation = Read-Host "Voulez-vous continuer? (tapez 'OUI' pour confirmer)"
 
     if ($confirmation -ne "OUI") {
-        Write-Host "❌ Opération annulée par l'utilisateur" -ForegroundColor Yellow
+        Write-Host "[ANNULE] Operation annulee par l'utilisateur" -ForegroundColor Yellow
         exit 0
     }
 
@@ -122,10 +123,10 @@ try {
 
     # Générer le script SQL
     $sqlCommands = @"
--- Désactiver les triggers pour accélérer
+-- Desactiver les triggers pour accelerer
 SET session_replication_role = 'replica';
 
--- Supprimer les données de toutes les tables
+-- Supprimer les donnees de toutes les tables
 "@
 
     foreach ($table in $tables) {
@@ -134,10 +135,10 @@ SET session_replication_role = 'replica';
 
     $sqlCommands += @"
 
--- Réactiver les triggers
+-- Reactiver les triggers
 SET session_replication_role = 'origin';
 
--- Reset les séquences
+-- Reset les sequences
 DO `$`$
 DECLARE
   seq_name text;
@@ -154,7 +155,7 @@ END `$`$;
     # Écrire le fichier SQL
     $sqlCommands | Out-File -FilePath $sqlFile -Encoding UTF8
 
-    Write-Host "⏳ Exécution de la suppression..." -ForegroundColor Cyan
+    Write-Host "[INFO] Execution de la suppression..." -ForegroundColor Cyan
     Write-Host ""
 
     # Définir le mot de passe PostgreSQL
@@ -164,7 +165,7 @@ END `$`$;
     $psqlPath = Get-Command psql -ErrorAction SilentlyContinue
 
     if ($null -eq $psqlPath) {
-        Write-Host "⚠️  psql non trouvé, tentative avec npx prisma db execute..." -ForegroundColor Yellow
+        Write-Host "[WARN] psql non trouve, tentative avec npx prisma db execute..." -ForegroundColor Yellow
 
         # Alternative: utiliser Prisma CLI
         npx prisma db execute --file $sqlFile --schema prisma/schema.prisma
@@ -175,13 +176,14 @@ END `$`$;
 
     if ($LASTEXITCODE -eq 0) {
         Write-Host ""
-        Write-Host "================================================" -ForegroundColor Green
-        Write-Host "✅ TERMINÉ: Toutes les données ont été supprimées" -ForegroundColor Green
-        Write-Host "🎉 La base de données est maintenant vide!" -ForegroundColor Green
+        Write-Host "========================================================" -ForegroundColor Green
+        Write-Host " TERMINE: Toutes les donnees ont ete supprimees" -ForegroundColor Green
+        Write-Host " La base de donnees est maintenant vide!" -ForegroundColor Green
+        Write-Host "========================================================" -ForegroundColor Green
         Write-Host ""
     } else {
         Write-Host ""
-        Write-Host "❌ ERREUR lors de l'exécution du script SQL" -ForegroundColor Red
+        Write-Host "[ERREUR] Erreur lors de l'execution du script SQL" -ForegroundColor Red
         exit 1
     }
 
@@ -190,7 +192,7 @@ END `$`$;
 
 } catch {
     Write-Host ""
-    Write-Host "❌ ERREUR: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "[ERREUR] $($_.Exception.Message)" -ForegroundColor Red
     Write-Host $_.ScriptStackTrace -ForegroundColor Red
     exit 1
 } finally {
