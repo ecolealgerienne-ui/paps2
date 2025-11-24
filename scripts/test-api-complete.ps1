@@ -75,9 +75,9 @@ function Invoke-Api {
     try {
         if ($Body) {
             $jsonBody = $Body | ConvertTo-Json -Depth 10
-            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -Body $jsonBody
+            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -Body $jsonBody -DisableKeepAlive
         } else {
-            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers
+            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -DisableKeepAlive
         }
 
         # Rate limiting: wait 350ms between requests (max 3 req/sec)
