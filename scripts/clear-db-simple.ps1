@@ -24,7 +24,7 @@ if (Test-Path $envFile) {
 }
 
 # Parser DATABASE_URL
-if ($DATABASE_URL -match 'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)') {
+if ($DATABASE_URL -match 'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/([^\?]+)') {
     $dbUser = $matches[1]
     $dbPassword = $matches[2]
     $dbHost = $matches[3]
