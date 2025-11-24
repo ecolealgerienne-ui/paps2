@@ -128,11 +128,11 @@ Write-Host ""
 Write-Host "1. Countries (5 pays europeens)" -ForegroundColor Cyan
 
 $countries = @(
-    @{ code = "FR"; nameFr = "France"; nameEn = "France"; nameAr = "فرنسا"; region = "EU" }
-    @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium"; nameAr = "بلجيكا"; region = "EU" }
-    @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany"; nameAr = "ألمانيا"; region = "EU" }
-    @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain"; nameAr = "إسبانيا"; region = "EU" }
-    @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy"; nameAr = "إيطاليا"; region = "EU" }
+    @{ code = "FR"; nameFr = "France"; nameEn = "France"; region = "EU" }
+    @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium"; region = "EU" }
+    @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany"; region = "EU" }
+    @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain"; region = "EU" }
+    @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy"; region = "EU" }
 )
 
 foreach ($country in $countries) {
@@ -147,11 +147,11 @@ Write-Host ""
 Write-Host "2. Administration Routes (5 voies)" -ForegroundColor Cyan
 
 $routes = @(
-    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular"; nameAr = "عضلي" }
-    @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous"; nameAr = "تحت الجلد" }
-    @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous"; nameAr = "وريدي" }
-    @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral"; nameAr = "فموي" }
-    @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical"; nameAr = "موضعي" }
+    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular" }
+    @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous" }
+    @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous" }
+    @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral" }
+    @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical" }
 )
 
 foreach ($route in $routes) {
@@ -166,21 +166,21 @@ Write-Host ""
 Write-Host "3. Global Medical Products (15 produits)" -ForegroundColor Cyan
 
 $products = @(
-    @{ code = "IVERM-001"; nameFr = "Ivomec 1%"; nameEn = "Ivomec 1%"; nameAr = "Ivomec 1%"; type = "antiparasitic"; laboratoire = "Boehringer Ingelheim"; principeActif = "Ivermectine" }
-    @{ code = "PANACUR-001"; nameFr = "Panacur"; nameEn = "Panacur"; nameAr = "Panacur"; type = "antiparasitic"; laboratoire = "MSD"; principeActif = "Fenbendazole" }
-    @{ code = "CLAMOXYL-001"; nameFr = "Clamoxyl LA"; nameEn = "Clamoxyl LA"; nameAr = "Clamoxyl LA"; type = "antibiotic"; laboratoire = "Zoetis"; principeActif = "Amoxicilline" }
-    @{ code = "EXCENEL-001"; nameFr = "Excenel RTU"; nameEn = "Excenel RTU"; nameAr = "Excenel RTU"; type = "antibiotic"; laboratoire = "Zoetis"; principeActif = "Ceftiofur" }
-    @{ code = "FINADYNE-001"; nameFr = "Finadyne"; nameEn = "Finadyne"; nameAr = "Finadyne"; type = "anti_inflammatory"; laboratoire = "MSD"; principeActif = "Flunixine" }
-    @{ code = "METACAM-001"; nameFr = "Metacam"; nameEn = "Metacam"; nameAr = "Metacam"; type = "anti_inflammatory"; laboratoire = "Boehringer Ingelheim"; principeActif = "Meloxicam" }
-    @{ code = "CALCIUM-001"; nameFr = "Calcium Injectable"; nameEn = "Calcium Injectable"; nameAr = "Calcium Injectable"; type = "vitamin_mineral"; laboratoire = "Vetoquinol"; principeActif = "Calcium borogluconate" }
-    @{ code = "VITAD3-001"; nameFr = "Vitamine AD3E"; nameEn = "Vitamin AD3E"; nameAr = "Vitamin AD3E"; type = "vitamin_mineral"; laboratoire = "CEVA"; principeActif = "Vitamines A, D3, E" }
-    @{ code = "OXYTETRA-001"; nameFr = "Oxytetracycline LA"; nameEn = "Oxytetracycline LA"; nameAr = "Oxytetracycline LA"; type = "antibiotic"; laboratoire = "CEVA"; principeActif = "Oxytetracycline" }
-    @{ code = "COLICOLI-001"; nameFr = "Coliprotec"; nameEn = "Coliprotec"; nameAr = "Coliprotec"; type = "antibiotic"; laboratoire = "Hipra"; principeActif = "Colistine" }
-    @{ code = "DEXTRO-001"; nameFr = "Dextrose 50%"; nameEn = "Dextrose 50%"; nameAr = "Dextrose 50%"; type = "vitamin_mineral"; laboratoire = "Vetoquinol"; principeActif = "Glucose" }
-    @{ code = "OXYTOCINE-001"; nameFr = "Oxytocine"; nameEn = "Oxytocin"; nameAr = "Oxytocin"; type = "hormone"; laboratoire = "CEVA"; principeActif = "Oxytocine" }
-    @{ code = "PROSTAGLAN-001"; nameFr = "Prostaglandine"; nameEn = "Prostaglandin"; nameAr = "Prostaglandin"; type = "hormone"; laboratoire = "Zoetis"; principeActif = "PGF2alpha" }
-    @{ code = "BETADINE-001"; nameFr = "Betadine"; nameEn = "Betadine"; nameAr = "Betadine"; type = "antiseptic"; laboratoire = "Vetoquinol"; principeActif = "Povidone iodee" }
-    @{ code = "SPRAY-001"; nameFr = "Spray cicatrisant"; nameEn = "Wound spray"; nameAr = "Wound spray"; type = "antiseptic"; laboratoire = "Vetoquinol"; principeActif = "Oxytetracycline" }
+    @{ code = "IVERM-001"; nameFr = "Ivomec 1%"; nameEn = "Ivomec 1%"; type = "antiparasitic"; laboratoire = "Boehringer Ingelheim"; principeActif = "Ivermectine" }
+    @{ code = "PANACUR-001"; nameFr = "Panacur"; nameEn = "Panacur"; type = "antiparasitic"; laboratoire = "MSD"; principeActif = "Fenbendazole" }
+    @{ code = "CLAMOXYL-001"; nameFr = "Clamoxyl LA"; nameEn = "Clamoxyl LA"; type = "antibiotic"; laboratoire = "Zoetis"; principeActif = "Amoxicilline" }
+    @{ code = "EXCENEL-001"; nameFr = "Excenel RTU"; nameEn = "Excenel RTU"; type = "antibiotic"; laboratoire = "Zoetis"; principeActif = "Ceftiofur" }
+    @{ code = "FINADYNE-001"; nameFr = "Finadyne"; nameEn = "Finadyne"; type = "anti_inflammatory"; laboratoire = "MSD"; principeActif = "Flunixine" }
+    @{ code = "METACAM-001"; nameFr = "Metacam"; nameEn = "Metacam"; type = "anti_inflammatory"; laboratoire = "Boehringer Ingelheim"; principeActif = "Meloxicam" }
+    @{ code = "CALCIUM-001"; nameFr = "Calcium Injectable"; nameEn = "Calcium Injectable"; type = "vitamin_mineral"; laboratoire = "Vetoquinol"; principeActif = "Calcium borogluconate" }
+    @{ code = "VITAD3-001"; nameFr = "Vitamine AD3E"; nameEn = "Vitamin AD3E"; type = "vitamin_mineral"; laboratoire = "CEVA"; principeActif = "Vitamines A, D3, E" }
+    @{ code = "OXYTETRA-001"; nameFr = "Oxytetracycline LA"; nameEn = "Oxytetracycline LA"; type = "antibiotic"; laboratoire = "CEVA"; principeActif = "Oxytetracycline" }
+    @{ code = "COLICOLI-001"; nameFr = "Coliprotec"; nameEn = "Coliprotec"; type = "antibiotic"; laboratoire = "Hipra"; principeActif = "Colistine" }
+    @{ code = "DEXTRO-001"; nameFr = "Dextrose 50%"; nameEn = "Dextrose 50%"; type = "vitamin_mineral"; laboratoire = "Vetoquinol"; principeActif = "Glucose" }
+    @{ code = "OXYTOCINE-001"; nameFr = "Oxytocine"; nameEn = "Oxytocin"; type = "hormone"; laboratoire = "CEVA"; principeActif = "Oxytocine" }
+    @{ code = "PROSTAGLAN-001"; nameFr = "Prostaglandine"; nameEn = "Prostaglandin"; type = "hormone"; laboratoire = "Zoetis"; principeActif = "PGF2alpha" }
+    @{ code = "BETADINE-001"; nameFr = "Betadine"; nameEn = "Betadine"; type = "antiseptic"; laboratoire = "Vetoquinol"; principeActif = "Povidone iodee" }
+    @{ code = "SPRAY-001"; nameFr = "Spray cicatrisant"; nameEn = "Wound spray"; type = "antiseptic"; laboratoire = "Vetoquinol"; principeActif = "Oxytetracycline" }
 )
 
 foreach ($product in $products) {
@@ -201,16 +201,16 @@ Write-Host ""
 Write-Host "4. Global Vaccines (10 vaccins)" -ForegroundColor Cyan
 
 $vaccines = @(
-    @{ code = "ENTEROTOX-001"; nameFr = "Vaccin Enterotoxemie"; nameEn = "Enterotoxemia Vaccine"; nameAr = "Enterotoxemia Vaccine"; targetDisease = "enterotoxemia"; laboratoire = "MSD" }
-    @{ code = "BRUCELLO-001"; nameFr = "Vaccin Brucellose B19"; nameEn = "Brucellosis B19"; nameAr = "Brucellosis B19"; targetDisease = "brucellosis"; laboratoire = "MSD" }
-    @{ code = "BLUETONGUE-001"; nameFr = "Vaccin Fievre Catarrhale"; nameEn = "Bluetongue Vaccine"; nameAr = "Bluetongue Vaccine"; targetDisease = "bluetongue"; laboratoire = "Zoetis" }
-    @{ code = "FMD-001"; nameFr = "Vaccin Fievre Aphteuse"; nameEn = "Foot and Mouth Disease"; nameAr = "Foot and Mouth Disease"; targetDisease = "foot_and_mouth"; laboratoire = "CEVA" }
-    @{ code = "RABIES-001"; nameFr = "Vaccin Rage"; nameEn = "Rabies Vaccine"; nameAr = "Rabies Vaccine"; targetDisease = "rabies"; laboratoire = "Zoetis" }
-    @{ code = "ANTHRAX-001"; nameFr = "Vaccin Charbon"; nameEn = "Anthrax Vaccine"; nameAr = "Anthrax Vaccine"; targetDisease = "anthrax"; laboratoire = "CEVA" }
-    @{ code = "PAST-001"; nameFr = "Vaccin Pasteurellose"; nameEn = "Pasteurellosis Vaccine"; nameAr = "Pasteurellosis Vaccine"; targetDisease = "pasteurellosis"; laboratoire = "MSD" }
-    @{ code = "PPR-001"; nameFr = "Vaccin Peste Petits Ruminants"; nameEn = "PPR Vaccine"; nameAr = "PPR Vaccine"; targetDisease = "ppr"; laboratoire = "CEVA" }
-    @{ code = "SHEEPPOX-001"; nameFr = "Vaccin Variole Ovine"; nameEn = "Sheep Pox Vaccine"; nameAr = "Sheep Pox Vaccine"; targetDisease = "sheep_pox"; laboratoire = "MSD" }
-    @{ code = "MULTI-001"; nameFr = "Vaccin Multivalent"; nameEn = "Multivalent Vaccine"; nameAr = "Multivalent Vaccine"; targetDisease = "other"; laboratoire = "Hipra" }
+    @{ code = "ENTEROTOX-001"; nameFr = "Vaccin Enterotoxemie"; nameEn = "Enterotoxemia Vaccine"; targetDisease = "enterotoxemia"; laboratoire = "MSD" }
+    @{ code = "BRUCELLO-001"; nameFr = "Vaccin Brucellose B19"; nameEn = "Brucellosis B19"; targetDisease = "brucellosis"; laboratoire = "MSD" }
+    @{ code = "BLUETONGUE-001"; nameFr = "Vaccin Fievre Catarrhale"; nameEn = "Bluetongue Vaccine"; targetDisease = "bluetongue"; laboratoire = "Zoetis" }
+    @{ code = "FMD-001"; nameFr = "Vaccin Fievre Aphteuse"; nameEn = "Foot and Mouth Disease"; targetDisease = "foot_and_mouth"; laboratoire = "CEVA" }
+    @{ code = "RABIES-001"; nameFr = "Vaccin Rage"; nameEn = "Rabies Vaccine"; targetDisease = "rabies"; laboratoire = "Zoetis" }
+    @{ code = "ANTHRAX-001"; nameFr = "Vaccin Charbon"; nameEn = "Anthrax Vaccine"; targetDisease = "anthrax"; laboratoire = "CEVA" }
+    @{ code = "PAST-001"; nameFr = "Vaccin Pasteurellose"; nameEn = "Pasteurellosis Vaccine"; targetDisease = "pasteurellosis"; laboratoire = "MSD" }
+    @{ code = "PPR-001"; nameFr = "Vaccin Peste Petits Ruminants"; nameEn = "PPR Vaccine"; targetDisease = "ppr"; laboratoire = "CEVA" }
+    @{ code = "SHEEPPOX-001"; nameFr = "Vaccin Variole Ovine"; nameEn = "Sheep Pox Vaccine"; targetDisease = "sheep_pox"; laboratoire = "MSD" }
+    @{ code = "MULTI-001"; nameFr = "Vaccin Multivalent"; nameEn = "Multivalent Vaccine"; targetDisease = "other"; laboratoire = "Hipra" }
 )
 
 foreach ($vaccine in $vaccines) {
@@ -231,10 +231,10 @@ Write-Host ""
 Write-Host "5. National Campaigns (4 campagnes)" -ForegroundColor Cyan
 
 $campaigns = @(
-    @{ code = "vacc-fr-2024"; nameFr = "Campagne Vaccination 2024"; nameEn = "Vaccination Campaign 2024"; nameAr = "Vaccination Campaign 2024"; type = "vaccination"; description = "Campagne nationale de vaccination"; startDate = "2024-01-01T00:00:00.000Z"; endDate = "2024-12-31T23:59:59.999Z"; isActive = $true }
-    @{ code = "depara-fr-2024"; nameFr = "Campagne Deparasitage 2024"; nameEn = "Deworming Campaign 2024"; nameAr = "Deworming Campaign 2024"; type = "deworming"; description = "Campagne de deparasitage"; startDate = "2024-03-01T00:00:00.000Z"; endDate = "2024-11-30T23:59:59.999Z"; isActive = $true }
-    @{ code = "brucello-fr-2024"; nameFr = "Depistage Brucellose 2024"; nameEn = "Brucellosis Screening 2024"; nameAr = "Brucellosis Screening 2024"; type = "screening"; description = "Depistage brucellose"; startDate = "2024-01-01T00:00:00.000Z"; endDate = "2024-12-31T23:59:59.999Z"; isActive = $true }
-    @{ code = "recens-fr-2024"; nameFr = "Recensement 2024"; nameEn = "Census 2024"; nameAr = "Census 2024"; type = "census"; description = "Recensement annuel"; startDate = "2024-09-01T00:00:00.000Z"; endDate = "2024-10-31T23:59:59.999Z"; isActive = $false }
+    @{ code = "vacc-fr-2024"; nameFr = "Campagne Vaccination 2024"; nameEn = "Vaccination Campaign 2024"; type = "vaccination"; description = "Campagne nationale de vaccination"; startDate = "2024-01-01T00:00:00.000Z"; endDate = "2024-12-31T23:59:59.999Z"; isActive = $true }
+    @{ code = "depara-fr-2024"; nameFr = "Campagne Deparasitage 2024"; nameEn = "Deworming Campaign 2024"; type = "deworming"; description = "Campagne de deparasitage"; startDate = "2024-03-01T00:00:00.000Z"; endDate = "2024-11-30T23:59:59.999Z"; isActive = $true }
+    @{ code = "brucello-fr-2024"; nameFr = "Depistage Brucellose 2024"; nameEn = "Brucellosis Screening 2024"; type = "screening"; description = "Depistage brucellose"; startDate = "2024-01-01T00:00:00.000Z"; endDate = "2024-12-31T23:59:59.999Z"; isActive = $true }
+    @{ code = "recens-fr-2024"; nameFr = "Recensement 2024"; nameEn = "Census 2024"; type = "census"; description = "Recensement annuel"; startDate = "2024-09-01T00:00:00.000Z"; endDate = "2024-10-31T23:59:59.999Z"; isActive = $false }
 )
 
 foreach ($campaign in $campaigns) {
@@ -255,12 +255,12 @@ Write-Host ""
 Write-Host "6. Alert Templates (6 templates)" -ForegroundColor Cyan
 
 $templates = @(
-    @{ code = "vacc-reminder"; nameFr = "Rappel vaccination"; nameEn = "Vaccination reminder"; nameAr = "Vaccination reminder"; descriptionFr = "Rappel pour vaccinations"; descriptionEn = "Vaccination reminder"; category = "vaccination"; daysBeforeAlert = 7; isActive = $true }
-    @{ code = "treat-reminder"; nameFr = "Rappel traitement"; nameEn = "Treatment reminder"; nameAr = "Treatment reminder"; descriptionFr = "Rappel pour traitements"; descriptionEn = "Treatment reminder"; category = "treatment"; daysBeforeAlert = 3; isActive = $true }
-    @{ code = "birth-reminder"; nameFr = "Rappel mise bas"; nameEn = "Birth reminder"; nameAr = "Birth reminder"; descriptionFr = "Rappel mise bas prevue"; descriptionEn = "Expected birth"; category = "reproduction"; daysBeforeAlert = 10; isActive = $true }
-    @{ code = "weight-reminder"; nameFr = "Rappel pesee"; nameEn = "Weight reminder"; nameAr = "Weight reminder"; descriptionFr = "Rappel pesee periodique"; descriptionEn = "Periodic weighing"; category = "health"; daysBeforeAlert = 30; isActive = $true }
-    @{ code = "health-check"; nameFr = "Controle sanitaire"; nameEn = "Health check"; nameAr = "Health check"; descriptionFr = "Controle sanitaire periodique"; descriptionEn = "Periodic health check"; category = "health"; daysBeforeAlert = 60; isActive = $true }
-    @{ code = "campaign-reminder"; nameFr = "Rappel campagne"; nameEn = "Campaign reminder"; nameAr = "Campaign reminder"; descriptionFr = "Rappel campagne nationale"; descriptionEn = "National campaign reminder"; category = "campaign"; daysBeforeAlert = 5; isActive = $true }
+    @{ code = "vacc-reminder"; nameFr = "Rappel vaccination"; nameEn = "Vaccination reminder"; descriptionFr = "Rappel pour vaccinations"; descriptionEn = "Vaccination reminder"; category = "vaccination"; daysBeforeAlert = 7; isActive = $true }
+    @{ code = "treat-reminder"; nameFr = "Rappel traitement"; nameEn = "Treatment reminder"; descriptionFr = "Rappel pour traitements"; descriptionEn = "Treatment reminder"; category = "treatment"; daysBeforeAlert = 3; isActive = $true }
+    @{ code = "birth-reminder"; nameFr = "Rappel mise bas"; nameEn = "Birth reminder"; descriptionFr = "Rappel mise bas prevue"; descriptionEn = "Expected birth"; category = "reproduction"; daysBeforeAlert = 10; isActive = $true }
+    @{ code = "weight-reminder"; nameFr = "Rappel pesee"; nameEn = "Weight reminder"; descriptionFr = "Rappel pesee periodique"; descriptionEn = "Periodic weighing"; category = "health"; daysBeforeAlert = 30; isActive = $true }
+    @{ code = "health-check"; nameFr = "Controle sanitaire"; nameEn = "Health check"; descriptionFr = "Controle sanitaire periodique"; descriptionEn = "Periodic health check"; category = "health"; daysBeforeAlert = 60; isActive = $true }
+    @{ code = "campaign-reminder"; nameFr = "Rappel campagne"; nameEn = "Campaign reminder"; descriptionFr = "Rappel campagne nationale"; descriptionEn = "National campaign reminder"; category = "campaign"; daysBeforeAlert = 5; isActive = $true }
 )
 
 foreach ($template in $templates) {
@@ -275,8 +275,8 @@ Write-Host ""
 Write-Host "7. Species (2 especes)" -ForegroundColor Cyan
 
 $species = @(
-    @{ id = "bovine"; nameFr = "Bovin"; nameEn = "Bovine"; nameAr = "بقري"; icon = "cow" }
-    @{ id = "ovine"; nameFr = "Ovin"; nameEn = "Ovine"; nameAr = "غنمي"; icon = "sheep" }
+    @{ id = "bovine"; nameFr = "Bovin"; nameEn = "Bovine"; icon = "cow" }
+    @{ id = "ovine"; nameFr = "Ovin"; nameEn = "Ovine"; icon = "sheep" }
 )
 
 foreach ($specie in $species) {
@@ -297,15 +297,15 @@ Write-Host "8. Breeds (8 races)" -ForegroundColor Cyan
 
 $breeds = @(
     # Races bovines
-    @{ code = "prim-holstein"; speciesId = "bovine"; nameFr = "Prim'Holstein"; nameEn = "Holstein"; nameAr = "Holstein"; description = "Race laitiere" }
-    @{ code = "montbeliarde"; speciesId = "bovine"; nameFr = "Montbeliarde"; nameEn = "Montbeliarde"; nameAr = "Montbeliarde"; description = "Race mixte" }
-    @{ code = "charolaise"; speciesId = "bovine"; nameFr = "Charolaise"; nameEn = "Charolais"; nameAr = "Charolais"; description = "Race a viande" }
-    @{ code = "limousine"; speciesId = "bovine"; nameFr = "Limousine"; nameEn = "Limousin"; nameAr = "Limousin"; description = "Race a viande" }
-    @{ code = "blonde-aquitaine"; speciesId = "bovine"; nameFr = "Blonde d'Aquitaine"; nameEn = "Blonde d'Aquitaine"; nameAr = "Blonde d'Aquitaine"; description = "Race a viande" }
+    @{ code = "prim-holstein"; speciesId = "bovine"; nameFr = "Prim'Holstein"; nameEn = "Holstein"; description = "Race laitiere" }
+    @{ code = "montbeliarde"; speciesId = "bovine"; nameFr = "Montbeliarde"; nameEn = "Montbeliarde"; description = "Race mixte" }
+    @{ code = "charolaise"; speciesId = "bovine"; nameFr = "Charolaise"; nameEn = "Charolais"; description = "Race a viande" }
+    @{ code = "limousine"; speciesId = "bovine"; nameFr = "Limousine"; nameEn = "Limousin"; description = "Race a viande" }
+    @{ code = "blonde-aquitaine"; speciesId = "bovine"; nameFr = "Blonde d'Aquitaine"; nameEn = "Blonde d'Aquitaine"; description = "Race a viande" }
     # Races ovines
-    @{ code = "ile-de-france"; speciesId = "ovine"; nameFr = "Ile-de-France"; nameEn = "Ile-de-France"; nameAr = "Ile-de-France"; description = "Race a viande" }
-    @{ code = "lacaune"; speciesId = "ovine"; nameFr = "Lacaune"; nameEn = "Lacaune"; nameAr = "Lacaune"; description = "Race laitiere" }
-    @{ code = "merinos"; speciesId = "ovine"; nameFr = "Merinos"; nameEn = "Merino"; nameAr = "Merino"; description = "Race a laine" }
+    @{ code = "ile-de-france"; speciesId = "ovine"; nameFr = "Ile-de-France"; nameEn = "Ile-de-France"; description = "Race a viande" }
+    @{ code = "lacaune"; speciesId = "ovine"; nameFr = "Lacaune"; nameEn = "Lacaune"; description = "Race laitiere" }
+    @{ code = "merinos"; speciesId = "ovine"; nameFr = "Merinos"; nameEn = "Merino"; description = "Race a laine" }
 )
 
 foreach ($breed in $breeds) {
