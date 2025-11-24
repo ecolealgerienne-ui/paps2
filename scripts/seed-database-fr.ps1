@@ -1,7 +1,7 @@
 # =============================================================================
 # Script de Seed - Donnees de test pour la France
 # Inclut: donnees de reference + donnees transactionnelles (1 entite par table)
-# 31 tables: 8 ref + 12 transactionnelles + 4 config + 7 liaisons
+# 33 tables: 8 ref + 14 transactionnelles + 4 config + 7 liaisons
 # =============================================================================
 
 param(
@@ -416,6 +416,40 @@ if ($farmResponse) {
 }
 
 # =============================================================================
+# 13b. CUSTOM VACCINES (Vaccins personnalises de la ferme)
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "13b. Custom Vaccines (Vaccins personnalises)" -ForegroundColor Cyan
+
+    $customVaccine = @{
+        name = "Vaccin Brucellose B19"
+        description = "Vaccin contre la brucellose bovine - formule locale"
+        targetDisease = "Brucellose"
+        laboratoire = "Laboratoire Local"
+        dosage = "2ml par animal"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccines" -Body $customVaccine `
+        -Description "Vaccin personnalise: $($customVaccine.name)"
+}
+
+# =============================================================================
+# 13c. LOT ANIMALS (Animaux dans les lots)
+# =============================================================================
+if ($farmResponse -and $lotIds -and $lotIds.Count -gt 0 -and $animalId) {
+    Write-Host ""
+    Write-Host "13c. Lot Animals (Animaux dans les lots)" -ForegroundColor Cyan
+
+    $lotAnimalDto = @{
+        animalIds = @($animalId)
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots/$($lotIds[0])/animals" -Body $lotAnimalDto `
+        -Description "Ajout animal au lot"
+}
+
+# =============================================================================
 # 14. VACCINATIONS
 # =============================================================================
 if ($farmResponse -and $animalResponse) {
@@ -818,6 +852,8 @@ Write-Host "    - Veterinarian: 1" -ForegroundColor White
 Write-Host "    - Lot: 1" -ForegroundColor White
 Write-Host "    - Animal: 1" -ForegroundColor White
 Write-Host "    - Medical Product (farm): 1" -ForegroundColor White
+Write-Host "    - Custom Vaccine (farm): 1" -ForegroundColor White
+Write-Host "    - Lot Animal: 1" -ForegroundColor White
 Write-Host "    - Vaccination: 1" -ForegroundColor White
 Write-Host "    - Treatment: 1" -ForegroundColor White
 Write-Host "    - Movement: 1" -ForegroundColor White
@@ -841,5 +877,5 @@ Write-Host "    - Farm Breed Preferences: 1" -ForegroundColor White
 Write-Host "    - Farm Campaign Preferences: 1" -ForegroundColor White
 Write-Host "    - Farm Vaccine Preferences: 1" -ForegroundColor White
 Write-Host ""
-Write-Host "  TOTAL: 31 tables creees avec succes!" -ForegroundColor Green
+Write-Host "  TOTAL: 33 tables creees avec succes!" -ForegroundColor Green
 Write-Host ""
