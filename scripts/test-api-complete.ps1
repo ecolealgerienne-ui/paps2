@@ -152,7 +152,7 @@ $testCountryResponse = Invoke-Api -Method POST -Endpoint "/countries" -Body @{
     code = "TS"
     nameFr = "Test Country"
     nameEn = "Test Country"
-    nameAr = "دولة اختبار"
+    nameAr = "Test Country AR"
     region = "Africa"
     isActive = $true
 }
@@ -269,7 +269,7 @@ $testProductResponse = Invoke-Api -Method POST -Endpoint "/api/v1/global-medical
     code = "TEST-PROD-001"
     nameFr = "Produit Test"
     nameEn = "Test Product"
-    nameAr = "منتج اختبار"
+    nameAr = "Test Product AR"
     type = "antibiotic"
     manufacturer = "Test Lab"
     activeIngredient = "Test Ingredient"
@@ -325,7 +325,7 @@ $testVaccineResponse = Invoke-Api -Method POST -Endpoint "/api/v1/vaccines-globa
     code = "TEST-VAC-001"
     nameFr = "Vaccin Test"
     nameEn = "Test Vaccine"
-    nameAr = "لقاح اختبار"
+    nameAr = "Test Vaccine AR"
     type = "obligatoire"
     targetDiseases = @("Test Disease")
     manufacturer = "Test Lab"
@@ -381,7 +381,7 @@ $testCampaignResponse = Invoke-Api -Method POST -Endpoint "/api/v1/national-camp
     code = "TEST-CAMP-001"
     nameFr = "Campagne Test"
     nameEn = "Test Campaign"
-    nameAr = "حملة اختبار"
+    nameAr = "Test Campaign AR"
     type = "vaccination"
     startDate = "2025-01-01T00:00:00Z"
     endDate = "2025-12-31T23:59:59Z"
@@ -438,12 +438,12 @@ $testTemplateResponse = Invoke-Api -Method POST -Endpoint "/api/v1/alert-templat
     code = "TEST-TEMPLATE-001"
     nameFr = "Template Test"
     nameEn = "Test Template"
-    nameAr = "قالب اختبار"
+    nameAr = "Test Template AR"
     category = "health"
     priority = "medium"
     messageFr = "Message test"
     messageEn = "Test message"
-    messageAr = "رسالة اختبار"
+    messageAr = "Test message AR"
 }
 $testAlertTemplateId = Get-ResponseData $testTemplateResponse "id"
 Write-Success "Created: $testAlertTemplateId"
@@ -1058,5 +1058,5 @@ Write-Host "  - Farm Vaccine Preferences (PHASE 22): 5 endpoints" -ForegroundCol
 Write-Host "  - Farm Veterinarian Preferences (PHASE 23): 5 endpoints" -ForegroundColor White
 Write-Host "  - Farm National Campaign Preferences (PHASE 24): 6 endpoints" -ForegroundColor White
 Write-Host ""
-Write-Host "TOTAL: ~100+ endpoints testes!" -ForegroundColor Green
+Write-Host "TOTAL: ~100+ endpoints tested!" -ForegroundColor Green
 Write-Host ""
