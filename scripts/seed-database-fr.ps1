@@ -73,11 +73,11 @@ Write-Host ""
 Write-Host "1. Countries (Pays)" -ForegroundColor Cyan
 
 $countries = @(
-    @{ code = "FR"; nameFr = "France"; nameEn = "France" }
-    @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain" }
-    @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy" }
-    @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany" }
-    @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium" }
+    @{ code = "FR"; nameFr = "France"; nameEn = "France"; nameAr = "France"; nameAr = "فرنسا" }
+    @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain"; nameAr = "Spain"; nameAr = "إسبانيا" }
+    @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy"; nameAr = "Italy"; nameAr = "إيطاليا" }
+    @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany"; nameAr = "Germany"; nameAr = "ألمانيا" }
+    @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium"; nameAr = "Belgium"; nameAr = "بلجيكا" }
 )
 
 foreach ($country in $countries) {
@@ -92,11 +92,11 @@ Write-Host ""
 Write-Host "2. Administration Routes (Voies d'administration)" -ForegroundColor Cyan
 
 $routes = @(
-    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular" }
-    @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous" }
-    @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous" }
-    @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral" }
-    @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical" }
+    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular"; nameAr = "Intramuscular"; nameAr = "عضلي" }
+    @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous"; nameAr = "Subcutaneous"; nameAr = "تحت الجلد" }
+    @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous"; nameAr = "Intravenous"; nameAr = "وريدي" }
+    @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral"; nameAr = "Oral"; nameAr = "فموي" }
+    @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical"; nameAr = "Topical"; nameAr = "موضعي" }
 )
 
 foreach ($route in $routes) {
@@ -114,7 +114,7 @@ $products = @(
     @{
         code = "IVERM-FR-001"
         nameFr = "Ivomec 1%"
-        nameEn = "Ivomec 1%"
+        nameEn = "Ivomec 1%"; nameAr = "Ivomec 1%"
         type = "antiparasitic"
         laboratoire = "Boehringer Ingelheim"
         principeActif = "Ivermectine"
@@ -122,7 +122,7 @@ $products = @(
     @{
         code = "PENI-FR-001"
         nameFr = "Pen & Strep"
-        nameEn = "Pen & Strep"
+        nameEn = "Pen & Strep"; nameAr = "Pen & Strep"
         type = "antibiotic"
         laboratoire = "Virbac"
         principeActif = "Penicilline + Streptomycine"
@@ -130,7 +130,7 @@ $products = @(
     @{
         code = "ALAMYCINE-001"
         nameFr = "Alamycine LA"
-        nameEn = "Alamycin LA"
+        nameEn = "Alamycin LA"; nameAr = "Alamycin LA"
         type = "antibiotic"
         laboratoire = "Norbrook"
         principeActif = "Oxytetracycline"
@@ -138,7 +138,7 @@ $products = @(
     @{
         code = "METACAM-001"
         nameFr = "Metacam 20mg/ml"
-        nameEn = "Metacam 20mg/ml"
+        nameEn = "Metacam 20mg/ml"; nameAr = "Metacam 20mg/ml"
         type = "anti_inflammatory"
         laboratoire = "Boehringer Ingelheim"
         principeActif = "Meloxicam"
@@ -160,28 +160,28 @@ $vaccines = @(
     @{
         code = "BVD-FR-001"
         nameFr = "Bovilis BVD"
-        nameEn = "Bovilis BVD"
+        nameEn = "Bovilis BVD"; nameAr = "Bovilis BVD"
         targetDisease = "bvd"
         laboratoire = "MSD Sante Animale"
     }
     @{
         code = "IBR-FR-001"
         nameFr = "Rispoval IBR Marker"
-        nameEn = "Rispoval IBR Marker"
+        nameEn = "Rispoval IBR Marker"; nameAr = "Rispoval IBR Marker"
         targetDisease = "ibr"
         laboratoire = "Zoetis"
     }
     @{
         code = "ROTAVIRUS-001"
         nameFr = "Rotavec Corona"
-        nameEn = "Rotavec Corona"
+        nameEn = "Rotavec Corona"; nameAr = "Rotavec Corona"
         targetDisease = "rotavirus"
         laboratoire = "MSD Sante Animale"
     }
     @{
         code = "CLOSTRI-001"
         nameFr = "Covexin 10"
-        nameEn = "Covexin 10"
+        nameEn = "Covexin 10"; nameAr = "Covexin 10"
         targetDisease = "enterotoxemia"
         laboratoire = "MSD Sante Animale"
     }
@@ -202,7 +202,7 @@ $campaigns = @(
     @{
         code = "bvd-fr-2025"
         nameFr = "Campagne BVD France 2025"
-        nameEn = "BVD Campaign France 2025"
+        nameEn = "BVD Campaign France 2025"; nameAr = "BVD Campaign France 2025"
         description = "Vaccination obligatoire contre la BVD bovine"
         startDate = "2025-01-01T00:00:00.000Z"
         endDate = "2025-12-31T23:59:59.999Z"
@@ -211,7 +211,7 @@ $campaigns = @(
     @{
         code = "ibr-fr-2025"
         nameFr = "Campagne IBR France 2025"
-        nameEn = "IBR Campaign France 2025"
+        nameEn = "IBR Campaign France 2025"; nameAr = "IBR Campaign France 2025"
         description = "Programme d'eradication IBR"
         startDate = "2025-01-01T00:00:00.000Z"
         endDate = "2025-12-31T23:59:59.999Z"
@@ -234,31 +234,28 @@ $templates = @(
     @{
         code = "vacc-reminder"
         nameFr = "Rappel de vaccination"
-        nameEn = "Vaccination reminder"
+        nameEn = "Vaccination reminder"; nameAr = "Vaccination reminder"
         descriptionFr = "Rappel automatique pour les vaccinations a venir"
         descriptionEn = "Automatic reminder for upcoming vaccinations"
-        
-        severity = "info"
+        category = "vaccination"
         isActive = $true
     }
     @{
         code = "treatment-reminder"
         nameFr = "Rappel de traitement"
-        nameEn = "Treatment reminder"
+        nameEn = "Treatment reminder"; nameAr = "Treatment reminder"
         descriptionFr = "Rappel pour les traitements en cours"
         descriptionEn = "Reminder for ongoing treatments"
-        
-        severity = "info"
+        category = "treatment"
         isActive = $true
     }
     @{
         code = "disease-alert"
         nameFr = "Alerte maladie"
-        nameEn = "Disease alert"
+        nameEn = "Disease alert"; nameAr = "Disease alert"
         descriptionFr = "Alerte en cas de detection de maladie"
         descriptionEn = "Alert when disease is detected"
-        
-        severity = "high"
+        category = "health"
         isActive = $true
     }
 )
