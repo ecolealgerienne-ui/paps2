@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { FarmNationalCampaignPreferencesService } from './farm-national-campaign-preferences.service';
 import { CreateFarmNationalCampaignPreferenceDto, UpdateFarmNationalCampaignPreferenceDto } from './dto';
