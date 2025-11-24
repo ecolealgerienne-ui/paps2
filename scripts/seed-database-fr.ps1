@@ -34,19 +34,25 @@ function Invoke-CurlApi {
     try {
         if ($Body) {
             $jsonBody = $Body | ConvertTo-Json -Depth 10 -Compress
-            $response = curl.exe -s -X $Method $uri `
+            $response = curl.exe -s -S -X $Method $uri `
                 -H "Content-Type: application/json" `
                 -H "Authorization: Bearer $Token" `
-                -d $jsonBody
+                -d $jsonBody 2>$null
         } else {
-            $response = curl.exe -s -X $Method $uri `
+            $response = curl.exe -s -S -X $Method $uri `
                 -H "Content-Type: application/json" `
-                -H "Authorization: Bearer $Token"
+                -H "Authorization: Bearer $Token" 2>$null
         }
 
         if ($LASTEXITCODE -eq 0 -and $response) {
             Write-Host " OK" -ForegroundColor Green
-            $result = $response | ConvertFrom-Json -ErrorAction SilentlyContinue
+            # Join all lines into single string if it's an array
+            if ($response -is [Array]) {
+                $responseStr = $response -join ""
+            } else {
+                $responseStr = $response
+            }
+            $result = $responseStr | ConvertFrom-Json -ErrorAction SilentlyContinue
             return $result
         } else {
             Write-Host " SKIP" -ForegroundColor Gray
