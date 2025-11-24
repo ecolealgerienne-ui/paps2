@@ -34,7 +34,7 @@ export class CampaignsService {
     }
 
     try {
-      const campaign = await this.prisma.campaign.create({
+      const campaign = await this.prisma.personalCampaign.create({
         data: {
           ...dto,
           farmId,
@@ -70,7 +70,7 @@ export class CampaignsService {
       if (query.toDate) where.startDate.lte = new Date(query.toDate);
     }
 
-    return this.prisma.campaign.findMany({
+    return this.prisma.personalCampaign.findMany({
       where,
       include: {
         lot: { select: { id: true, name: true, type: true } },
@@ -80,7 +80,7 @@ export class CampaignsService {
   }
 
   async findOne(farmId: string, id: string) {
-    const campaign = await this.prisma.campaign.findFirst({
+    const campaign = await this.prisma.personalCampaign.findFirst({
       where: { id, farmId, deletedAt: null },
       include: {
         lot: {
@@ -109,7 +109,7 @@ export class CampaignsService {
   async update(farmId: string, id: string, dto: UpdateCampaignDto) {
     this.logger.debug(`Updating campaign ${id} (version ${dto.version})`);
 
-    const existing = await this.prisma.campaign.findFirst({
+    const existing = await this.prisma.personalCampaign.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
@@ -150,7 +150,7 @@ export class CampaignsService {
       if (dto.startDate) updateData.startDate = new Date(dto.startDate);
       if (dto.endDate) updateData.endDate = new Date(dto.endDate);
 
-      const updated = await this.prisma.campaign.update({
+      const updated = await this.prisma.personalCampaign.update({
         where: { id },
         data: updateData,
         include: {
@@ -174,7 +174,7 @@ export class CampaignsService {
   async remove(farmId: string, id: string) {
     this.logger.debug(`Soft deleting campaign ${id}`);
 
-    const existing = await this.prisma.campaign.findFirst({
+    const existing = await this.prisma.personalCampaign.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
@@ -188,7 +188,7 @@ export class CampaignsService {
     }
 
     try {
-      const deleted = await this.prisma.campaign.update({
+      const deleted = await this.prisma.personalCampaign.update({
         where: { id },
         data: {
           deletedAt: new Date(),
@@ -208,7 +208,7 @@ export class CampaignsService {
   async getActiveCampaigns(farmId: string) {
     this.logger.debug(`Finding active campaigns for farm ${farmId}`);
 
-    return this.prisma.campaign.findMany({
+    return this.prisma.personalCampaign.findMany({
       where: {
         farmId,
         deletedAt: null,
@@ -240,7 +240,7 @@ export class CampaignsService {
   async complete(farmId: string, id: string) {
     this.logger.debug(`Completing campaign ${id}`);
 
-    const campaign = await this.prisma.campaign.findFirst({
+    const campaign = await this.prisma.personalCampaign.findFirst({
       where: { id, farmId, deletedAt: null },
     });
 
@@ -254,7 +254,7 @@ export class CampaignsService {
     }
 
     try {
-      const completed = await this.prisma.campaign.update({
+      const completed = await this.prisma.personalCampaign.update({
         where: { id },
         data: {
           status: 'completed',

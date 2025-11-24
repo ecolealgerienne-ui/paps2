@@ -85,8 +85,13 @@ export class BreedCountriesService {
       },
       include: {
         breed: {
-          where: {
-            deletedAt: null,
+          select: {
+            id: true,
+            code: true,
+            nameFr: true,
+            nameEn: true,
+            nameAr: true,
+            deletedAt: true,
           },
         },
         country: true,
@@ -98,12 +103,15 @@ export class BreedCountriesService {
       },
     });
 
+    // Filter out deleted breeds
+    const activeAssociations = associations.filter(a => !a.breed.deletedAt);
+
     this.logger.debug('Found breeds for country', {
       countryCode,
-      count: associations.length,
+      count: activeAssociations.length,
     });
 
-    return associations;
+    return activeAssociations;
   }
 
   /**
@@ -264,15 +272,13 @@ export class BreedCountriesService {
       where,
       include: {
         breed: {
-          where: {
-            deletedAt: null,
-          },
           select: {
             id: true,
             code: true,
             nameFr: true,
             nameEn: true,
             nameAr: true,
+            deletedAt: true,
           },
         },
         country: true,
@@ -283,6 +289,9 @@ export class BreedCountriesService {
       ],
     });
 
-    return associations;
+    // Filter out deleted breeds
+    const activeAssociations = associations.filter(a => !a.breed.deletedAt);
+
+    return activeAssociations;
   }
 }

@@ -86,8 +86,14 @@ export class CampaignCountriesService {
       },
       include: {
         campaign: {
-          where: {
-            deletedAt: null,
+          select: {
+            id: true,
+            code: true,
+            nameFr: true,
+            nameEn: true,
+            nameAr: true,
+            type: true,
+            deletedAt: true,
           },
         },
         country: true,
@@ -99,12 +105,15 @@ export class CampaignCountriesService {
       },
     });
 
+    // Filter out deleted campaigns
+    const activeAssociations = associations.filter(a => !a.campaign.deletedAt);
+
     this.logger.debug('Found campaigns for country', {
       countryCode,
-      count: associations.length,
+      count: activeAssociations.length,
     });
 
-    return associations;
+    return activeAssociations;
   }
 
   /**
@@ -267,9 +276,6 @@ export class CampaignCountriesService {
       where,
       include: {
         campaign: {
-          where: {
-            deletedAt: null,
-          },
           select: {
             id: true,
             code: true,
@@ -277,6 +283,7 @@ export class CampaignCountriesService {
             nameEn: true,
             nameAr: true,
             type: true,
+            deletedAt: true,
           },
         },
         country: true,
@@ -287,6 +294,9 @@ export class CampaignCountriesService {
       ],
     });
 
-    return associations;
+    // Filter out deleted campaigns
+    const activeAssociations = associations.filter(a => !a.campaign.deletedAt);
+
+    return activeAssociations;
   }
 }
