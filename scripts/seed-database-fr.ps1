@@ -200,89 +200,97 @@ $farmId = "550e8400-e29b-41d4-a716-446655440000"
 $farm = @{
     id = $farmId
     name = "EARL du Plateau"
-    ownerName = "Jean Dupont"
-    wilaya = "Auvergne-Rhone-Alpes"
-    commune = "Clermont-Ferrand"
+    ownerId = "owner-test-001"
+    location = "Clermont-Ferrand, France"
     address = "15 Route de la Montagne, 63000 Clermont-Ferrand"
-    phone = "0473123456"
-    isDefault = $true
+    commune = "63113"
+    city = "Clermont-Ferrand"
+    postalCode = "63000"
+    country = "FR"
+    department = "63"
 }
 
-Invoke-CurlApi -Method POST -Endpoint "/api/farms" -Body $farm `
+$farmResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms" -Body $farm `
     -Description "Ferme: $($farm.name)"
 
 # =============================================================================
 # 8. VETERINARIANS
 # =============================================================================
-Write-Host ""
-Write-Host "8. Veterinarians (Veterinaires)" -ForegroundColor Cyan
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "8. Veterinarians (Veterinaires)" -ForegroundColor Cyan
 
-$vets = @(
-    @{
-        firstName = "Marie"
-        lastName = "Martin"
-        title = "Dr."
-        phone = "0612345678"
-        email = "m.martin@veterinaire-france.fr"
-        licenseNumber = "VET-FR-123456"
-        specialties = "Bovins laitiers"
-    }
-)
+    $vets = @(
+        @{
+            firstName = "Marie"
+            lastName = "Martin"
+            title = "Dr."
+            phone = "0612345678"
+            email = "m.martin@veterinaire-france.fr"
+            licenseNumber = "VET-FR-123456"
+            specialties = "Bovins laitiers"
+        }
+    )
 
-$vetIds = @()
-foreach ($vet in $vets) {
-    $vetResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarians" -Body $vet `
-        -Description "Veterinaire: Dr. $($vet.lastName)"
-    if ($vetResponse -and $vetResponse.id) {
-        $vetIds += $vetResponse.id
+    $vetIds = @()
+    foreach ($vet in $vets) {
+        $vetResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarians" -Body $vet `
+            -Description "Veterinaire: Dr. $($vet.lastName)"
+        if ($vetResponse -and $vetResponse.id) {
+            $vetIds += $vetResponse.id
+        }
     }
 }
 
 # =============================================================================
 # 9. LOTS (Batches/Groups)
 # =============================================================================
-Write-Host ""
-Write-Host "9. Lots (Batches)" -ForegroundColor Cyan
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "9. Lots (Batches)" -ForegroundColor Cyan
 
-$lots = @(
-    @{
-        name = "Lot Test"
-        description = "Lot de test"
-        lotType = "production"
-        createdDate = "2024-01-01T00:00:00.000Z"
-        isActive = $true
-    }
-)
+    $lots = @(
+        @{
+            name = "Lot Test"
+            type = "sale"
+            status = "open"
+        }
+    )
 
-$lotIds = @()
-foreach ($lot in $lots) {
-    $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots" -Body $lot `
-        -Description "Lot: $($lot.name)"
-    if ($lotResponse -and $lotResponse.id) {
-        $lotIds += $lotResponse.id
+    $lotIds = @()
+    foreach ($lot in $lots) {
+        $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots" -Body $lot `
+            -Description "Lot: $($lot.name)"
+        if ($lotResponse -and $lotResponse.id) {
+            $lotIds += $lotResponse.id
+        }
     }
 }
 
 # =============================================================================
 # 10. ANIMALS (1 animal de test)
 # =============================================================================
-Write-Host ""
-Write-Host "10. Animals (1 animal)" -ForegroundColor Cyan
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "10. Animals (1 animal)" -ForegroundColor Cyan
 
-$animal = @{
-    name = "Belle Test"
-    earTag = "FR-TEST-001"
-    electronicId = "250269000000001"
-    birthDate = "2023-06-15T00:00:00.000Z"
-    sex = "female"
-    species = "bovin"
-    breed = "prim-holstein"
-    status = "alive"
-    lotId = if ($lotIds.Count -gt 0) { $lotIds[0] } else { $null }
+    $animalId = [guid]::NewGuid().ToString()
+    $animal = @{
+        id = $animalId
+        birthDate = "2023-06-15T00:00:00.000Z"
+        sex = "female"
+        currentEid = "250269000000001"
+        officialNumber = "FR-TEST-001"
+        visualId = "Belle-001"
+        speciesId = "bovin"
+        breedId = "prim-holstein"
+        status = "alive"
+        notes = "Animal de test"
+    }
+
+    $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/animals" -Body $animal `
+        -Description "Animal: $($animal.visualId) (EID: $($animal.currentEid))"
 }
-
-$animalResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/animals" -Body $animal `
-    -Description "Animal: $($animal.name) ($($animal.earTag))"
 
 # =============================================================================
 # RESUME
