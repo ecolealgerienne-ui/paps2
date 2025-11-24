@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsOptional, IsUUID, Min, ValidateIf } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsUUID, Min } from 'class-validator';
+import { IsXorField } from '../../common/validators';
 
 export class CreateFarmVaccinePreferenceDto {
   @ApiProperty({
@@ -10,19 +11,20 @@ export class CreateFarmVaccinePreferenceDto {
   farmId: string;
 
   @ApiPropertyOptional({
-    description: 'Global vaccine ID (XOR with customVaccineId - only one must be provided)',
+    description: 'Global vaccine ID (XOR with customVaccineId - exactly one must be provided)',
     example: 'b2c3d4e5-f6a7-8901-bcde-f12345678901',
   })
-  @ValidateIf(o => !o.customVaccineId)
-  @IsUUID(undefined, { message: 'Either globalVaccineId or customVaccineId must be provided (not both)' })
+  @IsOptional()
+  @IsUUID()
   globalVaccineId?: string;
 
   @ApiPropertyOptional({
-    description: 'Custom vaccine ID (XOR with globalVaccineId - only one must be provided)',
+    description: 'Custom vaccine ID (XOR with globalVaccineId - exactly one must be provided)',
     example: 'c3d4e5f6-a7b8-9012-cdef-123456789012',
   })
-  @ValidateIf(o => !o.globalVaccineId)
-  @IsUUID(undefined, { message: 'Either globalVaccineId or customVaccineId must be provided (not both)' })
+  @IsOptional()
+  @IsUUID()
+  @IsXorField(['globalVaccineId', 'customVaccineId'])
   customVaccineId?: string;
 
   @ApiPropertyOptional({
