@@ -12,6 +12,7 @@
  *   ts-node scripts/clear-database.ts
  */
 
+import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
