@@ -154,7 +154,7 @@ model Country {
 
   // Relations (BLOC 3 - Phases 16-19)
   breedCountries    BreedCountry[]       // PHASE_16
-  // productCountries  ProductCountry[]   // PHASE_17
+  productCountries  ProductCountry[]     // PHASE_17
   vaccineCountries  VaccineCountry[]     // PHASE_18
   campaignCountries CampaignCountry[]    // PHASE_19
 
@@ -611,6 +611,8 @@ model Farm {
   vaccinePreferences FarmVaccinePreference[]  // PHASE_22
   campaignPreferences FarmNationalCampaignPreference[]  // PHASE_24
   veterinarianPreferences FarmVeterinarianPreference[]  // PHASE_23
+  breedPreferences FarmBreedPreference[]  // PHASE_20
+  productPreferences FarmProductPreference[]  // PHASE_21
 
   // Indexes
   @@index([ownerId])
