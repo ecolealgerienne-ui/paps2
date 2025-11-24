@@ -72,11 +72,49 @@ export class FarmNationalCampaignPreferencesService {
     return preference;
   }
 
+  async findOneByCampaign(farmId: string, campaignId: string) {
+    const preference = await this.prisma.farmNationalCampaignPreference.findUnique({
+      where: {
+        farmId_campaignId: { farmId, campaignId },
+      },
+      include: {
+        farm: true,
+        campaign: true,
+      },
+    });
+
+    if (!preference) {
+      throw new NotFoundException(
+        `No preference found for farm ${farmId} and campaign ${campaignId}`
+      );
+    }
+
+    return preference;
+  }
+
   async update(id: string, dto: UpdateFarmNationalCampaignPreferenceDto) {
     await this.findOne(id); // Check existence
 
     return this.prisma.farmNationalCampaignPreference.update({
       where: { id },
+      data: {
+        isEnrolled: dto.isEnrolled,
+        enrolledAt: dto.enrolledAt ? new Date(dto.enrolledAt) : undefined,
+      },
+      include: {
+        farm: true,
+        campaign: true,
+      },
+    });
+  }
+
+  async updateByCampaign(farmId: string, campaignId: string, dto: UpdateFarmNationalCampaignPreferenceDto) {
+    await this.findOneByCampaign(farmId, campaignId); // Check existence
+
+    return this.prisma.farmNationalCampaignPreference.update({
+      where: {
+        farmId_campaignId: { farmId, campaignId },
+      },
       data: {
         isEnrolled: dto.isEnrolled,
         enrolledAt: dto.enrolledAt ? new Date(dto.enrolledAt) : undefined,

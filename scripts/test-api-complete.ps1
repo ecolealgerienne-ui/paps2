@@ -628,7 +628,6 @@ if ($nationalCampaignId -and $countryCode) {
     $campaignCountryResponse = Invoke-Api -Method POST -Endpoint "/api/v1/campaign-countries" -Body @{
         campaignId = $nationalCampaignId
         countryCode = $countryCode
-        isActive = $true
     }
     $campaignCountryId = Get-ResponseData $campaignCountryResponse "id"
     Write-Success "Created: $campaignCountryId"
@@ -946,6 +945,7 @@ $testVetResponse = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/veterinaria
     phone = "0550000000"
     email = "test@vet.dz"
     licenseNumber = "VET-TEST-001"
+    specialties = "General"
 }
 $testVetId = Get-ResponseData $testVetResponse "id"
 

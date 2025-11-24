@@ -4,7 +4,7 @@ import { ProductCountriesService } from './product-countries.service';
 import { CreateProductCountryDto, UpdateProductCountryDto } from './dto';
 
 @ApiTags('product-countries')
-@Controller('product-countries')
+@Controller('api/v1/product-countries')
 export class ProductCountriesController {
   constructor(private readonly service: ProductCountriesService) {}
 
