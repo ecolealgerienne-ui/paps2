@@ -1,6 +1,7 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsArray, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
+import { IsXorField, IsDateAfterOrEqual } from '../../common/validators';
 
 /**
  * DTO for creating a Vaccination
@@ -32,6 +33,7 @@ export class CreateVaccinationDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsXorField(['animal_ids', 'animalId', 'animalIds'])
   animal_ids?: string[];
 
   @ApiProperty({ description: 'Vaccine name' })
@@ -60,9 +62,13 @@ export class CreateVaccinationDto extends BaseSyncEntityDto {
   @IsDateString()
   vaccinationDate: string;
 
-  @ApiProperty({ description: 'Next due date', required: false })
+  @ApiProperty({
+    description: 'Next due date (must be >= vaccinationDate)',
+    required: false
+  })
   @IsOptional()
   @IsDateString()
+  @IsDateAfterOrEqual('vaccinationDate')
   nextDueDate?: string;
 
   @ApiProperty({ description: 'Batch number', required: false })

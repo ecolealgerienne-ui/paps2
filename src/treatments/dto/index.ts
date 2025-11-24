@@ -1,7 +1,8 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { TreatmentStatus } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
+import { IsXorField, IsDateAfterOrEqual } from '../../common/validators';
 
 /**
  * DTO for creating a Treatment
@@ -28,6 +29,7 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
+  @IsXorField(['animal_ids', 'animalId'])
   animal_ids?: string[];
 
   @ApiProperty({ description: 'Medical product ID' })
@@ -91,8 +93,11 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsEnum(TreatmentStatus)
   status?: TreatmentStatus;
 
-  @ApiProperty({ description: 'Withdrawal end date' })
+  @ApiProperty({
+    description: 'Withdrawal end date (must be >= treatmentDate)',
+  })
   @IsDateString()
+  @IsDateAfterOrEqual('treatmentDate')
   withdrawalEndDate: string;
 
   @ApiProperty({ description: 'Cost', required: false })

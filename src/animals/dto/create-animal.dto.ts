@@ -10,6 +10,7 @@ import {
   IsInt,
 } from 'class-validator';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
+import { IsMotherMustBeFemale } from '../validators/mother-must-be-female.validator';
 
 /**
  * DTO for creating an Animal
@@ -46,9 +47,12 @@ export class CreateAnimalDto extends BaseSyncEntityDto {
   @IsEnum(['male', 'female'])
   sex: string;
 
-  @ApiPropertyOptional({ description: 'ID de la mère' })
+  @ApiPropertyOptional({
+    description: 'ID de la mère (mother animal). If provided, animal must be female',
+  })
   @IsOptional()
   @IsUUID()
+  @IsMotherMustBeFemale()
   motherId?: string;
 
   @ApiPropertyOptional({ description: "ID de l'espèce" })
