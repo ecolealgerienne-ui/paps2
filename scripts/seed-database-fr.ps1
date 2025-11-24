@@ -1,6 +1,7 @@
 # =============================================================================
 # Script de Seed - Donnees de test pour la France
-# Inclut: donnees de reference + donnees transactionnelles (100 animaux)
+# Inclut: donnees de reference + donnees transactionnelles (1 entite par table)
+# 20 tables: 8 ref + 12 transactionnelles
 # =============================================================================
 
 param(
@@ -365,6 +366,226 @@ if ($farmResponse -and $breedId) {
 }
 
 # =============================================================================
+# 13. MEDICAL PRODUCTS (Produits de la ferme)
+# =============================================================================
+if ($farmResponse) {
+    Write-Host ""
+    Write-Host "13. Medical Products (Produits medicaux de la ferme)" -ForegroundColor Cyan
+
+    $medicalProduct = @{
+        name = "Ivomec 1% Local"
+        commercialName = "Ivomec Injectable"
+        category = "antiparasitic"
+        activeIngredient = "Ivermectine"
+        manufacturer = "Boehringer Ingelheim"
+        withdrawalPeriodMeat = 28
+        withdrawalPeriodMilk = 0
+        currentStock = 10
+        minStock = 5
+        stockUnit = "flacon"
+        unitPrice = 25.50
+        batchNumber = "BATCH2025-001"
+        expiryDate = "2026-12-31T23:59:59.999Z"
+        type = "treatment"
+        targetSpecies = "bovine"
+        isActive = $true
+    }
+
+    $medicalProductResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/medical-products" -Body $medicalProduct `
+        -Description "Produit medical: $($medicalProduct.name)"
+
+    if ($medicalProductResponse -and $medicalProductResponse.id) {
+        $medicalProductId = $medicalProductResponse.id
+        Write-Host "    Medical Product ID: $medicalProductId" -ForegroundColor Green
+    }
+}
+
+# =============================================================================
+# 14. VACCINATIONS
+# =============================================================================
+if ($farmResponse -and $animalResponse) {
+    Write-Host ""
+    Write-Host "14. Vaccinations" -ForegroundColor Cyan
+
+    $vaccination = @{
+        animalId = $animalId
+        vaccineName = "Vaccin Enterotoxemie"
+        type = "obligatoire"
+        disease = "enterotoxemia"
+        vaccinationDate = "2025-01-15T10:00:00.000Z"
+        nextDueDate = "2026-01-15T10:00:00.000Z"
+        dose = "2ml"
+        administrationRoute = "IM"
+        withdrawalPeriodDays = 21
+        batchNumber = "VAC2025-001"
+        expiryDate = "2026-12-31T23:59:59.999Z"
+        cost = 15.0
+        notes = "Vaccination de routine"
+    }
+
+    if ($vetIds -and $vetIds.Count -gt 0) {
+        $vaccination.veterinarianId = $vetIds[0]
+        $vaccination.veterinarianName = "Dr. Martin"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccinations" -Body $vaccination `
+        -Description "Vaccination: $($vaccination.disease)"
+}
+
+# =============================================================================
+# 15. TREATMENTS
+# =============================================================================
+if ($farmResponse -and $animalResponse -and $medicalProductId) {
+    Write-Host ""
+    Write-Host "15. Treatments (Traitements)" -ForegroundColor Cyan
+
+    $treatment = @{
+        animalId = $animalId
+        productId = $medicalProductId
+        productName = "Ivomec 1% Local"
+        treatmentDate = "2025-01-10T09:00:00.000Z"
+        dose = 5.0
+        dosage = 5.0
+        dosageUnit = "ml"
+        duration = 1
+        status = "completed"
+        withdrawalEndDate = "2025-02-07T00:00:00.000Z"
+        diagnosis = "Parasitose"
+        cost = 25.50
+        notes = "Traitement antiparasitaire preventif"
+    }
+
+    if ($vetIds -and $vetIds.Count -gt 0) {
+        $treatment.veterinarianId = $vetIds[0]
+        $treatment.veterinarianName = "Dr. Martin"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $treatment `
+        -Description "Traitement: $($treatment.diagnosis)"
+}
+
+# =============================================================================
+# 16. MOVEMENTS
+# =============================================================================
+if ($farmResponse -and $animalResponse) {
+    Write-Host ""
+    Write-Host "16. Movements (Mouvements)" -ForegroundColor Cyan
+
+    $movement = @{
+        movementType = "entry"
+        movementDate = "2023-06-15T08:00:00.000Z"
+        animalIds = @($animalId)
+        reason = "Naissance a la ferme"
+        notes = "Animal ne sur place"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/movements" -Body $movement `
+        -Description "Mouvement: $($movement.movementType)"
+}
+
+# =============================================================================
+# 17. WEIGHTS
+# =============================================================================
+if ($farmResponse -and $animalResponse) {
+    Write-Host ""
+    Write-Host "17. Weights (Pesees)" -ForegroundColor Cyan
+
+    $weight = @{
+        animalId = $animalId
+        weight = 350.5
+        weightDate = "2025-01-20T10:00:00.000Z"
+        source = "manual"
+        notes = "Pesee de routine"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/weights" -Body $weight `
+        -Description "Pesee: $($weight.weight) kg"
+}
+
+# =============================================================================
+# 18. BREEDINGS
+# =============================================================================
+if ($farmResponse -and $animalResponse) {
+    Write-Host ""
+    Write-Host "18. Breedings (Reproductions)" -ForegroundColor Cyan
+
+    $breeding = @{
+        motherId = $animalId
+        fatherName = "Taureau Limousin"
+        method = "artificial_insemination"
+        breedingDate = "2024-10-01T09:00:00.000Z"
+        expectedBirthDate = "2025-07-10T00:00:00.000Z"
+        expectedOffspringCount = 1
+        status = "planned"
+        notes = "IA avec semence de taureau Limousin"
+    }
+
+    if ($vetIds -and $vetIds.Count -gt 0) {
+        $breeding.veterinarianId = $vetIds[0]
+        $breeding.veterinarianName = "Dr. Martin"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breedings" -Body $breeding `
+        -Description "Reproduction: IA"
+}
+
+# =============================================================================
+# 19. PERSONAL CAMPAIGNS
+# =============================================================================
+if ($farmResponse -and $animalResponse -and $medicalProductId) {
+    Write-Host ""
+    Write-Host "19. Personal Campaigns (Campagnes personnelles)" -ForegroundColor Cyan
+
+    $personalCampaign = @{
+        name = "Campagne Depar" + "asitage Hiver 2025"
+        description = "Traitement antiparasitaire de tous les bovins"
+        productId = $medicalProductId
+        productName = "Ivomec 1% Local"
+        type = "deworming"
+        campaignDate = "2025-02-01T00:00:00.000Z"
+        withdrawalEndDate = "2025-03-01T00:00:00.000Z"
+        animalIdsJson = "[$($animalId | ConvertTo-Json)]"
+        targetCount = 1
+        status = "planned"
+        notes = "Traitement contre les parasites internes et externes"
+    }
+
+    if ($vetIds -and $vetIds.Count -gt 0) {
+        $personalCampaign.veterinarianId = $vetIds[0]
+        $personalCampaign.veterinarianName = "Dr. Martin"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/personal-campaigns" -Body $personalCampaign `
+        -Description "Campagne: $($personalCampaign.name)"
+}
+
+# =============================================================================
+# 20. DOCUMENTS
+# =============================================================================
+if ($farmResponse -and $animalResponse) {
+    Write-Host ""
+    Write-Host "20. Documents" -ForegroundColor Cyan
+
+    $document = @{
+        animalId = $animalId
+        type = "health_certificate"
+        title = "Certificat sanitaire"
+        fileName = "certificat-sanitaire-belle-001.pdf"
+        fileUrl = "https://example.com/documents/certificat-sanitaire-belle-001.pdf"
+        fileSizeBytes = 102400
+        mimeType = "application/pdf"
+        uploadDate = "2025-01-15T14:30:00.000Z"
+        documentNumber = "CERT-FR-2025-001"
+        issueDate = "2025-01-15T00:00:00.000Z"
+        expiryDate = "2026-01-15T00:00:00.000Z"
+        notes = "Certificat sanitaire valide pour mouvements"
+    }
+
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/documents" -Body $document `
+        -Description "Document: $($document.title)"
+}
+
+# =============================================================================
 # RESUME
 # =============================================================================
 Write-Host ""
@@ -373,16 +594,30 @@ Write-Host "  SEED TERMINE" -ForegroundColor Green
 Write-Host "============================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Donnees de test creees:" -ForegroundColor Cyan
-Write-Host "  - Country: 1" -ForegroundColor White
-Write-Host "  - Administration Route: 1" -ForegroundColor White
-Write-Host "  - Global Medical Product: 1" -ForegroundColor White
-Write-Host "  - Global Vaccine: 1" -ForegroundColor White
-Write-Host "  - National Campaign: 1" -ForegroundColor White
-Write-Host "  - Alert Template: 1" -ForegroundColor White
-Write-Host "  - Species: 1" -ForegroundColor White
-Write-Host "  - Breed: 1" -ForegroundColor White
-Write-Host "  - Farm: 1" -ForegroundColor White
-Write-Host "  - Veterinarian: 1" -ForegroundColor White
-Write-Host "  - Lot: 1" -ForegroundColor White
-Write-Host "  - Animal: 1" -ForegroundColor White
+Write-Host ""
+Write-Host "  Tables de reference:" -ForegroundColor Yellow
+Write-Host "    - Country: 1" -ForegroundColor White
+Write-Host "    - Administration Route: 1" -ForegroundColor White
+Write-Host "    - Global Medical Product: 1" -ForegroundColor White
+Write-Host "    - Global Vaccine: 1" -ForegroundColor White
+Write-Host "    - National Campaign: 1" -ForegroundColor White
+Write-Host "    - Alert Template: 1" -ForegroundColor White
+Write-Host "    - Species: 1" -ForegroundColor White
+Write-Host "    - Breed: 1" -ForegroundColor White
+Write-Host ""
+Write-Host "  Tables transactionnelles:" -ForegroundColor Yellow
+Write-Host "    - Farm: 1" -ForegroundColor White
+Write-Host "    - Veterinarian: 1" -ForegroundColor White
+Write-Host "    - Lot: 1" -ForegroundColor White
+Write-Host "    - Animal: 1" -ForegroundColor White
+Write-Host "    - Medical Product (farm): 1" -ForegroundColor White
+Write-Host "    - Vaccination: 1" -ForegroundColor White
+Write-Host "    - Treatment: 1" -ForegroundColor White
+Write-Host "    - Movement: 1" -ForegroundColor White
+Write-Host "    - Weight: 1" -ForegroundColor White
+Write-Host "    - Breeding: 1" -ForegroundColor White
+Write-Host "    - Personal Campaign: 1" -ForegroundColor White
+Write-Host "    - Document: 1" -ForegroundColor White
+Write-Host ""
+Write-Host "  TOTAL: 20 tables creees avec succes!" -ForegroundColor Green
 Write-Host ""
