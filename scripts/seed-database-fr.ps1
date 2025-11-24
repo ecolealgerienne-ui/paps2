@@ -218,20 +218,27 @@ Write-Host ""
 Write-Host "8. Breeds (Races)" -ForegroundColor Cyan
 
 $breedId = [guid]::NewGuid().ToString()
-$breeds = @(
-    @{
-        id = $breedId
-        code = "prim-holstein"
-        speciesId = "bovine"
-        nameFr = "Prim'Holstein"
-        nameEn = "Holstein"
-        nameAr = "Holstein"
-    }
-)
+$breed = @{
+    id = $breedId
+    code = "prim-holstein"
+    speciesId = "bovine"
+    nameFr = "Prim'Holstein"
+    nameEn = "Holstein"
+    nameAr = "Holstein"
+}
 
-foreach ($breed in $breeds) {
-    Invoke-CurlApi -Method POST -Endpoint "/api/v1/breeds" -Body $breed `
-        -Description "Race: $($breed.nameFr)"
+$breedResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/breeds" -Body $breed `
+    -Description "Race: $($breed.nameFr)"
+
+# Utiliser l'ID retourné par l'API si disponible
+if ($breedResponse) {
+    if ($breedResponse.id) {
+        $breedId = $breedResponse.id
+        Write-Host "    Breed ID captured: $breedId" -ForegroundColor Cyan
+    } elseif ($breedResponse.data -and $breedResponse.data.id) {
+        $breedId = $breedResponse.data.id
+        Write-Host "    Breed ID captured: $breedId" -ForegroundColor Cyan
+    }
 }
 
 # =============================================================================
@@ -314,7 +321,7 @@ if ($farmResponse) {
 # =============================================================================
 # 12. ANIMALS (1 animal de test)
 # =============================================================================
-if ($farmResponse) {
+if ($farmResponse -and $breedId) {
     Write-Host ""
     Write-Host "12. Animals (1 animal)" -ForegroundColor Cyan
 
@@ -332,8 +339,13 @@ if ($farmResponse) {
         notes = "Animal de test"
     }
 
+    Write-Host "    Using breedId: $breedId" -ForegroundColor Cyan
     $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/animals" -Body $animal `
         -Description "Animal: $($animal.visualId) (EID: $($animal.currentEid))"
+} elseif (-not $breedId) {
+    Write-Host ""
+    Write-Host "12. Animals (1 animal)" -ForegroundColor Cyan
+    Write-Host "  [SKIP] Animal creation skipped - breed not created" -ForegroundColor Yellow
 }
 
 # =============================================================================
