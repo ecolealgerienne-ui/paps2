@@ -65,11 +65,19 @@ Write-Host ""
 Write-Host "1. Countries (Pays)" -ForegroundColor Cyan
 
 $countries = @(
+<<<<<<< HEAD
     @{ code = "FR"; nameFr = "France"; nameEn = "France"; nameAr = "فرنسا" }
     @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain"; nameAr = "إسبانيا" }
     @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy"; nameAr = "إيطاليا" }
     @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany"; nameAr = "ألمانيا" }
     @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium"; nameAr = "بلجيكا" }
+=======
+    @{ code = "FR"; nameFr = "France"; nameEn = "France" }
+    @{ code = "ES"; nameFr = "Espagne"; nameEn = "Spain" }
+    @{ code = "IT"; nameFr = "Italie"; nameEn = "Italy" }
+    @{ code = "DE"; nameFr = "Allemagne"; nameEn = "Germany" }
+    @{ code = "BE"; nameFr = "Belgique"; nameEn = "Belgium" }
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
 )
 
 foreach ($country in $countries) {
@@ -84,11 +92,19 @@ Write-Host ""
 Write-Host "2. Administration Routes (Voies d'administration)" -ForegroundColor Cyan
 
 $routes = @(
+<<<<<<< HEAD
     @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular"; nameAr = "عضلي" }
     @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous"; nameAr = "تحت الجلد" }
     @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous"; nameAr = "وريدي" }
     @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral"; nameAr = "فموي" }
     @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical"; nameAr = "موضعي" }
+=======
+    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular" }
+    @{ code = "SC"; nameFr = "Sous-cutanee"; nameEn = "Subcutaneous" }
+    @{ code = "IV"; nameFr = "Intraveineuse"; nameEn = "Intravenous" }
+    @{ code = "PO"; nameFr = "Orale"; nameEn = "Oral" }
+    @{ code = "TOP"; nameFr = "Topique"; nameEn = "Topical" }
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
 )
 
 foreach ($route in $routes) {
@@ -107,7 +123,10 @@ $products = @(
         code = "IVERM-FR-001"
         nameFr = "Ivomec 1%"
         nameEn = "Ivomec 1%"
+<<<<<<< HEAD
         nameAr = "ايفومك"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         type = "antiparasitic"
         laboratoire = "Boehringer Ingelheim"
         principeActif = "Ivermectine"
@@ -116,7 +135,10 @@ $products = @(
         code = "PENI-FR-001"
         nameFr = "Pen & Strep"
         nameEn = "Pen & Strep"
+<<<<<<< HEAD
         nameAr = "بن ستريب"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         type = "antibiotic"
         laboratoire = "Virbac"
         principeActif = "Penicilline + Streptomycine"
@@ -125,7 +147,10 @@ $products = @(
         code = "ALAMYCINE-001"
         nameFr = "Alamycine LA"
         nameEn = "Alamycin LA"
+<<<<<<< HEAD
         nameAr = "الامايسين"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         type = "antibiotic"
         laboratoire = "Norbrook"
         principeActif = "Oxytetracycline"
@@ -134,7 +159,10 @@ $products = @(
         code = "METACAM-001"
         nameFr = "Metacam 20mg/ml"
         nameEn = "Metacam 20mg/ml"
+<<<<<<< HEAD
         nameAr = "ميتاكام"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         type = "anti_inflammatory"
         laboratoire = "Boehringer Ingelheim"
         principeActif = "Meloxicam"
@@ -157,7 +185,10 @@ $vaccines = @(
         code = "BVD-FR-001"
         nameFr = "Bovilis BVD"
         nameEn = "Bovilis BVD"
+<<<<<<< HEAD
         nameAr = "بوفيليس"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         targetDisease = "bvd"
         laboratoire = "MSD Sante Animale"
     }
@@ -165,7 +196,10 @@ $vaccines = @(
         code = "IBR-FR-001"
         nameFr = "Rispoval IBR Marker"
         nameEn = "Rispoval IBR Marker"
+<<<<<<< HEAD
         nameAr = "ريسبوفال"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         targetDisease = "ibr"
         laboratoire = "Zoetis"
     }
@@ -173,7 +207,10 @@ $vaccines = @(
         code = "ROTAVIRUS-001"
         nameFr = "Rotavec Corona"
         nameEn = "Rotavec Corona"
+<<<<<<< HEAD
         nameAr = "روتافيك"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         targetDisease = "rotavirus"
         laboratoire = "MSD Sante Animale"
     }
@@ -181,7 +218,10 @@ $vaccines = @(
         code = "CLOSTRI-001"
         nameFr = "Covexin 10"
         nameEn = "Covexin 10"
+<<<<<<< HEAD
         nameAr = "كوفيكسين"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         targetDisease = "enterotoxemia"
         laboratoire = "MSD Sante Animale"
     }
@@ -203,7 +243,10 @@ $campaigns = @(
         code = "bvd-fr-2025"
         nameFr = "Campagne BVD France 2025"
         nameEn = "BVD Campaign France 2025"
+<<<<<<< HEAD
         nameAr = "حملة BVD فرنسا 2025"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         description = "Vaccination obligatoire contre la BVD bovine"
         startDate = "2025-01-01T00:00:00.000Z"
         endDate = "2025-12-31T23:59:59.999Z"
@@ -213,7 +256,10 @@ $campaigns = @(
         code = "ibr-fr-2025"
         nameFr = "Campagne IBR France 2025"
         nameEn = "IBR Campaign France 2025"
+<<<<<<< HEAD
         nameAr = "حملة IBR فرنسا 2025"
+=======
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         description = "Programme d'eradication IBR"
         startDate = "2025-01-01T00:00:00.000Z"
         endDate = "2025-12-31T23:59:59.999Z"
@@ -237,10 +283,16 @@ $templates = @(
         code = "vacc-reminder"
         nameFr = "Rappel de vaccination"
         nameEn = "Vaccination reminder"
+<<<<<<< HEAD
         nameAr = "تذكير بالتطعيم"
         descriptionFr = "Rappel automatique pour les vaccinations a venir"
         descriptionEn = "Automatic reminder for upcoming vaccinations"
         descriptionAr = "تذكير تلقائي للتطعيمات القادمة"
+=======
+        descriptionFr = "Rappel automatique pour les vaccinations a venir"
+        descriptionEn = "Automatic reminder for upcoming vaccinations"
+        
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         severity = "info"
         isActive = $true
     }
@@ -248,10 +300,16 @@ $templates = @(
         code = "treatment-reminder"
         nameFr = "Rappel de traitement"
         nameEn = "Treatment reminder"
+<<<<<<< HEAD
         nameAr = "تذكير بالعلاج"
         descriptionFr = "Rappel pour les traitements en cours"
         descriptionEn = "Reminder for ongoing treatments"
         descriptionAr = "تذكير للعلاجات الجارية"
+=======
+        descriptionFr = "Rappel pour les traitements en cours"
+        descriptionEn = "Reminder for ongoing treatments"
+        
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         severity = "info"
         isActive = $true
     }
@@ -259,10 +317,16 @@ $templates = @(
         code = "disease-alert"
         nameFr = "Alerte maladie"
         nameEn = "Disease alert"
+<<<<<<< HEAD
         nameAr = "تنبيه المرض"
         descriptionFr = "Alerte en cas de detection de maladie"
         descriptionEn = "Alert when disease is detected"
         descriptionAr = "تنبيه عند اكتشاف المرض"
+=======
+        descriptionFr = "Alerte en cas de detection de maladie"
+        descriptionEn = "Alert when disease is detected"
+        
+>>>>>>> ced6d289d3dcf00dc2a6711f5a4e0b50d0705036
         severity = "high"
         isActive = $true
     }
