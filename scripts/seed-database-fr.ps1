@@ -217,8 +217,11 @@ foreach ($specie in $species) {
 Write-Host ""
 Write-Host "8. Breeds (Races)" -ForegroundColor Cyan
 
-# NE PAS envoyer d'ID - le serveur génère son propre UUID
+# Le DTO exige un ID (validation) mais le service l'ignore et génère le sien
+# On envoie un ID temporaire pour passer la validation
+$tempBreedId = [guid]::NewGuid().ToString()
 $breed = @{
+    id = $tempBreedId
     code = "prim-holstein"
     speciesId = "bovine"
     nameFr = "Prim'Holstein"
