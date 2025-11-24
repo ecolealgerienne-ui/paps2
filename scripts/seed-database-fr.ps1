@@ -47,7 +47,7 @@ function Invoke-CurlApi {
         }
 
         Write-Host " OK" -ForegroundColor Green
-        Start-Sleep -Milliseconds 50
+        Start-Sleep -Milliseconds 400
         return $response
     } catch {
         Write-Host " ERROR" -ForegroundColor Red
