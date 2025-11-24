@@ -116,7 +116,7 @@ ALERTES s'affichent selon ses préférences (on/off)
 │        INFOS DE BASE                   │
 ├────────────────────────────────────────┤
 │                                        │
-│  Devise:           [$ ▼]              │
+│  Devise:           [€ ▼]              │
 │  Langue:           [Français ▼]       │
 │  Format date:      [DD/MM/YYYY ▼]    │
 │  Unités:           [Kilogrammes ▼]    │
@@ -153,13 +153,13 @@ ALERTES s'affichent selon ses préférences (on/off)
 │  └──────────────────────────────────┘ │
 │                                        │
 │  RÉSULTATS FILTRÉS:                    │
-│  ☐ Dr. Hamza Ahmed - Alger            │
+│  ☐ Dr. Pierre Dubois - Île-de-France │
 │    Spécialité: Bovins                 │
 │                                        │
-│  ☑ Dr. Fatima Belmkaddam - Constantine│
+│  ☑ Dr. Marie Leclerc - PACA           │
 │    Spécialité: Ovins & Caprins        │
 │                                        │
-│  ☐ Dr. Mohamed Saidi - Oran           │
+│  ☐ Dr. Gérard Martin - Occitanie      │
 │    Spécialité: Volaille               │
 │                                        │
 │              [Sauvegarder]             │
@@ -167,7 +167,7 @@ ALERTES s'affichent selon ses préférences (on/off)
 ```
 
 **Filtres disponibles:**
-- **Région/Wilaya** : Alger, Constantine, Oran, etc.
+- **Région** : Île-de-France, PACA, Occitanie, Normandie, Nouvelle-Aquitaine, etc.
 - **Spécialité** : Bovins, Ovins, Caprins, Volaille, Équins, Apiculture
 - **Recherche texte** : par nom du vétérinaire
 
@@ -207,7 +207,7 @@ ALERTES s'affichent selon ses préférences (on/off)
 
 **Filtres disponibles:**
 - **Espèce** : Bovins, Ovins, Caprins, Volaille, Équins, Apiculture, Autres
-- **Région/Wilaya** : Toutes, Alger, Constantine, etc.
+- **Région** : Toutes, Île-de-France, PACA, Occitanie, Normandie, etc.
 - **Recherche texte** : par nom de race
 
 **Comportement:**
@@ -257,7 +257,7 @@ ALERTES s'affichent selon ses préférences (on/off)
 **Filtres disponibles:**
 - **Type** : Vaccin, Antiparasitaire, Antibiotique, Autres
 - **Pour espèce** : Bovins, Ovins, Caprins, Volaille, etc.
-- **Région** : Toutes, Alger, Constantine, etc.
+- **Région** : Toutes, Île-de-France, PACA, Occitanie, Normandie, etc.
 - **Recherche texte** : par nom de produit
 
 **Validation intégrée:**
@@ -376,7 +376,7 @@ AVEC paramètres configurés (Écran 4):
 {
   "fermier_id": 123,
   "preferences": {
-    "devise": "DZD",
+    "devise": "EUR",
     "langue": "fr",
     "format_date": "DD/MM/YYYY",
     "unite_poids": "kg",
@@ -452,41 +452,41 @@ Les alertes activées s'affichent :
 
 ### Scénario 1: Fermier novice (Ferme mixte)
 
-**Contexte:** Mohammed a une petite ferme avec bovins, ovins et volaille. C'est sa première utilisation.
+**Contexte:** Pierre a une petite ferme en Nouvelle-Aquitaine avec bovins, ovins et volaille. C'est sa première utilisation.
 
 **Flux:**
-1. Mohammed se connecte → reçoit message de bienvenue
+1. Pierre se connecte → reçoit message de bienvenue
 2. Il accède à "Paramètres" → voit les 5 écrans
-3. **Écran 1** : Configure devise (DZD), langue (Français), format date (DD/MM/YYYY)
-4. **Écran 2** : Cherche vétérinaires → filtre par région (Constantine) → sélectionne 2 vétérinaires
+3. **Écran 1** : Configure devise (EUR), langue (Français), format date (DD/MM/YYYY)
+4. **Écran 2** : Cherche vétérinaires → filtre par région (Nouvelle-Aquitaine) → sélectionne 2 vétérinaires
 5. **Écran 3** : Sélectionne espèces (Bovins, Ovins) → sélectionne races (Holstein, Montbéliarde, Mérinos)
 6. **Écran 4** : Filtre vaccins pour Bovins et Ovins → sélectionne 3 vaccins courants
 7. **Écran 5** : Active alertes pertinentes (pas pesé 30j, vaccination expirée, visite vétérinaire)
 8. Sauvegarde → retour à l'accueil
 
-**Résultat:** Mohammed voit uniquement ses données. Quand il ajoute un animal, le dropdown espèce = Bovins, Ovins. Quand il vaccine, le dropdown vaccin = ses 3 vaccins.
+**Résultat:** Pierre voit uniquement ses données. Quand il ajoute un animal, le dropdown espèce = Bovins, Ovins. Quand il vaccine, le dropdown vaccin = ses 3 vaccins.
 
 ---
 
 ### Scénario 2: Fermier spécialisé (Éleveur de volaille)
 
-**Contexte:** Aicha élève uniquement de la volaille (poules, dindes). Elle veut une config simple et pertinente.
+**Contexte:** Sandrine élève uniquement de la volaille (poules, dindes) en Normandie. Elle veut une config simple et pertinente.
 
 **Flux:**
 1. Accède à Paramètres
-2. **Écran 1** : Configure de base (devise, langue)
+2. **Écran 1** : Configure de base (devise EUR, langue)
 3. **Écran 2** : Sélectionne 1 vétérinaire (spécialisé volaille)
 4. **Écran 3** : Filtre par espèce "Volaille" → sélectionne races (Poule pondeuse, Dinde blanche)
 5. **Écran 4** : Filtre pour "Volaille" → sélectionne 4-5 vaccins volaille
 6. **Écran 5** : Active alertes : vaccination expirée, poids anormal, pas pesé 30j
 
-**Résultat:** Interface complètement allégée. Aicha ne voit que ce qui concerne la volaille.
+**Résultat:** Interface complètement allégée. Sandrine ne voit que ce qui concerne la volaille.
 
 ---
 
 ### Scénario 3: Ajout d'une nouvelle race après le setup
 
-**Contexte:** Hamza a configuré ses paramètres il y a 2 mois. Maintenant il veut ajouter une race bovine supplémentaire.
+**Contexte:** Jean a configuré ses paramètres il y a 2 mois. Maintenant il veut ajouter une race bovine supplémentaire à son élevage en PACA.
 
 **Flux:**
 1. Retourne en Paramètres → Écran 3
@@ -500,20 +500,20 @@ Les alertes activées s'affichent :
 
 ### Scénario 4: Validation d'incohérence
 
-**Contexte:** Karim sélectionne un vaccin pour "Bovins" mais n'a pas sélectionné de race bovine.
+**Contexte:** Marc sélectionne un vaccin pour "Bovins" mais n'a pas sélectionné de race bovine.
 
 **Flux:**
-1. En Écran 4, sélectionne "Vaccin FMD (pour Bovins)"
+1. En Écran 4, sélectionne "Vaccin Rhinotrachéite Infectieuse Bovine (pour Bovins)"
 2. Sauvegarde
 3. **Système affiche avertissement** : "Vous avez sélectionné un vaccin pour Bovins, mais aucune race bovine en Écran 3. Vérifiez vos sélections."
-4. Karim retourne en Écran 3 → sélectionne une race bovine
+4. Marc retourne en Écran 3 → sélectionne une race bovine
 5. Validation résolue
 
 ---
 
 ### Scénario 5: Modification après utilisation
 
-**Contexte:** Zahira a utilisé l'app pendant 3 mois. Elle veut désactiver les alertes de "poids anormal" car elle trouve ça trop bruyant.
+**Contexte:** Sophie a utilisé l'app pendant 3 mois en Île-de-France. Elle veut désactiver les alertes de "poids anormal" car elle trouve ça trop bruyant.
 
 **Flux:**
 1. Paramètres → Écran 5
@@ -535,35 +535,6 @@ Les alertes activées s'affichent :
 | **Optionalité** | Fermier peut configurer progressivement |
 | **Validation** | Système prévient les incohérences |
 | **Scalabilité** | Admin ajoute des données → tous les fermiers en bénéficient |
-
----
-
-## Points d'intégration technique
-
-### APIs requises
-
-1. **GET /api/preferences/:farmerId**
-   - Retourne les préférences actuelles du fermier
-
-2. **GET /api/catalog/:country**
-   - Retourne : vétérinaires, espèces, races, produits, vaccins, campagnes
-
-3. **GET /api/catalog/filtered**
-   - Query params : type, espece, region, search
-   - Retourne données filtrées
-
-4. **POST/PUT /api/preferences/:farmerId**
-   - Sauvegarde les sélections du fermier
-
-5. **GET /api/alerts/templates**
-   - Retourne les modèles d'alertes configurés par l'admin
-
-6. **GET /api/alerts/active/:farmerId**
-   - Retourne les alertes actives pour le fermier
-
-### Stockage des sélections
-
-Les sélections du fermier sont stockées comme des **listes d'IDs** référençant le catalogue maître. Pas de duplication de données.
 
 ---
 
