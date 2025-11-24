@@ -43,6 +43,7 @@ async function main() {
     data: [
       {
         id: 'ouled-djellal',
+        code: 'ouled-djellal',
         speciesId: 'sheep',
         nameFr: 'Ouled Djellal',
         nameEn: 'Ouled Djellal',
@@ -51,6 +52,7 @@ async function main() {
       },
       {
         id: 'rembi',
+        code: 'rembi',
         speciesId: 'sheep',
         nameFr: 'Rembi',
         nameEn: 'Rembi',
@@ -59,6 +61,7 @@ async function main() {
       },
       {
         id: 'hamra',
+        code: 'hamra',
         speciesId: 'sheep',
         nameFr: 'Hamra',
         nameEn: 'Hamra',
@@ -67,6 +70,7 @@ async function main() {
       },
       {
         id: 'dmen',
+        code: 'dmen',
         speciesId: 'sheep',
         nameFr: "D'men",
         nameEn: "D'men",
@@ -75,6 +79,7 @@ async function main() {
       },
       {
         id: 'taadmit',
+        code: 'taadmit',
         speciesId: 'sheep',
         nameFr: 'Taadmit',
         nameEn: 'Taadmit',
@@ -83,6 +88,7 @@ async function main() {
       },
       {
         id: 'barbarine',
+        code: 'barbarine',
         speciesId: 'sheep',
         nameFr: 'Barbarine',
         nameEn: 'Barbarine',
@@ -91,6 +97,7 @@ async function main() {
       },
       {
         id: 'sidahou',
+        code: 'sidahou',
         speciesId: 'sheep',
         nameFr: 'Sidahou',
         nameEn: 'Sidahou',
@@ -107,6 +114,7 @@ async function main() {
     data: [
       {
         id: 'guelma',
+        code: 'guelma',
         speciesId: 'cattle',
         nameFr: 'Guelmoise',
         nameEn: 'Guelma',
@@ -115,6 +123,7 @@ async function main() {
       },
       {
         id: 'cheurfa',
+        code: 'cheurfa',
         speciesId: 'cattle',
         nameFr: 'Cheurfa',
         nameEn: 'Cheurfa',
@@ -123,6 +132,7 @@ async function main() {
       },
       {
         id: 'setif',
+        code: 'setif',
         speciesId: 'cattle',
         nameFr: 'Sétifienne',
         nameEn: 'Setif',
@@ -139,6 +149,7 @@ async function main() {
     data: [
       {
         id: 'arbia',
+        code: 'arbia',
         speciesId: 'goat',
         nameFr: 'Arbia',
         nameEn: 'Arbia',
@@ -147,6 +158,7 @@ async function main() {
       },
       {
         id: 'kabyle',
+        code: 'kabyle',
         speciesId: 'goat',
         nameFr: 'Kabyle',
         nameEn: 'Kabyle',
@@ -155,6 +167,7 @@ async function main() {
       },
       {
         id: 'makatia',
+        code: 'makatia',
         speciesId: 'goat',
         nameFr: "M'katia",
         nameEn: 'Makatia',
