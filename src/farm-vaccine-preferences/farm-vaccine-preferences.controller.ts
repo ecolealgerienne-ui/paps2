@@ -10,10 +10,11 @@ export class FarmVaccinePreferencesController {
 
   @Post()
   @ApiOperation({ summary: 'Create farm vaccine preference (XOR: global OR custom)' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
   @ApiResponse({ status: 201, description: 'Preference created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request - XOR constraint violation' })
   create(@Param('farmId') farmId: string, @Body() dto: CreateFarmVaccinePreferenceDto) {
-    return this.farmVaccinePreferencesService.create(dto);
+    return this.farmVaccinePreferencesService.create({ ...dto, farmId });
   }
 
   @Get()
