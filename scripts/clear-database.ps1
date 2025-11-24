@@ -160,6 +160,7 @@ END `$`$;
 
     # Définir le mot de passe PostgreSQL
     $env:PGPASSWORD = $dbPassword
+    $env:DATABASE_URL = $databaseUrl
 
     # Exécuter le script SQL avec psql
     $psqlPath = Get-Command psql -ErrorAction SilentlyContinue
@@ -168,7 +169,7 @@ END `$`$;
         Write-Host "[WARN] psql non trouve, tentative avec npx prisma db execute..." -ForegroundColor Yellow
 
         # Alternative: utiliser Prisma CLI
-        npx prisma db execute --file $sqlFile --schema prisma/schema.prisma
+        npx prisma db execute --file $sqlFile --schema prisma\schema.prisma
     } else {
         # Utiliser psql
         & psql -h $dbHost -p $dbPort -U $dbUser -d $dbName -f $sqlFile -q
