@@ -16,7 +16,7 @@ Write-Host "  SEED DATABASE FR - AniTra Backend API" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Helper pour appeler l'API avec curl
+# Helper pour appeler l'API avec Invoke-RestMethod
 function Invoke-CurlApi {
     param(
         [string]$Method,
@@ -31,33 +31,25 @@ function Invoke-CurlApi {
         Write-Host "  [SEED] $Description..." -ForegroundColor Yellow -NoNewline
     }
 
+    $headers = @{
+        "Content-Type" = "application/json"
+        "Authorization" = "Bearer $Token"
+        "Connection" = "close"
+    }
+
     try {
         if ($Body) {
-            $jsonBody = $Body | ConvertTo-Json -Depth 10 -Compress
-            $response = curl.exe -s -S -X $Method $uri `
-                -H "Content-Type: application/json" `
-                -H "Authorization: Bearer $Token" `
-                -d $jsonBody 2>$null
+            $jsonBody = $Body | ConvertTo-Json -Depth 10
+            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -Body $jsonBody `
+                -DisableKeepAlive -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop
         } else {
-            $response = curl.exe -s -S -X $Method $uri `
-                -H "Content-Type: application/json" `
-                -H "Authorization: Bearer $Token" 2>$null
+            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers `
+                -DisableKeepAlive -UseBasicParsing -TimeoutSec 30 -ErrorAction Stop
         }
 
-        if ($LASTEXITCODE -eq 0 -and $response) {
-            Write-Host " OK" -ForegroundColor Green
-            # Join all lines into single string if it's an array
-            if ($response -is [Array]) {
-                $responseStr = $response -join ""
-            } else {
-                $responseStr = $response
-            }
-            $result = $responseStr | ConvertFrom-Json -ErrorAction SilentlyContinue
-            return $result
-        } else {
-            Write-Host " SKIP" -ForegroundColor Gray
-            return $null
-        }
+        Write-Host " OK" -ForegroundColor Green
+        Start-Sleep -Milliseconds 50
+        return $response
     } catch {
         Write-Host " SKIP" -ForegroundColor Gray
         return $null
