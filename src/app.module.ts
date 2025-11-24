@@ -36,6 +36,7 @@ import { VeterinariansModule } from './veterinarians/veterinarians.module';
 import { WeightsModule } from './weights/weights.module';
 import { VaccineCountriesModule } from './vaccine-countries/vaccine-countries.module';
 import { FarmVaccinePreferencesModule } from './farm-vaccine-preferences/farm-vaccine-preferences.module';
+import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-preferences/farm-national-campaign-preferences.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { FarmVaccinePreferencesModule } from './farm-vaccine-preferences/farm-va
     SyncModule,
     VaccineCountriesModule,
     FarmVaccinePreferencesModule,
+    FarmNationalCampaignPreferencesModule,
   ],
   controllers: [AppController],
   providers: [
