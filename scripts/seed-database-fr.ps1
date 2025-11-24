@@ -191,10 +191,54 @@ foreach ($template in $templates) {
 }
 
 # =============================================================================
-# 7. FARM (Ferme francaise)
+# 7. SPECIES (Especes)
 # =============================================================================
 Write-Host ""
-Write-Host "7. Farm (Ferme)" -ForegroundColor Cyan
+Write-Host "7. Species (Especes)" -ForegroundColor Cyan
+
+$species = @(
+    @{
+        id = "bovine"
+        nameFr = "Bovin"
+        nameEn = "Bovine"
+        nameAr = "Bovine"
+        icon = "cow"
+    }
+)
+
+foreach ($specie in $species) {
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/species" -Body $specie `
+        -Description "Espece: $($specie.nameFr)"
+}
+
+# =============================================================================
+# 8. BREEDS (Races)
+# =============================================================================
+Write-Host ""
+Write-Host "8. Breeds (Races)" -ForegroundColor Cyan
+
+$breedId = [guid]::NewGuid().ToString()
+$breeds = @(
+    @{
+        id = $breedId
+        code = "prim-holstein"
+        speciesId = "bovine"
+        nameFr = "Prim'Holstein"
+        nameEn = "Holstein"
+        nameAr = "Holstein"
+    }
+)
+
+foreach ($breed in $breeds) {
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/breeds" -Body $breed `
+        -Description "Race: $($breed.nameFr)"
+}
+
+# =============================================================================
+# 9. FARM (Ferme francaise)
+# =============================================================================
+Write-Host ""
+Write-Host "9. Farm (Ferme)" -ForegroundColor Cyan
 
 $farmId = "550e8400-e29b-41d4-a716-446655440000"
 $farm = @{
@@ -214,11 +258,11 @@ $farmResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms" -Body $farm `
     -Description "Ferme: $($farm.name)"
 
 # =============================================================================
-# 8. VETERINARIANS
+# 10. VETERINARIANS
 # =============================================================================
 if ($farmResponse) {
     Write-Host ""
-    Write-Host "8. Veterinarians (Veterinaires)" -ForegroundColor Cyan
+    Write-Host "10. Veterinarians (Veterinaires)" -ForegroundColor Cyan
 
     $vets = @(
         @{
@@ -243,11 +287,11 @@ if ($farmResponse) {
 }
 
 # =============================================================================
-# 9. LOTS (Batches/Groups)
+# 11. LOTS (Batches/Groups)
 # =============================================================================
 if ($farmResponse) {
     Write-Host ""
-    Write-Host "9. Lots (Batches)" -ForegroundColor Cyan
+    Write-Host "11. Lots (Batches)" -ForegroundColor Cyan
 
     $lots = @(
         @{
@@ -268,11 +312,11 @@ if ($farmResponse) {
 }
 
 # =============================================================================
-# 10. ANIMALS (1 animal de test)
+# 12. ANIMALS (1 animal de test)
 # =============================================================================
 if ($farmResponse) {
     Write-Host ""
-    Write-Host "10. Animals (1 animal)" -ForegroundColor Cyan
+    Write-Host "12. Animals (1 animal)" -ForegroundColor Cyan
 
     $animalId = [guid]::NewGuid().ToString()
     $animal = @{
@@ -282,8 +326,8 @@ if ($farmResponse) {
         currentEid = "250269000000001"
         officialNumber = "FR-TEST-001"
         visualId = "Belle-001"
-        speciesId = "bovin"
-        breedId = "prim-holstein"
+        speciesId = "bovine"
+        breedId = $breedId
         status = "alive"
         notes = "Animal de test"
     }
@@ -307,6 +351,8 @@ Write-Host "  - Global Medical Product: 1" -ForegroundColor White
 Write-Host "  - Global Vaccine: 1" -ForegroundColor White
 Write-Host "  - National Campaign: 1" -ForegroundColor White
 Write-Host "  - Alert Template: 1" -ForegroundColor White
+Write-Host "  - Species: 1" -ForegroundColor White
+Write-Host "  - Breed: 1" -ForegroundColor White
 Write-Host "  - Farm: 1" -ForegroundColor White
 Write-Host "  - Veterinarian: 1" -ForegroundColor White
 Write-Host "  - Lot: 1" -ForegroundColor White
