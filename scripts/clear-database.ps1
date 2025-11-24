@@ -24,7 +24,7 @@ Write-Host ""
 
 try {
     # Charger les variables d'environnement depuis .env
-    $envFile = Join-Path $PSScriptRoot ".." ".env"
+    $envFile = Join-Path $PSScriptRoot "..\.env"
 
     if (Test-Path $envFile) {
         Get-Content $envFile | ForEach-Object {
