@@ -232,11 +232,13 @@ $breed = @{
 $breedResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/breeds" -Body $breed `
     -Description "Race: $($breed.nameFr)"
 
-# Capturer l'ID généré par le serveur
+# Capturer l'ID généré par le serveur (structure imbriquée: data.data.id)
 $breedId = $null
 if ($breedResponse) {
     if ($breedResponse.id) {
         $breedId = $breedResponse.id
+    } elseif ($breedResponse.data -and $breedResponse.data.data -and $breedResponse.data.data.id) {
+        $breedId = $breedResponse.data.data.id
     } elseif ($breedResponse.data -and $breedResponse.data.id) {
         $breedId = $breedResponse.data.id
     }
@@ -334,6 +336,10 @@ if ($farmResponse) {
 if ($farmResponse -and $breedId) {
     Write-Host ""
     Write-Host "12. Animals (1 animal)" -ForegroundColor Cyan
+
+    # Attendre 1 seconde pour s'assurer que le breed est bien committé en DB
+    Write-Host "    Waiting 1 second before creating animal..." -ForegroundColor Gray
+    Start-Sleep -Seconds 1
 
     $animalId = [guid]::NewGuid().ToString()
     $animal = @{
