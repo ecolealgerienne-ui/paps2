@@ -117,7 +117,7 @@ model Country {
   // Relations (BLOC 3 - Phases 16-19)
   breedCountries    BreedCountry[]       // PHASE_16
   // productCountries  ProductCountry[]   // PHASE_17
-  // vaccineCountries  VaccineCountry[]   // PHASE_18
+  vaccineCountries  VaccineCountry[]     // PHASE_18
   campaignCountries CampaignCountry[]    // PHASE_19
 
   @@index([isActive])
@@ -211,13 +211,32 @@ model VaccineGlobal {
   updatedAt         DateTime             @updatedAt @map("updated_at")
 
   // Relations (seront ajoutées dans BLOC 3 & BLOC 4)
-  // vaccineCountries  VaccineCountry[]        // PHASE_18
-  // farmPreferences   FarmVaccinePreference[] // PHASE_22
+  vaccineCountries  VaccineCountry[]        // PHASE_18
+  farmPreferences   FarmVaccinePreference[] // PHASE_22
 
   @@index([code])
   @@index([targetDisease])
   @@index([deletedAt])
   @@map("vaccines_global")
+}
+
+// Table de liaison - Vaccins par pays (PHASE_18 - BLOC 3)
+model VaccineCountry {
+  id          String   @id @default(uuid())
+  vaccineId   String   @map("vaccine_id")
+  countryCode String   @map("country_code")
+  numeroAMM   String?  @map("numero_amm")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  vaccine VaccineGlobal @relation(fields: [vaccineId], references: [id], onDelete: Cascade)
+  country Country       @relation(fields: [countryCode], references: [code], onDelete: Cascade)
+
+  @@unique([vaccineId, countryCode])
+  @@index([vaccineId])
+  @@index([countryCode])
+  @@map("vaccine_countries")
 }
 
 // Vétérinaires (multi-tenant)
@@ -342,7 +361,7 @@ model CustomVaccine {
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
   farm              Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  // farmPreferences   FarmVaccinePreference[]  // PHASE_22
+  farmPreferences   FarmVaccinePreference[]  // PHASE_22
 
   @@index([farmId])
   @@index([deletedAt])
@@ -591,7 +610,8 @@ model Farm {
   customVaccines CustomVaccine[]
   preferences FarmPreferences?
   alertConfigurations AlertConfiguration[]
-  productPreferences FarmProductPreference[]
+  productPreferences FarmProductPreference[]  // PHASE_21
+  vaccinePreferences FarmVaccinePreference[]  // PHASE_22
 
   // Indexes
   @@index([ownerId])
@@ -1053,6 +1073,32 @@ model FarmProductPreference {
   @@index([customProductId])
   @@map("farm_product_preferences")
 }
+
+// Préférences vaccins de la ferme (PHASE_22 - BLOC 4)
+model FarmVaccinePreference {
+  id              String   @id @default(uuid())
+  farmId          String   @map("farm_id")
+
+  // XOR : global OU custom (jamais les deux)
+  globalVaccineId String?  @map("global_vaccine_id")
+  customVaccineId String?  @map("custom_vaccine_id")
+
+  displayOrder    Int      @default(0) @map("display_order")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  farm          Farm           @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  globalVaccine VaccineGlobal? @relation(fields: [globalVaccineId], references: [id], onDelete: Cascade)
+  customVaccine CustomVaccine? @relation(fields: [customVaccineId], references: [id], onDelete: Cascade)
+
+  @@index([farmId])
+  @@index([globalVaccineId])
+  @@index([customVaccineId])
+  @@map("farm_vaccine_preferences")
+}
+
+
 
 // ============================================================
 // SYNCHRONISATION
