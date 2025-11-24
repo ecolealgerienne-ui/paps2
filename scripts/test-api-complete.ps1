@@ -68,6 +68,7 @@ function Invoke-Api {
     $headers = @{
         "Content-Type" = "application/json"
         "Authorization" = "Bearer $Token"
+        "Connection" = "close"
     }
 
     $uri = "$BaseUrl$Endpoint"
@@ -75,9 +76,9 @@ function Invoke-Api {
     try {
         if ($Body) {
             $jsonBody = $Body | ConvertTo-Json -Depth 10
-            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -Body $jsonBody -DisableKeepAlive -UseBasicParsing
+            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -Body $jsonBody -DisableKeepAlive -UseBasicParsing -TimeoutSec 30
         } else {
-            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -DisableKeepAlive -UseBasicParsing
+            $response = Invoke-RestMethod -Uri $uri -Method $Method -Headers $headers -DisableKeepAlive -UseBasicParsing -TimeoutSec 30
         }
 
         # Rate limiting: wait 400ms between requests (2.5 req/sec to avoid throttling)
