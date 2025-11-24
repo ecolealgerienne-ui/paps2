@@ -217,9 +217,8 @@ foreach ($specie in $species) {
 Write-Host ""
 Write-Host "8. Breeds (Races)" -ForegroundColor Cyan
 
-$breedId = [guid]::NewGuid().ToString()
+# NE PAS envoyer d'ID - le serveur génère son propre UUID
 $breed = @{
-    id = $breedId
     code = "prim-holstein"
     speciesId = "bovine"
     nameFr = "Prim'Holstein"
@@ -230,15 +229,23 @@ $breed = @{
 $breedResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/breeds" -Body $breed `
     -Description "Race: $($breed.nameFr)"
 
-# Utiliser l'ID retourné par l'API si disponible
+# Capturer l'ID généré par le serveur
+$breedId = $null
 if ($breedResponse) {
     if ($breedResponse.id) {
         $breedId = $breedResponse.id
-        Write-Host "    Breed ID captured: $breedId" -ForegroundColor Cyan
     } elseif ($breedResponse.data -and $breedResponse.data.id) {
         $breedId = $breedResponse.data.id
-        Write-Host "    Breed ID captured: $breedId" -ForegroundColor Cyan
     }
+
+    if ($breedId) {
+        Write-Host "    Breed ID from server: $breedId" -ForegroundColor Green
+    } else {
+        Write-Host "    ERROR: Breed created but ID not found in response!" -ForegroundColor Red
+        Write-Host "    Response: $($breedResponse | ConvertTo-Json -Compress)" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "    ERROR: Breed creation failed - no response!" -ForegroundColor Red
 }
 
 # =============================================================================
