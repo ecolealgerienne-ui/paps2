@@ -49,6 +49,18 @@ export class SyncService {
     };
   }
 
+  /**
+   * Check if error is a conflict error
+   */
+  private isConflictError(error: any): boolean {
+    return (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === ERROR_CODES.VERSION_CONFLICT
+    );
+  }
+
   async pushChanges(dto: SyncPushDto): Promise<SyncPushResponseDto> {
     const results: SyncItemResultDto[] = [];
     const startTime = Date.now();
@@ -78,9 +90,7 @@ export class SyncService {
     const summary = {
       total: results.length,
       synced: results.filter((r) => r.success && !r.error).length,
-      conflicts: results.filter(
-        (r) => r.error && typeof r.error === 'object' && r.error.code === ERROR_CODES.VERSION_CONFLICT,
-      ).length,
+      conflicts: results.filter((r) => this.isConflictError(r.error)).length,
       failed: results.filter((r) => !r.success).length,
     };
 

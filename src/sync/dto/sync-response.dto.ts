@@ -10,8 +10,22 @@ export class SyncItemResultDto {
   @ApiProperty({ description: 'Server version after sync', required: false })
   serverVersion?: number;
 
-  @ApiProperty({ description: 'Error message if failed', required: false })
-  error?: string | null;
+  @ApiProperty({
+    description: 'Error message or structured error object if failed',
+    required: false,
+    oneOf: [
+      { type: 'string' },
+      {
+        type: 'object',
+        properties: {
+          code: { type: 'string' },
+          message: { type: 'string' },
+          context: { type: 'object' },
+        },
+      },
+    ],
+  })
+  error?: string | { code: string; message: string; context?: Record<string, any> } | null;
 
   // Internal fields used during processing (not sent to client)
   _internalStatus?: 'synced' | 'conflict' | 'failed';
