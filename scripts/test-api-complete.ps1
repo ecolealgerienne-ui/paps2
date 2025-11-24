@@ -264,8 +264,8 @@ if ($name) {
 # =============================================================================
 Write-Header "Global Medical Products API - 5 endpoints (FULL CRUD)"
 
-Write-Test "POST /api/v1/global-medical-products - Create test product"
-$testProductResponse = Invoke-Api -Method POST -Endpoint "/api/v1/global-medical-products" -Body @{
+Write-Test "POST /global-medical-products - Create test product"
+$testProductResponse = Invoke-Api -Method POST -Endpoint "/global-medical-products" -Body @{
     code = "TEST-PROD-001"
     nameFr = "Produit Test"
     nameEn = "Test Product"
@@ -277,8 +277,8 @@ $testProductResponse = Invoke-Api -Method POST -Endpoint "/api/v1/global-medical
 $testGlobalProductId = Get-ResponseData $testProductResponse "id"
 Write-Success "Created: $testGlobalProductId"
 
-Write-Test "GET /api/v1/global-medical-products - Get all"
-$response = Invoke-Api -Method GET -Endpoint "/api/v1/global-medical-products"
+Write-Test "GET /global-medical-products - Get all"
+$response = Invoke-Api -Method GET -Endpoint "/global-medical-products"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count global medical products"
 
@@ -291,8 +291,8 @@ if ($response.data -and $response.data.Count -gt 0) {
 }
 
 if ($testGlobalProductId) {
-    Write-Test "GET /api/v1/global-medical-products/$testGlobalProductId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/api/v1/global-medical-products/$testGlobalProductId"
+    Write-Test "GET /global-medical-products/$testGlobalProductId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/global-medical-products/$testGlobalProductId"
     $name = Get-ResponseData $response "nameFr"
     if ($name) {
         Write-Success "Retrieved: $name"
@@ -300,16 +300,16 @@ if ($testGlobalProductId) {
         Write-Success "Retrieved product"
     }
 
-    Write-Test "PATCH /api/v1/global-medical-products/$testGlobalProductId - Update"
-    $response = Invoke-Api -Method PATCH -Endpoint "/api/v1/global-medical-products/$testGlobalProductId" -Body @{
+    Write-Test "PATCH /global-medical-products/$testGlobalProductId - Update"
+    $response = Invoke-Api -Method PATCH -Endpoint "/global-medical-products/$testGlobalProductId" -Body @{
         nameFr = "Produit Test Updated"
     }
     if (-not (Test-ApiError $response)) {
         Write-Success "Updated product name"
     }
 
-    Write-Test "DELETE /api/v1/global-medical-products/$testGlobalProductId - Delete"
-    $response = Invoke-Api -Method DELETE -Endpoint "/api/v1/global-medical-products/$testGlobalProductId"
+    Write-Test "DELETE /global-medical-products/$testGlobalProductId - Delete"
+    $response = Invoke-Api -Method DELETE -Endpoint "/global-medical-products/$testGlobalProductId"
     if (-not (Test-ApiError $response)) {
         Write-Success "Deleted test product"
     }
@@ -320,8 +320,8 @@ if ($testGlobalProductId) {
 # =============================================================================
 Write-Header "Vaccines Global API - 5 endpoints (FULL CRUD)"
 
-Write-Test "POST /api/v1/vaccines-global - Create test vaccine"
-$testVaccineResponse = Invoke-Api -Method POST -Endpoint "/api/v1/vaccines-global" -Body @{
+Write-Test "POST /vaccines-global - Create test vaccine"
+$testVaccineResponse = Invoke-Api -Method POST -Endpoint "/vaccines-global" -Body @{
     code = "TEST-VAC-001"
     nameFr = "Vaccin Test"
     nameEn = "Test Vaccine"
@@ -333,8 +333,8 @@ $testVaccineResponse = Invoke-Api -Method POST -Endpoint "/api/v1/vaccines-globa
 $testGlobalVaccineId = Get-ResponseData $testVaccineResponse "id"
 Write-Success "Created: $testGlobalVaccineId"
 
-Write-Test "GET /api/v1/vaccines-global - Get all"
-$response = Invoke-Api -Method GET -Endpoint "/api/v1/vaccines-global"
+Write-Test "GET /vaccines-global - Get all"
+$response = Invoke-Api -Method GET -Endpoint "/vaccines-global"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count global vaccines"
 
@@ -347,8 +347,8 @@ if ($response.data -and $response.data.Count -gt 0) {
 }
 
 if ($testGlobalVaccineId) {
-    Write-Test "GET /api/v1/vaccines-global/$testGlobalVaccineId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/api/v1/vaccines-global/$testGlobalVaccineId"
+    Write-Test "GET /vaccines-global/$testGlobalVaccineId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/vaccines-global/$testGlobalVaccineId"
     $name = Get-ResponseData $response "nameFr"
     if ($name) {
         Write-Success "Retrieved: $name"
@@ -356,16 +356,16 @@ if ($testGlobalVaccineId) {
         Write-Success "Retrieved vaccine"
     }
 
-    Write-Test "PATCH /api/v1/vaccines-global/$testGlobalVaccineId - Update"
-    $response = Invoke-Api -Method PATCH -Endpoint "/api/v1/vaccines-global/$testGlobalVaccineId" -Body @{
+    Write-Test "PATCH /vaccines-global/$testGlobalVaccineId - Update"
+    $response = Invoke-Api -Method PATCH -Endpoint "/vaccines-global/$testGlobalVaccineId" -Body @{
         nameFr = "Vaccin Test Updated"
     }
     if (-not (Test-ApiError $response)) {
         Write-Success "Updated vaccine name"
     }
 
-    Write-Test "DELETE /api/v1/vaccines-global/$testGlobalVaccineId - Delete"
-    $response = Invoke-Api -Method DELETE -Endpoint "/api/v1/vaccines-global/$testGlobalVaccineId"
+    Write-Test "DELETE /vaccines-global/$testGlobalVaccineId - Delete"
+    $response = Invoke-Api -Method DELETE -Endpoint "/vaccines-global/$testGlobalVaccineId"
     if (-not (Test-ApiError $response)) {
         Write-Success "Deleted test vaccine"
     }
@@ -376,8 +376,8 @@ if ($testGlobalVaccineId) {
 # =============================================================================
 Write-Header "National Campaigns API - 5 endpoints (FULL CRUD)"
 
-Write-Test "POST /api/v1/national-campaigns - Create test campaign"
-$testCampaignResponse = Invoke-Api -Method POST -Endpoint "/api/v1/national-campaigns" -Body @{
+Write-Test "POST /api/national-campaigns - Create test campaign"
+$testCampaignResponse = Invoke-Api -Method POST -Endpoint "/api/national-campaigns" -Body @{
     code = "TEST-CAMP-001"
     nameFr = "Campagne Test"
     nameEn = "Test Campaign"
@@ -390,8 +390,8 @@ $testCampaignResponse = Invoke-Api -Method POST -Endpoint "/api/v1/national-camp
 $testNationalCampaignId = Get-ResponseData $testCampaignResponse "id"
 Write-Success "Created: $testNationalCampaignId"
 
-Write-Test "GET /api/v1/national-campaigns - Get all"
-$response = Invoke-Api -Method GET -Endpoint "/api/v1/national-campaigns"
+Write-Test "GET /api/national-campaigns - Get all"
+$response = Invoke-Api -Method GET -Endpoint "/api/national-campaigns"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count national campaigns"
 
@@ -404,8 +404,8 @@ if ($response.data -and $response.data.Count -gt 0) {
 }
 
 if ($testNationalCampaignId) {
-    Write-Test "GET /api/v1/national-campaigns/$testNationalCampaignId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/api/v1/national-campaigns/$testNationalCampaignId"
+    Write-Test "GET /api/national-campaigns/$testNationalCampaignId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/api/national-campaigns/$testNationalCampaignId"
     $name = Get-ResponseData $response "nameFr"
     if ($name) {
         Write-Success "Retrieved: $name"
@@ -413,16 +413,16 @@ if ($testNationalCampaignId) {
         Write-Success "Retrieved campaign"
     }
 
-    Write-Test "PUT /api/v1/national-campaigns/$testNationalCampaignId - Update"
-    $response = Invoke-Api -Method PUT -Endpoint "/api/v1/national-campaigns/$testNationalCampaignId" -Body @{
+    Write-Test "PUT /api/national-campaigns/$testNationalCampaignId - Update"
+    $response = Invoke-Api -Method PUT -Endpoint "/api/national-campaigns/$testNationalCampaignId" -Body @{
         nameFr = "Campagne Test Updated"
     }
     if (-not (Test-ApiError $response)) {
         Write-Success "Updated campaign name"
     }
 
-    Write-Test "DELETE /api/v1/national-campaigns/$testNationalCampaignId - Delete"
-    $response = Invoke-Api -Method DELETE -Endpoint "/api/v1/national-campaigns/$testNationalCampaignId"
+    Write-Test "DELETE /api/national-campaigns/$testNationalCampaignId - Delete"
+    $response = Invoke-Api -Method DELETE -Endpoint "/api/national-campaigns/$testNationalCampaignId"
     if (-not (Test-ApiError $response)) {
         Write-Success "Deleted test campaign"
     }
@@ -433,8 +433,8 @@ if ($testNationalCampaignId) {
 # =============================================================================
 Write-Header "Alert Templates API - 5 endpoints (FULL CRUD)"
 
-Write-Test "POST /api/v1/alert-templates - Create test template"
-$testTemplateResponse = Invoke-Api -Method POST -Endpoint "/api/v1/alert-templates" -Body @{
+Write-Test "POST /alert-templates - Create test template"
+$testTemplateResponse = Invoke-Api -Method POST -Endpoint "/alert-templates" -Body @{
     code = "TEST-TEMPLATE-001"
     nameFr = "Template Test"
     nameEn = "Test Template"
@@ -448,8 +448,8 @@ $testTemplateResponse = Invoke-Api -Method POST -Endpoint "/api/v1/alert-templat
 $testAlertTemplateId = Get-ResponseData $testTemplateResponse "id"
 Write-Success "Created: $testAlertTemplateId"
 
-Write-Test "GET /api/v1/alert-templates - Get all"
-$response = Invoke-Api -Method GET -Endpoint "/api/v1/alert-templates"
+Write-Test "GET /alert-templates - Get all"
+$response = Invoke-Api -Method GET -Endpoint "/alert-templates"
 if ($response.data) { $count = $response.data.Count } else { $count = $response.Count }
 Write-Success "Found: $count alert templates"
 
@@ -462,8 +462,8 @@ if ($response.data -and $response.data.Count -gt 0) {
 }
 
 if ($testAlertTemplateId) {
-    Write-Test "GET /api/v1/alert-templates/$testAlertTemplateId - Get one"
-    $response = Invoke-Api -Method GET -Endpoint "/api/v1/alert-templates/$testAlertTemplateId"
+    Write-Test "GET /alert-templates/$testAlertTemplateId - Get one"
+    $response = Invoke-Api -Method GET -Endpoint "/alert-templates/$testAlertTemplateId"
     $name = Get-ResponseData $response "nameFr"
     if ($name) {
         Write-Success "Retrieved: $name"
@@ -471,16 +471,16 @@ if ($testAlertTemplateId) {
         Write-Success "Retrieved template"
     }
 
-    Write-Test "PATCH /api/v1/alert-templates/$testAlertTemplateId - Update"
-    $response = Invoke-Api -Method PATCH -Endpoint "/api/v1/alert-templates/$testAlertTemplateId" -Body @{
+    Write-Test "PATCH /alert-templates/$testAlertTemplateId - Update"
+    $response = Invoke-Api -Method PATCH -Endpoint "/alert-templates/$testAlertTemplateId" -Body @{
         nameFr = "Template Test Updated"
     }
     if (-not (Test-ApiError $response)) {
         Write-Success "Updated template name"
     }
 
-    Write-Test "DELETE /api/v1/alert-templates/$testAlertTemplateId - Delete"
-    $response = Invoke-Api -Method DELETE -Endpoint "/api/v1/alert-templates/$testAlertTemplateId"
+    Write-Test "DELETE /alert-templates/$testAlertTemplateId - Delete"
+    $response = Invoke-Api -Method DELETE -Endpoint "/alert-templates/$testAlertTemplateId"
     if (-not (Test-ApiError $response)) {
         Write-Success "Deleted test template"
     }
