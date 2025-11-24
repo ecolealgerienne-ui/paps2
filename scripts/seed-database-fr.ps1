@@ -51,7 +51,8 @@ function Invoke-CurlApi {
         Start-Sleep -Milliseconds 50
         return $response
     } catch {
-        Write-Host " SKIP" -ForegroundColor Gray
+        Write-Host " ERROR" -ForegroundColor Red
+        Write-Host "    $($_.Exception.Message)" -ForegroundColor Red
         return $null
     }
 }
