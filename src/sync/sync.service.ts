@@ -304,16 +304,16 @@ export class SyncService {
   }
 
   async pullChanges(query: SyncPullQueryDto): Promise<SyncPullResponseDto> {
-    const changes: SyncChangeDto[] = [];
     const since = query.since ? new Date(query.since) : new Date(0);
     const entityTypes = query.entityTypes || Object.values(EntityType);
     const limit = 1000; // Max items per pull
 
-    for (const entityType of entityTypes) {
+    // Build query promises for all entity types in parallel
+    const queryPromises = entityTypes.map(async (entityType) => {
       const modelName = this.getModelName(entityType as EntityType);
       const model = this.prisma[modelName];
 
-      if (!model) continue;
+      if (!model) return [];
 
       try {
         // Get updated records - all models now have direct farmId
@@ -326,20 +326,23 @@ export class SyncService {
           take: limit,
         });
 
-        for (const record of records) {
-          changes.push({
-            entityType,
-            entityId: record.id,
-            action: record.deletedAt ? 'delete' : 'update',
-            data: record,
-            version: record.version || 1,
-            updatedAt: record.updatedAt?.toISOString() || new Date().toISOString(),
-          });
-        }
+        return records.map((record: any) => ({
+          entityType,
+          entityId: record.id,
+          action: record.deletedAt ? 'delete' : 'update',
+          data: record,
+          version: record.version || 1,
+          updatedAt: record.updatedAt?.toISOString() || new Date().toISOString(),
+        }));
       } catch (error) {
         this.logger.error(`Failed to pull ${entityType}:`, error);
+        return [];
       }
-    }
+    });
+
+    // Execute all queries in parallel
+    const resultsPerType = await Promise.all(queryPromises);
+    const changes: SyncChangeDto[] = resultsPerType.flat();
 
     // Sort by updatedAt
     changes.sort((a, b) =>

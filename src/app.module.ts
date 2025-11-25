@@ -46,21 +46,24 @@ import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    // Rate limiting configuration
+    // In MVP mode: high limits for development/testing
+    // In production: reasonable limits to prevent abuse
     ThrottlerModule.forRoot([
       {
         name: 'short',
         ttl: 1000, // 1 second
-        limit: 10000, // 10,000 requests per second (effectively unlimited for testing)
+        limit: process.env.MVP_MODE === 'true' ? 100 : 20, // 20 req/sec in prod
       },
       {
         name: 'medium',
         ttl: 10000, // 10 seconds
-        limit: 50000, // 50,000 requests per 10 seconds (effectively unlimited for testing)
+        limit: process.env.MVP_MODE === 'true' ? 500 : 100, // 100 req/10sec in prod
       },
       {
         name: 'long',
         ttl: 60000, // 1 minute
-        limit: 200000, // 200,000 requests per minute (effectively unlimited for testing)
+        limit: process.env.MVP_MODE === 'true' ? 2000 : 300, // 300 req/min in prod
       },
     ]),
     PrismaModule,

@@ -30,6 +30,14 @@ export class SecurityConfigService {
     if (!this.instance) {
       const mvpMode = process.env.MVP_MODE === 'true';
 
+      // SECURITY: Prevent MVP mode from being enabled in production
+      if (mvpMode && process.env.NODE_ENV === 'production') {
+        throw new Error(
+          '🚨 SECURITY ERROR: MVP_MODE cannot be enabled in production! ' +
+          'Set MVP_MODE=false or remove NODE_ENV=production.'
+        );
+      }
+
       this.instance = {
         mvpMode,
 

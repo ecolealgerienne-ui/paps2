@@ -85,8 +85,14 @@ async function main() {
     await prisma.$executeRaw`SET session_replication_role = 'replica';`;
 
     // Supprimer les données de chaque table
+    // SECURITY NOTE: Table names come from hardcoded list above, NOT from user input.
+    // This is a dev-only script protected by the production check at the start.
     for (const table of tablesToClear) {
       try {
+        // Using $executeRawUnsafe because Prisma doesn't support dynamic table names
+        // in tagged template literals. This is safe because:
+        // 1. Table names are from our hardcoded whitelist above
+        // 2. Script is protected by production environment check
         const result = await prisma.$executeRawUnsafe(
           `DELETE FROM "${table.name}";`
         );
@@ -108,8 +114,10 @@ async function main() {
     await prisma.$executeRaw`SET session_replication_role = 'origin';`;
 
     // Reset les séquences des IDs auto-incrémentés (si nécessaire)
+    // SECURITY NOTE: This is a static SQL block with no user input.
+    // The PL/pgSQL iterates over system catalog data, not external input.
     console.log('🔄 Reset des séquences...');
-    await prisma.$executeRawUnsafe(`
+    await prisma.$executeRaw`
       DO $$
       DECLARE
         seq_name text;
@@ -121,7 +129,7 @@ async function main() {
           EXECUTE 'ALTER SEQUENCE ' || seq_name || ' RESTART WITH 1';
         END LOOP;
       END $$;
-    `);
+    `;
 
     console.log('\n================================================');
     console.log(`✅ TERMINÉ: ${totalDeleted} lignes supprimées au total`);
