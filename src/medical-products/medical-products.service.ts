@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMedicalProductDto, UpdateMedicalProductDto, QueryMedicalProductDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import { EntityNotFoundException } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { DataScope, Prisma } from '@prisma/client';
 
 @Injectable()
 export class MedicalProductsService {
@@ -11,18 +12,23 @@ export class MedicalProductsService {
 
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Create a local medical product for a farm
+   * Local products have scope='local' and farmId set
+   */
   async create(farmId: string, dto: CreateMedicalProductDto) {
-    this.logger.debug(`Creating medical product in farm ${farmId}`);
+    this.logger.debug(`Creating local medical product in farm ${farmId}`);
 
     try {
-      const product = await this.prisma.customMedicalProduct.create({
+      const product = await this.prisma.medicalProduct.create({
         data: {
           ...dto,
+          scope: DataScope.local,
           farmId,
         },
       });
 
-      this.logger.audit('Medical product created', { medicalProductId: product.id, farmId });
+      this.logger.audit('Medical product created', { medicalProductId: product.id, farmId, scope: 'local' });
       return product;
     } catch (error) {
       this.logger.error(`Failed to create medical product in farm ${farmId}`, error.stack);
@@ -30,34 +36,102 @@ export class MedicalProductsService {
     }
   }
 
+  /**
+   * Find all medical products accessible to a farm
+   * Returns global products + farm's local products
+   * Supports filtering by scope (global, local, all)
+   */
   async findAll(farmId: string, query: QueryMedicalProductDto) {
-    const where: any = {
-      farmId,
+    const {
+      search,
+      scope = 'all',
+      category,
+      type,
+      isActive,
+      page = 1,
+      limit = 50,
+      sort = 'nameFr',
+      order = 'asc',
+    } = query;
+
+    // Build scope filter
+    let scopeFilter: Prisma.MedicalProductWhereInput;
+    if (scope === 'global') {
+      scopeFilter = { scope: DataScope.global };
+    } else if (scope === 'local') {
+      scopeFilter = { scope: DataScope.local, farmId };
+    } else {
+      // 'all' - return global + farm's local products
+      scopeFilter = {
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
+      };
+    }
+
+    // Build complete where clause
+    const where: Prisma.MedicalProductWhereInput = {
+      ...scopeFilter,
       deletedAt: null,
     };
 
-    if (query.search) {
-      where.name = { contains: query.search, mode: 'insensitive' };
+    if (search) {
+      where.OR = [
+        { nameFr: { contains: search, mode: 'insensitive' } },
+        { nameEn: { contains: search, mode: 'insensitive' } },
+        { nameAr: { contains: search, mode: 'insensitive' } },
+        { commercialName: { contains: search, mode: 'insensitive' } },
+        { code: { contains: search, mode: 'insensitive' } },
+      ];
     }
-    if (query.category) {
-      where.category = query.category;
+    if (category) {
+      where.category = category;
     }
-    if (query.type) {
-      where.type = query.type;
+    if (type) {
+      where.type = type;
     }
-    if (query.isActive !== undefined) {
-      where.isActive = query.isActive;
+    if (isActive !== undefined) {
+      where.isActive = isActive;
     }
 
-    return this.prisma.customMedicalProduct.findMany({
-      where,
-      orderBy: { name: 'asc' },
-    });
+    // Execute query with pagination
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.medicalProduct.findMany({
+        where,
+        orderBy: { [sort]: order },
+        skip,
+        take: limit,
+      }),
+      this.prisma.medicalProduct.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
+  /**
+   * Find a medical product by ID
+   * Returns global products or farm's local products
+   */
   async findOne(farmId: string, id: string) {
-    const product = await this.prisma.customMedicalProduct.findFirst({
-      where: { id, farmId, deletedAt: null },
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
+      },
     });
 
     if (!product) {
@@ -72,11 +146,16 @@ export class MedicalProductsService {
     return product;
   }
 
+  /**
+   * Update a medical product
+   * Only local products owned by the farm can be updated
+   * Global products are read-only for farmers
+   */
   async update(farmId: string, id: string, dto: UpdateMedicalProductDto) {
     this.logger.debug(`Updating medical product ${id}`);
 
-    const existing = await this.prisma.customMedicalProduct.findFirst({
-      where: { id, farmId, deletedAt: null },
+    const existing = await this.prisma.medicalProduct.findFirst({
+      where: { id, deletedAt: null },
     });
 
     if (!existing) {
@@ -88,8 +167,24 @@ export class MedicalProductsService {
       );
     }
 
+    // Check if this is a global product (read-only for farmers)
+    if (existing.scope === DataScope.global) {
+      this.logger.warn('Cannot update global medical product', { medicalProductId: id, farmId });
+      throw new ForbiddenException('Global medical products cannot be modified');
+    }
+
+    // Check if this local product belongs to the farm
+    if (existing.farmId !== farmId) {
+      this.logger.warn('Medical product belongs to another farm', { medicalProductId: id, farmId, ownerFarmId: existing.farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MEDICAL_PRODUCT_NOT_FOUND,
+        `Medical product ${id} not found`,
+        { medicalProductId: id, farmId },
+      );
+    }
+
     try {
-      const updated = await this.prisma.customMedicalProduct.update({
+      const updated = await this.prisma.medicalProduct.update({
         where: { id },
         data: {
           ...dto,
@@ -105,11 +200,16 @@ export class MedicalProductsService {
     }
   }
 
+  /**
+   * Soft delete a medical product
+   * Only local products owned by the farm can be deleted
+   * Global products cannot be deleted by farmers
+   */
   async remove(farmId: string, id: string) {
     this.logger.debug(`Soft deleting medical product ${id}`);
 
-    const existing = await this.prisma.customMedicalProduct.findFirst({
-      where: { id, farmId, deletedAt: null },
+    const existing = await this.prisma.medicalProduct.findFirst({
+      where: { id, deletedAt: null },
     });
 
     if (!existing) {
@@ -121,8 +221,24 @@ export class MedicalProductsService {
       );
     }
 
+    // Check if this is a global product (cannot be deleted by farmers)
+    if (existing.scope === DataScope.global) {
+      this.logger.warn('Cannot delete global medical product', { medicalProductId: id, farmId });
+      throw new ForbiddenException('Global medical products cannot be deleted');
+    }
+
+    // Check if this local product belongs to the farm
+    if (existing.farmId !== farmId) {
+      this.logger.warn('Medical product belongs to another farm', { medicalProductId: id, farmId, ownerFarmId: existing.farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MEDICAL_PRODUCT_NOT_FOUND,
+        `Medical product ${id} not found`,
+        { medicalProductId: id, farmId },
+      );
+    }
+
     try {
-      const deleted = await this.prisma.customMedicalProduct.update({
+      const deleted = await this.prisma.medicalProduct.update({
         where: { id },
         data: {
           deletedAt: new Date(),

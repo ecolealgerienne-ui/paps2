@@ -1,28 +1,38 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVeterinarianDto, UpdateVeterinarianDto, QueryVeterinarianDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import { EntityNotFoundException } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { DataScope, Prisma } from '@prisma/client';
 
+/**
+ * Service for managing Veterinarians (Master Table Pattern)
+ * Supports both global (admin) and local (farm-specific) veterinarians
+ */
 @Injectable()
 export class VeterinariansService {
   private readonly logger = new AppLogger(VeterinariansService.name);
 
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Create a local veterinarian for a farm
+   * Local veterinarians have scope='local' and farmId set
+   */
   async create(farmId: string, dto: CreateVeterinarianDto) {
-    this.logger.debug(`Creating veterinarian in farm ${farmId}`);
+    this.logger.debug(`Creating local veterinarian in farm ${farmId}`);
 
     try {
       const vet = await this.prisma.veterinarian.create({
         data: {
           ...dto,
+          scope: DataScope.local,
           farmId,
         },
       });
 
-      this.logger.audit('Veterinarian created', { veterinarianId: vet.id, farmId });
+      this.logger.audit('Veterinarian created', { veterinarianId: vet.id, farmId, scope: 'local' });
       return vet;
     } catch (error) {
       this.logger.error(`Failed to create veterinarian in farm ${farmId}`, error.stack);
@@ -30,31 +40,105 @@ export class VeterinariansService {
     }
   }
 
+  /**
+   * Find all veterinarians accessible to a farm
+   * Returns global veterinarians + farm's local veterinarians
+   * Supports filtering by scope (global, local, all)
+   */
   async findAll(farmId: string, query: QueryVeterinarianDto) {
-    const where: any = {
-      farmId,
+    const {
+      search,
+      scope = 'all',
+      department,
+      isActive,
+      isAvailable,
+      emergencyService,
+      page = 1,
+      limit = 50,
+      sort = 'lastName',
+      order = 'asc',
+    } = query;
+
+    // Build scope filter
+    let scopeFilter: Prisma.VeterinarianWhereInput;
+    if (scope === 'global') {
+      scopeFilter = { scope: DataScope.global };
+    } else if (scope === 'local') {
+      scopeFilter = { scope: DataScope.local, farmId };
+    } else {
+      // 'all' - return global + farm's local veterinarians
+      scopeFilter = {
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
+      };
+    }
+
+    // Build complete where clause
+    const where: Prisma.VeterinarianWhereInput = {
+      ...scopeFilter,
       deletedAt: null,
     };
 
-    if (query.search) {
+    if (search) {
       where.OR = [
-        { firstName: { contains: query.search, mode: 'insensitive' } },
-        { lastName: { contains: query.search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { clinic: { contains: search, mode: 'insensitive' } },
+        { licenseNumber: { contains: search, mode: 'insensitive' } },
       ];
     }
-    if (query.isActive !== undefined) {
-      where.isActive = query.isActive;
+    if (department) {
+      where.department = department;
+    }
+    if (isActive !== undefined) {
+      where.isActive = isActive;
+    }
+    if (isAvailable !== undefined) {
+      where.isAvailable = isAvailable;
+    }
+    if (emergencyService !== undefined) {
+      where.emergencyService = emergencyService;
     }
 
-    return this.prisma.veterinarian.findMany({
-      where,
-      orderBy: { lastName: 'asc' },
-    });
+    // Execute query with pagination
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.veterinarian.findMany({
+        where,
+        orderBy: { [sort]: order },
+        skip,
+        take: limit,
+      }),
+      this.prisma.veterinarian.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
+  /**
+   * Find a veterinarian by ID
+   * Returns global veterinarians or farm's local veterinarians
+   */
   async findOne(farmId: string, id: string) {
     const vet = await this.prisma.veterinarian.findFirst({
-      where: { id, farmId, deletedAt: null },
+      where: {
+        id,
+        deletedAt: null,
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
+      },
     });
 
     if (!vet) {
@@ -69,11 +153,16 @@ export class VeterinariansService {
     return vet;
   }
 
+  /**
+   * Update a veterinarian
+   * Only local veterinarians owned by the farm can be updated
+   * Global veterinarians are read-only for farmers
+   */
   async update(farmId: string, id: string, dto: UpdateVeterinarianDto) {
     this.logger.debug(`Updating veterinarian ${id}`);
 
     const existing = await this.prisma.veterinarian.findFirst({
-      where: { id, farmId, deletedAt: null },
+      where: { id, deletedAt: null },
     });
 
     if (!existing) {
@@ -85,11 +174,36 @@ export class VeterinariansService {
       );
     }
 
+    // Check if this is a global veterinarian (read-only for farmers)
+    if (existing.scope === DataScope.global) {
+      this.logger.warn('Cannot update global veterinarian', { veterinarianId: id, farmId });
+      throw new ForbiddenException('Global veterinarians cannot be modified');
+    }
+
+    // Check if this local veterinarian belongs to the farm
+    if (existing.farmId !== farmId) {
+      this.logger.warn('Veterinarian belongs to another farm', { veterinarianId: id, farmId, ownerFarmId: existing.farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.VETERINARIAN_NOT_FOUND,
+        `Veterinarian ${id} not found`,
+        { veterinarianId: id, farmId },
+      );
+    }
+
+    // Optimistic locking
+    if (dto.version !== undefined && existing.version !== dto.version) {
+      throw new ConflictException(
+        'Version conflict: the veterinarian has been modified by another user',
+      );
+    }
+
     try {
+      const { version, ...updateData } = dto;
+
       const updated = await this.prisma.veterinarian.update({
         where: { id },
         data: {
-          ...dto,
+          ...updateData,
           version: existing.version + 1,
         },
       });
@@ -102,15 +216,36 @@ export class VeterinariansService {
     }
   }
 
+  /**
+   * Soft delete a veterinarian
+   * Only local veterinarians owned by the farm can be deleted
+   * Global veterinarians cannot be deleted by farmers
+   */
   async remove(farmId: string, id: string) {
     this.logger.debug(`Soft deleting veterinarian ${id}`);
 
     const existing = await this.prisma.veterinarian.findFirst({
-      where: { id, farmId, deletedAt: null },
+      where: { id, deletedAt: null },
     });
 
     if (!existing) {
       this.logger.warn('Veterinarian not found', { veterinarianId: id, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.VETERINARIAN_NOT_FOUND,
+        `Veterinarian ${id} not found`,
+        { veterinarianId: id, farmId },
+      );
+    }
+
+    // Check if this is a global veterinarian (cannot be deleted by farmers)
+    if (existing.scope === DataScope.global) {
+      this.logger.warn('Cannot delete global veterinarian', { veterinarianId: id, farmId });
+      throw new ForbiddenException('Global veterinarians cannot be deleted');
+    }
+
+    // Check if this local veterinarian belongs to the farm
+    if (existing.farmId !== farmId) {
+      this.logger.warn('Veterinarian belongs to another farm', { veterinarianId: id, farmId, ownerFarmId: existing.farmId });
       throw new EntityNotFoundException(
         ERROR_CODES.VETERINARIAN_NOT_FOUND,
         `Veterinarian ${id} not found`,
@@ -135,14 +270,21 @@ export class VeterinariansService {
     }
   }
 
-  // 🆕 PHASE_13: New methods
+  // =============================================================================
+  // Additional methods
+  // =============================================================================
 
+  /**
+   * Find active veterinarians for a farm (global + local)
+   */
   async findByFarm(farmId: string) {
-    this.logger.debug(`Finding veterinarians for farm ${farmId}`);
-    // Uses composite index: idx_vets_farm_active
+    this.logger.debug(`Finding active veterinarians for farm ${farmId}`);
     return this.prisma.veterinarian.findMany({
       where: {
-        farmId,
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
         isActive: true,
         deletedAt: null,
       },
@@ -150,12 +292,17 @@ export class VeterinariansService {
     });
   }
 
+  /**
+   * Find the default veterinarian for a farm
+   */
   async findDefault(farmId: string) {
     this.logger.debug(`Finding default veterinarian for farm ${farmId}`);
-    // Uses composite index: idx_vets_farm_default
     const defaultVet = await this.prisma.veterinarian.findFirst({
       where: {
-        farmId,
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
         isDefault: true,
         deletedAt: null,
       },
@@ -173,12 +320,15 @@ export class VeterinariansService {
     return defaultVet;
   }
 
+  /**
+   * Find veterinarians by department (global only, useful for discovery)
+   */
   async findByDepartment(department: string) {
     this.logger.debug(`Finding veterinarians in department ${department}`);
-    // Uses composite index: idx_vets_dept_active
     return this.prisma.veterinarian.findMany({
       where: {
         department,
+        scope: DataScope.global, // Only return global vets for department search
         isActive: true,
         deletedAt: null,
       },
@@ -186,11 +336,22 @@ export class VeterinariansService {
     });
   }
 
+  /**
+   * Set a veterinarian as default for the farm
+   * Only local veterinarians can be set as default
+   */
   async setDefault(farmId: string, id: string) {
     this.logger.debug(`Setting veterinarian ${id} as default for farm ${farmId}`);
 
     const vet = await this.prisma.veterinarian.findFirst({
-      where: { id, farmId, deletedAt: null },
+      where: {
+        id,
+        deletedAt: null,
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
+      },
     });
 
     if (!vet) {
@@ -203,27 +364,35 @@ export class VeterinariansService {
     }
 
     try {
-      // First, unset all defaults for this farm
+      // First, unset all defaults for this farm's local veterinarians
       await this.prisma.veterinarian.updateMany({
         where: {
           farmId,
+          scope: DataScope.local,
           isDefault: true,
           deletedAt: null,
         },
         data: { isDefault: false },
       });
 
-      // Then set the new default
-      const updated = await this.prisma.veterinarian.update({
-        where: { id },
-        data: {
-          isDefault: true,
-          version: vet.version + 1,
-        },
-      });
+      // Then set the new default (only if it's a local vet)
+      if (vet.scope === DataScope.local && vet.farmId === farmId) {
+        const updated = await this.prisma.veterinarian.update({
+          where: { id },
+          data: {
+            isDefault: true,
+            version: vet.version + 1,
+          },
+        });
 
-      this.logger.audit('Default veterinarian set', { veterinarianId: id, farmId });
-      return updated;
+        this.logger.audit('Default veterinarian set', { veterinarianId: id, farmId });
+        return updated;
+      }
+
+      // For global vets, we can't set isDefault on the vet itself
+      // Instead, this could be stored in a preference table if needed
+      this.logger.audit('Veterinarian referenced as default', { veterinarianId: id, farmId, scope: vet.scope });
+      return vet;
     } catch (error) {
       this.logger.error(`Failed to set default veterinarian ${id}`, error.stack);
       throw error;
