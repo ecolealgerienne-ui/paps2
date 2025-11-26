@@ -17,6 +17,9 @@ CREATE TYPE "AlertPriority" AS ENUM ('low', 'medium', 'high', 'urgent');
 CREATE TYPE "PersonalCampaignStatus" AS ENUM ('planned', 'in_progress', 'completed', 'cancelled');
 
 -- CreateEnum
+CREATE TYPE "DataScope" AS ENUM ('global', 'local');
+
+-- CreateEnum
 CREATE TYPE "Language" AS ENUM ('fr', 'en', 'ar');
 
 -- CreateEnum
@@ -133,27 +136,6 @@ CREATE TABLE "farm_breed_preferences" (
 );
 
 -- CreateTable
-CREATE TABLE "vaccines_global" (
-    "id" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
-    "name_fr" TEXT NOT NULL,
-    "name_en" TEXT NOT NULL,
-    "name_ar" TEXT NOT NULL,
-    "description" TEXT,
-    "target_disease" "VaccineTargetDisease" NOT NULL,
-    "laboratoire" TEXT,
-    "numero_amm" TEXT,
-    "dosage_recommande" TEXT,
-    "duree_immunite" INTEGER,
-    "version" INTEGER NOT NULL DEFAULT 1,
-    "deleted_at" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "vaccines_global_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "vaccine_countries" (
     "id" TEXT NOT NULL,
     "vaccine_id" TEXT NOT NULL,
@@ -167,16 +149,93 @@ CREATE TABLE "vaccine_countries" (
 );
 
 -- CreateTable
+CREATE TABLE "medical_products" (
+    "id" TEXT NOT NULL,
+    "scope" "DataScope" NOT NULL,
+    "farm_id" TEXT,
+    "code" TEXT,
+    "name_fr" TEXT NOT NULL,
+    "name_en" TEXT,
+    "name_ar" TEXT,
+    "commercial_name" TEXT,
+    "description" TEXT,
+    "type" "MedicalProductType",
+    "category" TEXT,
+    "principe_actif" TEXT,
+    "active_ingredient" TEXT,
+    "laboratoire" TEXT,
+    "manufacturer" TEXT,
+    "numero_amm" TEXT,
+    "form" TEXT,
+    "dosage" DOUBLE PRECISION,
+    "dosage_unit" TEXT,
+    "dosage_formula" TEXT,
+    "administration_frequency" TEXT,
+    "default_administration_route" TEXT,
+    "default_injection_site" TEXT,
+    "standard_cure_days" INTEGER,
+    "withdrawal_period_meat" INTEGER,
+    "withdrawal_period_milk" INTEGER,
+    "current_stock" DOUBLE PRECISION DEFAULT 0,
+    "min_stock" DOUBLE PRECISION DEFAULT 0,
+    "stock_unit" TEXT,
+    "unit_price" DOUBLE PRECISION,
+    "currency" TEXT,
+    "batch_number" TEXT,
+    "expiry_date" TIMESTAMP(3),
+    "storage_conditions" TEXT,
+    "prescription" TEXT,
+    "product_type" TEXT DEFAULT 'treatment',
+    "target_species" TEXT,
+    "vaccination_protocol" TEXT,
+    "reminder_days" TEXT,
+    "notes" TEXT,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "version" INTEGER NOT NULL DEFAULT 1,
+    "deleted_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "medical_products_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "vaccines" (
+    "id" TEXT NOT NULL,
+    "scope" "DataScope" NOT NULL,
+    "farm_id" TEXT,
+    "code" TEXT,
+    "name_fr" TEXT NOT NULL,
+    "name_en" TEXT,
+    "name_ar" TEXT,
+    "description" TEXT,
+    "target_disease" "VaccineTargetDisease",
+    "laboratoire" TEXT,
+    "numero_amm" TEXT,
+    "dosage" TEXT,
+    "dosage_recommande" TEXT,
+    "duree_immunite" INTEGER,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "version" INTEGER NOT NULL DEFAULT 1,
+    "deleted_at" TIMESTAMP(3),
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "vaccines_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "veterinarians" (
     "id" TEXT NOT NULL,
-    "farm_id" TEXT NOT NULL,
+    "scope" "DataScope" NOT NULL DEFAULT 'local',
+    "farm_id" TEXT,
     "first_name" TEXT NOT NULL,
     "last_name" TEXT NOT NULL,
     "title" TEXT,
-    "license_number" TEXT NOT NULL,
-    "specialties" TEXT NOT NULL,
+    "license_number" TEXT,
+    "specialties" TEXT,
     "clinic" TEXT,
-    "phone" TEXT NOT NULL,
+    "phone" TEXT,
     "mobile" TEXT,
     "email" TEXT,
     "address" TEXT,
@@ -207,65 +266,6 @@ CREATE TABLE "veterinarians" (
 );
 
 -- CreateTable
-CREATE TABLE "custom_medical_products" (
-    "id" TEXT NOT NULL,
-    "farm_id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "commercial_name" TEXT,
-    "category" TEXT NOT NULL,
-    "active_ingredient" TEXT,
-    "manufacturer" TEXT,
-    "form" TEXT,
-    "dosage" DOUBLE PRECISION,
-    "dosage_unit" TEXT,
-    "withdrawal_period_meat" INTEGER NOT NULL,
-    "withdrawal_period_milk" INTEGER NOT NULL,
-    "current_stock" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "min_stock" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "stock_unit" TEXT NOT NULL,
-    "unit_price" DOUBLE PRECISION,
-    "currency" TEXT,
-    "batch_number" TEXT,
-    "expiry_date" TIMESTAMP(3),
-    "storage_conditions" TEXT,
-    "prescription" TEXT,
-    "type" TEXT NOT NULL DEFAULT 'treatment',
-    "target_species" TEXT NOT NULL DEFAULT '',
-    "standard_cure_days" INTEGER,
-    "administration_frequency" TEXT,
-    "dosage_formula" TEXT,
-    "vaccination_protocol" TEXT,
-    "reminder_days" TEXT,
-    "default_administration_route" TEXT,
-    "default_injection_site" TEXT,
-    "notes" TEXT,
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
-    "version" INTEGER NOT NULL DEFAULT 1,
-    "deleted_at" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "custom_medical_products_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "custom_vaccines" (
-    "id" TEXT NOT NULL,
-    "farm_id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "target_disease" TEXT,
-    "laboratoire" TEXT,
-    "dosage" TEXT,
-    "version" INTEGER NOT NULL DEFAULT 1,
-    "deleted_at" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "custom_vaccines_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "administration_routes" (
     "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
@@ -273,32 +273,13 @@ CREATE TABLE "administration_routes" (
     "name_en" TEXT NOT NULL,
     "name_ar" TEXT NOT NULL,
     "description" TEXT,
+    "display_order" INTEGER NOT NULL DEFAULT 0,
     "version" INTEGER NOT NULL DEFAULT 1,
     "deleted_at" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "administration_routes_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "global_medical_products" (
-    "id" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
-    "name_fr" TEXT NOT NULL,
-    "name_en" TEXT NOT NULL,
-    "name_ar" TEXT NOT NULL,
-    "description" TEXT,
-    "type" "MedicalProductType" NOT NULL,
-    "principe_actif" TEXT,
-    "laboratoire" TEXT,
-    "numero_amm" TEXT,
-    "version" INTEGER NOT NULL DEFAULT 1,
-    "deleted_at" TIMESTAMP(3),
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "global_medical_products_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -486,6 +467,7 @@ CREATE TABLE "vaccinations" (
     "animal_id" TEXT,
     "animal_ids" TEXT NOT NULL,
     "protocol_id" TEXT,
+    "vaccine_id" TEXT,
     "vaccine_name" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "disease" TEXT NOT NULL,
@@ -676,8 +658,7 @@ CREATE TABLE "farm_preferences" (
 CREATE TABLE "farm_product_preferences" (
     "id" TEXT NOT NULL,
     "farm_id" TEXT NOT NULL,
-    "global_product_id" TEXT,
-    "custom_product_id" TEXT,
+    "product_id" TEXT NOT NULL,
     "display_order" INTEGER NOT NULL DEFAULT 0,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -703,8 +684,7 @@ CREATE TABLE "farm_veterinarian_preferences" (
 CREATE TABLE "farm_vaccine_preferences" (
     "id" TEXT NOT NULL,
     "farm_id" TEXT NOT NULL,
-    "global_vaccine_id" TEXT,
-    "custom_vaccine_id" TEXT,
+    "vaccine_id" TEXT NOT NULL,
     "display_order" INTEGER NOT NULL DEFAULT 0,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -850,18 +830,6 @@ CREATE INDEX "farm_breed_preferences_display_order_idx" ON "farm_breed_preferenc
 CREATE UNIQUE INDEX "farm_breed_preferences_farm_id_breed_id_key" ON "farm_breed_preferences"("farm_id", "breed_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "vaccines_global_code_key" ON "vaccines_global"("code");
-
--- CreateIndex
-CREATE INDEX "vaccines_global_code_idx" ON "vaccines_global"("code");
-
--- CreateIndex
-CREATE INDEX "vaccines_global_target_disease_idx" ON "vaccines_global"("target_disease");
-
--- CreateIndex
-CREATE INDEX "vaccines_global_deleted_at_idx" ON "vaccines_global"("deleted_at");
-
--- CreateIndex
 CREATE INDEX "vaccine_countries_vaccine_id_idx" ON "vaccine_countries"("vaccine_id");
 
 -- CreateIndex
@@ -869,6 +837,78 @@ CREATE INDEX "vaccine_countries_country_code_idx" ON "vaccine_countries"("countr
 
 -- CreateIndex
 CREATE UNIQUE INDEX "vaccine_countries_vaccine_id_country_code_key" ON "vaccine_countries"("vaccine_id", "country_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "medical_products_code_key" ON "medical_products"("code");
+
+-- CreateIndex
+CREATE INDEX "medical_products_scope_idx" ON "medical_products"("scope");
+
+-- CreateIndex
+CREATE INDEX "medical_products_farm_id_idx" ON "medical_products"("farm_id");
+
+-- CreateIndex
+CREATE INDEX "medical_products_code_idx" ON "medical_products"("code");
+
+-- CreateIndex
+CREATE INDEX "medical_products_type_idx" ON "medical_products"("type");
+
+-- CreateIndex
+CREATE INDEX "medical_products_laboratoire_idx" ON "medical_products"("laboratoire");
+
+-- CreateIndex
+CREATE INDEX "medical_products_is_active_idx" ON "medical_products"("is_active");
+
+-- CreateIndex
+CREATE INDEX "medical_products_deleted_at_idx" ON "medical_products"("deleted_at");
+
+-- CreateIndex
+CREATE INDEX "medical_products_scope_farm_id_idx" ON "medical_products"("scope", "farm_id");
+
+-- CreateIndex
+CREATE INDEX "medical_products_scope_is_active_idx" ON "medical_products"("scope", "is_active");
+
+-- CreateIndex
+CREATE INDEX "medical_products_scope_is_active_deleted_at_idx" ON "medical_products"("scope", "is_active", "deleted_at");
+
+-- CreateIndex
+CREATE INDEX "medical_products_farm_id_is_active_deleted_at_idx" ON "medical_products"("farm_id", "is_active", "deleted_at");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "vaccines_code_key" ON "vaccines"("code");
+
+-- CreateIndex
+CREATE INDEX "vaccines_scope_idx" ON "vaccines"("scope");
+
+-- CreateIndex
+CREATE INDEX "vaccines_farm_id_idx" ON "vaccines"("farm_id");
+
+-- CreateIndex
+CREATE INDEX "vaccines_code_idx" ON "vaccines"("code");
+
+-- CreateIndex
+CREATE INDEX "vaccines_target_disease_idx" ON "vaccines"("target_disease");
+
+-- CreateIndex
+CREATE INDEX "vaccines_is_active_idx" ON "vaccines"("is_active");
+
+-- CreateIndex
+CREATE INDEX "vaccines_deleted_at_idx" ON "vaccines"("deleted_at");
+
+-- CreateIndex
+CREATE INDEX "vaccines_scope_farm_id_idx" ON "vaccines"("scope", "farm_id");
+
+-- CreateIndex
+CREATE INDEX "vaccines_scope_is_active_idx" ON "vaccines"("scope", "is_active");
+
+-- CreateIndex
+CREATE INDEX "vaccines_scope_is_active_deleted_at_idx" ON "vaccines"("scope", "is_active", "deleted_at");
+
+-- CreateIndex
+CREATE INDEX "vaccines_farm_id_is_active_deleted_at_idx" ON "vaccines"("farm_id", "is_active", "deleted_at");
+
+-- CreateIndex
+CREATE INDEX "veterinarians_scope_idx" ON "veterinarians"("scope");
 
 -- CreateIndex
 CREATE INDEX "veterinarians_farm_id_idx" ON "veterinarians"("farm_id");
@@ -886,6 +926,12 @@ CREATE INDEX "veterinarians_is_default_idx" ON "veterinarians"("is_default");
 CREATE INDEX "veterinarians_department_idx" ON "veterinarians"("department");
 
 -- CreateIndex
+CREATE INDEX "veterinarians_scope_farm_id_idx" ON "veterinarians"("scope", "farm_id");
+
+-- CreateIndex
+CREATE INDEX "veterinarians_scope_is_active_idx" ON "veterinarians"("scope", "is_active");
+
+-- CreateIndex
 CREATE INDEX "veterinarians_farm_id_is_active_deleted_at_idx" ON "veterinarians"("farm_id", "is_active", "deleted_at");
 
 -- CreateIndex
@@ -895,18 +941,6 @@ CREATE INDEX "veterinarians_department_is_active_idx" ON "veterinarians"("depart
 CREATE INDEX "veterinarians_farm_id_is_default_idx" ON "veterinarians"("farm_id", "is_default");
 
 -- CreateIndex
-CREATE INDEX "custom_medical_products_farm_id_idx" ON "custom_medical_products"("farm_id");
-
--- CreateIndex
-CREATE INDEX "custom_medical_products_deleted_at_idx" ON "custom_medical_products"("deleted_at");
-
--- CreateIndex
-CREATE INDEX "custom_vaccines_farm_id_idx" ON "custom_vaccines"("farm_id");
-
--- CreateIndex
-CREATE INDEX "custom_vaccines_deleted_at_idx" ON "custom_vaccines"("deleted_at");
-
--- CreateIndex
 CREATE UNIQUE INDEX "administration_routes_code_key" ON "administration_routes"("code");
 
 -- CreateIndex
@@ -914,21 +948,6 @@ CREATE INDEX "administration_routes_code_idx" ON "administration_routes"("code")
 
 -- CreateIndex
 CREATE INDEX "administration_routes_deleted_at_idx" ON "administration_routes"("deleted_at");
-
--- CreateIndex
-CREATE UNIQUE INDEX "global_medical_products_code_key" ON "global_medical_products"("code");
-
--- CreateIndex
-CREATE INDEX "global_medical_products_code_idx" ON "global_medical_products"("code");
-
--- CreateIndex
-CREATE INDEX "global_medical_products_type_idx" ON "global_medical_products"("type");
-
--- CreateIndex
-CREATE INDEX "global_medical_products_laboratoire_idx" ON "global_medical_products"("laboratoire");
-
--- CreateIndex
-CREATE INDEX "global_medical_products_deleted_at_idx" ON "global_medical_products"("deleted_at");
 
 -- CreateIndex
 CREATE INDEX "product_countries_product_id_idx" ON "product_countries"("product_id");
@@ -1012,6 +1031,9 @@ CREATE UNIQUE INDEX "animals_farm_id_official_number_key" ON "animals"("farm_id"
 CREATE INDEX "lots_farm_id_idx" ON "lots"("farm_id");
 
 -- CreateIndex
+CREATE INDEX "lots_product_id_idx" ON "lots"("product_id");
+
+-- CreateIndex
 CREATE INDEX "lots_deleted_at_idx" ON "lots"("deleted_at");
 
 -- CreateIndex
@@ -1033,6 +1055,9 @@ CREATE INDEX "treatments_farm_id_idx" ON "treatments"("farm_id");
 CREATE INDEX "treatments_animal_id_idx" ON "treatments"("animal_id");
 
 -- CreateIndex
+CREATE INDEX "treatments_product_id_idx" ON "treatments"("product_id");
+
+-- CreateIndex
 CREATE INDEX "treatments_treatment_date_idx" ON "treatments"("treatment_date");
 
 -- CreateIndex
@@ -1043,6 +1068,9 @@ CREATE INDEX "vaccinations_farm_id_idx" ON "vaccinations"("farm_id");
 
 -- CreateIndex
 CREATE INDEX "vaccinations_animal_id_idx" ON "vaccinations"("animal_id");
+
+-- CreateIndex
+CREATE INDEX "vaccinations_vaccine_id_idx" ON "vaccinations"("vaccine_id");
 
 -- CreateIndex
 CREATE INDEX "vaccinations_vaccination_date_idx" ON "vaccinations"("vaccination_date");
@@ -1096,6 +1124,9 @@ CREATE INDEX "breedings_deleted_at_idx" ON "breedings"("deleted_at");
 CREATE INDEX "personal_campaigns_farm_id_idx" ON "personal_campaigns"("farm_id");
 
 -- CreateIndex
+CREATE INDEX "personal_campaigns_product_id_idx" ON "personal_campaigns"("product_id");
+
+-- CreateIndex
 CREATE INDEX "personal_campaigns_status_idx" ON "personal_campaigns"("status");
 
 -- CreateIndex
@@ -1126,10 +1157,10 @@ CREATE INDEX "farm_preferences_deleted_at_idx" ON "farm_preferences"("deleted_at
 CREATE INDEX "farm_product_preferences_farm_id_idx" ON "farm_product_preferences"("farm_id");
 
 -- CreateIndex
-CREATE INDEX "farm_product_preferences_global_product_id_idx" ON "farm_product_preferences"("global_product_id");
+CREATE INDEX "farm_product_preferences_product_id_idx" ON "farm_product_preferences"("product_id");
 
 -- CreateIndex
-CREATE INDEX "farm_product_preferences_custom_product_id_idx" ON "farm_product_preferences"("custom_product_id");
+CREATE UNIQUE INDEX "farm_product_preferences_farm_id_product_id_key" ON "farm_product_preferences"("farm_id", "product_id");
 
 -- CreateIndex
 CREATE INDEX "farm_veterinarian_preferences_farm_id_idx" ON "farm_veterinarian_preferences"("farm_id");
@@ -1144,10 +1175,10 @@ CREATE UNIQUE INDEX "farm_veterinarian_preferences_farm_id_veterinarian_id_key" 
 CREATE INDEX "farm_vaccine_preferences_farm_id_idx" ON "farm_vaccine_preferences"("farm_id");
 
 -- CreateIndex
-CREATE INDEX "farm_vaccine_preferences_global_vaccine_id_idx" ON "farm_vaccine_preferences"("global_vaccine_id");
+CREATE INDEX "farm_vaccine_preferences_vaccine_id_idx" ON "farm_vaccine_preferences"("vaccine_id");
 
 -- CreateIndex
-CREATE INDEX "farm_vaccine_preferences_custom_vaccine_id_idx" ON "farm_vaccine_preferences"("custom_vaccine_id");
+CREATE UNIQUE INDEX "farm_vaccine_preferences_farm_id_vaccine_id_key" ON "farm_vaccine_preferences"("farm_id", "vaccine_id");
 
 -- CreateIndex
 CREATE INDEX "farm_national_campaign_preferences_farm_id_idx" ON "farm_national_campaign_preferences"("farm_id");
@@ -1201,22 +1232,22 @@ ALTER TABLE "farm_breed_preferences" ADD CONSTRAINT "farm_breed_preferences_farm
 ALTER TABLE "farm_breed_preferences" ADD CONSTRAINT "farm_breed_preferences_breed_id_fkey" FOREIGN KEY ("breed_id") REFERENCES "breeds"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "vaccine_countries" ADD CONSTRAINT "vaccine_countries_vaccine_id_fkey" FOREIGN KEY ("vaccine_id") REFERENCES "vaccines_global"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "vaccine_countries" ADD CONSTRAINT "vaccine_countries_vaccine_id_fkey" FOREIGN KEY ("vaccine_id") REFERENCES "vaccines"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "vaccine_countries" ADD CONSTRAINT "vaccine_countries_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "countries"("code") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "medical_products" ADD CONSTRAINT "medical_products_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "vaccines" ADD CONSTRAINT "vaccines_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "veterinarians" ADD CONSTRAINT "veterinarians_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "custom_medical_products" ADD CONSTRAINT "custom_medical_products_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "custom_vaccines" ADD CONSTRAINT "custom_vaccines_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "product_countries" ADD CONSTRAINT "product_countries_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "global_medical_products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "product_countries" ADD CONSTRAINT "product_countries_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "medical_products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "product_countries" ADD CONSTRAINT "product_countries_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "countries"("code") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1240,6 +1271,9 @@ ALTER TABLE "animals" ADD CONSTRAINT "animals_mother_id_fkey" FOREIGN KEY ("moth
 ALTER TABLE "lots" ADD CONSTRAINT "lots_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "lots" ADD CONSTRAINT "lots_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "medical_products"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "lot_animals" ADD CONSTRAINT "lot_animals_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1255,7 +1289,7 @@ ALTER TABLE "treatments" ADD CONSTRAINT "treatments_farm_id_fkey" FOREIGN KEY ("
 ALTER TABLE "treatments" ADD CONSTRAINT "treatments_animal_id_fkey" FOREIGN KEY ("animal_id") REFERENCES "animals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "treatments" ADD CONSTRAINT "treatments_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "custom_medical_products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "treatments" ADD CONSTRAINT "treatments_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "medical_products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "treatments" ADD CONSTRAINT "treatments_veterinarian_id_fkey" FOREIGN KEY ("veterinarian_id") REFERENCES "veterinarians"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1268,6 +1302,9 @@ ALTER TABLE "vaccinations" ADD CONSTRAINT "vaccinations_farm_id_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "vaccinations" ADD CONSTRAINT "vaccinations_animal_id_fkey" FOREIGN KEY ("animal_id") REFERENCES "animals"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "vaccinations" ADD CONSTRAINT "vaccinations_vaccine_id_fkey" FOREIGN KEY ("vaccine_id") REFERENCES "vaccines"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "vaccinations" ADD CONSTRAINT "vaccinations_veterinarian_id_fkey" FOREIGN KEY ("veterinarian_id") REFERENCES "veterinarians"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -1303,6 +1340,9 @@ ALTER TABLE "personal_campaigns" ADD CONSTRAINT "personal_campaigns_farm_id_fkey
 ALTER TABLE "personal_campaigns" ADD CONSTRAINT "personal_campaigns_lot_id_fkey" FOREIGN KEY ("lot_id") REFERENCES "lots"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "personal_campaigns" ADD CONSTRAINT "personal_campaigns_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "medical_products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "documents" ADD CONSTRAINT "documents_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1312,10 +1352,7 @@ ALTER TABLE "farm_preferences" ADD CONSTRAINT "farm_preferences_farm_id_fkey" FO
 ALTER TABLE "farm_product_preferences" ADD CONSTRAINT "farm_product_preferences_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "farm_product_preferences" ADD CONSTRAINT "farm_product_preferences_global_product_id_fkey" FOREIGN KEY ("global_product_id") REFERENCES "global_medical_products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "farm_product_preferences" ADD CONSTRAINT "farm_product_preferences_custom_product_id_fkey" FOREIGN KEY ("custom_product_id") REFERENCES "custom_medical_products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "farm_product_preferences" ADD CONSTRAINT "farm_product_preferences_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "medical_products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "farm_veterinarian_preferences" ADD CONSTRAINT "farm_veterinarian_preferences_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1327,10 +1364,7 @@ ALTER TABLE "farm_veterinarian_preferences" ADD CONSTRAINT "farm_veterinarian_pr
 ALTER TABLE "farm_vaccine_preferences" ADD CONSTRAINT "farm_vaccine_preferences_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "farm_vaccine_preferences" ADD CONSTRAINT "farm_vaccine_preferences_global_vaccine_id_fkey" FOREIGN KEY ("global_vaccine_id") REFERENCES "vaccines_global"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "farm_vaccine_preferences" ADD CONSTRAINT "farm_vaccine_preferences_custom_vaccine_id_fkey" FOREIGN KEY ("custom_vaccine_id") REFERENCES "custom_vaccines"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "farm_vaccine_preferences" ADD CONSTRAINT "farm_vaccine_preferences_vaccine_id_fkey" FOREIGN KEY ("vaccine_id") REFERENCES "vaccines"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "farm_national_campaign_preferences" ADD CONSTRAINT "farm_national_campaign_preferences_farm_id_fkey" FOREIGN KEY ("farm_id") REFERENCES "farms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
