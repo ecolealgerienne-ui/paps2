@@ -495,25 +495,24 @@ if ($farmResponse) {
     Write-Host "16. Farm Preferences (Favoris de la ferme)" -ForegroundColor Cyan
 
     # Farm Product Preferences (5 produits favoris)
+    # Note: Uses productId (unified MedicalProduct table with Master Table Pattern)
     $productPrefCount = 0
-    for ($i = 0; $i -lt [Math]::Min(5, $medicalProductIds.Count); $i++) {
-        if ($i -lt $globalProductIds.Count) {
-            $productPref = @{
-                globalProductId = $globalProductIds[$i]
-                displayOrder = $i + 1
-                isActive = $true
-            }
-            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/product-preferences" -Body $productPref -Silent
-            if ($response) { $productPrefCount++ }
+    for ($i = 0; $i -lt [Math]::Min(5, $globalProductIds.Count); $i++) {
+        $productPref = @{
+            productId = $globalProductIds[$i]
+            displayOrder = $i + 1
+            isActive = $true
         }
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/product-preferences" -Body $productPref -Silent
+        if ($response) { $productPrefCount++ }
     }
 
     # Farm Vaccine Preferences (4 vaccins favoris)
+    # Note: Uses vaccineId (unified Vaccine table with Master Table Pattern)
     $vaccinePrefCount = 0
     for ($i = 0; $i -lt [Math]::Min(4, $globalVaccineIds.Count); $i++) {
         $vaccinePref = @{
-            farmId = $farmId
-            globalVaccineId = $globalVaccineIds[$i]
+            vaccineId = $globalVaccineIds[$i]
             displayOrder = $i + 1
             isActive = $true
         }
@@ -564,19 +563,20 @@ if ($farmResponse) {
     Write-Host ""
     Write-Host "17. Medical Products (Stock ferme - 12 produits)" -ForegroundColor Cyan
 
+    # Note: Uses nameFr field (Master Table Pattern with i18n support)
     $farmProducts = @(
-        @{ name = "Ivomec 1% Stock"; commercialName = "Ivomec Injectable"; category = "antiparasitic"; activeIngredient = "Ivermectine"; manufacturer = "Boehringer Ingelheim"; withdrawalPeriodMeat = 28; withdrawalPeriodMilk = 0; currentStock = 15; minStock = 5; stockUnit = "flacon"; unitPrice = 25.50; batchNumber = "IV2024-001"; expiryDate = "2026-12-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Clamoxyl LA Stock"; commercialName = "Clamoxyl LA"; category = "antibiotic"; activeIngredient = "Amoxicilline"; manufacturer = "Zoetis"; withdrawalPeriodMeat = 14; withdrawalPeriodMilk = 60; currentStock = 20; minStock = 8; stockUnit = "flacon"; unitPrice = 45.00; batchNumber = "CL2024-002"; expiryDate = "2026-06-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Finadyne Stock"; commercialName = "Finadyne"; category = "anti_inflammatory"; activeIngredient = "Flunixine"; manufacturer = "MSD"; withdrawalPeriodMeat = 7; withdrawalPeriodMilk = 24; currentStock = 10; minStock = 5; stockUnit = "flacon"; unitPrice = 32.00; batchNumber = "FI2024-003"; expiryDate = "2026-09-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Panacur Stock"; commercialName = "Panacur"; category = "antiparasitic"; activeIngredient = "Fenbendazole"; manufacturer = "MSD"; withdrawalPeriodMeat = 14; withdrawalPeriodMilk = 0; currentStock = 25; minStock = 10; stockUnit = "sachet"; unitPrice = 8.50; batchNumber = "PA2024-004"; expiryDate = "2027-03-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Calcium Injectable"; commercialName = "Calcium"; category = "vitamin_mineral"; activeIngredient = "Calcium borogluconate"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 12; minStock = 5; stockUnit = "flacon"; unitPrice = 18.00; batchNumber = "CA2024-005"; expiryDate = "2026-11-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Vitamine AD3E"; commercialName = "Vitamine AD3E"; category = "vitamin_mineral"; activeIngredient = "Vitamines A, D3, E"; manufacturer = "CEVA"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 8; minStock = 3; stockUnit = "flacon"; unitPrice = 22.00; batchNumber = "VI2024-006"; expiryDate = "2026-08-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Oxytetracycline LA"; commercialName = "Oxytet"; category = "antibiotic"; activeIngredient = "Oxytetracycline"; manufacturer = "CEVA"; withdrawalPeriodMeat = 21; withdrawalPeriodMilk = 96; currentStock = 18; minStock = 8; stockUnit = "flacon"; unitPrice = 38.00; batchNumber = "OX2024-007"; expiryDate = "2026-07-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Metacam Stock"; commercialName = "Metacam"; category = "anti_inflammatory"; activeIngredient = "Meloxicam"; manufacturer = "Boehringer Ingelheim"; withdrawalPeriodMeat = 15; withdrawalPeriodMilk = 120; currentStock = 14; minStock = 6; stockUnit = "flacon"; unitPrice = 42.00; batchNumber = "ME2024-008"; expiryDate = "2026-10-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Betadine Stock"; commercialName = "Betadine"; category = "antiseptic"; activeIngredient = "Povidone iodee"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 30; minStock = 10; stockUnit = "flacon"; unitPrice = 12.00; batchNumber = "BE2024-009"; expiryDate = "2027-12-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Spray Cicatrisant"; commercialName = "Spray Oxy"; category = "antiseptic"; activeIngredient = "Oxytetracycline"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 7; withdrawalPeriodMilk = 0; currentStock = 22; minStock = 8; stockUnit = "bombe"; unitPrice = 16.00; batchNumber = "SP2024-010"; expiryDate = "2027-06-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Oxytocine Stock"; commercialName = "Oxytocine"; category = "hormone"; activeIngredient = "Oxytocine"; manufacturer = "CEVA"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 12; currentStock = 10; minStock = 5; stockUnit = "flacon"; unitPrice = 28.00; batchNumber = "OT2024-011"; expiryDate = "2026-04-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
-        @{ name = "Prostaglandine Stock"; commercialName = "PGF2alpha"; category = "hormone"; activeIngredient = "Prostaglandine"; manufacturer = "Zoetis"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 24; currentStock = 8; minStock = 4; stockUnit = "flacon"; unitPrice = 52.00; batchNumber = "PG2024-012"; expiryDate = "2026-05-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Ivomec 1% Stock"; nameEn = "Ivomec 1% Stock"; commercialName = "Ivomec Injectable"; category = "antiparasitic"; activeIngredient = "Ivermectine"; manufacturer = "Boehringer Ingelheim"; withdrawalPeriodMeat = 28; withdrawalPeriodMilk = 0; currentStock = 15; minStock = 5; stockUnit = "flacon"; unitPrice = 25.50; batchNumber = "IV2024-001"; expiryDate = "2026-12-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Clamoxyl LA Stock"; nameEn = "Clamoxyl LA Stock"; commercialName = "Clamoxyl LA"; category = "antibiotic"; activeIngredient = "Amoxicilline"; manufacturer = "Zoetis"; withdrawalPeriodMeat = 14; withdrawalPeriodMilk = 60; currentStock = 20; minStock = 8; stockUnit = "flacon"; unitPrice = 45.00; batchNumber = "CL2024-002"; expiryDate = "2026-06-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Finadyne Stock"; nameEn = "Finadyne Stock"; commercialName = "Finadyne"; category = "anti_inflammatory"; activeIngredient = "Flunixine"; manufacturer = "MSD"; withdrawalPeriodMeat = 7; withdrawalPeriodMilk = 24; currentStock = 10; minStock = 5; stockUnit = "flacon"; unitPrice = 32.00; batchNumber = "FI2024-003"; expiryDate = "2026-09-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Panacur Stock"; nameEn = "Panacur Stock"; commercialName = "Panacur"; category = "antiparasitic"; activeIngredient = "Fenbendazole"; manufacturer = "MSD"; withdrawalPeriodMeat = 14; withdrawalPeriodMilk = 0; currentStock = 25; minStock = 10; stockUnit = "sachet"; unitPrice = 8.50; batchNumber = "PA2024-004"; expiryDate = "2027-03-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Calcium Injectable"; nameEn = "Injectable Calcium"; commercialName = "Calcium"; category = "vitamin_mineral"; activeIngredient = "Calcium borogluconate"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 12; minStock = 5; stockUnit = "flacon"; unitPrice = 18.00; batchNumber = "CA2024-005"; expiryDate = "2026-11-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Vitamine AD3E"; nameEn = "Vitamin AD3E"; commercialName = "Vitamine AD3E"; category = "vitamin_mineral"; activeIngredient = "Vitamines A, D3, E"; manufacturer = "CEVA"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 8; minStock = 3; stockUnit = "flacon"; unitPrice = 22.00; batchNumber = "VI2024-006"; expiryDate = "2026-08-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Oxytetracycline LA"; nameEn = "Oxytetracycline LA"; commercialName = "Oxytet"; category = "antibiotic"; activeIngredient = "Oxytetracycline"; manufacturer = "CEVA"; withdrawalPeriodMeat = 21; withdrawalPeriodMilk = 96; currentStock = 18; minStock = 8; stockUnit = "flacon"; unitPrice = 38.00; batchNumber = "OX2024-007"; expiryDate = "2026-07-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Metacam Stock"; nameEn = "Metacam Stock"; commercialName = "Metacam"; category = "anti_inflammatory"; activeIngredient = "Meloxicam"; manufacturer = "Boehringer Ingelheim"; withdrawalPeriodMeat = 15; withdrawalPeriodMilk = 120; currentStock = 14; minStock = 6; stockUnit = "flacon"; unitPrice = 42.00; batchNumber = "ME2024-008"; expiryDate = "2026-10-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Betadine Stock"; nameEn = "Betadine Stock"; commercialName = "Betadine"; category = "antiseptic"; activeIngredient = "Povidone iodee"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 0; currentStock = 30; minStock = 10; stockUnit = "flacon"; unitPrice = 12.00; batchNumber = "BE2024-009"; expiryDate = "2027-12-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Spray Cicatrisant"; nameEn = "Healing Spray"; commercialName = "Spray Oxy"; category = "antiseptic"; activeIngredient = "Oxytetracycline"; manufacturer = "Vetoquinol"; withdrawalPeriodMeat = 7; withdrawalPeriodMilk = 0; currentStock = 22; minStock = 8; stockUnit = "bombe"; unitPrice = 16.00; batchNumber = "SP2024-010"; expiryDate = "2027-06-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Oxytocine Stock"; nameEn = "Oxytocin Stock"; commercialName = "Oxytocine"; category = "hormone"; activeIngredient = "Oxytocine"; manufacturer = "CEVA"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 12; currentStock = 10; minStock = 5; stockUnit = "flacon"; unitPrice = 28.00; batchNumber = "OT2024-011"; expiryDate = "2026-04-30T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
+        @{ nameFr = "Prostaglandine Stock"; nameEn = "Prostaglandin Stock"; commercialName = "PGF2alpha"; category = "hormone"; activeIngredient = "Prostaglandine"; manufacturer = "Zoetis"; withdrawalPeriodMeat = 0; withdrawalPeriodMilk = 24; currentStock = 8; minStock = 4; stockUnit = "flacon"; unitPrice = 52.00; batchNumber = "PG2024-012"; expiryDate = "2026-05-31T23:59:59.999Z"; type = "treatment"; targetSpecies = "bovine"; isActive = $true }
     )
 
     foreach ($product in $farmProducts) {
@@ -596,10 +596,11 @@ if ($farmResponse) {
     Write-Host ""
     Write-Host "18. Custom Vaccines (3 vaccins personnalises)" -ForegroundColor Cyan
 
+    # Note: Uses nameFr field (Master Table Pattern with i18n support)
     $customVaccines = @(
-        @{ name = "Vaccin Brucellose B19 Local"; description = "Vaccin contre la brucellose bovine - formule locale"; targetDisease = "Brucellose"; laboratoire = "Laboratoire Regional"; dosage = "2ml par animal" }
-        @{ name = "Vaccin Enterotoxemie Ovins"; description = "Vaccin enterotoxemie specifique ovins"; targetDisease = "Enterotoxemie"; laboratoire = "Labo Ovins"; dosage = "1ml par animal" }
-        @{ name = "Vaccin Multivalent Ferme"; description = "Vaccin multivalent formule ferme"; targetDisease = "Multiple"; laboratoire = "Production Locale"; dosage = "2.5ml par animal" }
+        @{ nameFr = "Vaccin Brucellose B19 Local"; nameEn = "Brucellosis B19 Local"; description = "Vaccin contre la brucellose bovine - formule locale"; targetDisease = "Brucellose"; laboratoire = "Laboratoire Regional"; dosage = "2ml par animal" }
+        @{ nameFr = "Vaccin Enterotoxemie Ovins"; nameEn = "Sheep Enterotoxemia"; description = "Vaccin enterotoxemie specifique ovins"; targetDisease = "Enterotoxemie"; laboratoire = "Labo Ovins"; dosage = "1ml par animal" }
+        @{ nameFr = "Vaccin Multivalent Ferme"; nameEn = "Farm Multivalent"; description = "Vaccin multivalent formule ferme"; targetDisease = "Multiple"; laboratoire = "Production Locale"; dosage = "2.5ml par animal" }
     )
 
     foreach ($vaccine in $customVaccines) {

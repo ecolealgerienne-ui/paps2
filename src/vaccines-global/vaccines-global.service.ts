@@ -9,32 +9,11 @@ import {
   VaccineTargetDisease,
 } from './dto/create-vaccine-global.dto';
 import { UpdateVaccineGlobalDto } from './dto/update-vaccine-global.dto';
-
-/**
- * Type temporaire pour VaccineGlobal
- * (sera remplacé par @prisma/client après génération)
- */
-type VaccineGlobal = {
-  id: string;
-  code: string;
-  nameFr: string;
-  nameEn: string;
-  nameAr: string;
-  description: string | null;
-  targetDisease: string;
-  laboratoire: string | null;
-  numeroAMM: string | null;
-  dosageRecommande: string | null;
-  dureeImmunite: number | null;
-  version: number;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import { DataScope, Vaccine } from '@prisma/client';
 
 /**
  * Service pour la gestion des vaccins globaux
- * PHASE_06: Référentiel international des vaccins
+ * Uses unified Vaccine table with scope='global'
  */
 @Injectable()
 export class VaccinesGlobalService {
@@ -43,23 +22,40 @@ export class VaccinesGlobalService {
   /**
    * Créer un nouveau vaccin global
    */
-  async create(dto: CreateVaccineGlobalDto): Promise<VaccineGlobal> {
+  async create(dto: CreateVaccineGlobalDto): Promise<Vaccine> {
     // Vérifier si le code existe déjà
-    const existing = await this.prisma.vaccineGlobal.findUnique({
-      where: { code: dto.code },
+    const existing = await this.prisma.vaccine.findFirst({
+      where: {
+        code: dto.code,
+        scope: DataScope.global,
+      },
     });
 
-    if (existing) {
+    if (existing && !existing.deletedAt) {
       throw new ConflictException(
         `Vaccine with code "${dto.code}" already exists`,
       );
     }
 
-    return this.prisma.vaccineGlobal.create({
+    // Si soft-deleted, restaurer
+    if (existing && existing.deletedAt) {
+      return this.prisma.vaccine.update({
+        where: { id: existing.id },
+        data: {
+          ...dto,
+          deletedAt: null,
+          version: existing.version + 1,
+        },
+      });
+    }
+
+    return this.prisma.vaccine.create({
       data: {
         ...dto,
+        scope: DataScope.global,
+        farmId: null, // Global vaccines have no farm
       },
-    }) as Promise<VaccineGlobal>;
+    });
   }
 
   /**
@@ -68,8 +64,10 @@ export class VaccinesGlobalService {
   async findAll(filters?: {
     targetDisease?: VaccineTargetDisease;
     includeDeleted?: boolean;
-  }): Promise<VaccineGlobal[]> {
-    const where: Record<string, unknown> = {};
+  }): Promise<Vaccine[]> {
+    const where: Record<string, unknown> = {
+      scope: DataScope.global, // Only return global vaccines
+    };
 
     // Exclure les soft deleted par défaut
     if (!filters?.includeDeleted) {
@@ -81,55 +79,60 @@ export class VaccinesGlobalService {
       where.targetDisease = filters.targetDisease;
     }
 
-    return this.prisma.vaccineGlobal.findMany({
+    return this.prisma.vaccine.findMany({
       where,
       orderBy: [{ targetDisease: 'asc' }, { nameFr: 'asc' }],
-    }) as Promise<VaccineGlobal[]>;
+    });
   }
 
   /**
    * Récupérer les vaccins par maladie cible
    */
-  async findByTargetDisease(
-    disease: VaccineTargetDisease,
-  ): Promise<VaccineGlobal[]> {
-    return this.prisma.vaccineGlobal.findMany({
+  async findByTargetDisease(disease: VaccineTargetDisease): Promise<Vaccine[]> {
+    return this.prisma.vaccine.findMany({
       where: {
         targetDisease: disease,
+        scope: DataScope.global,
         deletedAt: null,
       },
       orderBy: { nameFr: 'asc' },
-    }) as Promise<VaccineGlobal[]>;
+    });
   }
 
   /**
    * Récupérer un vaccin par ID
    */
-  async findOne(id: string): Promise<VaccineGlobal> {
-    const vaccine = await this.prisma.vaccineGlobal.findUnique({
-      where: { id },
+  async findOne(id: string): Promise<Vaccine> {
+    const vaccine = await this.prisma.vaccine.findFirst({
+      where: {
+        id,
+        scope: DataScope.global,
+      },
     });
 
     if (!vaccine || vaccine.deletedAt) {
       throw new NotFoundException(`Vaccine with ID "${id}" not found`);
     }
 
-    return vaccine as VaccineGlobal;
+    return vaccine;
   }
 
   /**
    * Récupérer un vaccin par code
    */
-  async findByCode(code: string): Promise<VaccineGlobal> {
-    const vaccine = await this.prisma.vaccineGlobal.findUnique({
-      where: { code },
+  async findByCode(code: string): Promise<Vaccine> {
+    const vaccine = await this.prisma.vaccine.findFirst({
+      where: {
+        code,
+        scope: DataScope.global,
+      },
     });
 
     if (!vaccine || vaccine.deletedAt) {
       throw new NotFoundException(`Vaccine with code "${code}" not found`);
     }
 
-    return vaccine as VaccineGlobal;
+    return vaccine;
   }
 
   /**
@@ -139,7 +142,7 @@ export class VaccinesGlobalService {
     id: string,
     dto: UpdateVaccineGlobalDto,
     currentVersion?: number,
-  ): Promise<VaccineGlobal> {
+  ): Promise<Vaccine> {
     // Vérifier que le vaccin existe
     const existing = await this.findOne(id);
 
@@ -151,73 +154,57 @@ export class VaccinesGlobalService {
     }
 
     // Mettre à jour avec incrément de version
-    return this.prisma.vaccineGlobal.update({
+    return this.prisma.vaccine.update({
       where: { id },
       data: {
         ...dto,
         version: { increment: 1 },
       },
-    }) as Promise<VaccineGlobal>;
+    });
   }
 
   /**
    * Soft delete d'un vaccin
    */
-  async remove(id: string): Promise<VaccineGlobal> {
+  async remove(id: string): Promise<Vaccine> {
     // Vérifier que le vaccin existe
-    const vaccine = await this.findOne(id);
-
-    // Vérifier si le vaccin est utilisé dans des relations
-    const usageCount = await this.checkUsage(id);
-
-    if (usageCount > 0) {
-      throw new ConflictException(
-        `Cannot delete vaccine "${vaccine.code}": used in ${usageCount} relations (countries, farm preferences). Please deactivate instead.`,
-      );
-    }
+    await this.findOne(id);
 
     // Soft delete
-    return this.prisma.vaccineGlobal.update({
+    return this.prisma.vaccine.update({
       where: { id },
       data: {
         deletedAt: new Date(),
       },
-    }) as Promise<VaccineGlobal>;
-  }
-
-  /**
-   * Vérifier l'utilisation du vaccin dans les relations
-   * TODO: Activer après BLOC 3 (Phase 18) et BLOC 4 (Phase 22)
-   */
-  private async checkUsage(id: string): Promise<number> {
-    // Temporairement retourne 0 car les tables de liaison n'existent pas encore
-    // await Promise.all([
-    //   this.prisma.vaccineCountry.count({ where: { vaccineId: id } }),
-    //   this.prisma.farmVaccinePreference.count({ where: { vaccineId: id } }),
-    // ]);
-    return 0;
+    });
   }
 
   /**
    * Récupérer la liste des maladies cibles disponibles
    */
   async getTargetDiseases(): Promise<string[]> {
-    const diseases = await this.prisma.vaccineGlobal.findMany({
-      where: { deletedAt: null },
+    const diseases = await this.prisma.vaccine.findMany({
+      where: {
+        scope: DataScope.global,
+        deletedAt: null,
+      },
       select: { targetDisease: true },
       distinct: ['targetDisease'],
       orderBy: { targetDisease: 'asc' },
     });
 
-    return diseases.map((d) => d.targetDisease);
+    return diseases.map((d) => d.targetDisease).filter(Boolean) as string[];
   }
 
   /**
    * Restaurer un vaccin soft deleted
    */
-  async restore(id: string): Promise<VaccineGlobal> {
-    const vaccine = await this.prisma.vaccineGlobal.findUnique({
-      where: { id },
+  async restore(id: string): Promise<Vaccine> {
+    const vaccine = await this.prisma.vaccine.findFirst({
+      where: {
+        id,
+        scope: DataScope.global,
+      },
     });
 
     if (!vaccine) {
@@ -228,11 +215,11 @@ export class VaccinesGlobalService {
       throw new ConflictException(`Vaccine "${vaccine.code}" is not deleted`);
     }
 
-    return this.prisma.vaccineGlobal.update({
+    return this.prisma.vaccine.update({
       where: { id },
       data: {
         deletedAt: null,
       },
-    }) as Promise<VaccineGlobal>;
+    });
   }
 }

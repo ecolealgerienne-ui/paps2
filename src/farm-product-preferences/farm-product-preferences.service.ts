@@ -1,21 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFarmProductPreferenceDto, UpdateFarmProductPreferenceDto } from './dto';
+import { DataScope } from '@prisma/client';
 
 @Injectable()
 export class FarmProductPreferencesService {
   constructor(private prisma: PrismaService) {}
 
   async create(farmId: string, dto: CreateFarmProductPreferenceDto) {
-    // Double vérification XOR (backend)
-    const hasGlobal = !!dto.globalProductId;
-    const hasCustom = !!dto.customProductId;
-
-    if (hasGlobal === hasCustom) {
-      throw new BadRequestException('Must specify exactly one: globalProductId or customProductId');
-    }
-
-    // Vérifier que la ferme existe
+    // Verify farm exists
     const farm = await this.prisma.farm.findUnique({
       where: { id: farmId },
     });
@@ -24,38 +17,47 @@ export class FarmProductPreferencesService {
       throw new NotFoundException(`Farm with ID "${farmId}" not found`);
     }
 
-    // Vérifier que le produit existe
-    if (dto.globalProductId) {
-      const product = await this.prisma.globalMedicalProduct.findUnique({
-        where: { id: dto.globalProductId },
-      });
+    // Verify product exists and is accessible to this farm
+    // (global products are accessible to all, local products only to their farm)
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: {
+        id: dto.productId,
+        deletedAt: null,
+        OR: [
+          { scope: DataScope.global },
+          { scope: DataScope.local, farmId },
+        ],
+      },
+    });
 
-      if (!product) {
-        throw new NotFoundException(`Global product with ID "${dto.globalProductId}" not found`);
-      }
+    if (!product) {
+      throw new NotFoundException(
+        `Product with ID "${dto.productId}" not found or not accessible to this farm`,
+      );
     }
 
-    if (dto.customProductId) {
-      const product = await this.prisma.customMedicalProduct.findFirst({
-        where: {
-          id: dto.customProductId,
-          farmId, // Vérifier que le produit custom appartient à cette ferme
-        },
-      });
+    // Check for duplicate preference
+    const existing = await this.prisma.farmProductPreference.findUnique({
+      where: {
+        farmId_productId: { farmId, productId: dto.productId },
+      },
+    });
 
-      if (!product) {
-        throw new NotFoundException(`Custom product with ID "${dto.customProductId}" not found or does not belong to this farm`);
-      }
+    if (existing) {
+      throw new BadRequestException(
+        `Product preference already exists for this farm`,
+      );
     }
 
     return this.prisma.farmProductPreference.create({
       data: {
-        ...dto,
         farmId,
+        productId: dto.productId,
+        displayOrder: dto.displayOrder ?? 0,
+        isActive: dto.isActive ?? true,
       },
       include: {
-        globalProduct: true,
-        customProduct: true,
+        product: true,
         farm: {
           select: {
             id: true,
@@ -69,8 +71,7 @@ export class FarmProductPreferencesService {
   async findAll() {
     return this.prisma.farmProductPreference.findMany({
       include: {
-        globalProduct: true,
-        customProduct: true,
+        product: true,
         farm: {
           select: {
             id: true,
@@ -85,7 +86,7 @@ export class FarmProductPreferencesService {
   }
 
   async findByFarm(farmId: string) {
-    // Vérifier que la ferme existe
+    // Verify farm exists
     const farm = await this.prisma.farm.findUnique({
       where: { id: farmId },
     });
@@ -97,8 +98,7 @@ export class FarmProductPreferencesService {
     return this.prisma.farmProductPreference.findMany({
       where: { farmId },
       include: {
-        globalProduct: true,
-        customProduct: true,
+        product: true,
       },
       orderBy: {
         displayOrder: 'asc',
@@ -110,8 +110,7 @@ export class FarmProductPreferencesService {
     const preference = await this.prisma.farmProductPreference.findUnique({
       where: { id },
       include: {
-        globalProduct: true,
-        customProduct: true,
+        product: true,
         farm: {
           select: {
             id: true,
@@ -122,7 +121,9 @@ export class FarmProductPreferencesService {
     });
 
     if (!preference) {
-      throw new NotFoundException(`Farm product preference with ID "${id}" not found`);
+      throw new NotFoundException(
+        `Farm product preference with ID "${id}" not found`,
+      );
     }
 
     return preference;
@@ -135,8 +136,7 @@ export class FarmProductPreferencesService {
       where: { id },
       data: dto,
       include: {
-        globalProduct: true,
-        customProduct: true,
+        product: true,
         farm: {
           select: {
             id: true,
@@ -162,14 +162,13 @@ export class FarmProductPreferencesService {
       where: { id },
       data: { isActive },
       include: {
-        globalProduct: true,
-        customProduct: true,
+        product: true,
       },
     });
   }
 
   async reorder(farmId: string, orderedIds: string[]) {
-    // Vérifier que la ferme existe
+    // Verify farm exists
     const farm = await this.prisma.farm.findUnique({
       where: { id: farmId },
     });
@@ -178,7 +177,7 @@ export class FarmProductPreferencesService {
       throw new NotFoundException(`Farm with ID "${farmId}" not found`);
     }
 
-    // Vérifier que toutes les préférences appartiennent à cette ferme
+    // Verify all preferences belong to this farm
     const preferences = await this.prisma.farmProductPreference.findMany({
       where: {
         id: { in: orderedIds },
@@ -187,15 +186,17 @@ export class FarmProductPreferencesService {
     });
 
     if (preferences.length !== orderedIds.length) {
-      throw new BadRequestException('Some preference IDs are invalid or do not belong to this farm');
+      throw new BadRequestException(
+        'Some preference IDs are invalid or do not belong to this farm',
+      );
     }
 
-    // Mettre à jour l'ordre
+    // Update order
     const updates = orderedIds.map((id, index) =>
       this.prisma.farmProductPreference.update({
         where: { id },
         data: { displayOrder: index },
-      })
+      }),
     );
 
     await this.prisma.$transaction(updates);
