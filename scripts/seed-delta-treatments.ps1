@@ -130,7 +130,10 @@ Write-Host "  Chargement des animaux de la ferme $FarmId..." -ForegroundColor Gr
 $animalsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/animals?limit=500" -Silent
 $animals = @()
 if ($animalsResponse) {
-    if ($animalsResponse.data) {
+    # Structure: response.data.data (nested)
+    if ($animalsResponse.data -and $animalsResponse.data.data) {
+        $animals = @($animalsResponse.data.data)
+    } elseif ($animalsResponse.data -is [array]) {
         $animals = @($animalsResponse.data)
     } elseif ($animalsResponse -is [array]) {
         $animals = @($animalsResponse)
@@ -165,12 +168,18 @@ Write-Host "    -> $($products.Count) produits trouves (locaux + globaux)" -Fore
 Write-Host "  Chargement des veterinaires..." -ForegroundColor Gray
 $vetsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/veterinarians" -Silent
 $vets = @()
-if ($vetsResponse.data) {
-    $vets = $vetsResponse.data
-} elseif ($vetsResponse -is [array]) {
-    $vets = $vetsResponse
+if ($vetsResponse) {
+    # Structure: response.data.data (nested) ou response.data (array)
+    if ($vetsResponse.data -and $vetsResponse.data.data) {
+        $vets = @($vetsResponse.data.data)
+    } elseif ($vetsResponse.data -is [array]) {
+        $vets = @($vetsResponse.data)
+    } elseif ($vetsResponse -is [array]) {
+        $vets = @($vetsResponse)
+    }
 }
-Write-Host "    -> $($vets.Count) veterinaires trouves" -ForegroundColor Green
+$vetCount = if ($vets) { $vets.Count } else { 0 }
+Write-Host "    -> $vetCount veterinaires trouves" -ForegroundColor Green
 
 # Verifier qu'on a les donnees necessaires
 if ($animalCount -eq 0) {
@@ -265,7 +274,7 @@ foreach ($animal in $animals) {
         }
 
         # Ajouter un veterinaire si disponible
-        if ($vets.Count -gt 0) {
+        if ($vetCount -gt 0) {
             $selectedVet = $vets | Get-Random
             $treatment.veterinarianId = $selectedVet.id
             $treatment.veterinarianName = "$($selectedVet.firstName) $($selectedVet.lastName)"
