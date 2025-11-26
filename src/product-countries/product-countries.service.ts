@@ -1,15 +1,16 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductCountryDto, UpdateProductCountryDto } from './dto';
+import { DataScope } from '@prisma/client';
 
 @Injectable()
 export class ProductCountriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateProductCountryDto) {
-    // Vérifier que le produit existe
-    const product = await this.prisma.globalMedicalProduct.findUnique({
-      where: { id: dto.productId },
+    // Vérifier que le produit global existe (only global products can be linked to countries)
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: { id: dto.productId, scope: DataScope.global },
     });
 
     if (!product) {
@@ -68,8 +69,8 @@ export class ProductCountriesService {
    * Liste des pays d'un produit (PHASE_17 requirement)
    */
   async findCountriesByProduct(productId: string) {
-    const product = await this.prisma.globalMedicalProduct.findUnique({
-      where: { id: productId },
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: { id: productId, scope: DataScope.global },
     });
 
     if (!product) {

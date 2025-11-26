@@ -50,8 +50,6 @@ export class VaccinesService {
       search,
       scope = 'all',
       targetDisease,
-      type,
-      isMandatory,
       isActive,
       page = 1,
       limit = 50,
@@ -86,19 +84,12 @@ export class VaccinesService {
         { nameFr: { contains: search, mode: 'insensitive' } },
         { nameEn: { contains: search, mode: 'insensitive' } },
         { nameAr: { contains: search, mode: 'insensitive' } },
-        { commercialName: { contains: search, mode: 'insensitive' } },
-        { targetDisease: { contains: search, mode: 'insensitive' } },
         { code: { contains: search, mode: 'insensitive' } },
+        { laboratoire: { contains: search, mode: 'insensitive' } },
       ];
     }
     if (targetDisease) {
-      where.targetDisease = { contains: targetDisease, mode: 'insensitive' };
-    }
-    if (type) {
-      where.type = type;
-    }
-    if (isMandatory !== undefined) {
-      where.isMandatory = isMandatory;
+      where.targetDisease = targetDisease; // Enum value, exact match
     }
     if (isActive !== undefined) {
       where.isActive = isActive;

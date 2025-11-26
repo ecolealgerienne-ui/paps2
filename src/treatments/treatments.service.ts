@@ -154,7 +154,7 @@ export class TreatmentsService {
       where,
       include: {
         animal: { select: { id: true, visualId: true, currentEid: true } },
-        product: { select: { id: true, name: true } },
+        product: { select: { id: true, nameFr: true } },
         veterinarian: { select: { id: true, firstName: true, lastName: true } },
       },
       orderBy: { treatmentDate: 'desc' },
