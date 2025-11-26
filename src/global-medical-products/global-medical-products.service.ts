@@ -3,15 +3,19 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MedicalProductType } from './types/medical-product-type.enum';
 import { CreateGlobalMedicalProductDto } from './dto/create-global-medical-product.dto';
 import { UpdateGlobalMedicalProductDto } from './dto/update-global-medical-product.dto';
+import { DataScope } from '@prisma/client';
 
 @Injectable()
 export class GlobalMedicalProductsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateGlobalMedicalProductDto) {
-    // Vérifier code unique
-    const existing = await this.prisma.globalMedicalProduct.findUnique({
-      where: { code: dto.code },
+    // Vérifier code unique parmi les produits globaux
+    const existing = await this.prisma.medicalProduct.findFirst({
+      where: {
+        code: dto.code,
+        scope: DataScope.global,
+      },
     });
 
     if (existing && !existing.deletedAt) {
@@ -20,7 +24,7 @@ export class GlobalMedicalProductsService {
 
     // Si soft-deleted, restaurer
     if (existing && existing.deletedAt) {
-      return this.prisma.globalMedicalProduct.update({
+      return this.prisma.medicalProduct.update({
         where: { id: existing.id },
         data: {
           ...dto,
@@ -30,11 +34,19 @@ export class GlobalMedicalProductsService {
       });
     }
 
-    return this.prisma.globalMedicalProduct.create({ data: dto });
+    return this.prisma.medicalProduct.create({
+      data: {
+        ...dto,
+        scope: DataScope.global,
+        farmId: null, // Global products have no farm
+      },
+    });
   }
 
   async findAll(filters?: { type?: MedicalProductType; laboratoire?: string; includeDeleted?: boolean }) {
-    const where: any = {};
+    const where: any = {
+      scope: DataScope.global, // Only return global products
+    };
 
     // Filtre soft delete
     if (!filters?.includeDeleted) {
@@ -54,15 +66,18 @@ export class GlobalMedicalProductsService {
       };
     }
 
-    return this.prisma.globalMedicalProduct.findMany({
+    return this.prisma.medicalProduct.findMany({
       where,
       orderBy: { nameFr: 'asc' },
     });
   }
 
   async findOne(id: string) {
-    const product = await this.prisma.globalMedicalProduct.findUnique({
-      where: { id },
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: {
+        id,
+        scope: DataScope.global,
+      },
     });
 
     if (!product || product.deletedAt) {
@@ -73,8 +88,11 @@ export class GlobalMedicalProductsService {
   }
 
   async findByCode(code: string) {
-    const product = await this.prisma.globalMedicalProduct.findUnique({
-      where: { code },
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: {
+        code,
+        scope: DataScope.global,
+      },
     });
 
     if (!product || product.deletedAt) {
@@ -85,8 +103,12 @@ export class GlobalMedicalProductsService {
   }
 
   async findByType(type: MedicalProductType) {
-    return this.prisma.globalMedicalProduct.findMany({
-      where: { type, deletedAt: null },
+    return this.prisma.medicalProduct.findMany({
+      where: {
+        type,
+        scope: DataScope.global,
+        deletedAt: null,
+      },
       orderBy: { nameFr: 'asc' },
     });
   }
@@ -99,7 +121,7 @@ export class GlobalMedicalProductsService {
       throw new ConflictException('Version conflict: the resource has been modified by another user');
     }
 
-    return this.prisma.globalMedicalProduct.update({
+    return this.prisma.medicalProduct.update({
       where: { id },
       data: {
         ...dto,
@@ -111,16 +133,7 @@ export class GlobalMedicalProductsService {
   async remove(id: string) {
     const existing = await this.findOne(id);
 
-    // Note: Vérification d'utilisation dans FarmProductPreference sera ajoutée en Phase 21
-    // Pour l'instant, on permet la suppression
-    // const usageCount = await this.prisma.farmProductPreference.count({
-    //   where: { globalProductId: id },
-    // });
-    // if (usageCount > 0) {
-    //   throw new ConflictException(`Product used in ${usageCount} farm preferences`);
-    // }
-
-    return this.prisma.globalMedicalProduct.update({
+    return this.prisma.medicalProduct.update({
       where: { id },
       data: {
         deletedAt: new Date(),
@@ -130,8 +143,11 @@ export class GlobalMedicalProductsService {
   }
 
   async restore(id: string) {
-    const product = await this.prisma.globalMedicalProduct.findUnique({
-      where: { id },
+    const product = await this.prisma.medicalProduct.findFirst({
+      where: {
+        id,
+        scope: DataScope.global,
+      },
     });
 
     if (!product) {
@@ -142,7 +158,7 @@ export class GlobalMedicalProductsService {
       throw new ConflictException('Global medical product is not deleted');
     }
 
-    return this.prisma.globalMedicalProduct.update({
+    return this.prisma.medicalProduct.update({
       where: { id },
       data: {
         deletedAt: null,

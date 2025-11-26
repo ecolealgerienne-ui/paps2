@@ -1,40 +1,32 @@
-import { IsUUID, IsOptional, IsInt, IsBoolean } from 'class-validator';
+import { IsUUID, IsOptional, IsInt, IsBoolean, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsXorField } from '../../common/validators';
+import { Type } from 'class-transformer';
 
 export class CreateFarmProductPreferenceDto {
-  @ApiPropertyOptional({
-    description: 'Global product ID (from global catalog). XOR with customProductId',
-    example: '123e4567-e89b-12d3-a456-426614174000'
+  @ApiProperty({
+    description: 'Product ID (from unified MedicalProduct table - can be global or local)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsUUID()
-  @IsOptional()
-  globalProductId?: string;
-
-  @ApiPropertyOptional({
-    description: 'Custom product ID (farm-specific). XOR with globalProductId',
-    example: '123e4567-e89b-12d3-a456-426614174001'
-  })
-  @IsUUID()
-  @IsOptional()
-  @IsXorField(['globalProductId', 'customProductId'])
-  customProductId?: string;
+  productId: string;
 
   @ApiPropertyOptional({
     description: 'Display order for sorting',
     example: 1,
-    default: 0
+    default: 0,
   })
-  @IsInt()
   @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
   displayOrder?: number;
 
   @ApiPropertyOptional({
     description: 'Is this preference active',
     example: true,
-    default: true
+    default: true,
   })
-  @IsBoolean()
   @IsOptional()
+  @IsBoolean()
   isActive?: boolean;
 }
