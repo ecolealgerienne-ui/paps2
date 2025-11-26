@@ -3,7 +3,6 @@ import {
   IsOptional,
   IsBoolean,
   IsInt,
-  IsNumber,
   Min,
   IsDateString,
   IsEnum,
@@ -12,10 +11,11 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { VaccineType } from '@prisma/client';
+import { VaccineTargetDisease } from '@prisma/client';
 
 // =============================================================================
 // CREATE DTO - For creating vaccines (local scope by default)
+// Based on Vaccine model in schema.prisma
 // =============================================================================
 export class CreateVaccineDto {
   @ApiPropertyOptional({ description: 'UUID généré par le client (optionnel)' })
@@ -40,12 +40,6 @@ export class CreateVaccineDto {
   @MaxLength(255)
   nameAr?: string;
 
-  @ApiPropertyOptional({ description: 'Nom commercial' })
-  @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  commercialName?: string;
-
   @ApiPropertyOptional({ description: 'Code unique (obligatoire pour global)', example: 'fmd-vaccine' })
   @IsOptional()
   @IsString()
@@ -58,38 +52,18 @@ export class CreateVaccineDto {
   description?: string;
 
   @ApiPropertyOptional({
-    description: 'Type de vaccin',
-    enum: VaccineType,
-    example: 'viral',
+    description: 'Maladie cible',
+    enum: VaccineTargetDisease,
+    example: 'foot_and_mouth',
   })
   @IsOptional()
-  @IsEnum(VaccineType)
-  type?: VaccineType;
-
-  @ApiPropertyOptional({ description: 'Maladie cible', example: 'Fièvre Aphteuse' })
-  @IsOptional()
-  @IsString()
-  targetDisease?: string;
-
-  @ApiPropertyOptional({ description: 'Espèces cibles (séparées par virgule)', example: 'bovine,ovine,caprine' })
-  @IsOptional()
-  @IsString()
-  targetSpecies?: string;
-
-  @ApiPropertyOptional({ description: 'Souche du vaccin' })
-  @IsOptional()
-  @IsString()
-  strain?: string;
+  @IsEnum(VaccineTargetDisease)
+  targetDisease?: VaccineTargetDisease;
 
   @ApiPropertyOptional({ description: 'Laboratoire fabricant' })
   @IsOptional()
   @IsString()
   laboratoire?: string;
-
-  @ApiPropertyOptional({ description: 'Fabricant' })
-  @IsOptional()
-  @IsString()
-  manufacturer?: string;
 
   @ApiPropertyOptional({ description: 'Numéro AMM' })
   @IsOptional()
@@ -101,126 +75,17 @@ export class CreateVaccineDto {
   @IsString()
   dosage?: string;
 
-  @ApiPropertyOptional({ description: 'Voie d\'administration' })
+  @ApiPropertyOptional({ description: 'Dosage recommandé' })
   @IsOptional()
   @IsString()
-  administrationRoute?: string;
+  dosageRecommande?: string;
 
-  @ApiPropertyOptional({ description: 'Site d\'injection' })
-  @IsOptional()
-  @IsString()
-  injectionSite?: string;
-
-  @ApiPropertyOptional({ description: 'Âge minimum (jours)' })
+  @ApiPropertyOptional({ description: 'Durée d\'immunité (jours)' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  minAgeInDays?: number;
-
-  @ApiPropertyOptional({ description: 'Âge maximum (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  maxAgeInDays?: number;
-
-  @ApiPropertyOptional({ description: 'Intervalle entre doses (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  intervalBetweenDoses?: number;
-
-  @ApiPropertyOptional({ description: 'Nombre de doses requises' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  numberOfDoses?: number;
-
-  @ApiPropertyOptional({ description: 'Durée de protection (mois)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  protectionDurationMonths?: number;
-
-  @ApiPropertyOptional({ description: 'Intervalle de rappel (mois)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  boosterIntervalMonths?: number;
-
-  @ApiPropertyOptional({ description: 'Délai d\'attente viande (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  withdrawalPeriodMeat?: number;
-
-  @ApiPropertyOptional({ description: 'Délai d\'attente lait (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  withdrawalPeriodMilk?: number;
-
-  @ApiPropertyOptional({ description: 'Conditions de stockage' })
-  @IsOptional()
-  @IsString()
-  storageConditions?: string;
-
-  @ApiPropertyOptional({ description: 'Stock actuel', default: 0 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  currentStock?: number;
-
-  @ApiPropertyOptional({ description: 'Stock minimum', default: 0 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  minStock?: number;
-
-  @ApiPropertyOptional({ description: 'Unité de stock' })
-  @IsOptional()
-  @IsString()
-  stockUnit?: string;
-
-  @ApiPropertyOptional({ description: 'Prix unitaire' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  unitPrice?: number;
-
-  @ApiPropertyOptional({ description: 'Devise' })
-  @IsOptional()
-  @IsString()
-  currency?: string;
-
-  @ApiPropertyOptional({ description: 'Numéro de lot' })
-  @IsOptional()
-  @IsString()
-  batchNumber?: string;
-
-  @ApiPropertyOptional({ description: 'Date d\'expiration' })
-  @IsOptional()
-  @IsDateString()
-  expiryDate?: string;
-
-  @ApiPropertyOptional({ description: 'Notes' })
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
-  @ApiPropertyOptional({ description: 'Obligatoire (campagne nationale)', default: false })
-  @IsOptional()
-  @IsBoolean()
-  isMandatory?: boolean;
+  dureeImmunite?: number;
 
   @ApiPropertyOptional({ description: 'Actif', default: true })
   @IsOptional()
@@ -249,16 +114,12 @@ export class CreateGlobalVaccineDto extends CreateVaccineDto {
   declare code: string;
 
   @ApiProperty({
-    description: 'Type de vaccin (obligatoire pour global)',
-    enum: VaccineType,
-    example: 'viral',
+    description: 'Maladie cible (obligatoire pour global)',
+    enum: VaccineTargetDisease,
+    example: 'foot_and_mouth',
   })
-  @IsEnum(VaccineType)
-  declare type: VaccineType;
-
-  @ApiProperty({ description: 'Maladie cible (obligatoire pour global)', example: 'Fièvre Aphteuse' })
-  @IsString()
-  declare targetDisease: string;
+  @IsEnum(VaccineTargetDisease)
+  declare targetDisease: VaccineTargetDisease;
 }
 
 // =============================================================================
@@ -283,11 +144,6 @@ export class UpdateVaccineDto {
   @MaxLength(255)
   nameAr?: string;
 
-  @ApiPropertyOptional({ description: 'Nom commercial' })
-  @IsOptional()
-  @IsString()
-  commercialName?: string;
-
   @ApiPropertyOptional({ description: 'Code unique' })
   @IsOptional()
   @IsString()
@@ -299,35 +155,18 @@ export class UpdateVaccineDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ enum: VaccineType })
+  @ApiPropertyOptional({
+    description: 'Maladie cible',
+    enum: VaccineTargetDisease,
+  })
   @IsOptional()
-  @IsEnum(VaccineType)
-  type?: VaccineType;
-
-  @ApiPropertyOptional({ description: 'Maladie cible' })
-  @IsOptional()
-  @IsString()
-  targetDisease?: string;
-
-  @ApiPropertyOptional({ description: 'Espèces cibles' })
-  @IsOptional()
-  @IsString()
-  targetSpecies?: string;
-
-  @ApiPropertyOptional({ description: 'Souche' })
-  @IsOptional()
-  @IsString()
-  strain?: string;
+  @IsEnum(VaccineTargetDisease)
+  targetDisease?: VaccineTargetDisease;
 
   @ApiPropertyOptional({ description: 'Laboratoire' })
   @IsOptional()
   @IsString()
   laboratoire?: string;
-
-  @ApiPropertyOptional({ description: 'Fabricant' })
-  @IsOptional()
-  @IsString()
-  manufacturer?: string;
 
   @ApiPropertyOptional({ description: 'Numéro AMM' })
   @IsOptional()
@@ -339,126 +178,17 @@ export class UpdateVaccineDto {
   @IsString()
   dosage?: string;
 
-  @ApiPropertyOptional({ description: 'Voie d\'administration' })
+  @ApiPropertyOptional({ description: 'Dosage recommandé' })
   @IsOptional()
   @IsString()
-  administrationRoute?: string;
+  dosageRecommande?: string;
 
-  @ApiPropertyOptional({ description: 'Site d\'injection' })
-  @IsOptional()
-  @IsString()
-  injectionSite?: string;
-
-  @ApiPropertyOptional({ description: 'Âge minimum (jours)' })
+  @ApiPropertyOptional({ description: 'Durée d\'immunité (jours)' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
-  minAgeInDays?: number;
-
-  @ApiPropertyOptional({ description: 'Âge maximum (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  maxAgeInDays?: number;
-
-  @ApiPropertyOptional({ description: 'Intervalle entre doses (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  intervalBetweenDoses?: number;
-
-  @ApiPropertyOptional({ description: 'Nombre de doses' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  numberOfDoses?: number;
-
-  @ApiPropertyOptional({ description: 'Durée de protection (mois)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  protectionDurationMonths?: number;
-
-  @ApiPropertyOptional({ description: 'Intervalle de rappel (mois)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  boosterIntervalMonths?: number;
-
-  @ApiPropertyOptional({ description: 'Délai d\'attente viande (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  withdrawalPeriodMeat?: number;
-
-  @ApiPropertyOptional({ description: 'Délai d\'attente lait (jours)' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  withdrawalPeriodMilk?: number;
-
-  @ApiPropertyOptional({ description: 'Conditions de stockage' })
-  @IsOptional()
-  @IsString()
-  storageConditions?: string;
-
-  @ApiPropertyOptional({ description: 'Stock actuel' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  currentStock?: number;
-
-  @ApiPropertyOptional({ description: 'Stock minimum' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  minStock?: number;
-
-  @ApiPropertyOptional({ description: 'Unité de stock' })
-  @IsOptional()
-  @IsString()
-  stockUnit?: string;
-
-  @ApiPropertyOptional({ description: 'Prix unitaire' })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  unitPrice?: number;
-
-  @ApiPropertyOptional({ description: 'Devise' })
-  @IsOptional()
-  @IsString()
-  currency?: string;
-
-  @ApiPropertyOptional({ description: 'Numéro de lot' })
-  @IsOptional()
-  @IsString()
-  batchNumber?: string;
-
-  @ApiPropertyOptional({ description: 'Date d\'expiration' })
-  @IsOptional()
-  @IsDateString()
-  expiryDate?: string;
-
-  @ApiPropertyOptional({ description: 'Notes' })
-  @IsOptional()
-  @IsString()
-  notes?: string;
-
-  @ApiPropertyOptional({ description: 'Obligatoire' })
-  @IsOptional()
-  @IsBoolean()
-  isMandatory?: boolean;
+  dureeImmunite?: number;
 
   @ApiPropertyOptional({ description: 'Actif' })
   @IsOptional()
@@ -496,21 +226,13 @@ export class QueryVaccineDto {
   @IsString()
   scope?: 'global' | 'local' | 'all';
 
-  @ApiPropertyOptional({ description: 'Filtrer par maladie cible' })
+  @ApiPropertyOptional({
+    description: 'Filtrer par maladie cible',
+    enum: VaccineTargetDisease,
+  })
   @IsOptional()
-  @IsString()
-  targetDisease?: string;
-
-  @ApiPropertyOptional({ enum: VaccineType })
-  @IsOptional()
-  @IsEnum(VaccineType)
-  type?: VaccineType;
-
-  @ApiPropertyOptional({ description: 'Filtrer par vaccins obligatoires' })
-  @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
-  isMandatory?: boolean;
+  @IsEnum(VaccineTargetDisease)
+  targetDisease?: VaccineTargetDisease;
 
   @ApiPropertyOptional({ description: 'Filtrer par statut actif' })
   @IsOptional()
