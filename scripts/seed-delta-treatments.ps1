@@ -90,17 +90,54 @@ function Get-RandomDate {
 # 1. RECUPERER LES DONNEES EXISTANTES
 # =============================================================================
 Write-Host "1. Recuperation des donnees existantes..." -ForegroundColor Cyan
+Write-Host "   FarmId utilise: $FarmId" -ForegroundColor Gray
+
+# D'abord, lister les fermes pour verifier
+Write-Host "  Verification des fermes disponibles..." -ForegroundColor Gray
+$farmsResponse = Invoke-Api -Method GET -Endpoint "/farms" -Silent
+if ($farmsResponse) {
+    $farms = @()
+    if ($farmsResponse.data) { $farms = @($farmsResponse.data) }
+    elseif ($farmsResponse -is [array]) { $farms = @($farmsResponse) }
+    else { $farms = @($farmsResponse) }
+
+    if ($farms.Count -gt 0) {
+        Write-Host "    -> Fermes trouvees:" -ForegroundColor Green
+        foreach ($farm in $farms) {
+            $farmName = if ($farm.name) { $farm.name } else { "Sans nom" }
+            $farmIdFound = if ($farm.id) { $farm.id } else { "?" }
+            Write-Host "       - $farmName (ID: $farmIdFound)" -ForegroundColor White
+
+            # Utiliser la premiere ferme trouvee si le FarmId par defaut n'existe pas
+            if (-not $script:foundFarm -and $farm.id) {
+                $script:foundFarm = $farm.id
+            }
+        }
+
+        # Si le FarmId passe en param n'est pas dans la liste, utiliser le premier trouve
+        $farmExists = $farms | Where-Object { $_.id -eq $FarmId }
+        if (-not $farmExists -and $script:foundFarm) {
+            Write-Host "    -> FarmId $FarmId non trouve, utilisation de: $($script:foundFarm)" -ForegroundColor Yellow
+            $FarmId = $script:foundFarm
+        }
+    } else {
+        Write-Host "    -> Aucune ferme trouvee!" -ForegroundColor Red
+    }
+}
 
 # Recuperer les animaux
-Write-Host "  Chargement des animaux..." -ForegroundColor Gray
-$animalsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/animals" -Silent
+Write-Host "  Chargement des animaux de la ferme $FarmId..." -ForegroundColor Gray
+$animalsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/animals?limit=500" -Silent
 $animals = @()
-if ($animalsResponse.data) {
-    $animals = $animalsResponse.data
-} elseif ($animalsResponse -is [array]) {
-    $animals = $animalsResponse
+if ($animalsResponse) {
+    if ($animalsResponse.data) {
+        $animals = @($animalsResponse.data)
+    } elseif ($animalsResponse -is [array]) {
+        $animals = @($animalsResponse)
+    }
 }
-Write-Host "    -> $($animals.Count) animaux trouves" -ForegroundColor Green
+$animalCount = if ($animals) { $animals.Count } else { 0 }
+Write-Host "    -> $animalCount animaux trouves" -ForegroundColor Green
 
 # Recuperer les produits medicaux (local + global)
 Write-Host "  Chargement des produits medicaux..." -ForegroundColor Gray
@@ -136,9 +173,10 @@ if ($vetsResponse.data) {
 Write-Host "    -> $($vets.Count) veterinaires trouves" -ForegroundColor Green
 
 # Verifier qu'on a les donnees necessaires
-if ($animals.Count -eq 0) {
+if ($animalCount -eq 0) {
     Write-Host ""
-    Write-Host "ERREUR: Aucun animal trouve. Executez d'abord seed-database-100-animals-fr.ps1" -ForegroundColor Red
+    Write-Host "ERREUR: Aucun animal trouve pour la ferme $FarmId" -ForegroundColor Red
+    Write-Host "Executez d'abord: .\scripts\seed-database-100-animals-fr.ps1" -ForegroundColor Red
     exit 1
 }
 
