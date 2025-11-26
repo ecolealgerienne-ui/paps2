@@ -38,7 +38,8 @@ function Invoke-Api {
         [string]$Endpoint,
         [object]$Body = $null,
         [string]$Description,
-        [switch]$Silent
+        [switch]$Silent,
+        [switch]$ShowBodyOnError
     )
 
     $uri = "$BaseUrl$Endpoint"
@@ -71,6 +72,16 @@ function Invoke-Api {
         if (-not $Silent) {
             Write-Host " ERROR" -ForegroundColor Red
             Write-Host "    $($_.Exception.Message)" -ForegroundColor Red
+            # Try to get detailed error from response
+            try {
+                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                $reader.BaseStream.Position = 0
+                $errorBody = $reader.ReadToEnd()
+                Write-Host "    Details: $errorBody" -ForegroundColor Red
+            } catch {}
+        }
+        if ($ShowBodyOnError -and $Body) {
+            Write-Host "    Body sent: $jsonBody" -ForegroundColor Yellow
         }
         return $null
     }
@@ -92,39 +103,6 @@ function Get-RandomDate {
 Write-Host "1. Recuperation des donnees existantes..." -ForegroundColor Cyan
 Write-Host "   FarmId utilise: $FarmId" -ForegroundColor Gray
 
-# D'abord, lister les fermes pour verifier
-Write-Host "  Verification des fermes disponibles..." -ForegroundColor Gray
-$farmsResponse = Invoke-Api -Method GET -Endpoint "/farms" -Silent
-if ($farmsResponse) {
-    $farms = @()
-    if ($farmsResponse.data) { $farms = @($farmsResponse.data) }
-    elseif ($farmsResponse -is [array]) { $farms = @($farmsResponse) }
-    else { $farms = @($farmsResponse) }
-
-    if ($farms.Count -gt 0) {
-        Write-Host "    -> Fermes trouvees:" -ForegroundColor Green
-        foreach ($farm in $farms) {
-            $farmName = if ($farm.name) { $farm.name } else { "Sans nom" }
-            $farmIdFound = if ($farm.id) { $farm.id } else { "?" }
-            Write-Host "       - $farmName (ID: $farmIdFound)" -ForegroundColor White
-
-            # Utiliser la premiere ferme trouvee si le FarmId par defaut n'existe pas
-            if (-not $script:foundFarm -and $farm.id) {
-                $script:foundFarm = $farm.id
-            }
-        }
-
-        # Si le FarmId passe en param n'est pas dans la liste, utiliser le premier trouve
-        $farmExists = $farms | Where-Object { $_.id -eq $FarmId }
-        if (-not $farmExists -and $script:foundFarm) {
-            Write-Host "    -> FarmId $FarmId non trouve, utilisation de: $($script:foundFarm)" -ForegroundColor Yellow
-            $FarmId = $script:foundFarm
-        }
-    } else {
-        Write-Host "    -> Aucune ferme trouvee!" -ForegroundColor Red
-    }
-}
-
 # Recuperer les animaux
 Write-Host "  Chargement des animaux de la ferme $FarmId..." -ForegroundColor Gray
 $animalsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/animals?limit=500" -Silent
@@ -141,28 +119,28 @@ if ($animalsResponse) {
 }
 $animalCount = if ($animals) { $animals.Count } else { 0 }
 Write-Host "    -> $animalCount animaux trouves" -ForegroundColor Green
+if ($animalCount -gt 0) {
+    $firstAnimal = $animals[0]
+    Write-Host "    Debug - Premier animal: id=$($firstAnimal.id), name=$($firstAnimal.name)" -ForegroundColor Gray
+}
 
-# Recuperer les produits medicaux (local + global)
+# Recuperer les produits medicaux (endpoint retourne global + local)
 Write-Host "  Chargement des produits medicaux..." -ForegroundColor Gray
 $products = @()
 
-# D'abord les produits locaux de la ferme
-$localProductsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/medical-products" -Silent
-if ($localProductsResponse.data) {
-    $products += $localProductsResponse.data
-} elseif ($localProductsResponse -is [array]) {
-    $products += $localProductsResponse
+$productsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/medical-products?limit=100" -Silent
+if ($productsResponse) {
+    # Structure: response.data.data (nested) ou response.data (array)
+    if ($productsResponse.data -and $productsResponse.data.data) {
+        $products = @($productsResponse.data.data)
+    } elseif ($productsResponse.data -is [array]) {
+        $products = @($productsResponse.data)
+    } elseif ($productsResponse -is [array]) {
+        $products = @($productsResponse)
+    }
 }
 
-# Ensuite les produits globaux
-$globalProductsResponse = Invoke-Api -Method GET -Endpoint "/global-medical-products" -Silent
-if ($globalProductsResponse.data) {
-    $products += $globalProductsResponse.data
-} elseif ($globalProductsResponse -is [array]) {
-    $products += $globalProductsResponse
-}
-
-Write-Host "    -> $($products.Count) produits trouves (locaux + globaux)" -ForegroundColor Green
+Write-Host "    -> $($products.Count) produits medicaux trouves" -ForegroundColor Green
 
 # Recuperer les veterinaires
 Write-Host "  Chargement des veterinaires..." -ForegroundColor Gray
@@ -241,6 +219,15 @@ $productNames = @(
 # Statuts possibles (TreatmentStatus enum: scheduled, in_progress, completed, cancelled)
 $statuses = @("completed", "completed", "completed", "in_progress", "scheduled")
 
+# Debug: show first product
+if ($products.Count -gt 0) {
+    $firstProduct = $products[0]
+    Write-Host "    Debug - Premier produit: id=$($firstProduct.id), nameFr=$($firstProduct.nameFr)" -ForegroundColor Gray
+}
+
+$attemptCount = 0
+$errorCount = 0
+
 # 2-3 traitements par animal
 foreach ($animal in $animals) {
     $animalId = $animal.id
@@ -249,40 +236,58 @@ foreach ($animal in $animals) {
     $numTreatments = Get-Random -Minimum 2 -Maximum 4
 
     for ($i = 0; $i -lt $numTreatments; $i++) {
+        $attemptCount++
         $treatmentDate = Get-RandomDate -Start $startDate -End $endDate
         $withdrawalDays = Get-Random -Minimum 0 -Maximum 60
         $withdrawalEndDate = (Get-Date $treatmentDate).AddDays($withdrawalDays).ToString("yyyy-MM-ddT00:00:00.000Z")
 
         # Selectionner un produit (obligatoire)
         $selectedProduct = $products | Get-Random
-        $productNameValue = if ($selectedProduct.nameFr) { $selectedProduct.nameFr } else { $productNames | Get-Random }
+        $productNameValue = if ($selectedProduct.nameFr) { $selectedProduct.nameFr } elseif ($selectedProduct.name) { $selectedProduct.name } else { $productNames | Get-Random }
+        $productIdValue = $selectedProduct.id
+
+        # Skip si pas de productId valide
+        if (-not $productIdValue) {
+            Write-Host "    SKIP: Produit sans ID" -ForegroundColor Yellow
+            continue
+        }
 
         $treatment = @{
-            animalId = $animalId
-            productId = $selectedProduct.id
-            productName = $productNameValue
-            treatmentDate = $treatmentDate
-            dose = [Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1)
-            dosage = [Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1)
-            dosageUnit = @("ml", "mg", "g", "comprime") | Get-Random
-            duration = Get-Random -Minimum 1 -Maximum 7
-            status = $statuses | Get-Random
-            withdrawalEndDate = $withdrawalEndDate
-            diagnosis = $diagnostics | Get-Random
-            cost = [Math]::Round((Get-Random -Minimum 1500 -Maximum 8000) / 100.0, 2)
+            animalId = [string]$animalId
+            productId = [string]$productIdValue
+            productName = [string]$productNameValue
+            treatmentDate = [string]$treatmentDate
+            dose = [double]([Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1))
+            dosage = [double]([Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1))
+            dosageUnit = [string](@("ml", "mg", "g", "comprime") | Get-Random)
+            duration = [int](Get-Random -Minimum 1 -Maximum 7)
+            status = [string]($statuses | Get-Random)
+            withdrawalEndDate = [string]$withdrawalEndDate
+            diagnosis = [string]($diagnostics | Get-Random)
+            cost = [double]([Math]::Round((Get-Random -Minimum 1500 -Maximum 8000) / 100.0, 2))
             notes = "Traitement therapeutique - Delta script"
         }
 
         # Ajouter un veterinaire si disponible
         if ($vetCount -gt 0) {
             $selectedVet = $vets | Get-Random
-            $treatment.veterinarianId = $selectedVet.id
+            $treatment.veterinarianId = [string]$selectedVet.id
             $treatment.veterinarianName = "$($selectedVet.firstName) $($selectedVet.lastName)"
         }
 
-        $response = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/treatments" -Body $treatment -Silent
+        # Debug: show first few attempts with details
+        $showDebug = ($attemptCount -le 3)
+
+        $response = Invoke-Api -Method POST -Endpoint "/farms/$FarmId/treatments" -Body $treatment -Silent:(-not $showDebug) -ShowBodyOnError:$showDebug
         if ($response) {
             $treatmentCount++
+        } else {
+            $errorCount++
+            # Stop after 5 errors to avoid flooding
+            if ($errorCount -ge 5) {
+                Write-Host "    -> Trop d'erreurs ($errorCount), arret..." -ForegroundColor Red
+                break
+            }
         }
 
         # Afficher progression tous les 50
@@ -290,6 +295,9 @@ foreach ($animal in $animals) {
             Write-Host "    -> Traitements: $treatmentCount crees..." -ForegroundColor Cyan
         }
     }
+
+    # Break outer loop if too many errors
+    if ($errorCount -ge 5) { break }
 }
 
 Write-Host ""
