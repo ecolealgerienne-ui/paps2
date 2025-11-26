@@ -102,16 +102,27 @@ if ($animalsResponse.data) {
 }
 Write-Host "    -> $($animals.Count) animaux trouves" -ForegroundColor Green
 
-# Recuperer les produits medicaux de la ferme (local scope)
+# Recuperer les produits medicaux (local + global)
 Write-Host "  Chargement des produits medicaux..." -ForegroundColor Gray
-$productsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/medical-products" -Silent
 $products = @()
-if ($productsResponse.data) {
-    $products = $productsResponse.data
-} elseif ($productsResponse -is [array]) {
-    $products = $productsResponse
+
+# D'abord les produits locaux de la ferme
+$localProductsResponse = Invoke-Api -Method GET -Endpoint "/farms/$FarmId/medical-products" -Silent
+if ($localProductsResponse.data) {
+    $products += $localProductsResponse.data
+} elseif ($localProductsResponse -is [array]) {
+    $products += $localProductsResponse
 }
-Write-Host "    -> $($products.Count) produits trouves" -ForegroundColor Green
+
+# Ensuite les produits globaux
+$globalProductsResponse = Invoke-Api -Method GET -Endpoint "/global-medical-products" -Silent
+if ($globalProductsResponse.data) {
+    $products += $globalProductsResponse.data
+} elseif ($globalProductsResponse -is [array]) {
+    $products += $globalProductsResponse
+}
+
+Write-Host "    -> $($products.Count) produits trouves (locaux + globaux)" -ForegroundColor Green
 
 # Recuperer les veterinaires
 Write-Host "  Chargement des veterinaires..." -ForegroundColor Gray
@@ -133,7 +144,9 @@ if ($animals.Count -eq 0) {
 
 if ($products.Count -eq 0) {
     Write-Host ""
-    Write-Host "ATTENTION: Aucun produit medical trouve. Les traitements seront crees sans productId." -ForegroundColor Yellow
+    Write-Host "ERREUR: Aucun produit medical trouve. productId est obligatoire pour les traitements." -ForegroundColor Red
+    Write-Host "Executez d'abord seed-database-100-animals-fr.ps1 pour creer les produits globaux." -ForegroundColor Red
+    exit 1
 }
 
 # =============================================================================
@@ -178,8 +191,8 @@ $productNames = @(
     "Prostaglandine"
 )
 
-# Statuts possibles
-$statuses = @("completed", "completed", "completed", "in_progress", "planned")
+# Statuts possibles (TreatmentStatus enum: scheduled, in_progress, completed, cancelled)
+$statuses = @("completed", "completed", "completed", "in_progress", "scheduled")
 
 # 2-3 traitements par animal
 foreach ($animal in $animals) {
@@ -193,8 +206,14 @@ foreach ($animal in $animals) {
         $withdrawalDays = Get-Random -Minimum 0 -Maximum 60
         $withdrawalEndDate = (Get-Date $treatmentDate).AddDays($withdrawalDays).ToString("yyyy-MM-ddT00:00:00.000Z")
 
+        # Selectionner un produit (obligatoire)
+        $selectedProduct = $products | Get-Random
+        $productNameValue = if ($selectedProduct.nameFr) { $selectedProduct.nameFr } else { $productNames | Get-Random }
+
         $treatment = @{
             animalId = $animalId
+            productId = $selectedProduct.id
+            productName = $productNameValue
             treatmentDate = $treatmentDate
             dose = [Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1)
             dosage = [Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1)
@@ -205,14 +224,6 @@ foreach ($animal in $animals) {
             diagnosis = $diagnostics | Get-Random
             cost = [Math]::Round((Get-Random -Minimum 1500 -Maximum 8000) / 100.0, 2)
             notes = "Traitement therapeutique - Delta script"
-            productName = $productNames | Get-Random
-        }
-
-        # Ajouter un produit si disponible
-        if ($products.Count -gt 0) {
-            $selectedProduct = $products | Get-Random
-            $treatment.productId = $selectedProduct.id
-            $treatment.productName = $selectedProduct.nameFr
         }
 
         # Ajouter un veterinaire si disponible
