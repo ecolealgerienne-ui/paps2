@@ -12,14 +12,39 @@
  *   ts-node scripts/clear-database.ts
  */
 
-import 'dotenv/config';
+import * as path from 'path';
+import * as dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
+// Load .env from project root (one level up from scripts folder)
+const envPath = path.resolve(__dirname, '..', '.env');
+const envResult = dotenv.config({ path: envPath });
+
+if (envResult.error) {
+  console.warn(`⚠️  Warning: Could not load .env from ${envPath}`);
+  console.warn(`   Error: ${envResult.error.message}`);
+  console.warn(`   Make sure .env exists at project root or set DATABASE_URL environment variable`);
+}
+
+// Validate DATABASE_URL before instantiating Prisma
+if (!process.env.DATABASE_URL) {
+  console.error('❌ ERREUR: DATABASE_URL non définie!');
+  console.error(`   .env path tried: ${envPath}`);
+  console.error('   Solutions:');
+  console.error('   1. Créer un fichier .env à la racine du projet avec DATABASE_URL');
+  console.error('   2. Définir DATABASE_URL dans votre environnement');
+  console.error('   Example: DATABASE_URL="postgresql://user:pass@localhost:5432/db?schema=public"');
+  process.exit(1);
+}
+
+// Instantiate Prisma client AFTER dotenv has loaded
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🗑️  SUPPRESSION DE TOUTES LES DONNÉES DE LA BASE DE DONNÉES');
-  console.log('================================================\n');
+  console.log('================================================');
+  console.log(`📍 .env loaded from: ${envPath}`);
+  console.log(`🔗 DATABASE_URL: ${process.env.DATABASE_URL?.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}\n`); // Hide credentials
 
   try {
     // Confirmer l'environnement (sécurité)
@@ -33,6 +58,7 @@ async function main() {
 
     // Liste de toutes les tables dans l'ordre de suppression (respects foreign keys)
     // On commence par les tables de liaison et les dépendances, puis les tables principales
+    // Updated for Master Table Pattern (unified Vaccine, MedicalProduct, Veterinarian tables)
     const tablesToClear = [
       // Tables de liaison et préférences (PHASES 16-24)
       { name: 'farm_national_campaign_preferences', label: 'Farm National Campaign Preferences' },
@@ -60,18 +86,19 @@ async function main() {
       { name: 'animals', label: 'Animals' },
       { name: 'alert_configurations', label: 'Alert Configurations' },
       { name: 'farm_preferences', label: 'Farm Preferences' },
-      { name: 'custom_vaccines', label: 'Custom Vaccines' },
-      { name: 'custom_medical_products', label: 'Custom Medical Products' },
 
       // Tables de fermes et utilisateurs
       { name: 'farms', label: 'Farms' },
-      { name: 'veterinarians', label: 'Veterinarians' },
+
+      // Master Table Pattern: Unified tables with scope (global/local)
+      // Must be cleared after farm_*_preferences due to foreign keys
+      { name: 'vaccines', label: 'Vaccines (unified global + local)' },
+      { name: 'medical_products', label: 'Medical Products (unified global + local)' },
+      { name: 'veterinarians', label: 'Veterinarians (unified global + local)' },
 
       // Tables de référence globales
       { name: 'alert_templates', label: 'Alert Templates' },
       { name: 'national_campaigns', label: 'National Campaigns' },
-      { name: 'vaccines_global', label: 'Global Vaccines' },
-      { name: 'global_medical_products', label: 'Global Medical Products' },
       { name: 'breeds', label: 'Breeds' },
       { name: 'species', label: 'Species' },
       { name: 'countries', label: 'Countries' },
