@@ -300,9 +300,22 @@ async function seedProducts() {
     const code = `MED_${med.id_medicament}`;
 
     // Determine product type from ATCvet code
-    let productType = 'medication';
+    // Valid ProductType: antibiotic, anti_inflammatory, antiparasitic, vitamin, mineral, vaccine, anesthetic, hormone, antiseptic, analgesic, other
+    let productType = 'other';
     if (med.code_atc_vet?.startsWith('QI')) {
       productType = 'vaccine';
+    } else if (med.code_atc_vet?.startsWith('QJ')) {
+      productType = 'antibiotic';
+    } else if (med.code_atc_vet?.startsWith('QM')) {
+      productType = 'anti_inflammatory';
+    } else if (med.code_atc_vet?.startsWith('QP')) {
+      productType = 'antiparasitic';
+    } else if (med.code_atc_vet?.startsWith('QA')) {
+      productType = 'vitamin'; // Often vitamins/supplements
+    } else if (med.code_atc_vet?.startsWith('QN')) {
+      productType = 'anesthetic';
+    } else if (med.code_atc_vet?.startsWith('QG') || med.code_atc_vet?.startsWith('QH')) {
+      productType = 'hormone';
     }
 
     const existing = await prisma.product.findUnique({ where: { code } });
