@@ -450,10 +450,10 @@ async function seedTherapeuticIndications() {
     51: 'ovine',
   };
 
-  // Fetch species from DB and build ID map
+  // Build species ID map (Species.id IS the code: "bovine", "ovine", "caprine")
   const speciesMap: Record<number, string> = {};
   for (const [numCode, code] of Object.entries(speciesCodeMap)) {
-    const species = await prisma.species.findFirst({ where: { code } });
+    const species = await prisma.species.findUnique({ where: { id: code } });
     if (species) {
       speciesMap[parseInt(numCode)] = species.id;
     }
