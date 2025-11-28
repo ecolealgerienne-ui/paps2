@@ -36,6 +36,9 @@ import { FarmVeterinarianPreferencesModule } from './farm-veterinarian-preferenc
 import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-preferences/farm-national-campaign-preferences.module';
 import { UnitsModule } from './units/units.module';
 import { TherapeuticIndicationsModule } from './therapeutic-indications/therapeutic-indications.module';
+import { ActiveSubstancesModule } from './active-substances/active-substances.module';
+import { ProductCategoriesModule } from './product-categories/product-categories.module';
+import { AgeCategoriesModule } from './age-categories/age-categories.module';
 
 @Module({
   imports: [
@@ -78,6 +81,9 @@ import { TherapeuticIndicationsModule } from './therapeutic-indications/therapeu
     ProductPackagingsModule,
     UnitsModule,
     TherapeuticIndicationsModule,
+    ActiveSubstancesModule,
+    ProductCategoriesModule,
+    AgeCategoriesModule,
     NationalCampaignsModule,
     AlertTemplatesModule,
     AdministrationRoutesModule,
