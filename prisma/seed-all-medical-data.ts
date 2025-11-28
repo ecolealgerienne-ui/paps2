@@ -85,6 +85,36 @@ async function seedSpecies() {
   console.log(`  ✅ Species: ${speciesData.length} processed`);
 }
 
+async function seedCountries() {
+  console.log('\n📦 Seeding Countries...');
+
+  const countriesData = [
+    { code: 'FR', nameFr: 'France', nameEn: 'France', nameAr: 'فرنسا', region: 'Europe' },
+    { code: 'DZ', nameFr: 'Algérie', nameEn: 'Algeria', nameAr: 'الجزائر', region: 'Africa' },
+    { code: 'MA', nameFr: 'Maroc', nameEn: 'Morocco', nameAr: 'المغرب', region: 'Africa' },
+    { code: 'TN', nameFr: 'Tunisie', nameEn: 'Tunisia', nameAr: 'تونس', region: 'Africa' },
+    { code: 'ES', nameFr: 'Espagne', nameEn: 'Spain', nameAr: 'إسبانيا', region: 'Europe' },
+    { code: 'IT', nameFr: 'Italie', nameEn: 'Italy', nameAr: 'إيطاليا', region: 'Europe' },
+    { code: 'DE', nameFr: 'Allemagne', nameEn: 'Germany', nameAr: 'ألمانيا', region: 'Europe' },
+    { code: 'BE', nameFr: 'Belgique', nameEn: 'Belgium', nameAr: 'بلجيكا', region: 'Europe' },
+  ];
+
+  for (const country of countriesData) {
+    await prisma.country.upsert({
+      where: { code: country.code },
+      update: {
+        nameFr: country.nameFr,
+        nameEn: country.nameEn,
+        nameAr: country.nameAr,
+        region: country.region,
+      },
+      create: country,
+    });
+  }
+
+  console.log(`  ✅ Countries: ${countriesData.length} processed`);
+}
+
 async function seedUnits() {
   console.log('\n📦 Seeding Units...');
 
@@ -586,6 +616,7 @@ async function main() {
   try {
     // Seed in dependency order
     await seedSpecies();
+    await seedCountries();
     await seedUnits();
     await seedProductCategories();
     await seedActiveSubstances();
