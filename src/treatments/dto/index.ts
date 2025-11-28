@@ -1,6 +1,6 @@
 import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TreatmentStatus } from '../../common/enums';
+import { TreatmentStatus, TreatmentType } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 import { IsXorField, IsDateAfterOrEqual } from '../../common/validators';
 
@@ -14,6 +14,11 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsString()
   id?: string;
+
+  @ApiPropertyOptional({ enum: TreatmentType, default: TreatmentType.TREATMENT, description: 'Treatment type (treatment or vaccination)' })
+  @IsOptional()
+  @IsEnum(TreatmentType)
+  type?: TreatmentType;
 
   @ApiProperty({ description: 'Animal ID (single treatment)', required: false })
   @IsOptional()

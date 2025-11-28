@@ -89,6 +89,12 @@ export enum TreatmentStatus {
   CANCELLED = 'cancelled',
 }
 
+// ========== TREATMENT TYPE ==========
+export enum TreatmentType {
+  TREATMENT = 'treatment',
+  VACCINATION = 'vaccination',
+}
+
 // ========== CAMPAIGN STATUS ==========
 export enum CampaignStatus {
   PLANNED = 'planned',
