@@ -239,13 +239,14 @@ async function seedAgeCategories() {
   console.log('\n📦 Seeding Age Categories...');
 
   interface AgeCategoryData {
-    code: string;
+    code_categorie: string;
     code_espece: number;
-    designation_categorie_age: string;
+    libelle: string;
+    description?: string;
     age_min_jours: number;
     age_max_jours: number | null;
-    ordre_affichage: number;
-    est_defaut: boolean;
+    ordre: number;
+    is_default: boolean;
   }
 
   const categories: AgeCategoryData[] = loadJson('categories_age.json');
@@ -272,19 +273,19 @@ async function seedAgeCategories() {
     }
 
     const existing = await prisma.ageCategory.findFirst({
-      where: { speciesId, code: cat.code },
+      where: { speciesId, code: cat.code_categorie },
     });
 
     const data = {
-      code: cat.code,
+      code: cat.code_categorie,
       speciesId,
-      nameFr: cat.designation_categorie_age,
-      nameEn: cat.designation_categorie_age,
-      nameAr: cat.designation_categorie_age,
+      nameFr: cat.libelle,
+      nameEn: cat.libelle,
+      nameAr: cat.libelle,
       ageMinDays: cat.age_min_jours,
       ageMaxDays: cat.age_max_jours,
-      displayOrder: cat.ordre_affichage,
-      isDefault: cat.est_defaut,
+      displayOrder: cat.ordre,
+      isDefault: cat.is_default,
     };
 
     if (existing) {
