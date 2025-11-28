@@ -201,11 +201,11 @@ $productsResponse = Invoke-CurlApi -Method GET -Endpoint "/api/v1/products?limit
 if ($productsResponse) {
     # Handle nested response: {success, data: {data: [...], meta: {...}}}
     if ($productsResponse.data.data) {
-        $script:productsArray = @($productsResponse.data.data)
+        $productsArray = @($productsResponse.data.data)
     } elseif ($productsResponse.data -is [array]) {
-        $script:productsArray = @($productsResponse.data)
+        $productsArray = @($productsResponse.data)
     } else {
-        $script:productsArray = @($productsResponse)
+        $productsArray = @($productsResponse)
     }
     foreach ($product in $productsArray) {
         $productIds += $product.id
