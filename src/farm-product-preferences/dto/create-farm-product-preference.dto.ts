@@ -4,7 +4,7 @@ import { Type } from 'class-transformer';
 
 export class CreateFarmProductPreferenceDto {
   @ApiProperty({
-    description: 'Product ID (from unified MedicalProduct table - can be global or local)',
+    description: 'Product ID (from unified Product table - can be global or local)',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsUUID()
