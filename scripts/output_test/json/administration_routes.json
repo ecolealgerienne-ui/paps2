@@ -1,0 +1,146 @@
+[
+  {
+    "code": "im",
+    "numericCode": 2,
+    "nameFr": "Intramusculaire",
+    "nameEn": "Intramuscular",
+    "nameAr": "عضلي",
+    "displayOrder": 1
+  },
+  {
+    "code": "sc",
+    "numericCode": 4,
+    "nameFr": "Sous-cutanée",
+    "nameEn": "Subcutaneous",
+    "nameAr": "تحت الجلد",
+    "displayOrder": 2
+  },
+  {
+    "code": "intramammary",
+    "numericCode": 6,
+    "nameFr": "Intramammaire",
+    "nameEn": "Intramammary",
+    "nameAr": "داخل الضرع",
+    "displayOrder": 3
+  },
+  {
+    "code": "pour_on",
+    "numericCode": 8,
+    "nameFr": "Pour-on",
+    "nameEn": "Pour-on",
+    "nameAr": "صب على الجلد",
+    "displayOrder": 4
+  },
+  {
+    "code": "im_sc",
+    "numericCode": 9,
+    "nameFr": "IM ou SC",
+    "nameEn": "IM or SC",
+    "nameAr": "عضلي أو تحت الجلد",
+    "displayOrder": 5
+  },
+  {
+    "code": "intranasal",
+    "numericCode": 11,
+    "nameFr": "Intranasale",
+    "nameEn": "Intranasal",
+    "nameAr": "أنفي",
+    "displayOrder": 6
+  },
+  {
+    "code": "intraperitoneal",
+    "numericCode": 15,
+    "nameFr": "Intrapéritonéale",
+    "nameEn": "Intraperitoneal",
+    "nameAr": "داخل الصفاق",
+    "displayOrder": 7
+  },
+  {
+    "code": "epidural",
+    "numericCode": 16,
+    "nameFr": "Épidurale",
+    "nameEn": "Epidural",
+    "nameAr": "فوق الجافية",
+    "displayOrder": 8
+  },
+  {
+    "code": "intraarticular",
+    "numericCode": 17,
+    "nameFr": "Intra-articulaire",
+    "nameEn": "Intraarticular",
+    "nameAr": "داخل المفصل",
+    "displayOrder": 9
+  },
+  {
+    "code": "feed",
+    "numericCode": 19,
+    "nameFr": "Aliment",
+    "nameEn": "Feed",
+    "nameAr": "العلف",
+    "displayOrder": 10
+  },
+  {
+    "code": "route_24",
+    "numericCode": 24,
+    "nameFr": "Voie 24",
+    "nameEn": "Route 24",
+    "nameAr": "طريق 24",
+    "displayOrder": 11
+  },
+  {
+    "code": "route_27",
+    "numericCode": 27,
+    "nameFr": "Voie 27",
+    "nameEn": "Route 27",
+    "nameAr": "طريق 27",
+    "displayOrder": 12
+  },
+  {
+    "code": "route_29",
+    "numericCode": 29,
+    "nameFr": "Voie 29",
+    "nameEn": "Route 29",
+    "nameAr": "طريق 29",
+    "displayOrder": 13
+  },
+  {
+    "code": "route_30",
+    "numericCode": 30,
+    "nameFr": "Voie 30",
+    "nameEn": "Route 30",
+    "nameAr": "طريق 30",
+    "displayOrder": 14
+  },
+  {
+    "code": "route_4109",
+    "numericCode": 4109,
+    "nameFr": "Voie 4109",
+    "nameEn": "Route 4109",
+    "nameAr": "طريق 4109",
+    "displayOrder": 15
+  },
+  {
+    "code": "route_9379",
+    "numericCode": 9379,
+    "nameFr": "Voie 9379",
+    "nameEn": "Route 9379",
+    "nameAr": "طريق 9379",
+    "displayOrder": 16
+  },
+  {
+    "code": "route_9704",
+    "numericCode": 9704,
+    "nameFr": "Voie 9704",
+    "nameEn": "Route 9704",
+    "nameAr": "طريق 9704",
+    "displayOrder": 17
+  },
+  {
+    "code": "route_9705",
+    "numericCode": 9705,
+    "nameFr": "Voie 9705",
+    "nameEn": "Route 9705",
+    "nameAr": "طريق 9705",
+    "displayOrder": 18
+  }
+]
