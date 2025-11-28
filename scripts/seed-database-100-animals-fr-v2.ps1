@@ -615,7 +615,7 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
                 $treatmentErrorCount++
                 # Show first 3 errors for debugging
                 if ($treatmentErrorCount -le 3) {
-                    Write-Host "    ERREUR Treatment #$treatmentErrorCount: productId=$($treatment.productId), animalId=$($treatment.animalId)" -ForegroundColor Red
+                    Write-Host "    ERREUR Treatment #${treatmentErrorCount} - productId=$($treatment.productId), animalId=$($treatment.animalId)" -ForegroundColor Red
                 }
             }
 
@@ -661,7 +661,7 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
                 $vaccinationErrorCount++
                 # Show first 3 errors for debugging
                 if ($vaccinationErrorCount -le 3) {
-                    Write-Host "    ERREUR Vaccination #$vaccinationErrorCount: productId=$($vaccination.productId), animalId=$($vaccination.animalId)" -ForegroundColor Red
+                    Write-Host "    ERREUR Vaccination #${vaccinationErrorCount} - productId=$($vaccination.productId), animalId=$($vaccination.animalId)" -ForegroundColor Red
                 }
             }
 
