@@ -197,16 +197,17 @@ if ($breedsResponse) {
 # Récupérer les produits existants (endpoint global, pas besoin de farmId)
 Write-Host "  [FETCH] Recuperation des produits..." -ForegroundColor Yellow -NoNewline
 $productsResponse = Invoke-CurlApi -Method GET -Endpoint "/api/v1/products?limit=1000" -Silent
+$productsArray = @()  # Store full product objects for name lookup
 if ($productsResponse) {
     # Handle nested response: {success, data: {success, data: [...]}}
-    $products = if ($productsResponse.data.data) {
+    $productsArray = if ($productsResponse.data.data) {
         $productsResponse.data.data
     } elseif ($productsResponse.data -is [array]) {
         $productsResponse.data
     } else {
-        $productsResponse
+        @($productsResponse)
     }
-    foreach ($product in $products) {
+    foreach ($product in $productsArray) {
         $productIds += $product.id
     }
     Write-Host " OK ($($productIds.Count) produits)" -ForegroundColor Green
@@ -570,14 +571,21 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
             $withdrawalDays = Get-Random -Minimum 0 -Maximum 60
             $withdrawalEndDate = (Get-Date $treatmentDate).AddDays($withdrawalDays).ToString("yyyy-MM-ddT00:00:00.000Z")
 
+            # Get random product with name
+            $selectedProduct = $productsArray | Get-Random
+            $productName = if ($selectedProduct.nameFr) { $selectedProduct.nameFr }
+                          elseif ($selectedProduct.name_fr) { $selectedProduct.name_fr }
+                          else { "Produit" }
+
             $treatment = @{
                 animalId = $animalId
-                productId = $productIds | Get-Random
+                productId = $selectedProduct.id
+                productName = $productName
                 type = "treatment"
                 treatmentDate = $treatmentDate
                 dose = [Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1)
                 doseUnit = @("ml", "mg", "g") | Get-Random
-                status = @("completed", "in_progress", "planned") | Get-Random
+                status = @("completed", "in_progress", "scheduled") | Get-Random
                 withdrawalEndDate = $withdrawalEndDate
                 diagnosis = @("Infection respiratoire", "Parasitose", "Boiterie", "Mammite", "Diarrhee", "Fievre", "Plaie", "Reproduction") | Get-Random
                 notes = "Traitement therapeutique"
@@ -601,9 +609,16 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
             $vaccineDate = Get-RandomDate -Start (Get-Date "2023-01-01") -End $endDate
             $nextDueDate = (Get-Date $vaccineDate).AddYears(1).ToString("yyyy-MM-ddT00:00:00.000Z")
 
+            # Get random product (vaccine) with name
+            $selectedVaccine = $productsArray | Get-Random
+            $vaccineName = if ($selectedVaccine.nameFr) { $selectedVaccine.nameFr }
+                          elseif ($selectedVaccine.name_fr) { $selectedVaccine.name_fr }
+                          else { "Vaccin" }
+
             $vaccination = @{
                 animalId = $animalId
-                productId = $productIds | Get-Random
+                productId = $selectedVaccine.id
+                productName = $vaccineName
                 type = "vaccination"
                 treatmentDate = $vaccineDate
                 dose = @(1.0, 2.0, 2.5, 3.0, 5.0) | Get-Random
