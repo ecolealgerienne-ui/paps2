@@ -1,5 +1,5 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf, IsBoolean } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TreatmentStatus } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 import { IsXorField, IsDateAfterOrEqual } from '../../common/validators';
@@ -40,6 +40,16 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   productName: string;
 
+  @ApiPropertyOptional({ description: 'Product packaging ID (new workflow)' })
+  @IsOptional()
+  @IsString()
+  packagingId?: string;
+
+  @ApiPropertyOptional({ description: 'Therapeutic indication ID (new workflow)' })
+  @IsOptional()
+  @IsString()
+  indicationId?: string;
+
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
   @IsString()
@@ -69,6 +79,11 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsDateString()
   treatmentDate: string;
 
+  @ApiPropertyOptional({ description: 'Animal weight at treatment time (kg)' })
+  @IsOptional()
+  @IsNumber()
+  animalWeightKg?: number;
+
   @ApiProperty({ description: 'Dose amount' })
   @IsNumber()
   dose: number;
@@ -83,6 +98,26 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   dosageUnit?: string;
 
+  @ApiPropertyOptional({ description: 'Quantity administered (new workflow)' })
+  @IsOptional()
+  @IsNumber()
+  quantityAdministered?: number;
+
+  @ApiPropertyOptional({ description: 'Quantity unit ID (new workflow)' })
+  @IsOptional()
+  @IsString()
+  quantityUnitId?: string;
+
+  @ApiPropertyOptional({ description: 'Batch/lot number' })
+  @IsOptional()
+  @IsString()
+  batchNumber?: string;
+
+  @ApiPropertyOptional({ description: 'Batch expiry date' })
+  @IsOptional()
+  @IsDateString()
+  batchExpiryDate?: string;
+
   @ApiProperty({ description: 'Duration in days', required: false })
   @IsOptional()
   @IsNumber()
@@ -93,12 +128,20 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsEnum(TreatmentStatus)
   status?: TreatmentStatus;
 
-  @ApiProperty({
-    description: 'Withdrawal end date (must be >= treatmentDate)',
+  @ApiPropertyOptional({
+    description: 'Withdrawal end date (legacy). If not provided and autoCalculateWithdrawal=true, will be calculated from indication.',
   })
+  @IsOptional()
   @IsDateString()
-  @IsDateAfterOrEqual('treatmentDate')
-  withdrawalEndDate: string;
+  withdrawalEndDate?: string;
+
+  @ApiPropertyOptional({
+    description: 'Auto-calculate withdrawal dates from therapeutic indication',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  autoCalculateWithdrawal?: boolean;
 
   @ApiProperty({ description: 'Cost', required: false })
   @IsOptional()
