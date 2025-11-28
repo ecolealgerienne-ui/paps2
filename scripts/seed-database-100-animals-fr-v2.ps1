@@ -213,7 +213,7 @@ $campaigns = @(
 )
 
 foreach ($campaign in $campaigns) {
-    $campaignResponse = Invoke-CurlApi -Method POST -Endpoint "/national-campaigns" -Body $campaign `
+    $campaignResponse = Invoke-CurlApi -Method POST -Endpoint "/api/national-campaigns" -Body $campaign `
         -Description "Campagne: $($campaign.nameFr)"
     $campaignId = Get-IdFromResponse $campaignResponse
     if ($campaignId) {
@@ -259,7 +259,7 @@ if ($farmResponse) {
     )
 
     foreach ($vet in $vets) {
-        $vetResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/veterinarians" -Body $vet `
+        $vetResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarians" -Body $vet `
             -Description "Veterinaire: Dr. $($vet.lastName)"
         $vetId = Get-IdFromResponse $vetResponse
         if ($vetId) {
@@ -282,7 +282,7 @@ foreach ($campaignId in $nationalCampaignIds) {
         campaignId = $campaignId
         countryCode = "FR"
     }
-    $response = Invoke-CurlApi -Method POST -Endpoint "/campaign-countries" -Body $campaignCountry -Silent
+    $response = Invoke-CurlApi -Method POST -Endpoint "/api/v1/campaign-countries" -Body $campaignCountry -Silent
     if ($response) { $campaignCountryCount++ }
 }
 Write-Host "    -> $campaignCountryCount liaisons campagne-pays creees" -ForegroundColor Green
@@ -303,7 +303,7 @@ if ($farmResponse) {
         treatmentReminderDays = 3
         healthCheckReminderDays = 30
     }
-    Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/alert-configuration" -Body $alertConfig `
+    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/alert-configuration" -Body $alertConfig `
         -Description "  Configuration alertes"
 
     # Farm Preferences - utiliser les races et produits existants
@@ -318,7 +318,7 @@ if ($farmResponse) {
         defaultBreedId = $defaultBreedId
         defaultSpeciesId = "bovine"
     }
-    Invoke-CurlApi -Method PUT -Endpoint "/api/farms/$farmId/preferences" -Body $farmPreferences `
+    Invoke-CurlApi -Method PUT -Endpoint "/farms/$farmId/preferences" -Body $farmPreferences `
         -Description "  Preferences ferme"
 
     # Farm Product Preferences (5 produits favoris) - utiliser productIds existants
@@ -329,7 +329,7 @@ if ($farmResponse) {
             displayOrder = $i + 1
             isActive = $true
         }
-        $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/product-preferences" -Body $productPref -Silent
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/product-preferences" -Body $productPref -Silent
         if ($response) { $productPrefCount++ }
     }
 
@@ -341,7 +341,7 @@ if ($farmResponse) {
             displayOrder = $i + 1
             isActive = $true
         }
-        $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/veterinarian-preferences" -Body $vetPref -Silent
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarian-preferences" -Body $vetPref -Silent
         if ($response) { $vetPrefCount++ }
     }
 
@@ -351,14 +351,14 @@ if ($farmResponse) {
         $breedPref = @{
             breedId = $bovineBreeds[$i]
         }
-        $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/breed-preferences" -Body $breedPref -Silent
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breed-preferences" -Body $breedPref -Silent
         if ($response) { $breedPrefCount++ }
     }
 
     # Farm Campaign Preferences (Inscription a 2 campagnes)
     $campaignPrefCount = 0
     for ($i = 0; $i -lt [Math]::Min(2, $nationalCampaignIds.Count); $i++) {
-        $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/campaign-preferences/$($nationalCampaignIds[$i])/enroll" -Body @{} -Silent
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/campaign-preferences/$($nationalCampaignIds[$i])/enroll" -Body @{} -Silent
         if ($response) { $campaignPrefCount++ }
     }
 
@@ -389,7 +389,7 @@ if ($farmResponse) {
     )
 
     foreach ($lot in $lots) {
-        $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/lots" -Body $lot -Silent
+        $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots" -Body $lot -Silent
         $lotId = Get-IdFromResponse $lotResponse
         if ($lotId) {
             $lotIds += $lotId
@@ -483,7 +483,7 @@ if ($farmResponse -and $breedIds.Count -gt 0) {
                 $animal.saleDate = $saleDate
             }
 
-            $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/animals" -Body $animal -Silent
+            $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/animals" -Body $animal -Silent
             $animalIdResult = Get-IdFromResponse $animalResponse
 
             if ($animalIdResult) {
@@ -516,7 +516,7 @@ if ($farmResponse -and $lotIds.Count -gt 0 -and $animalIds.Count -gt 0) {
             $lotAnimalDto = @{
                 animalIds = @($animalId)
             }
-            $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/lots/$lotId/animals" -Body $lotAnimalDto -Silent
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots/$lotId/animals" -Body $lotAnimalDto -Silent
             if ($response) { $lotAnimalCount++ }
         }
     }
@@ -558,7 +558,7 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
                 $treatment.veterinarianId = $vetIds | Get-Random
             }
 
-            $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/treatments" -Body $treatment -Silent
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $treatment -Silent
             if ($response) { $treatmentCount++ }
 
             if ($treatmentCount % 50 -eq 0) {
@@ -589,7 +589,7 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
                 $vaccination.veterinarianId = $vetIds | Get-Random
             }
 
-            $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/treatments" -Body $vaccination -Silent
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $vaccination -Silent
             if ($response) { $vaccinationCount++ }
 
             if ($vaccinationCount % 50 -eq 0) {
@@ -631,7 +631,7 @@ if ($farmResponse -and $animalIds.Count -gt 0) {
                 notes = "Mouvement type $movementType"
             }
 
-            $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/movements" -Body $movement -Silent
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/movements" -Body $movement -Silent
             if ($response) { $movementCount++ }
 
             if ($movementCount % 50 -eq 0) {
@@ -668,7 +668,7 @@ if ($farmResponse -and $animalIds.Count -gt 0) {
                 notes = "Pesee periodique #$($i + 1)"
             }
 
-            $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/weights" -Body $weight -Silent
+            $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/weights" -Body $weight -Silent
             if ($response) { $weightCount++ }
 
             if ($weightCount % 100 -eq 0) {
@@ -710,7 +710,7 @@ if ($farmResponse -and $animalIds.Count -gt 0) {
             $breeding.veterinarianId = $vetIds | Get-Random
         }
 
-        $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/breedings" -Body $breeding -Silent
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breedings" -Body $breeding -Silent
         if ($response) { $breedingCount++ }
 
         if ($breedingCount % 10 -eq 0) {
@@ -760,7 +760,7 @@ if ($farmResponse -and $animalIds.Count -gt 0) {
             notes = "Document officiel"
         }
 
-        $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/documents" -Body $document -Silent
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/documents" -Body $document -Silent
         if ($response) { $documentCount++ }
 
         if ($documentCount % 25 -eq 0) {
@@ -806,7 +806,7 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
             $personalCampaign.veterinarianId = $vetIds | Get-Random
         }
 
-        $response = Invoke-CurlApi -Method POST -Endpoint "/api/farms/$farmId/personal-campaigns" -Body $personalCampaign `
+        $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/personal-campaigns" -Body $personalCampaign `
             -Description "  Campagne: $($campaignData.name)"
         if ($response) { $campaignCount++ }
     }
