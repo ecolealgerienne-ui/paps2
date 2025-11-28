@@ -129,9 +129,9 @@ const unitsData = [
   { code: 'bolus', symbol: 'bol', nameFr: 'Bolus', nameEn: 'Bolus', nameAr: 'بلعة', type: 'count', factor: 1 },
   { code: 'sachet', symbol: 'sach', nameFr: 'Sachet', nameEn: 'Sachet', nameAr: 'كيس', type: 'count', factor: 1 },
   { code: 'syringe', symbol: 'ser', nameFr: 'Seringue', nameEn: 'Syringe', nameAr: 'حقنة', type: 'count', factor: 1 },
-  // Time (for withdrawal)
-  { code: 'day', symbol: 'j', nameFr: 'Jour', nameEn: 'Day', nameAr: 'يوم', type: 'time', factor: 1 },
-  { code: 'hour', symbol: 'h', nameFr: 'Heure', nameEn: 'Hour', nameAr: 'ساعة', type: 'time', factor: 1/24 },
+  // Time (for withdrawal) - mapped to 'other' since 'time' not in UnitType enum
+  { code: 'day', symbol: 'j', nameFr: 'Jour', nameEn: 'Day', nameAr: 'يوم', type: 'other', factor: 1 },
+  { code: 'hour', symbol: 'h', nameFr: 'Heure', nameEn: 'Hour', nameAr: 'ساعة', type: 'other', factor: 1/24 },
 ];
 
 console.log(`\n=== Units: ${unitsData.length} ===`);
