@@ -4,7 +4,25 @@ import { CreateVeterinarianDto, UpdateVeterinarianDto, QueryVeterinarianDto } fr
 import { AppLogger } from '../common/utils/logger.service';
 import { EntityNotFoundException } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
-import { DataScope, Prisma } from '@prisma/client';
+import { DataScope } from '../common/types/prisma-types';
+
+// Type pour les requêtes where sur Veterinarian (remplacement temporaire de Prisma.VeterinarianWhereInput)
+type VeterinarianWhereInput = {
+  id?: string;
+  scope?: DataScope;
+  farmId?: string | null;
+  deletedAt?: null | Date;
+  isActive?: boolean;
+  isAvailable?: boolean;
+  emergencyService?: boolean;
+  department?: string;
+  isDefault?: boolean;
+  firstName?: { contains: string; mode: 'insensitive' };
+  lastName?: { contains: string; mode: 'insensitive' };
+  clinic?: { contains: string; mode: 'insensitive' };
+  licenseNumber?: { contains: string; mode: 'insensitive' };
+  OR?: VeterinarianWhereInput[];
+};
 
 /**
  * Service for managing Veterinarians (Master Table Pattern)
@@ -60,7 +78,7 @@ export class VeterinariansService {
     } = query;
 
     // Build scope filter
-    let scopeFilter: Prisma.VeterinarianWhereInput;
+    let scopeFilter: VeterinarianWhereInput;
     if (scope === 'global') {
       scopeFilter = { scope: DataScope.global };
     } else if (scope === 'local') {
@@ -76,7 +94,7 @@ export class VeterinariansService {
     }
 
     // Build complete where clause
-    const where: Prisma.VeterinarianWhereInput = {
+    const where: VeterinarianWhereInput = {
       ...scopeFilter,
       deletedAt: null,
     };
