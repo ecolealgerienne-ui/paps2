@@ -126,30 +126,45 @@ $startDate = Get-Date "2023-01-01"
 $endDate = Get-Date "2025-11-24"
 
 # =============================================================================
-# 0. CRÉATION DE LA FERME (nécessaire pour récupérer les produits)
+# 0. VÉRIFICATION/CRÉATION DE LA FERME
 # =============================================================================
 Write-Host ""
-Write-Host "0. Creation de la ferme" -ForegroundColor Cyan
+Write-Host "0. Verification/Creation de la ferme" -ForegroundColor Cyan
 
-$farm = @{
-    id = $farmId
-    name = "GAEC de la Vallee Verte"
-    ownerId = "owner-gaec-001"
-    location = "Lyon, Rhone-Alpes, France"
-    address = "125 Chemin des Pres, 69100 Villeurbanne"
-    commune = "69266"
-    city = "Villeurbanne"
-    postalCode = "69100"
-    country = "FR"
-    department = "69"
-}
+# Vérifier si la ferme existe déjà
+Write-Host "  [CHECK] Verification si la ferme existe..." -ForegroundColor Yellow -NoNewline
+$existingFarm = Invoke-CurlApi -Method GET -Endpoint "/api/farms/$farmId" -Silent
 
-$farmResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms" -Body $farm `
-    -Description "Ferme: $($farm.name)"
+if ($existingFarm) {
+    Write-Host " EXISTE" -ForegroundColor Green
+    Write-Host "  -> Utilisation de la ferme existante: $($existingFarm.name)" -ForegroundColor Gray
+    $farmResponse = $existingFarm
+} else {
+    Write-Host " NON TROUVEE" -ForegroundColor Yellow
+    Write-Host "  [SEED] Creation de la ferme..." -ForegroundColor Yellow -NoNewline
 
-if (-not $farmResponse) {
-    Write-Host "  ERREUR - Impossible de creer la ferme" -ForegroundColor Red
-    exit 1
+    $farm = @{
+        id = $farmId
+        name = "GAEC de la Vallee Verte"
+        ownerId = "owner-gaec-001"
+        location = "Lyon, Rhone-Alpes, France"
+        address = "125 Chemin des Pres, 69100 Villeurbanne"
+        commune = "69266"
+        city = "Villeurbanne"
+        postalCode = "69100"
+        country = "FR"
+        department = "69"
+    }
+
+    $farmResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms" -Body $farm -Silent
+
+    if ($farmResponse) {
+        Write-Host " OK" -ForegroundColor Green
+    } else {
+        Write-Host " ERREUR" -ForegroundColor Red
+        Write-Host "  ERREUR - Impossible de creer la ferme" -ForegroundColor Red
+        exit 1
+    }
 }
 
 # =============================================================================
