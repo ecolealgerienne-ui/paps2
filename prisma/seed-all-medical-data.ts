@@ -115,6 +115,111 @@ async function seedCountries() {
   console.log(`  ✅ Countries: ${countriesData.length} processed`);
 }
 
+async function seedBreeds() {
+  console.log('\n📦 Seeding Breeds...');
+
+  interface RaceData {
+    code_fao: string;
+    nom_local: string;
+    nom_anglais: string;
+    code_espece: number;
+    pays_origine: string;
+    description: string;
+    classification_adaptation: string;
+    classification_geographique: string;
+  }
+
+  const races: RaceData[] = loadJson('races.json');
+
+  // Map species codes to IDs
+  const speciesCodeMap: Record<number, string> = {
+    5: 'bovine',
+    11: 'caprine',
+    51: 'ovine',
+  };
+
+  let created = 0;
+  let skipped = 0;
+
+  for (const race of races) {
+    const speciesId = speciesCodeMap[race.code_espece];
+    if (!speciesId) {
+      skipped++;
+      continue;
+    }
+
+    // Generate a code from the local name
+    const code = race.nom_local
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dash
+      .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
+
+    try {
+      await prisma.breed.upsert({
+        where: { code },
+        update: {
+          speciesId,
+          nameFr: race.nom_local,
+          nameEn: race.nom_local, // nom_anglais contains UUID, use nom_local
+          nameAr: race.nom_local,
+          description: race.description || `${race.classification_adaptation} - ${race.classification_geographique}`,
+        },
+        create: {
+          code,
+          speciesId,
+          nameFr: race.nom_local,
+          nameEn: race.nom_local,
+          nameAr: race.nom_local,
+          description: race.description || `${race.classification_adaptation} - ${race.classification_geographique}`,
+        },
+      });
+      created++;
+    } catch (error: any) {
+      if (!error.message.includes('Unique constraint')) {
+        console.error(`  ❌ Error for breed ${race.nom_local}: ${error.message}`);
+      }
+      skipped++;
+    }
+  }
+
+  console.log(`  ✅ Breeds: ${created} created, ${skipped} skipped`);
+}
+
+async function seedBreedCountries() {
+  console.log('\n📦 Seeding Breed Countries...');
+
+  // Get all breeds
+  const breeds = await prisma.breed.findMany();
+
+  // Link all breeds to France (FR) since the data is from France
+  let created = 0;
+
+  for (const breed of breeds) {
+    try {
+      await prisma.breedCountry.upsert({
+        where: {
+          breedId_countryCode: {
+            breedId: breed.id,
+            countryCode: 'FR',
+          },
+        },
+        update: {},
+        create: {
+          breedId: breed.id,
+          countryCode: 'FR',
+        },
+      });
+      created++;
+    } catch (error: any) {
+      // Skip errors silently
+    }
+  }
+
+  console.log(`  ✅ Breed Countries: ${created} breed-country links created`);
+}
+
 async function seedUnits() {
   console.log('\n📦 Seeding Units...');
 
@@ -617,6 +722,8 @@ async function main() {
     // Seed in dependency order
     await seedSpecies();
     await seedCountries();
+    await seedBreeds();
+    await seedBreedCountries();
     await seedUnits();
     await seedProductCategories();
     await seedActiveSubstances();
