@@ -167,7 +167,7 @@
     "nameFr": "Jour",
     "nameEn": "Day",
     "nameAr": "يوم",
-    "type": "time",
+    "type": "other",
     "factor": 1
   },
   {
@@ -176,7 +176,7 @@
     "nameFr": "Heure",
     "nameEn": "Hour",
     "nameAr": "ساعة",
-    "type": "time",
+    "type": "other",
     "factor": 0.041666666666666664
   }
 ]
