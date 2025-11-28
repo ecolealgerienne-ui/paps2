@@ -8,11 +8,138 @@ import {
 } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
 
+interface WithdrawalDates {
+  computedWithdrawalMeatDate: Date | null;
+  computedWithdrawalMilkDate: Date | null;
+  withdrawalEndDate: Date;
+}
+
 @Injectable()
 export class TreatmentsService {
   private readonly logger = new AppLogger(TreatmentsService.name);
 
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * Find the best therapeutic indication for a treatment context
+   * Priority: country + age > country + all ages > universal + age > universal + all ages
+   */
+  async findBestIndication(
+    productId: string,
+    speciesId: string,
+    routeId: string,
+    countryCode?: string,
+    ageCategoryId?: string,
+  ) {
+    const baseWhere = {
+      productId,
+      speciesId,
+      routeId,
+      isActive: true,
+      deletedAt: null,
+    };
+
+    // Priority 1: Country + Age specific
+    if (countryCode && ageCategoryId) {
+      const indication = await this.prisma.therapeuticIndication.findFirst({
+        where: { ...baseWhere, countryCode, ageCategoryId },
+      });
+      if (indication) return indication;
+    }
+
+    // Priority 2: Country + All ages
+    if (countryCode) {
+      const indication = await this.prisma.therapeuticIndication.findFirst({
+        where: { ...baseWhere, countryCode, ageCategoryId: null },
+      });
+      if (indication) return indication;
+    }
+
+    // Priority 3: Universal + Age specific
+    if (ageCategoryId) {
+      const indication = await this.prisma.therapeuticIndication.findFirst({
+        where: { ...baseWhere, countryCode: null, ageCategoryId },
+      });
+      if (indication) return indication;
+    }
+
+    // Priority 4: Universal + All ages (fallback)
+    return this.prisma.therapeuticIndication.findFirst({
+      where: { ...baseWhere, countryCode: null, ageCategoryId: null },
+    });
+  }
+
+  /**
+   * Calculate withdrawal dates from therapeutic indication
+   */
+  calculateWithdrawalDates(
+    treatmentDate: Date,
+    indication: { withdrawalMeatDays: number | null; withdrawalMilkDays: number | null },
+  ): WithdrawalDates {
+    const meatDays = indication.withdrawalMeatDays ?? 0;
+    const milkDays = indication.withdrawalMilkDays ?? 0;
+
+    const computedWithdrawalMeatDate = meatDays > 0
+      ? new Date(treatmentDate.getTime() + meatDays * 24 * 60 * 60 * 1000)
+      : null;
+
+    const computedWithdrawalMilkDate = milkDays > 0
+      ? new Date(treatmentDate.getTime() + milkDays * 24 * 60 * 60 * 1000)
+      : null;
+
+    // withdrawalEndDate = max of meat and milk dates
+    const maxDays = Math.max(meatDays, milkDays);
+    const withdrawalEndDate = new Date(treatmentDate.getTime() + maxDays * 24 * 60 * 60 * 1000);
+
+    return {
+      computedWithdrawalMeatDate,
+      computedWithdrawalMilkDate,
+      withdrawalEndDate,
+    };
+  }
+
+  /**
+   * Get indication context for an animal (species, age category, country)
+   */
+  async getAnimalIndicationContext(animalId: string, farmId: string) {
+    const animal = await this.prisma.animal.findFirst({
+      where: { id: animalId, farmId, deletedAt: null },
+      include: {
+        breed: { include: { species: true } },
+        farm: { include: { country: true } },
+      },
+    });
+
+    if (!animal) return null;
+
+    const speciesId = animal.breed?.speciesId;
+    const countryCode = animal.farm?.countryCode;
+
+    // Calculate age in days
+    let ageCategoryId: string | null = null;
+    if (speciesId && animal.birthDate) {
+      const ageInDays = Math.floor(
+        (Date.now() - new Date(animal.birthDate).getTime()) / (24 * 60 * 60 * 1000)
+      );
+
+      const ageCategory = await this.prisma.ageCategory.findFirst({
+        where: {
+          speciesId,
+          ageMinDays: { lte: ageInDays },
+          OR: [
+            { ageMaxDays: null },
+            { ageMaxDays: { gte: ageInDays } },
+          ],
+          deletedAt: null,
+          isActive: true,
+        },
+      });
+
+      ageCategoryId = ageCategory?.id ?? null;
+    }
+
+    return { speciesId, countryCode, ageCategoryId };
+  }
 
   async create(farmId: string, dto: CreateTreatmentDto) {
     // Determine which animals to treat: batch (animal_ids) or single (animalId)
@@ -54,13 +181,64 @@ export class TreatmentsService {
 
     try {
       // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
-      const { farmId: dtoFarmId, created_at, updated_at, animal_ids, animalId, id, ...treatmentData } = dto;
+      const {
+        farmId: dtoFarmId,
+        created_at,
+        updated_at,
+        animal_ids,
+        animalId,
+        id,
+        autoCalculateWithdrawal,
+        batchExpiryDate,
+        ...treatmentData
+      } = dto;
+
+      const treatmentDate = new Date(dto.treatmentDate);
+
+      // Calculate withdrawal dates if requested and indication is available
+      let withdrawalDates: WithdrawalDates | null = null;
+      if (autoCalculateWithdrawal && dto.indicationId) {
+        const indication = await this.prisma.therapeuticIndication.findUnique({
+          where: { id: dto.indicationId },
+        });
+        if (indication) {
+          withdrawalDates = this.calculateWithdrawalDates(treatmentDate, indication);
+          this.logger.debug('Auto-calculated withdrawal dates', {
+            indicationId: dto.indicationId,
+            meatDate: withdrawalDates.computedWithdrawalMeatDate,
+            milkDate: withdrawalDates.computedWithdrawalMilkDate,
+          });
+        }
+      } else if (autoCalculateWithdrawal && dto.productId && dto.routeId) {
+        // Try to find best indication from context
+        const context = await this.getAnimalIndicationContext(animalIds[0], farmId);
+        if (context?.speciesId) {
+          const indication = await this.findBestIndication(
+            dto.productId,
+            context.speciesId,
+            dto.routeId,
+            context.countryCode ?? undefined,
+            context.ageCategoryId ?? undefined,
+          );
+          if (indication) {
+            withdrawalDates = this.calculateWithdrawalDates(treatmentDate, indication);
+            // Store the indication ID for audit
+            treatmentData.indicationId = indication.id;
+            this.logger.debug('Auto-found and calculated withdrawal from best indication', {
+              indicationId: indication.id,
+            });
+          }
+        }
+      }
+
+      // Use calculated dates or fallback to provided date
+      const finalWithdrawalEndDate = withdrawalDates?.withdrawalEndDate
+        ?? (dto.withdrawalEndDate ? new Date(dto.withdrawalEndDate) : treatmentDate);
 
       // For batch treatments, use optimized createMany + findMany approach
       // This is 10-15x faster than individual creates in a transaction
       if (isBatchTreatment) {
         const { randomUUID } = await import('crypto');
-        const baseId = id || randomUUID();
         const treatmentIds: string[] = [];
 
         // 1. Fast bulk insert with createMany
@@ -73,8 +251,11 @@ export class TreatmentsService {
             ...treatmentData,
             animalId,
             farmId: dtoFarmId || farmId,
-            treatmentDate: new Date(dto.treatmentDate),
-            withdrawalEndDate: new Date(dto.withdrawalEndDate),
+            treatmentDate,
+            withdrawalEndDate: finalWithdrawalEndDate,
+            computedWithdrawalMeatDate: withdrawalDates?.computedWithdrawalMeatDate,
+            computedWithdrawalMilkDate: withdrawalDates?.computedWithdrawalMilkDate,
+            ...(batchExpiryDate && { batchExpiryDate: new Date(batchExpiryDate) }),
             // CRITICAL: Use client timestamps if provided (offline-first)
             ...(created_at && { createdAt: new Date(created_at) }),
             ...(updated_at && { updatedAt: new Date(updated_at) }),
@@ -96,13 +277,15 @@ export class TreatmentsService {
             product: true,
             veterinarian: true,
             route: true,
+            indication: true,
           },
         });
 
         this.logger.audit('Batch treatments created', {
           count: treatments.length,
           farmId,
-          animalIds
+          animalIds,
+          autoCalculated: !!withdrawalDates,
         });
         return treatments;
       }
@@ -114,8 +297,11 @@ export class TreatmentsService {
           ...treatmentData,
           animalId: animalIds[0],
           farmId: dtoFarmId || farmId,
-          treatmentDate: new Date(dto.treatmentDate),
-          withdrawalEndDate: new Date(dto.withdrawalEndDate),
+          treatmentDate,
+          withdrawalEndDate: finalWithdrawalEndDate,
+          computedWithdrawalMeatDate: withdrawalDates?.computedWithdrawalMeatDate,
+          computedWithdrawalMilkDate: withdrawalDates?.computedWithdrawalMilkDate,
+          ...(batchExpiryDate && { batchExpiryDate: new Date(batchExpiryDate) }),
           // CRITICAL: Use client timestamps if provided (offline-first)
           ...(created_at && { createdAt: new Date(created_at) }),
           ...(updated_at && { updatedAt: new Date(updated_at) }),
@@ -125,10 +311,16 @@ export class TreatmentsService {
           product: true,
           veterinarian: true,
           route: true,
+          indication: true,
         },
       });
 
-      this.logger.audit('Treatment created', { treatmentId: treatment.id, animalId: animalIds[0], farmId });
+      this.logger.audit('Treatment created', {
+        treatmentId: treatment.id,
+        animalId: animalIds[0],
+        farmId,
+        autoCalculated: !!withdrawalDates,
+      });
       return treatment;
     } catch (error) {
       this.logger.error(`Failed to create treatment${isBatchTreatment ? 's' : ''} in farm ${farmId}`, error.stack);
