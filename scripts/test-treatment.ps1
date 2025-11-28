@@ -11,8 +11,15 @@ Write-Host "=== TEST TREATMENT ===" -ForegroundColor Cyan
 Write-Host "`n1. Recuperation d'un animal..." -ForegroundColor Yellow
 try {
     $animalsResponse = Invoke-RestMethod -Uri "$BaseUrl/farms/$farmId/animals?limit=1" -Method GET
-    $animal = $animalsResponse.data[0]
-    if (-not $animal) {
+    # Handle nested response: {success, data: {data: [...], meta: {...}}}
+    $animal = if ($animalsResponse.data.data) {
+        $animalsResponse.data.data[0]
+    } elseif ($animalsResponse.data -is [array]) {
+        $animalsResponse.data[0]
+    } else {
+        $animalsResponse.data
+    }
+    if (-not $animal -or -not $animal.id) {
         Write-Host "   ERREUR: Aucun animal trouve" -ForegroundColor Red
         exit 1
     }
