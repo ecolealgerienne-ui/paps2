@@ -1,0 +1,92 @@
+[
+  {
+    "code_categorie": "JEUNE",
+    "code_espece": 5,
+    "libelle": "Jeune bovin",
+    "description": "Veau avant et après sevrage",
+    "age_min_jours": 0,
+    "age_max_jours": 240,
+    "ordre": 1,
+    "is_default": false
+  },
+  {
+    "code_categorie": "CROISSANCE",
+    "code_espece": 5,
+    "libelle": "En croissance",
+    "description": "Jeune bovin en croissance post-sevrage",
+    "age_min_jours": 241,
+    "age_max_jours": 730,
+    "ordre": 2,
+    "is_default": false
+  },
+  {
+    "code_categorie": "ADULTE",
+    "code_espece": 5,
+    "libelle": "Adulte",
+    "description": "Bovin adulte reproducteur",
+    "age_min_jours": 731,
+    "age_max_jours": null,
+    "ordre": 3,
+    "is_default": true
+  },
+  {
+    "code_categorie": "JEUNE",
+    "code_espece": 51,
+    "libelle": "Jeune ovin",
+    "description": "Agneau avant et après sevrage",
+    "age_min_jours": 0,
+    "age_max_jours": 120,
+    "ordre": 1,
+    "is_default": false
+  },
+  {
+    "code_categorie": "CROISSANCE",
+    "code_espece": 51,
+    "libelle": "En croissance",
+    "description": "Jeune ovin en croissance post-sevrage",
+    "age_min_jours": 121,
+    "age_max_jours": 365,
+    "ordre": 2,
+    "is_default": false
+  },
+  {
+    "code_categorie": "ADULTE",
+    "code_espece": 51,
+    "libelle": "Adulte",
+    "description": "Ovin adulte reproducteur",
+    "age_min_jours": 366,
+    "age_max_jours": null,
+    "ordre": 3,
+    "is_default": true
+  },
+  {
+    "code_categorie": "JEUNE",
+    "code_espece": 11,
+    "libelle": "Jeune caprin",
+    "description": "Chevreau avant et après sevrage",
+    "age_min_jours": 0,
+    "age_max_jours": 90,
+    "ordre": 1,
+    "is_default": false
+  },
+  {
+    "code_categorie": "CROISSANCE",
+    "code_espece": 11,
+    "libelle": "En croissance",
+    "description": "Jeune caprin en croissance post-sevrage",
+    "age_min_jours": 91,
+    "age_max_jours": 365,
+    "ordre": 2,
+    "is_default": false
+  },
+  {
+    "code_categorie": "ADULTE",
+    "code_espece": 11,
+    "libelle": "Adulte",
+    "description": "Caprin adulte reproducteur",
+    "age_min_jours": 366,
+    "age_max_jours": null,
+    "ordre": 3,
+    "is_default": true
+  }
+]

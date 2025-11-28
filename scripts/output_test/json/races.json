@@ -1,0 +1,1992 @@
+[
+  {
+    "code_fao": "e3a26e97-4730-41b0-b461-cf1c8eceb36e",
+    "nom_local": "Abondance",
+    "nom_anglais": "e3a26e97-4730-41b0-b461-cf1c8eceb36e",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "69dae097-9bb9-4bbc-b2f7-12724985e035",
+    "nom_local": "Alpha 16",
+    "nom_anglais": "69dae097-9bb9-4bbc-b2f7-12724985e035",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "7de81cb8-f574-4736-b51c-ef27b4532eed",
+    "nom_local": "Angus",
+    "nom_anglais": "7de81cb8-f574-4736-b51c-ef27b4532eed",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "e9d230c2-4f54-4ae8-a13f-a989ffc73519",
+    "nom_local": "Armoricaine",
+    "nom_anglais": "e9d230c2-4f54-4ae8-a13f-a989ffc73519",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "197dfff5-3f6b-4ed7-9cca-9be9ceb1e50a",
+    "nom_local": "Aubrac",
+    "nom_anglais": "197dfff5-3f6b-4ed7-9cca-9be9ceb1e50a",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "234733ca-5766-461f-901f-0fdf182bb221",
+    "nom_local": "Aurochs-reconstitué",
+    "nom_anglais": "234733ca-5766-461f-901f-0fdf182bb221",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "fa66d667-50f8-4200-b641-ba5115fd78ca",
+    "nom_local": "Bazadaise",
+    "nom_anglais": "fa66d667-50f8-4200-b641-ba5115fd78ca",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "511c5885-df45-4ce8-a141-157b26a674de",
+    "nom_local": "Betizu",
+    "nom_anglais": "511c5885-df45-4ce8-a141-157b26a674de",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "094a08fd-8a8c-4d97-82ce-2eab4e9b2fa0",
+    "nom_local": "Blanc Bleu",
+    "nom_anglais": "094a08fd-8a8c-4d97-82ce-2eab4e9b2fa0",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "b69e05fe-9081-4c38-998f-5d90dd8f509a",
+    "nom_local": "Bleue de Bazougers",
+    "nom_anglais": "b69e05fe-9081-4c38-998f-5d90dd8f509a",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "571aeb4d-dc9f-40a9-a1ff-f905321e26d3",
+    "nom_local": "Bleue du Nord",
+    "nom_anglais": "571aeb4d-dc9f-40a9-a1ff-f905321e26d3",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "45d4b4c4-3319-4665-9abd-d79df84c838f",
+    "nom_local": "Blonde d'Aquitaine",
+    "nom_anglais": "45d4b4c4-3319-4665-9abd-d79df84c838f",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "d2e0e738-e890-41c5-a655-a649a0045b35",
+    "nom_local": "Bordelaise",
+    "nom_anglais": "d2e0e738-e890-41c5-a655-a649a0045b35",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "4ea613f2-559c-4700-8408-5211c653d8b2",
+    "nom_local": "Brahman",
+    "nom_anglais": "4ea613f2-559c-4700-8408-5211c653d8b2",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "3eec8c2b-c591-415a-ab5b-b736432d787b",
+    "nom_local": "Brave",
+    "nom_anglais": "3eec8c2b-c591-415a-ab5b-b736432d787b",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "f157d858-0edb-4e6e-8d78-dc3bb1b79dfd",
+    "nom_local": "Bretonne Pie-Noir",
+    "nom_anglais": "f157d858-0edb-4e6e-8d78-dc3bb1b79dfd",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "e7b0fd06-56fd-4a57-950e-1eb3ba05ee7a",
+    "nom_local": "Brune",
+    "nom_anglais": "e7b0fd06-56fd-4a57-950e-1eb3ba05ee7a",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "67300e36-f022-4e6f-831a-4d76a7b5c842",
+    "nom_local": "Béarnaise",
+    "nom_anglais": "67300e36-f022-4e6f-831a-4d76a7b5c842",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "1d65536d-a057-4352-b316-ee5aa6646a27",
+    "nom_local": "Canadienne",
+    "nom_anglais": "1d65536d-a057-4352-b316-ee5aa6646a27",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "ff0d21ef-f202-4e97-9c43-0334aeafd977",
+    "nom_local": "Casta",
+    "nom_anglais": "ff0d21ef-f202-4e97-9c43-0334aeafd977",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "3d2acf5f-9d2d-4b0c-9844-cf07c22b22c5",
+    "nom_local": "Charolaise",
+    "nom_anglais": "3d2acf5f-9d2d-4b0c-9844-cf07c22b22c5",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "06f544de-a021-41b5-b246-cf1515c6fd2c",
+    "nom_local": "Corse",
+    "nom_anglais": "06f544de-a021-41b5-b246-cf1515c6fd2c",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "b00ae32e-8904-4efe-afd4-a3423212aabd",
+    "nom_local": "Créole Guadeloupe",
+    "nom_anglais": "b00ae32e-8904-4efe-afd4-a3423212aabd",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "1487bdb5-f1ae-40f6-8461-5e955d4a6ca7",
+    "nom_local": "Ferrandaise",
+    "nom_anglais": "1487bdb5-f1ae-40f6-8461-5e955d4a6ca7",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "3cc069d2-f927-4c13-9527-296bc2378be1",
+    "nom_local": "Froment Du Léon",
+    "nom_anglais": "3cc069d2-f927-4c13-9527-296bc2378be1",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "a619fd3a-0774-447f-ab54-35be8a501f34",
+    "nom_local": "Gasconne",
+    "nom_anglais": "a619fd3a-0774-447f-ab54-35be8a501f34",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "95646f24-97ed-487a-b0e8-d3d064dcb1f1",
+    "nom_local": "Hereford",
+    "nom_anglais": "95646f24-97ed-487a-b0e8-d3d064dcb1f1",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "cc932775-f3bc-49bd-b031-923845c9d451",
+    "nom_local": "Higland Cattle",
+    "nom_anglais": "cc932775-f3bc-49bd-b031-923845c9d451",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "af01bee3-f072-47f8-adc9-7a6ee4a7d3f0",
+    "nom_local": "Hérens",
+    "nom_anglais": "af01bee3-f072-47f8-adc9-7a6ee4a7d3f0",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "6768fa2f-1687-4aae-8d2d-38d342d4d33d",
+    "nom_local": "Inra 95",
+    "nom_anglais": "6768fa2f-1687-4aae-8d2d-38d342d4d33d",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "6bab2337-d722-4ada-a472-ad30ad194d23",
+    "nom_local": "Jersiaise",
+    "nom_anglais": "6bab2337-d722-4ada-a472-ad30ad194d23",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "b61984ab-3b01-490d-a22d-26482646b9e9",
+    "nom_local": "Limousine",
+    "nom_anglais": "b61984ab-3b01-490d-a22d-26482646b9e9",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "2e14643d-cc88-4733-9daa-f6d049eee47d",
+    "nom_local": "Lourdaise",
+    "nom_anglais": "2e14643d-cc88-4733-9daa-f6d049eee47d",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "82433025-e85e-47e2-aeb4-96e0c85c3628",
+    "nom_local": "Maraîchine",
+    "nom_anglais": "82433025-e85e-47e2-aeb4-96e0c85c3628",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "b2a85866-c34d-4001-9623-6bd0728f7077",
+    "nom_local": "Marine Landaise",
+    "nom_anglais": "b2a85866-c34d-4001-9623-6bd0728f7077",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "8fe0a1fe-6d48-4aa8-a21b-9d29bd0c5bdf",
+    "nom_local": "Mirandaise",
+    "nom_anglais": "8fe0a1fe-6d48-4aa8-a21b-9d29bd0c5bdf",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "aeec8f3b-44b6-4d87-9e3c-b9b53f6149c1",
+    "nom_local": "Moka",
+    "nom_anglais": "aeec8f3b-44b6-4d87-9e3c-b9b53f6149c1",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "Métisse zébu et Taurin (probablement issu du zébu de Madagascar)",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "3e4ea297-2cd8-44f2-8fc9-e2bc217d4f46",
+    "nom_local": "Montbéliarde",
+    "nom_anglais": "3e4ea297-2cd8-44f2-8fc9-e2bc217d4f46",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "33450c84-1efb-4111-9277-547be8e9fa94",
+    "nom_local": "Nantaise",
+    "nom_anglais": "33450c84-1efb-4111-9277-547be8e9fa94",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "0ff680fe-d5bf-4367-8ecf-26fe9891f06c",
+    "nom_local": "Normande",
+    "nom_anglais": "0ff680fe-d5bf-4367-8ecf-26fe9891f06c",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "e46f62f0-d76c-4610-8afb-35d8fc21b3de",
+    "nom_local": "Parthenaise",
+    "nom_anglais": "e46f62f0-d76c-4610-8afb-35d8fc21b3de",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "7bc40fb3-c774-4406-9d5f-5ed35f6711ef",
+    "nom_local": "Pie Rouge des Plaines",
+    "nom_anglais": "7bc40fb3-c774-4406-9d5f-5ed35f6711ef",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "5bdb3c58-e0bc-43ef-a651-563f4c8ad8c9",
+    "nom_local": "Pirenaica",
+    "nom_anglais": "5bdb3c58-e0bc-43ef-a651-563f4c8ad8c9",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "49939477-5ef5-4aa7-926c-26a6b4050c70",
+    "nom_local": "Piémontaise",
+    "nom_anglais": "49939477-5ef5-4aa7-926c-26a6b4050c70",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "bdb85763-9654-4c50-b1ad-4855ce04d735",
+    "nom_local": "Prim'Holstein",
+    "nom_anglais": "bdb85763-9654-4c50-b1ad-4855ce04d735",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "3ffbdc7b-effc-4839-b8d9-d6ea88636d9f",
+    "nom_local": "Raço di Biou",
+    "nom_anglais": "3ffbdc7b-effc-4839-b8d9-d6ea88636d9f",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "08db627b-476a-46d8-859b-ee8b397d50d4",
+    "nom_local": "Redyblack",
+    "nom_anglais": "08db627b-476a-46d8-859b-ee8b397d50d4",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "a18b0d28-6e4d-40bd-af2f-84dc6ba9bd31",
+    "nom_local": "Rouge Flamande",
+    "nom_anglais": "a18b0d28-6e4d-40bd-af2f-84dc6ba9bd31",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "ba50b3a6-b62b-450f-b5f5-e762ee9d6d15",
+    "nom_local": "Rouge des prés",
+    "nom_anglais": "ba50b3a6-b62b-450f-b5f5-e762ee9d6d15",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "344255a7-d0f9-4a1e-9b81-e643c0359138",
+    "nom_local": "Salers",
+    "nom_anglais": "344255a7-d0f9-4a1e-9b81-e643c0359138",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "08544692-0adb-428c-9ace-f4dddb2adf27",
+    "nom_local": "Saosnoise",
+    "nom_anglais": "08544692-0adb-428c-9ace-f4dddb2adf27",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "ca162cf2-2260-450c-9312-71d1a5a0d53a",
+    "nom_local": "Simmental Francaise",
+    "nom_anglais": "ca162cf2-2260-450c-9312-71d1a5a0d53a",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "8ff72b6a-7669-4695-bc84-6f1531199443",
+    "nom_local": "Tarentaise",
+    "nom_anglais": "8ff72b6a-7669-4695-bc84-6f1531199443",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "ec5d870c-f66d-4841-8e33-d9d09ce9bc99",
+    "nom_local": "Villard de Lans",
+    "nom_anglais": "ec5d870c-f66d-4841-8e33-d9d09ce9bc99",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "6b345cbc-8fa7-487e-a553-37308f40d50d",
+    "nom_local": "Vosgienne",
+    "nom_anglais": "6b345cbc-8fa7-487e-a553-37308f40d50d",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "4b22149f-9647-4659-85f4-469ceabed79b",
+    "nom_local": "Wagyu",
+    "nom_anglais": "4b22149f-9647-4659-85f4-469ceabed79b",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "adf9edcf-3eb9-4511-b16b-06b0d57ddd34",
+    "nom_local": "Zébu Mahorais",
+    "nom_anglais": "adf9edcf-3eb9-4511-b16b-06b0d57ddd34",
+    "code_espece": 5,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "0fbeef1e-551e-4a1b-97d8-7e9fbe5d8413",
+    "nom_local": "Alpine",
+    "nom_anglais": "0fbeef1e-551e-4a1b-97d8-7e9fbe5d8413",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "347a2866-0945-4432-ae1d-951a1836490e",
+    "nom_local": "Angora",
+    "nom_anglais": "347a2866-0945-4432-ae1d-951a1836490e",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "ae074208-2d8a-45d1-bcba-413962f27298",
+    "nom_local": "Blanche des Cévennes",
+    "nom_anglais": "ae074208-2d8a-45d1-bcba-413962f27298",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "Population de chèvres intégrée à celle du Massif Central lors de sa reconnaissance en tant que race en 2010",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "38dcc873-5c90-4d21-8bbf-c849f68807df",
+    "nom_local": "Boer",
+    "nom_anglais": "38dcc873-5c90-4d21-8bbf-c849f68807df",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "4569c7cb-f2b8-4885-b0a4-6e503ea49d31",
+    "nom_local": "Catalan",
+    "nom_anglais": "4569c7cb-f2b8-4885-b0a4-6e503ea49d31",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "d75be4bc-dd79-48bb-ae5c-cd4352fdadaf",
+    "nom_local": "Chèvre de Lorraine",
+    "nom_anglais": "d75be4bc-dd79-48bb-ae5c-cd4352fdadaf",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "présente aussi en Belgique, Allemagne et Luxembourg",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "f9a74af4-030c-4983-ab35-fb602e2b0d6e",
+    "nom_local": "Chèvre des Fossés",
+    "nom_anglais": "f9a74af4-030c-4983-ab35-fb602e2b0d6e",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "260868ef-610e-4014-8de9-e16aa14537f4",
+    "nom_local": "Chèvre des Savoie",
+    "nom_anglais": "260868ef-610e-4014-8de9-e16aa14537f4",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "c307ca2d-526c-48ca-a96f-5c4134db3942",
+    "nom_local": "Chèvre du Massif central",
+    "nom_anglais": "c307ca2d-526c-48ca-a96f-5c4134db3942",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "2994ff7f-8ca1-4e4e-a6fe-068460b903ae",
+    "nom_local": "Corse",
+    "nom_anglais": "2994ff7f-8ca1-4e4e-a6fe-068460b903ae",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "présente uniquement en Corse",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "3761eb64-92e9-49db-a0f6-9f85708042b3",
+    "nom_local": "Cou-Clair de Berry",
+    "nom_anglais": "3761eb64-92e9-49db-a0f6-9f85708042b3",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "baf00bc2-1e38-4480-918f-7b9d253c415e",
+    "nom_local": "Créole",
+    "nom_anglais": "baf00bc2-1e38-4480-918f-7b9d253c415e",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "ecf2a948-15b2-4329-afb1-89455cd5d784",
+    "nom_local": "Peï",
+    "nom_anglais": "ecf2a948-15b2-4329-afb1-89455cd5d784",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "a846518e-7868-4368-a895-a10f5e4179a2",
+    "nom_local": "Poitevine",
+    "nom_anglais": "a846518e-7868-4368-a895-a10f5e4179a2",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "0de01cc1-ae3e-40e0-a38e-84b950bfa76d",
+    "nom_local": "Provencale",
+    "nom_anglais": "0de01cc1-ae3e-40e0-a38e-84b950bfa76d",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "fe780148-acf9-4e31-b538-4125b9f8d7eb",
+    "nom_local": "Pyrénéenne",
+    "nom_anglais": "fe780148-acf9-4e31-b538-4125b9f8d7eb",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "db2187fc-9078-4ccc-b61e-1383b5172d2a",
+    "nom_local": "Rove",
+    "nom_anglais": "db2187fc-9078-4ccc-b61e-1383b5172d2a",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "03ea2c71-eb32-40cf-a181-42ce5148b5c0",
+    "nom_local": "Saanen",
+    "nom_anglais": "03ea2c71-eb32-40cf-a181-42ce5148b5c0",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "ef1ca99f-f911-4757-bacb-ae44ca0ced0e",
+    "nom_local": "Sundgau",
+    "nom_anglais": "ef1ca99f-f911-4757-bacb-ae44ca0ced0e",
+    "code_espece": 11,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "ddabe622-76ed-41aa-b0c8-74eb92e82d9f",
+    "nom_local": "Aure et Campan",
+    "nom_anglais": "ddabe622-76ed-41aa-b0c8-74eb92e82d9f",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "0f5b37ad-20fa-4238-8f27-14d0221d37ae",
+    "nom_local": "Avranchin",
+    "nom_anglais": "0f5b37ad-20fa-4238-8f27-14d0221d37ae",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "4931aaa1-db0f-4654-a56e-9af4f09f9e98",
+    "nom_local": "Barégeoise",
+    "nom_anglais": "4931aaa1-db0f-4654-a56e-9af4f09f9e98",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "fa92d1ca-5d33-49ab-acd1-d072b8b8d7ef",
+    "nom_local": "Basco-Béarnaise",
+    "nom_anglais": "fa92d1ca-5d33-49ab-acd1-d072b8b8d7ef",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Le nom de la race fait référence à l'origine géographique de la race",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "a0f66bb3-a1bb-4b06-8c57-a9d197f09c97",
+    "nom_local": "Belle Ile",
+    "nom_anglais": "a0f66bb3-a1bb-4b06-8c57-a9d197f09c97",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "691ad304-1bc2-4a77-8bd0-9d68e057f2c9",
+    "nom_local": "Berrichon de l'Indre",
+    "nom_anglais": "691ad304-1bc2-4a77-8bd0-9d68e057f2c9",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "d4ee67a6-b626-433d-a2c4-f2073abd1974",
+    "nom_local": "Berrichon du Cher",
+    "nom_anglais": "d4ee67a6-b626-433d-a2c4-f2073abd1974",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "4d039b5c-d84e-426e-88b9-6d4fd0c24dde",
+    "nom_local": "Bizet",
+    "nom_anglais": "4d039b5c-d84e-426e-88b9-6d4fd0c24dde",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race de mouton rustiques, adaptée aux environnements extérieurs et montagnards",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "09a7e8f2-a236-42ab-8740-10d397123f64",
+    "nom_local": "Blackface",
+    "nom_anglais": "09a7e8f2-a236-42ab-8740-10d397123f64",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "01545a73-49df-493d-8c83-60b14409c796",
+    "nom_local": "Blanc du Massif Central",
+    "nom_anglais": "01545a73-49df-493d-8c83-60b14409c796",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "af333021-8260-43c7-97f2-9963c5dad0a5",
+    "nom_local": "Bleu du Maine",
+    "nom_anglais": "af333021-8260-43c7-97f2-9963c5dad0a5",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "fb39179c-e166-4e2d-b651-ffb9eed14bea",
+    "nom_local": "Boulonnaise",
+    "nom_anglais": "fb39179c-e166-4e2d-b651-ffb9eed14bea",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "2166d829-44db-41b3-bc1c-dbb91333548c",
+    "nom_local": "Brigasque",
+    "nom_anglais": "2166d829-44db-41b3-bc1c-dbb91333548c",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "7ed76237-0adb-4b91-a25c-6ae4744d32d6",
+    "nom_local": "Castillonnaise",
+    "nom_anglais": "7ed76237-0adb-4b91-a25c-6ae4744d32d6",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "dcb11149-eb73-4454-a0df-9539e413e2a9",
+    "nom_local": "Caussenarde des Garrigues",
+    "nom_anglais": "dcb11149-eb73-4454-a0df-9539e413e2a9",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "a6186834-d8be-4d83-98a7-7ce1a1c347c7",
+    "nom_local": "Causses du Lot",
+    "nom_anglais": "a6186834-d8be-4d83-98a7-7ce1a1c347c7",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "9acb3662-30a2-4f73-a1d0-3e282f4e022e",
+    "nom_local": "Charmoise",
+    "nom_anglais": "9acb3662-30a2-4f73-a1d0-3e282f4e022e",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "6d01e358-8ec2-4cc5-8073-94e4ee6b67f3",
+    "nom_local": "Clun Forest",
+    "nom_anglais": "6d01e358-8ec2-4cc5-8073-94e4ee6b67f3",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "43ddcf22-b2cc-4dd2-82a9-70aae9889f2c",
+    "nom_local": "Corse",
+    "nom_anglais": "43ddcf22-b2cc-4dd2-82a9-70aae9889f2c",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "d577c956-ca1b-4d1d-b74c-7117bf32ed5a",
+    "nom_local": "Cotentin",
+    "nom_anglais": "d577c956-ca1b-4d1d-b74c-7117bf32ed5a",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "5fb53a4e-3a8a-4575-a73a-616d50044649",
+    "nom_local": "Dorset Down",
+    "nom_anglais": "5fb53a4e-3a8a-4575-a73a-616d50044649",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "24e6e41b-3397-478d-bbec-8916045ba501",
+    "nom_local": "Est à laine Mérinos",
+    "nom_anglais": "24e6e41b-3397-478d-bbec-8916045ba501",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "a3f8749e-04e5-46f0-9d3a-8609fd87205f",
+    "nom_local": "Finnoise",
+    "nom_anglais": "a3f8749e-04e5-46f0-9d3a-8609fd87205f",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "7880aed0-3e78-4291-83d2-3f44e6866ef5",
+    "nom_local": "Grivette",
+    "nom_anglais": "7880aed0-3e78-4291-83d2-3f44e6866ef5",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "ad4b99d8-c16b-4c8d-84d3-e7c7ce364e09",
+    "nom_local": "Hampshire",
+    "nom_anglais": "ad4b99d8-c16b-4c8d-84d3-e7c7ce364e09",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "b072710b-2f69-4345-a08f-dc99bee3516e",
+    "nom_local": "INRA 401",
+    "nom_anglais": "b072710b-2f69-4345-a08f-dc99bee3516e",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "8197748e-a75a-4cc4-acfc-89d673715379",
+    "nom_local": "Ile-de-France",
+    "nom_anglais": "8197748e-a75a-4cc4-acfc-89d673715379",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "e10b606f-4a83-4768-8e1a-a777f72b4224",
+    "nom_local": "Lacaune Lait",
+    "nom_anglais": "e10b606f-4a83-4768-8e1a-a777f72b4224",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "8839ec2d-66f5-45b5-9d04-98b74d83ea79",
+    "nom_local": "Lacaune Viande",
+    "nom_anglais": "8839ec2d-66f5-45b5-9d04-98b74d83ea79",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "cbbd5b36-b8ad-4edd-925d-4f17c3299959",
+    "nom_local": "Landaise",
+    "nom_anglais": "cbbd5b36-b8ad-4edd-925d-4f17c3299959",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "491bdc64-3495-4b2a-91a8-0d18ab6ea180",
+    "nom_local": "Landes de Bretagne",
+    "nom_anglais": "491bdc64-3495-4b2a-91a8-0d18ab6ea180",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "d838141c-9006-4893-b662-265415a3b952",
+    "nom_local": "Limousine",
+    "nom_anglais": "d838141c-9006-4893-b662-265415a3b952",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "d489b78a-8858-428d-a8af-5a3ccfcacc0c",
+    "nom_local": "Lourdaise",
+    "nom_anglais": "d489b78a-8858-428d-a8af-5a3ccfcacc0c",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "70c98461-6021-45ff-9afc-44667d73299c",
+    "nom_local": "Manech Tête Noire",
+    "nom_anglais": "70c98461-6021-45ff-9afc-44667d73299c",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "0dd215b6-4576-4fbb-a35b-19b426673787",
+    "nom_local": "Manech Tête Rousse",
+    "nom_anglais": "0dd215b6-4576-4fbb-a35b-19b426673787",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "20a1d722-8a67-40d6-a1f1-a74cf766bd2c",
+    "nom_local": "Martinik",
+    "nom_anglais": "20a1d722-8a67-40d6-a1f1-a74cf766bd2c",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "5b373a16-0f85-4d8a-8092-9944b830fb51",
+    "nom_local": "Montagne noire",
+    "nom_anglais": "5b373a16-0f85-4d8a-8092-9944b830fb51",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "c94ae44d-2a1e-422f-b2aa-30f9376bd673",
+    "nom_local": "Mourerous",
+    "nom_anglais": "c94ae44d-2a1e-422f-b2aa-30f9376bd673",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "efbd601c-af2a-4b8a-8ab2-832a7df759cd",
+    "nom_local": "Mouton charollais",
+    "nom_anglais": "efbd601c-af2a-4b8a-8ab2-832a7df759cd",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "3c04e343-8153-4103-8347-2e623fb35eb1",
+    "nom_local": "Mouton vendéen",
+    "nom_anglais": "3c04e343-8153-4103-8347-2e623fb35eb1",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Tout commence au XIIe siècle, avec l’élevage de moutons dans le Bas-Poitou. La race du Poitou est peu à peu absorbée par croisements répétés notamment avec la race Flandrine, importée au XVIIe siècle par les Hollandais lors des travaux d’asséchement du Marais Poitevin. Cette dernière, bonne laitière, de haute stature, améliore la qualité du Mouton Poitevin, animal vigoureux et à bon potentiel de transformation. Des croisements entre les races locales et la race Southdown vont permettre d'améliorer les qualités bouchères des animaux. Dès les années 50, les éleveurs a race s’attachent à sélectionner à la fois les aptitudes maternelles et bouchères. En 1967, la race est officiellement agréée par le Ministère de l’Agriculture. La majorité des effectifs se trouve dans le Grand Ouest et le Centre du pays. COMMENT RECONNAITRE UN MOUTON VENDEEN ? On reconnait le Mouton Vendéen à sa bonne conformation bouchère mais surtout à sa couleur particulière de tête gris souris. Les pattes sont de la même couleur que la tête, qui est recouverte par un carré de laine.",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "84665a1f-752d-442c-9b72-8f56cafa4201",
+    "nom_local": "Mérinos d'Arles",
+    "nom_anglais": "84665a1f-752d-442c-9b72-8f56cafa4201",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "bd618547-6fda-4282-be9d-85ae66aecd53",
+    "nom_local": "Mérinos de Rambouillet",
+    "nom_anglais": "bd618547-6fda-4282-be9d-85ae66aecd53",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "2da7b42b-8911-4a0b-8e9b-f10de3c6133b",
+    "nom_local": "Mérinos précoce",
+    "nom_anglais": "2da7b42b-8911-4a0b-8e9b-f10de3c6133b",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "bb1c458c-fce0-4959-b7e7-b519bdcd7834",
+    "nom_local": "Noir du Velay",
+    "nom_anglais": "bb1c458c-fce0-4959-b7e7-b519bdcd7834",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "85f786b5-29d4-4daa-b7e6-d249df98c947",
+    "nom_local": "Ouessant",
+    "nom_anglais": "85f786b5-29d4-4daa-b7e6-d249df98c947",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "c33c28d4-69d6-4151-a43a-8e9c78908609",
+    "nom_local": "PréAlpes du Sud",
+    "nom_anglais": "c33c28d4-69d6-4151-a43a-8e9c78908609",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "1f7e5666-5cf2-48e9-88f3-62ffd40ed79b",
+    "nom_local": "Raiole",
+    "nom_anglais": "1f7e5666-5cf2-48e9-88f3-62ffd40ed79b",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "f36ae9e9-d74c-4fbd-9dc2-34cc3ae3a488",
+    "nom_local": "Rava",
+    "nom_anglais": "f36ae9e9-d74c-4fbd-9dc2-34cc3ae3a488",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "ace7dd7b-4608-4555-b2d6-c7bdfd9214e3",
+    "nom_local": "Romanov",
+    "nom_anglais": "ace7dd7b-4608-4555-b2d6-c7bdfd9214e3",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "9e90b5a1-6ed6-4f87-9bf3-de886ea72cca",
+    "nom_local": "Rouge de l'ouest",
+    "nom_anglais": "9e90b5a1-6ed6-4f87-9bf3-de886ea72cca",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "63b926d3-fb23-4e5d-8d04-67874c3ac1e6",
+    "nom_local": "Rouge du Roussillon",
+    "nom_anglais": "63b926d3-fb23-4e5d-8d04-67874c3ac1e6",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "1be852de-e53f-4e1e-8415-2e9980da8be8",
+    "nom_local": "Roussin de La Hague",
+    "nom_anglais": "1be852de-e53f-4e1e-8415-2e9980da8be8",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "50b2b975-b645-4ad7-8afc-8971de1cfa58",
+    "nom_local": "Sasi Ardi",
+    "nom_anglais": "50b2b975-b645-4ad7-8afc-8971de1cfa58",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "fbcd4996-e9d5-4635-9ef7-856c32e86899",
+    "nom_local": "Shropshire",
+    "nom_anglais": "fbcd4996-e9d5-4635-9ef7-856c32e86899",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Exotique",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "d5b6f481-e9e0-4f48-8205-f46651087356",
+    "nom_local": "Solognote",
+    "nom_anglais": "d5b6f481-e9e0-4f48-8205-f46651087356",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Régional"
+  },
+  {
+    "code_fao": "a7b19765-2110-42c8-b488-9e2eb800f9dc",
+    "nom_local": "Southdown français",
+    "nom_anglais": "a7b19765-2110-42c8-b488-9e2eb800f9dc",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "1c0127a4-dbc3-4c3f-a024-27584c0d2409",
+    "nom_local": "Suffolk",
+    "nom_anglais": "1c0127a4-dbc3-4c3f-a024-27584c0d2409",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "fbf8ce6e-ba61-4d3e-acf4-75862d890659",
+    "nom_local": "Tarasconnaise",
+    "nom_anglais": "fbf8ce6e-ba61-4d3e-acf4-75862d890659",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "e824baf0-e490-438d-906c-198e5f280818",
+    "nom_local": "Texel",
+    "nom_anglais": "e824baf0-e490-438d-906c-198e5f280818",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Localement adaptée",
+    "classification_geographique": "International"
+  },
+  {
+    "code_fao": "0807b34b-df72-4431-88c0-9a8788ac7a47",
+    "nom_local": "Thônes et Marthod",
+    "nom_anglais": "0807b34b-df72-4431-88c0-9a8788ac7a47",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "",
+    "classification_adaptation": "Indigène",
+    "classification_geographique": "Local"
+  },
+  {
+    "code_fao": "FRA_51_137",
+    "nom_local": "\"France\",\"FRA\",\"Goat\",\"db2187fc-9078-4ccc-b61e-1383b5172d2a\",\"Rove\",\"fr\",\"\",\"\",\"du Rove\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée pour vivre dans des conditions méditerranéennes\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Système transhumant\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: rouge, jaune, rouge avec quelques noirs, noir et feu, blaireau\",\"\",\"\",\"2\",\"2\",\"\",\"85\",\"72\",\"80\",\"55\",\"\",\"y\",\"\",\"Domestique\",\"Race\",\"Autour de la région de Marseille et par extension dans toute la Crau, on trouvait la chèvre du Rove, élevée pour sa dualité viande / lait. Son existence est attestée par la peinture animalière dès le XIXème siècle. Au début du XXème siècle, un produit laitier, la brousse, était le principal revenu des habitants du village du Rove. Estimés à plus de 14 000 au début des années 1960, les effectifs sont estimés à quelques milliers en 1979. l’arrêt de la transhumance à pied et la mise en place de la prophylaxie pour l’éradication de la brucellose a porté un coup fatal à la race dont les effectifs déclinent de façon drastique. Depuis les effectifs de la Rove ont remonté pour avoisiner le cap des 10 000 mères en 2020, mais depuis les effectifs ont rechuté. Environ la moitié des élevages sont en transformation fromagère, l'autre sont en allaitant, souvent en accompagnement d'un troupeau ovin.\",\"1900\",\"\",\"Provence-Alpes-Côte d'Azur. Reconnue \"\"Race Locale française\"\" par le Ministère en charge de l'Agriculture (Arrêté du 29 avril 2015) : \"\"Une race est dite locale si des liens suffisants avec un territoire spécifique sont démontrés, notamment si 30 % des effectifs sont situés dans un seul département ou 70 % dans trois départements limitrophes deux à deux.\"\"\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Goat\",\"db2187fc-9078-4ccc-b61e-1383b5172d2a\",\"Rove\",\"fr\",\"\",\"\",\"du Rove\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée pour vivre dans des conditions méditerranéennes\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Système transhumant\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: rouge, jaune, rouge avec quelques noirs, noir et feu, blaireau\",\"\",\"\",\"2\",\"2\",\"\",\"85\",\"72\",\"80\",\"55\",\"\",\"y\",\"\",\"Domestique\",\"Race\",\"Autour de la région de Marseille et par extension dans toute la Crau, on trouvait la chèvre du Rove, élevée pour sa dualité viande / lait. Son existence est attestée par la peinture animalière dès le XIXème siècle. Au début du XXème siècle, un produit laitier, la brousse, était le principal revenu des habitants du village du Rove. Estimés à plus de 14 000 au début des années 1960, les effectifs sont estimés à quelques milliers en 1979. l’arrêt de la transhumance à pied et la mise en place de la prophylaxie pour l’éradication de la brucellose a porté un coup fatal à la race dont les effectifs déclinent de façon drastique. Depuis les effectifs de la Rove ont remonté pour avoisiner le cap des 10 000 mères en 2020, mais depuis les effectifs ont rechuté. Environ la moitié des élevages sont en transformation fromagère, l'autre sont en allaitant, souvent en accompagnement d'un troupeau ovin.\",\"1900\",\"\",\"Provence-Alpes-Côte d'Azur. Reconnue \"\"Race Locale française\"\" par le Ministère en charge de l'Agriculture (Arrêté du 29 avril 2015) : \"\"Une race est dite locale si des liens suffisants avec un territoire spécifique sont démontrés, notamment si 30 % des effectifs sont situés dans un seul département ou 70 % dans trois départements limitrophes deux à deux.\"\"\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_138",
+    "nom_local": "\"France\",\"FRA\",\"Goat\",\"03ea2c71-eb32-40cf-a181-42ce5148b5c0\",\"Saanen\",\"fr\",\"\",\"Saanen\",\"French Saanen\",\"Localement adaptée\",\"International\",\"2004: sur toutes les races chèvre de France, deux (la race alpine et la race Saanen française) représentent 97% du troupeau national.\",\"Certaines caractéristiques génétiques spécifiques (Caséine alpha-S1, Debit) sont rapportées pour cette race.\",\"\",\"\",\"\",\"Gène de résistance à la tremblante (Codon K222)\",\"\",\"Impliquées dans de nombreuses production fromagères dont certaines sous AOP.\",\"\",\"\",\"Gène de résistance à la tremblante (Codon K222)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0 / 2\",\"0 / 2\",\"\",\"85\",\"80\",\"85\",\"70\",\"Poils courts\",\"y\",\"1959\",\"Domestique\",\"Race\",\"importé de Suisse\",\"1930\",\"depuis 1960 de Saanen Suisse (Allemagne, Royaume-Uni); de 1970 à 1975 de German Improved Blanc (Allemagne); de 1965 à 1975 de Blanche (Pays- Pays-Bas)\",\"France métropolitaine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Goat\",\"03ea2c71-eb32-40cf-a181-42ce5148b5c0\",\"Saanen\",\"fr\",\"\",\"Saanen\",\"French Saanen\",\"Localement adaptée\",\"International\",\"2004: sur toutes les races chèvre de France, deux (la race alpine et la race Saanen française) représentent 97% du troupeau national.\",\"Certaines caractéristiques génétiques spécifiques (Caséine alpha-S1, Debit) sont rapportées pour cette race.\",\"\",\"\",\"\",\"Gène de résistance à la tremblante (Codon K222)\",\"\",\"Impliquées dans de nombreuses production fromagères dont certaines sous AOP.\",\"\",\"\",\"Gène de résistance à la tremblante (Codon K222)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0 / 2\",\"0 / 2\",\"\",\"85\",\"80\",\"85\",\"70\",\"Poils courts\",\"y\",\"1959\",\"Domestique\",\"Race\",\"importé de Suisse\",\"1930\",\"depuis 1960 de Saanen Suisse (Allemagne, Royaume-Uni); de 1970 à 1975 de German Improved Blanc (Allemagne); de 1965 à 1975 de Blanche (Pays- Pays-Bas)\",\"France métropolitaine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_139",
+    "nom_local": "\"France\",\"FRA\",\"Goat\",\"ef1ca99f-f911-4757-bacb-ae44ca0ced0e\",\"Sundgau\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: noir. Commentaires: avec des marques blanc sur le corps et des rayures blanc sur le visage\",\"\",\"\",\"2\",\"2\",\"\",\"\",\"\",\"\",\"\",\"\",\"n\",\"\",\"Domestique\",\"Variété\",\"ancienne variété d'alpine française: originaire du Toggenburg\",\"\",\"\",\"southern Haut Rhin, Alsace\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Goat\",\"ef1ca99f-f911-4757-bacb-ae44ca0ced0e\",\"Sundgau\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: noir. Commentaires: avec des marques blanc sur le corps et des rayures blanc sur le visage\",\"\",\"\",\"2\",\"2\",\"\",\"\",\"\",\"\",\"\",\"\",\"n\",\"\",\"Domestique\",\"Variété\",\"ancienne variété d'alpine française: originaire du Toggenburg\",\"\",\"\",\"southern Haut Rhin, Alsace\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_140",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"ddabe622-76ed-41aa-b0c8-74eb92e82d9f\",\"Aure et Campan\",\"fr.\",\"\",\"\",\"Auroise, Aure-Campan\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives (1200-2000 m,t)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"75\",\"70\",\"75\",\"50\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"composé de' une race locale et mérinos\",\"\",\"\",\"central Pyrénées\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"ddabe622-76ed-41aa-b0c8-74eb92e82d9f\",\"Aure et Campan\",\"fr.\",\"\",\"\",\"Auroise, Aure-Campan\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives (1200-2000 m,t)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"75\",\"70\",\"75\",\"50\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"composé de' une race locale et mérinos\",\"\",\"\",\"central Pyrénées\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_141",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"0f5b37ad-20fa-4238-8f27-14d0221d37ae\",\"Avranchin\",\"fr.\",\"\",\"\",\"Avranchin\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec la face et les pieds brunâtres\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"60\",\"100\",\"75\",\"\",\"y\",\"1928\",\"Domestique\",\"Race\",\"composé de' une race locale, Leicester, Kent et South Duvet\",\"\",\"de 1987 à 1997 de Vendéen (France)\",\"western Calvados, Basse-Normandie, Bretagne\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"0f5b37ad-20fa-4238-8f27-14d0221d37ae\",\"Avranchin\",\"fr.\",\"\",\"\",\"Avranchin\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec la face et les pieds brunâtres\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"60\",\"100\",\"75\",\"\",\"y\",\"1928\",\"Domestique\",\"Race\",\"composé de' une race locale, Leicester, Kent et South Duvet\",\"\",\"de 1987 à 1997 de Vendéen (France)\",\"western Calvados, Basse-Normandie, Bretagne\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_142",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"4931aaa1-db0f-4654-a56e-9af4f09f9e98\",\"Barégeoise\",\"fr.\",\"\",\"\",\"Baregeois, Baregeois\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée pour vivre dans l'environnement local (montagnes).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives (1200-2000m¦t.)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc, parfois marron\",\"\",\"\",\"2\",\"2\",\"\",\"78\",\"70\",\"90\",\"60\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"composé de' une race locale et mérinos\",\"\",\"\",\"central Pyrénées\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"4931aaa1-db0f-4654-a56e-9af4f09f9e98\",\"Barégeoise\",\"fr.\",\"\",\"\",\"Baregeois, Baregeois\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée pour vivre dans l'environnement local (montagnes).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives (1200-2000m¦t.)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc, parfois marron\",\"\",\"\",\"2\",\"2\",\"\",\"78\",\"70\",\"90\",\"60\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"composé de' une race locale et mérinos\",\"\",\"\",\"central Pyrénées\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_143",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"fa92d1ca-5d33-49ab-acd1-d072b8b8d7ef\",\"Basco-Béarnaise\",\"fr.\",\"Le nom de la race fait référence à l'origine géographique de la race\",\"\",\"Basco-Béarnaise\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation transhumante des estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"2\",\"\",\"90\",\"75\",\"80\",\"55\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"race indigène race des vallées basques et béarnaises\",\"\",\"\",\"Béarn Mountains, Aquitaine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"fa92d1ca-5d33-49ab-acd1-d072b8b8d7ef\",\"Basco-Béarnaise\",\"fr.\",\"Le nom de la race fait référence à l'origine géographique de la race\",\"\",\"Basco-Béarnaise\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation transhumante des estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"2\",\"\",\"90\",\"75\",\"80\",\"55\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"race indigène race des vallées basques et béarnaises\",\"\",\"\",\"Béarn Mountains, Aquitaine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_144",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"a0f66bb3-a1bb-4b06-8c57-a9d197f09c97\",\"Belle Ile\",\"fr.\",\"\",\"\",\"Race de Deux, Belle Ile\",\"Indigène\",\"Local\",\"\",\"Des caractéristiques génétiques spécifiques sont signalées pour cette race.\",\"\",\"\",\"Bien adapté aux conditions extérieures permanentes (climat océanique - Bretagne)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Pâturage sur houblonnière, jachère végétale, en association avec le bétail\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Peut montrer des taches marron sur les pattes\",\"blanc d'une seule couleur (ou moins fréquemment noir)\",\"\",\"0\",\"0\",\"\",\"61\",\"59\",\"65\",\"47\",\"tenez-vous proportionnellement haut sur les pattes, pas de cornes\",\"\",\"\",\"Domestique\",\"Race\",\"Créé à l'origine à la fin du 18e siècle à partir d'un croisement entre la race \"\"Landes de Bretagne\"\" et la race \"\"Mouton Flandrin\"\". Repris du spécimen original localisé sur Belle Ile en 1985.\",\"1800\",\"\",\"Bretagne, Pays de la Loire\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"a0f66bb3-a1bb-4b06-8c57-a9d197f09c97\",\"Belle Ile\",\"fr.\",\"\",\"\",\"Race de Deux, Belle Ile\",\"Indigène\",\"Local\",\"\",\"Des caractéristiques génétiques spécifiques sont signalées pour cette race.\",\"\",\"\",\"Bien adapté aux conditions extérieures permanentes (climat océanique - Bretagne)\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Pâturage sur houblonnière, jachère végétale, en association avec le bétail\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Peut montrer des taches marron sur les pattes\",\"blanc d'une seule couleur (ou moins fréquemment noir)\",\"\",\"0\",\"0\",\"\",\"61\",\"59\",\"65\",\"47\",\"tenez-vous proportionnellement haut sur les pattes, pas de cornes\",\"\",\"\",\"Domestique\",\"Race\",\"Créé à l'origine à la fin du 18e siècle à partir d'un croisement entre la race \"\"Landes de Bretagne\"\" et la race \"\"Mouton Flandrin\"\". Repris du spécimen original localisé sur Belle Ile en 1985.\",\"1800\",\"\",\"Bretagne, Pays de la Loire\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_145",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"691ad304-1bc2-4a77-8bd0-9d68e057f2c9\",\"Berrichon de l'Indre\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"83\",\"78\",\"90\",\"60\",\"\",\"y\",\"1895\",\"Domestique\",\"\",\"local breed, autochthon Mouton Berrichon\",\"1800\",\"\",\"Champagne Berrichonne, Champagne-Ardennes\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"691ad304-1bc2-4a77-8bd0-9d68e057f2c9\",\"Berrichon de l'Indre\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"83\",\"78\",\"90\",\"60\",\"\",\"y\",\"1895\",\"Domestique\",\"\",\"local breed, autochthon Mouton Berrichon\",\"1800\",\"\",\"Champagne Berrichonne, Champagne-Ardennes\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_146",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"d4ee67a6-b626-433d-a2c4-f2073abd1974\",\"Berrichon du Cher\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"73\",\"68\",\"110\",\"70\",\"\",\"\",\"1934\",\"Domestique\",\"Race\",\"composé de' une race locale, Merino et Leicester (Royaume-Uni)\",\"\",\"since 1960 from Ile-de-France (France)\",\"le sud-ouest de la France et le centre de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"d4ee67a6-b626-433d-a2c4-f2073abd1974\",\"Berrichon du Cher\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"73\",\"68\",\"110\",\"70\",\"\",\"\",\"1934\",\"Domestique\",\"Race\",\"composé de' une race locale, Merino et Leicester (Royaume-Uni)\",\"\",\"since 1960 from Ile-de-France (France)\",\"le sud-ouest de la France et le centre de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_147",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"4d039b5c-d84e-426e-88b9-6d4fd0c24dde\",\"Bizet\",\"fr.\",\"Race de mouton rustiques, adaptée aux environnements extérieurs et montagnards\",\"\",\"Bizet\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race de mouton Bizet présente une extrême rusticité parmi les autres races locales de montagne du Massif Central. D'excellentes performances de marche favorisent l' adaptation des animaux de cette race aux conditions extérieures et aux conditions de pâturage extensives, y compris les environnements montagneux.\",\"Excellente résistance aux environnements difficiles et froids. Un troupeau de cette race a été acclimaté aux îles Kerguelen (océan Atlantique sud)\",\"Les brebis peuvent facilement désaisonner. Les brebis peuvent agneau à des intervalles de 8 mois. La race est sélectionnée pour la capacité de succion des brebis.\",\"La viande agneau de Bizet est célèbre et serait l'un des plats préférés du roi de France Louis XIV\",\"La docilité de la race la rend facile à gérer avec les humains.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Tête noir avec liste blanc , pattes marron portant au moins deux balanes blanc\",\"Polaire de couleur toison, avec une forme en forme de coquille\",\"\",\"2\",\"0\",\"Cornes en spirale élargies chez les mâles\",\"80\",\"75\",\"90\",\"55\",\"\",\"y\",\"1946\",\"Domestique\",\"Race\",\"race indigène du Massif Central en France: Le premier congrès des sélectionneurs de race Bizet a été organisé en 1905.\",\"1905\",\"Aucun\",\"Haute Loire, Puy-De-Dome, Cantal\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"4d039b5c-d84e-426e-88b9-6d4fd0c24dde\",\"Bizet\",\"fr.\",\"Race de mouton rustiques, adaptée aux environnements extérieurs et montagnards\",\"\",\"Bizet\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race de mouton Bizet présente une extrême rusticité parmi les autres races locales de montagne du Massif Central. D'excellentes performances de marche favorisent l' adaptation des animaux de cette race aux conditions extérieures et aux conditions de pâturage extensives, y compris les environnements montagneux.\",\"Excellente résistance aux environnements difficiles et froids. Un troupeau de cette race a été acclimaté aux îles Kerguelen (océan Atlantique sud)\",\"Les brebis peuvent facilement désaisonner. Les brebis peuvent agneau à des intervalles de 8 mois. La race est sélectionnée pour la capacité de succion des brebis.\",\"La viande agneau de Bizet est célèbre et serait l'un des plats préférés du roi de France Louis XIV\",\"La docilité de la race la rend facile à gérer avec les humains.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Tête noir avec liste blanc , pattes marron portant au moins deux balanes blanc\",\"Polaire de couleur toison, avec une forme en forme de coquille\",\"\",\"2\",\"0\",\"Cornes en spirale élargies chez les mâles\",\"80\",\"75\",\"90\",\"55\",\"\",\"y\",\"1946\",\"Domestique\",\"Race\",\"race indigène du Massif Central en France: Le premier congrès des sélectionneurs de race Bizet a été organisé en 1905.\",\"1905\",\"Aucun\",\"Haute Loire, Puy-De-Dome, Cantal\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_148",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"09a7e8f2-a236-42ab-8740-10d397123f64\",\"Blackface\",\"eng.\",\"\",\"Blackface\",\"\",\"Exotique\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation de parcours m,diterran,ens\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: tête et pattes tachetées de blanc, noir ou noir-blanc\",\"\",\"\",\"2\",\"2\",\"\",\"\",\"\",\"\",\"\",\"\",\"n\",\"\",\"Domestique\",\"Race\",\"importé du Royaume-Uni (1974)\",\"\",\"\",\"sud de la France, sud-est de la France, Languedoc-Rousillon\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"09a7e8f2-a236-42ab-8740-10d397123f64\",\"Blackface\",\"eng.\",\"\",\"Blackface\",\"\",\"Exotique\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation de parcours m,diterran,ens\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: tête et pattes tachetées de blanc, noir ou noir-blanc\",\"\",\"\",\"2\",\"2\",\"\",\"\",\"\",\"\",\"\",\"\",\"n\",\"\",\"Domestique\",\"Race\",\"importé du Royaume-Uni (1974)\",\"\",\"\",\"sud de la France, sud-est de la France, Languedoc-Rousillon\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_149",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"01545a73-49df-493d-8c83-60b14409c796\",\"Blanc du Massif Central\",\"fr.\",\"\",\"Blanc Du Massif Central\",\"\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"95\",\"85\",\"110\",\"70\",\"\",\"\",\"1967\",\"Domestique\",\"Race\",\"composite of a local breed, Lacaune, Berrichon de l'Indre\",\"\",\"\",\"sud-est du Massif central\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"01545a73-49df-493d-8c83-60b14409c796\",\"Blanc du Massif Central\",\"fr.\",\"\",\"Blanc Du Massif Central\",\"\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"95\",\"85\",\"110\",\"70\",\"\",\"\",\"1967\",\"Domestique\",\"Race\",\"composite of a local breed, Lacaune, Berrichon de l'Indre\",\"\",\"\",\"sud-est du Massif central\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_150",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"af333021-8260-43c7-97f2-9963c5dad0a5\",\"Bleu du Maine\",\"fr.\",\"\",\"Bleu Du Maine\",\"Bluefaced Main\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec face bleu foncé et muqueuse bleue\",\"\",\"\",\"0\",\"0\",\"\",\"76\",\"65\",\"110\",\"80\",\"\",\"y\",\"1927\",\"Domestique\",\"Race\",\"composé de race locale et Bluefaced Leicester\",\"\",\"\",\"western France, northern France, Pays de la Loire, Champagne\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"af333021-8260-43c7-97f2-9963c5dad0a5\",\"Bleu du Maine\",\"fr.\",\"\",\"Bleu Du Maine\",\"Bluefaced Main\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec face bleu foncé et muqueuse bleue\",\"\",\"\",\"0\",\"0\",\"\",\"76\",\"65\",\"110\",\"80\",\"\",\"y\",\"1927\",\"Domestique\",\"Race\",\"composé de race locale et Bluefaced Leicester\",\"\",\"\",\"western France, northern France, Pays de la Loire, Champagne\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_151",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"fb39179c-e166-4e2d-b651-ffb9eed14bea\",\"Boulonnaise\",\"fr.\",\"\",\"\",\"Mouton Boulonnais, Boulonnais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec le visage et les pattes bleus ou rouge et le nez noir\",\"\",\"\",\"0\",\"0\",\"\",\"75\",\"75\",\"125\",\"82\",\"\",\"y\",\"1987\",\"Domestique\",\"Race\",\"composé de' une race locale, Leicester, New Kent et Dishley-Merino\",\"1850\",\"\",\"côte nord de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"fb39179c-e166-4e2d-b651-ffb9eed14bea\",\"Boulonnaise\",\"fr.\",\"\",\"\",\"Mouton Boulonnais, Boulonnais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec le visage et les pattes bleus ou rouge et le nez noir\",\"\",\"\",\"0\",\"0\",\"\",\"75\",\"75\",\"125\",\"82\",\"\",\"y\",\"1987\",\"Domestique\",\"Race\",\"composé de' une race locale, Leicester, New Kent et Dishley-Merino\",\"1850\",\"\",\"côte nord de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_152",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"2166d829-44db-41b3-bc1c-dbb91333548c\",\"Brigasque\",\"fr.\",\"\",\"Brigasca\",\"Brigasca\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"La race est connue pour son adaptation aux conditions marginales locales (flancs escarpés des montagnes).\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"zone montaigneuse\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc, tête et pattes marbrées rouge\",\"\",\"\",\"2\",\"2\",\"\",\"90\",\"78\",\"70\",\"60\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"composite of Moutons de Pays, Langhe and Fabrosa (Italy)\",\"\",\"\",\"Département des Alpes Maritimes, à \"\"\"\" La Brigue \"\"\"\" le long de la frontière du sud-est de la France et dans le nord-ouest de l'Italie.\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"2166d829-44db-41b3-bc1c-dbb91333548c\",\"Brigasque\",\"fr.\",\"\",\"Brigasca\",\"Brigasca\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"La race est connue pour son adaptation aux conditions marginales locales (flancs escarpés des montagnes).\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"zone montaigneuse\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc, tête et pattes marbrées rouge\",\"\",\"\",\"2\",\"2\",\"\",\"90\",\"78\",\"70\",\"60\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"composite of Moutons de Pays, Langhe and Fabrosa (Italy)\",\"\",\"\",\"Département des Alpes Maritimes, à \"\"\"\" La Brigue \"\"\"\" le long de la frontière du sud-est de la France et dans le nord-ouest de l'Italie.\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_153",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"7ed76237-0adb-4b91-a25c-6ae4744d32d6\",\"Castillonnaise\",\"fr.\",\"\",\"\",\"Pyrénées Centrales à Extrémités Rousses, St.Gironnais, Castillonnais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches rouge sur la tête et les pattes\",\"\",\"\",\"2\",\"0/2\",\"\",\"65\",\"55\",\"70\",\"50\",\"\",\"y\",\"1982\",\"Domestique\",\"Race\",\"composé de races locales et de South Duvet\",\"1850\",\"\",\"Ariège, Central Pyrénées\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"7ed76237-0adb-4b91-a25c-6ae4744d32d6\",\"Castillonnaise\",\"fr.\",\"\",\"\",\"Pyrénées Centrales à Extrémités Rousses, St.Gironnais, Castillonnais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches rouge sur la tête et les pattes\",\"\",\"\",\"2\",\"0/2\",\"\",\"65\",\"55\",\"70\",\"50\",\"\",\"y\",\"1982\",\"Domestique\",\"Race\",\"composé de races locales et de South Duvet\",\"1850\",\"\",\"Ariège, Central Pyrénées\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_154",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"dcb11149-eb73-4454-a0df-9539e413e2a9\",\"Caussenarde des Garrigues\",\"fr.\",\"\",\"\",\"Caussenard des Garrigues\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée pour vivre dans les zones marginales du Massif Central.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"zones marginales du Massif Central\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"boutons: 10% des mâles, 20% des femelles\",\"80\",\"70\",\"100\",\"70\",\"oreilles courtes\",\"y\",\"1994\",\"Domestique\",\"Race\",\"variété indigène du sud de Caussenard\",\"19th Century\",\"since 1960 from Blanc du Massif Central (France)\",\"Département du Gard et l'Hérault, Languedoc-Rousillon\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"dcb11149-eb73-4454-a0df-9539e413e2a9\",\"Caussenarde des Garrigues\",\"fr.\",\"\",\"\",\"Caussenard des Garrigues\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée pour vivre dans les zones marginales du Massif Central.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"zones marginales du Massif Central\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"boutons: 10% des mâles, 20% des femelles\",\"80\",\"70\",\"100\",\"70\",\"oreilles courtes\",\"y\",\"1994\",\"Domestique\",\"Race\",\"variété indigène du sud de Caussenard\",\"19th Century\",\"since 1960 from Blanc du Massif Central (France)\",\"Département du Gard et l'Hérault, Languedoc-Rousillon\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_155",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"a6186834-d8be-4d83-98a7-7ce1a1c347c7\",\"Causses du Lot\",\"fr.\",\"\",\"Caussenard Du Lot\",\"Caussenarde du Lot\",\"Indigène\",\"International\",\"\",\"\",\"La race mouton des Causses du Lot est un symbole reconnu du territoire quercynois\",\"Des liens documentés à travers l'histoire humaine et le développement de la race mouton à travers le territoire du Quercy\",\"La race est adaptée aux zones marginales, en particulier au pâturage sur les prairies sèches des Causses du Quercy\",\"Tolérance et / ou résistance à la piroplasmose\",\"Capacité bien documentée pour l'agnelage / «désassaisonnement» «hors saison»\",\"Recognized meat quality marketed under IGP Indication Géographique Protégée : Agneau Fermier du Quercy since 1980\",\"Excellente capacité à marcher\",\"\",\"\",\"\",\"zones marginales\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec des lunettes et des oreilles noir\",\"\",\"\",\"0\",\"0\",\"\",\"100\",\"90\",\"95\",\"70\",\"Morphologie du cadre léger\",\"y\",\"1955\",\"Domestique\",\"Race\",\"race indigène race\",\"\",\"\",\"Département du Lot, Midi-Pyrénées\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"a6186834-d8be-4d83-98a7-7ce1a1c347c7\",\"Causses du Lot\",\"fr.\",\"\",\"Caussenard Du Lot\",\"Caussenarde du Lot\",\"Indigène\",\"International\",\"\",\"\",\"La race mouton des Causses du Lot est un symbole reconnu du territoire quercynois\",\"Des liens documentés à travers l'histoire humaine et le développement de la race mouton à travers le territoire du Quercy\",\"La race est adaptée aux zones marginales, en particulier au pâturage sur les prairies sèches des Causses du Quercy\",\"Tolérance et / ou résistance à la piroplasmose\",\"Capacité bien documentée pour l'agnelage / «désassaisonnement» «hors saison»\",\"Recognized meat quality marketed under IGP Indication Géographique Protégée : Agneau Fermier du Quercy since 1980\",\"Excellente capacité à marcher\",\"\",\"\",\"\",\"zones marginales\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec des lunettes et des oreilles noir\",\"\",\"\",\"0\",\"0\",\"\",\"100\",\"90\",\"95\",\"70\",\"Morphologie du cadre léger\",\"y\",\"1955\",\"Domestique\",\"Race\",\"race indigène race\",\"\",\"\",\"Département du Lot, Midi-Pyrénées\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_156",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"9acb3662-30a2-4f73-a1d0-3e282f4e022e\",\"Charmoise\",\"fr.\",\"\",\"Charmois\",\"Charmois\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploite des zones difficiles\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"65\",\"60\",\"70\",\"45\",\"\",\"y\",\"1927\",\"Domestique\",\"Race\",\"composé de races locales croisées avec des béliers de race Kent\",\"1850\",\"\",\"ouest de la France, centre de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"9acb3662-30a2-4f73-a1d0-3e282f4e022e\",\"Charmoise\",\"fr.\",\"\",\"Charmois\",\"Charmois\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploite des zones difficiles\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"65\",\"60\",\"70\",\"45\",\"\",\"y\",\"1927\",\"Domestique\",\"Race\",\"composé de races locales croisées avec des béliers de race Kent\",\"1850\",\"\",\"ouest de la France, centre de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_157",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"6d01e358-8ec2-4cc5-8073-94e4ee6b67f3\",\"Clun Forest\",\"eng.\",\"\",\"Clun Forest\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"Les animaux sont adaptés aux zones forestières.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"zones forestières\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec tête et pattes marron\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"80\",\"55\",\"\",\"y\",\"1970\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"\",\"depuis 1960 de Clun Forest (Royaume-Uni)\",\"ouest du Massif central, sud du Massif central\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"6d01e358-8ec2-4cc5-8073-94e4ee6b67f3\",\"Clun Forest\",\"eng.\",\"\",\"Clun Forest\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"Les animaux sont adaptés aux zones forestières.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"zones forestières\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec tête et pattes marron\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"80\",\"55\",\"\",\"y\",\"1970\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"\",\"depuis 1960 de Clun Forest (Royaume-Uni)\",\"ouest du Massif central, sud du Massif central\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_158",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"43ddcf22-b2cc-4dd2-82a9-70aae9889f2c\",\"Corse\",\"fr.\",\"\",\"\",\"Corsican, Corsican\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation d'estives en transhumance\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur par exemple; des couleurs mélangées se produisent\",\"blanc, noir, argenté, gris, marron ou rouge unicolore\",\"\",\"2\",\"0 / 2\",\"\",\"70\",\"55\",\"65\",\"35\",\"\",\"y\",\"1975\",\"Domestique\",\"Race\",\"race indigène de Corse\",\"\",\"depuis 1960 de Sarde (Italie)\",\"Corse\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"43ddcf22-b2cc-4dd2-82a9-70aae9889f2c\",\"Corse\",\"fr.\",\"\",\"\",\"Corsican, Corsican\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation d'estives en transhumance\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur par exemple; des couleurs mélangées se produisent\",\"blanc, noir, argenté, gris, marron ou rouge unicolore\",\"\",\"2\",\"0 / 2\",\"\",\"70\",\"55\",\"65\",\"35\",\"\",\"y\",\"1975\",\"Domestique\",\"Race\",\"race indigène de Corse\",\"\",\"depuis 1960 de Sarde (Italie)\",\"Corse\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_159",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"d577c956-ca1b-4d1d-b74c-7117bf32ed5a\",\"Cotentin\",\"fr.\",\"\",\"Cotentin\",\"\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec tête rose et blanc\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"115\",\"75\",\"\",\"y\",\"1925\",\"Domestique\",\"Race\",\"composé de Côtentin, Kent et Leicester\",\"\",\"\",\"Département du Calvados, Normandie, Basse-Normandie\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"d577c956-ca1b-4d1d-b74c-7117bf32ed5a\",\"Cotentin\",\"fr.\",\"\",\"Cotentin\",\"\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec tête rose et blanc\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"115\",\"75\",\"\",\"y\",\"1925\",\"Domestique\",\"Race\",\"composé de Côtentin, Kent et Leicester\",\"\",\"\",\"Département du Calvados, Normandie, Basse-Normandie\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_160",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"5fb53a4e-3a8a-4575-a73a-616d50044649\",\"Dorset Down\",\"eng.\",\"\",\"Dorset Down\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage et pattes marron\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"95\",\"65\",\"\",\"\",\"1966\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"\",\"depuis 1960 de Dorset Duvet (Royaume-Uni)\",\"centre de la France, ouest de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"5fb53a4e-3a8a-4575-a73a-616d50044649\",\"Dorset Down\",\"eng.\",\"\",\"Dorset Down\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage et pattes marron\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"95\",\"65\",\"\",\"\",\"1966\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"\",\"depuis 1960 de Dorset Duvet (Royaume-Uni)\",\"centre de la France, ouest de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_161",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"24e6e41b-3397-478d-bbec-8916045ba501\",\"Est à laine Mérinos\",\"fr.\",\"\",\"\",\"Merino de l'Est, Est ŕ laine Mérino\",\"Localement adaptée\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"expl.de pare-deux - paturages d'altitude\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"100\",\"75\",\"\",\"\",\"1947\",\"Domestique\",\"Race\",\"importé d'Allemagne, similaire au Land Merino\",\"\",\"depuis 1960 de Merino Landschaf (Allemagne)\",\"Lorraine, est de la France, Alsace, Champagne-Ardennes\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"24e6e41b-3397-478d-bbec-8916045ba501\",\"Est à laine Mérinos\",\"fr.\",\"\",\"\",\"Merino de l'Est, Est ŕ laine Mérino\",\"Localement adaptée\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"expl.de pare-deux - paturages d'altitude\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"100\",\"75\",\"\",\"\",\"1947\",\"Domestique\",\"Race\",\"importé d'Allemagne, similaire au Land Merino\",\"\",\"depuis 1960 de Merino Landschaf (Allemagne)\",\"Lorraine, est de la France, Alsace, Champagne-Ardennes\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_162",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"a3f8749e-04e5-46f0-9d3a-8609fd87205f\",\"Finnoise\",\"fr.\",\"\",\"\",\"Finnsheep, Finnish Landrace\",\"Localement adaptée\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"Cette race est connue pour sa grande prolificité.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"60\",\"80\",\"60\",\"\",\"\",\"1966\",\"Domestique\",\"Race\",\"importé de Finlande\",\"\",\"\",\"Picardie, Champagne, Ardennes\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"a3f8749e-04e5-46f0-9d3a-8609fd87205f\",\"Finnoise\",\"fr.\",\"\",\"\",\"Finnsheep, Finnish Landrace\",\"Localement adaptée\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"Cette race est connue pour sa grande prolificité.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"60\",\"80\",\"60\",\"\",\"\",\"1966\",\"Domestique\",\"Race\",\"importé de Finlande\",\"\",\"\",\"Picardie, Champagne, Ardennes\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_163",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"7880aed0-3e78-4291-83d2-3f44e6866ef5\",\"Grivette\",\"fr.\",\"\",\"\",\"Grivette\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"Prolificité élevée, (1.95 agneaux par portée). Aptitude au désaisonnement (avec naissances tous les 8 mois soit une productivité annuelle jusqu'à 2.35 agneaux par an.\",\"Agneaux valorisés dans des filières de qualité. Utilisation en race pure et en croisement (le plus souvent en croisement avec des béliers de race Ile de France. Les agneaux produits sont classés O/R en race pure et R en croisement sur la grille EUROP\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc tacheté à la naissance\",\"\",\"\",\"0\",\"0\",\"\",\"95\",\"85\",\"90\",\"70\",\"\",\"y\",\"1960\",\"Domestique\",\"Race\",\"race indigène du Bas Dauphiné\",\"\",\"depuis 1960 de South Duvet (France) et Rava (France)\",\"Région lyonnaise, Auvergne, Languedoc-Rousillon\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"7880aed0-3e78-4291-83d2-3f44e6866ef5\",\"Grivette\",\"fr.\",\"\",\"\",\"Grivette\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"Prolificité élevée, (1.95 agneaux par portée). Aptitude au désaisonnement (avec naissances tous les 8 mois soit une productivité annuelle jusqu'à 2.35 agneaux par an.\",\"Agneaux valorisés dans des filières de qualité. Utilisation en race pure et en croisement (le plus souvent en croisement avec des béliers de race Ile de France. Les agneaux produits sont classés O/R en race pure et R en croisement sur la grille EUROP\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc tacheté à la naissance\",\"\",\"\",\"0\",\"0\",\"\",\"95\",\"85\",\"90\",\"70\",\"\",\"y\",\"1960\",\"Domestique\",\"Race\",\"race indigène du Bas Dauphiné\",\"\",\"depuis 1960 de South Duvet (France) et Rava (France)\",\"Région lyonnaise, Auvergne, Languedoc-Rousillon\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_164",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"ad4b99d8-c16b-4c8d-84d3-e7c7ce364e09\",\"Hampshire\",\"eng.\",\"\",\"Hampshire Down\",\"Hampshire\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec face et pattes brun noir\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"100\",\"70\",\"\",\"y\",\"1957\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"1925\",\"depuis 1960 du Hampshire (Royaume-Uni)\",\"\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"ad4b99d8-c16b-4c8d-84d3-e7c7ce364e09\",\"Hampshire\",\"eng.\",\"\",\"Hampshire Down\",\"Hampshire\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec face et pattes brun noir\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"100\",\"70\",\"\",\"y\",\"1957\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"1925\",\"depuis 1960 du Hampshire (Royaume-Uni)\",\"\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_165",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"b072710b-2f69-4345-a08f-dc99bee3516e\",\"INRA 401\",\"fr.\",\"\",\"INRA 401\",\"Romane\",\"Indigène\",\"Régional\",\"\",\"Certaines caractéristiques génétiques spécifiques (Hémoglobine A 0,49 (49%) Groupe sang A, allèle a 0,23 Groupe sang B, allèle b 0,47 Groupe sang C, allèle b 0,69 Groupe sang D, allèle a 0,22 Le groupe sang M, allèle a 0,52) sont signalés pour cette race.\",\"\",\"\",\"\",\"\",\"Cette race est connue pour sa prolificité et sa sélection saisonnière.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: noir, marron, blanc, parfois noir ou marron tacheté\",\"\",\"\",\"0\",\"0\",\"\",\"80\",\"70\",\"85\",\"70\",\"\",\"\",\"1986\",\"Domestique\",\"Lignée\",\"composite of Romanov and Berrichon du Cher\",\"\",\"\",\"dans tout le pays\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"b072710b-2f69-4345-a08f-dc99bee3516e\",\"INRA 401\",\"fr.\",\"\",\"INRA 401\",\"Romane\",\"Indigène\",\"Régional\",\"\",\"Certaines caractéristiques génétiques spécifiques (Hémoglobine A 0,49 (49%) Groupe sang A, allèle a 0,23 Groupe sang B, allèle b 0,47 Groupe sang C, allèle b 0,69 Groupe sang D, allèle a 0,22 Le groupe sang M, allèle a 0,52) sont signalés pour cette race.\",\"\",\"\",\"\",\"\",\"Cette race est connue pour sa prolificité et sa sélection saisonnière.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: noir, marron, blanc, parfois noir ou marron tacheté\",\"\",\"\",\"0\",\"0\",\"\",\"80\",\"70\",\"85\",\"70\",\"\",\"\",\"1986\",\"Domestique\",\"Lignée\",\"composite of Romanov and Berrichon du Cher\",\"\",\"\",\"dans tout le pays\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_166",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"8197748e-a75a-4cc4-acfc-89d673715379\",\"Ile-de-France\",\"fr.\",\"\",\"Ile-De-France\",\"OIF\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"78\",\"70\",\"120\",\"80\",\"\",\"y\",\"1922\",\"Domestique\",\"Race\",\"composé de Merino Spain, Leicester et Dishley (Royaume-Uni)\",\"\",\"\",\"Bassin de Paris, centre-est de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"8197748e-a75a-4cc4-acfc-89d673715379\",\"Ile-de-France\",\"fr.\",\"\",\"Ile-De-France\",\"OIF\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"78\",\"70\",\"120\",\"80\",\"\",\"y\",\"1922\",\"Domestique\",\"Race\",\"composé de Merino Spain, Leicester et Dishley (Royaume-Uni)\",\"\",\"\",\"Bassin de Paris, centre-est de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_167",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"e10b606f-4a83-4768-8e1a-a777f72b4224\",\"Lacaune Lait\",\"fr.\",\"\",\"\",\"Lacaune Lait\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"75\",\"70\",\"95\",\"75\",\"\",\"y\",\"\",\"\",\"\",\"from Lacaune (France)\",\"\",\"\",\"\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"e10b606f-4a83-4768-8e1a-a777f72b4224\",\"Lacaune Lait\",\"fr.\",\"\",\"\",\"Lacaune Lait\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"75\",\"70\",\"95\",\"75\",\"\",\"y\",\"\",\"\",\"\",\"from Lacaune (France)\",\"\",\"\",\"\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_168",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"8839ec2d-66f5-45b5-9d04-98b74d83ea79\",\"Lacaune Viande\",\"fr.\",\"\",\"\",\"Lacaune Viande\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"75\",\"70\",\"100\",\"75\",\"\",\"y\",\"\",\"\",\"\",\"from Lacaune (France)\",\"\",\"\",\"Midi-Pyrénées, Aquitaine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"8839ec2d-66f5-45b5-9d04-98b74d83ea79\",\"Lacaune Viande\",\"fr.\",\"\",\"\",\"Lacaune Viande\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"75\",\"70\",\"100\",\"75\",\"\",\"y\",\"\",\"\",\"\",\"from Lacaune (France)\",\"\",\"\",\"Midi-Pyrénées, Aquitaine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_169",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"cbbd5b36-b8ad-4edd-925d-4f17c3299959\",\"Landaise\",\"fr.\",\"\",\"\",\"Landes de Gascogne, Landais, Landais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"utilisation de landes\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches marron et noir\",\"\",\"\",\"2\",\"2\",\"\",\"70\",\"65\",\"70\",\"45\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"population locale indigène\",\"1850\",\"\",\"Les Landes, Aquitaine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"cbbd5b36-b8ad-4edd-925d-4f17c3299959\",\"Landaise\",\"fr.\",\"\",\"\",\"Landes de Gascogne, Landais, Landais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"utilisation de landes\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches marron et noir\",\"\",\"\",\"2\",\"2\",\"\",\"70\",\"65\",\"70\",\"45\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"population locale indigène\",\"1850\",\"\",\"Les Landes, Aquitaine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_170",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"491bdc64-3495-4b2a-91a8-0d18ab6ea180\",\"Landes de Bretagne\",\"fr.\",\"\",\"\",\"Landes de l'Ouest, Mouton Brièron, Landes de Bretagne\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"résistance à la pourriture des pieds\",\"adapté à l'agnelage en extérieur\",\"viande rouge et marbrée\",\"\",\"\",\"\",\"\",\"Convient aux landes, aux bruyères ou aux ronces\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Peut montrer un pie en noir et blanc\",\"unicolore noir ou blanc\",\"\",\"0 / 2\",\"0\",\"corne courte, forme circulaire serrée sur la tête ou forme plus ouverte\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"race autochtone\",\"1850\",\"\",\"Bretagne\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"491bdc64-3495-4b2a-91a8-0d18ab6ea180\",\"Landes de Bretagne\",\"fr.\",\"\",\"\",\"Landes de l'Ouest, Mouton Brièron, Landes de Bretagne\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"résistance à la pourriture des pieds\",\"adapté à l'agnelage en extérieur\",\"viande rouge et marbrée\",\"\",\"\",\"\",\"\",\"Convient aux landes, aux bruyères ou aux ronces\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Peut montrer un pie en noir et blanc\",\"unicolore noir ou blanc\",\"\",\"0 / 2\",\"0\",\"corne courte, forme circulaire serrée sur la tête ou forme plus ouverte\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"race autochtone\",\"1850\",\"\",\"Bretagne\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_171",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"d838141c-9006-4893-b662-265415a3b952\",\"Limousine\",\"fr.\",\"\",\"Limousin\",\"\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"80\",\"72\",\"100\",\"65\",\"\",\"\",\"1943\",\"Domestique\",\"Race\",\"race indigène race du Massif Central\",\"\",\"\",\"Nord Massif Central, Limousin, Auvergne\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"d838141c-9006-4893-b662-265415a3b952\",\"Limousine\",\"fr.\",\"\",\"Limousin\",\"\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"80\",\"72\",\"100\",\"65\",\"\",\"\",\"1943\",\"Domestique\",\"Race\",\"race indigène race du Massif Central\",\"\",\"\",\"Nord Massif Central, Limousin, Auvergne\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_172",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"d489b78a-8858-428d-a8af-5a3ccfcacc0c\",\"Lourdaise\",\"fr.\",\"\",\"\",\"Lourdais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée au climat montagnard.\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"capable de marcher sur de longues distances\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc multicolore: pied marron (10%)\",\"\",\"\",\"2\",\"2\",\"\",\"80\",\"72\",\"90\",\"65\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"composé de' une ancienne race locale et Mérino\",\"\",\"\",\"Pyrénées\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"d489b78a-8858-428d-a8af-5a3ccfcacc0c\",\"Lourdaise\",\"fr.\",\"\",\"\",\"Lourdais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée au climat montagnard.\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"capable de marcher sur de longues distances\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc multicolore: pied marron (10%)\",\"\",\"\",\"2\",\"2\",\"\",\"80\",\"72\",\"90\",\"65\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"composé de' une ancienne race locale et Mérino\",\"\",\"\",\"Pyrénées\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_173",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"70c98461-6021-45ff-9afc-44667d73299c\",\"Manech Tête Noire\",\"fr.\",\"\",\"\",\"Black-Face Manech, Black-Face Manech\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation transhumante des estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage et pattes noir\",\"\",\"\",\"2\",\"2\",\"\",\"80\",\"65\",\"75\",\"50\",\"\",\"y\",\"1975\",\"Domestique\",\"Race\",\"race indigène\",\"\",\"depuis 1950 de Latsa Casa Negra (Espagne)\",\"Euskadi, Basque Provinces, Aquitaine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"70c98461-6021-45ff-9afc-44667d73299c\",\"Manech Tête Noire\",\"fr.\",\"\",\"\",\"Black-Face Manech, Black-Face Manech\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation transhumante des estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage et pattes noir\",\"\",\"\",\"2\",\"2\",\"\",\"80\",\"65\",\"75\",\"50\",\"\",\"y\",\"1975\",\"Domestique\",\"Race\",\"race indigène\",\"\",\"depuis 1950 de Latsa Casa Negra (Espagne)\",\"Euskadi, Basque Provinces, Aquitaine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_174",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"0dd215b6-4576-4fbb-a35b-19b426673787\",\"Manech Tête Rousse\",\"fr.\",\"\",\"\",\"Red-Face Manech, Red-Face Manech\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Le lait est utilisé pour la production de fromage .\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches rouge et une face rouge\",\"\",\"\",\"2\",\"0\",\"\",\"\",\"60\",\"70\",\"45\",\"\",\"y\",\"1975\",\"Domestique\",\"Race\",\"Composé de race locale et Latsa Casa Rubia Espagne\",\"1970\",\"\",\"Euskadi, Basque Provinces, Aquitaine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"0dd215b6-4576-4fbb-a35b-19b426673787\",\"Manech Tête Rousse\",\"fr.\",\"\",\"\",\"Red-Face Manech, Red-Face Manech\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Le lait est utilisé pour la production de fromage .\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches rouge et une face rouge\",\"\",\"\",\"2\",\"0\",\"\",\"\",\"60\",\"70\",\"45\",\"\",\"y\",\"1975\",\"Domestique\",\"Race\",\"Composé de race locale et Latsa Casa Rubia Espagne\",\"1970\",\"\",\"Euskadi, Basque Provinces, Aquitaine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_175",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"20a1d722-8a67-40d6-a1f1-a74cf766bd2c\",\"Martinik\",\"\",\"\",\"Martinique\",\"OMK\",\"Indigène\",\"International\",\"\",\"\",\"Fait partie intégrante du système du jardin créole.\",\"Race du terroir, viande festive et appréciée.\",\"Adaptation aux conditions pédoclimatiques des Antilles et au changement climatique. Poil ras\",\"Résistance au parasitisme\",\"Race non saisonnée\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"\",\"\",\"\",\"y\",\"1993\",\"Domestique\",\"Race\",\"\",\"\",\"\",\"Martinique\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"20a1d722-8a67-40d6-a1f1-a74cf766bd2c\",\"Martinik\",\"\",\"\",\"Martinique\",\"OMK\",\"Indigène\",\"International\",\"\",\"\",\"Fait partie intégrante du système du jardin créole.\",\"Race du terroir, viande festive et appréciée.\",\"Adaptation aux conditions pédoclimatiques des Antilles et au changement climatique. Poil ras\",\"Résistance au parasitisme\",\"Race non saisonnée\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"\",\"\",\"\",\"y\",\"1993\",\"Domestique\",\"Race\",\"\",\"\",\"\",\"Martinique\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_176",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"5b373a16-0f85-4d8a-8092-9944b830fb51\",\"Montagne noire\",\"Fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"5b373a16-0f85-4d8a-8092-9944b830fb51\",\"Montagne noire\",\"Fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_177",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"c94ae44d-2a1e-422f-b2aa-30f9376bd673\",\"Mourerous\",\"fr.\",\"\",\"\",\"Guillaume, Peone, Mourerous\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"utilisation de parcours et d'estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: marron, blanc avec tête et pattes rouge à fauves\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"61\",\"70\",\"55\",\"\",\"\",\"1883\",\"Domestique\",\"Race\",\"race indigène race des Alpes Maritimes\",\"\",\"since 1960 from Préalpes (France)\",\"Alpes du Sud\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"c94ae44d-2a1e-422f-b2aa-30f9376bd673\",\"Mourerous\",\"fr.\",\"\",\"\",\"Guillaume, Peone, Mourerous\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"utilisation de parcours et d'estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: marron, blanc avec tête et pattes rouge à fauves\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"61\",\"70\",\"55\",\"\",\"\",\"1883\",\"Domestique\",\"Race\",\"race indigène race des Alpes Maritimes\",\"\",\"since 1960 from Préalpes (France)\",\"Alpes du Sud\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_178",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"efbd601c-af2a-4b8a-8ab2-832a7df759cd\",\"Mouton charollais\",\"fr.\",\"\",\"Charollais\",\"\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec le visage et les pattes marron tacheté de rose\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"135\",\"90\",\"\",\"\",\"1963\",\"Domestique\",\"Race\",\"composé de mouton locaux, Leicester Longwool et South Duvet\",\"\",\"\",\"centre-ouest de la France et centre-est de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"efbd601c-af2a-4b8a-8ab2-832a7df759cd\",\"Mouton charollais\",\"fr.\",\"\",\"Charollais\",\"\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec le visage et les pattes marron tacheté de rose\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"135\",\"90\",\"\",\"\",\"1963\",\"Domestique\",\"Race\",\"composé de mouton locaux, Leicester Longwool et South Duvet\",\"\",\"\",\"centre-ouest de la France et centre-est de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_179",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"3c04e343-8153-4103-8347-2e623fb35eb1\",\"Mouton vendéen\",\"eng.\",\"Tout commence au XIIe siècle, avec l’élevage de moutons dans le Bas-Poitou. La race du Poitou est peu à peu absorbée par croisements répétés notamment avec la race Flandrine, importée au XVIIe siècle par les Hollandais lors des travaux d’asséchement du Marais Poitevin. Cette dernière, bonne laitière, de haute stature, améliore la qualité du Mouton Poitevin, animal vigoureux et à bon potentiel de transformation. Des croisements entre les races locales et la race Southdown vont permettre d'améliorer les qualités bouchères des animaux. Dès les années 50, les éleveurs a race s’attachent à sélectionner à la fois les aptitudes maternelles et bouchères. En 1967, la race est officiellement agréée par le Ministère de l’Agriculture. La majorité des effectifs se trouve dans le Grand Ouest et le Centre du pays. COMMENT RECONNAITRE UN MOUTON VENDEEN ? On reconnait le Mouton Vendéen à sa bonne conformation bouchère mais surtout à sa couleur particulière de tête gris souris. Les pattes sont de la même couleur que la tête, qui est recouverte par un carré de laine.\",\"Vendeen\",\"Vendéen\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"S'adapte à tous les types de climats.\",\"\",\"Race qui a une bonne aptitude au désaisonnement. Cycles œstraux étalés sur une période longe, de Juillet à Janvier.\",\"Carcasses larges et longues (95% classées E ou U en race pure). Excellente qualité de viande : grain fin et saveur délicate.\",\"Tempérament calme, facilitant la conduite en grands troupeaux.\",\"\",\"\",\"\",\"Les moutons vendéens se retrouvent dans divers écosystèmes. On les retrouve notamment dans les marais de la côte atlantique où ils pâturent, permettant ainsi l'entretien des marais.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"On reconnait le Mouton Vendéen à sa bonne conformation bouchère mais surtout à sa couleur particulière de tête gris souris. Les pattes sont de la même couleur que la tête, qui est recouverte par un carré de laine.\",\"blanc avec visage et pattes gris\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"130\",\"75\",\"Poitrine large, garrot épais, bassin large, gigots rebondis et descendus. Poids des mâles de 100 à 150 kg. Poids des femelles de 70 à 80 kgs.\",\"y\",\"1967\",\"Domestique\",\"Race\",\"Composé de races britanniques et flamandes.\",\"\",\"\",\"Côte atlantique. Principalement présent dans les départements de Vendée, des Deux-Sèvres, de la Vienne et de Loire Atlantique.\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"3c04e343-8153-4103-8347-2e623fb35eb1\",\"Mouton vendéen\",\"eng.\",\"Tout commence au XIIe siècle, avec l’élevage de moutons dans le Bas-Poitou. La race du Poitou est peu à peu absorbée par croisements répétés notamment avec la race Flandrine, importée au XVIIe siècle par les Hollandais lors des travaux d’asséchement du Marais Poitevin. Cette dernière, bonne laitière, de haute stature, améliore la qualité du Mouton Poitevin, animal vigoureux et à bon potentiel de transformation. Des croisements entre les races locales et la race Southdown vont permettre d'améliorer les qualités bouchères des animaux. Dès les années 50, les éleveurs a race s’attachent à sélectionner à la fois les aptitudes maternelles et bouchères. En 1967, la race est officiellement agréée par le Ministère de l’Agriculture. La majorité des effectifs se trouve dans le Grand Ouest et le Centre du pays. COMMENT RECONNAITRE UN MOUTON VENDEEN ? On reconnait le Mouton Vendéen à sa bonne conformation bouchère mais surtout à sa couleur particulière de tête gris souris. Les pattes sont de la même couleur que la tête, qui est recouverte par un carré de laine.\",\"Vendeen\",\"Vendéen\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"S'adapte à tous les types de climats.\",\"\",\"Race qui a une bonne aptitude au désaisonnement. Cycles œstraux étalés sur une période longe, de Juillet à Janvier.\",\"Carcasses larges et longues (95% classées E ou U en race pure). Excellente qualité de viande : grain fin et saveur délicate.\",\"Tempérament calme, facilitant la conduite en grands troupeaux.\",\"\",\"\",\"\",\"Les moutons vendéens se retrouvent dans divers écosystèmes. On les retrouve notamment dans les marais de la côte atlantique où ils pâturent, permettant ainsi l'entretien des marais.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"On reconnait le Mouton Vendéen à sa bonne conformation bouchère mais surtout à sa couleur particulière de tête gris souris. Les pattes sont de la même couleur que la tête, qui est recouverte par un carré de laine.\",\"blanc avec visage et pattes gris\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"130\",\"75\",\"Poitrine large, garrot épais, bassin large, gigots rebondis et descendus. Poids des mâles de 100 à 150 kg. Poids des femelles de 70 à 80 kgs.\",\"y\",\"1967\",\"Domestique\",\"Race\",\"Composé de races britanniques et flamandes.\",\"\",\"\",\"Côte atlantique. Principalement présent dans les départements de Vendée, des Deux-Sèvres, de la Vienne et de Loire Atlantique.\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_180",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"84665a1f-752d-442c-9b72-8f56cafa4201\",\"Mérinos d'Arles\",\"fr.\",\"\",\"\",\"Arles Merino, Mérinos de la Crau, Métis\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"70\",\"60\",\"80\",\"50\",\"\",\"y\",\"1946\",\"Domestique\",\"\",\"composite of local Mérino and Mérino Précoce\",\"1790\",\"de 1925 à 1990 de Merino Precoce (France); de 1975 à 1990 d'Est a Laine Merino (France); depuis 1984 de Boorola\",\"Provence\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"84665a1f-752d-442c-9b72-8f56cafa4201\",\"Mérinos d'Arles\",\"fr.\",\"\",\"\",\"Arles Merino, Mérinos de la Crau, Métis\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"70\",\"60\",\"80\",\"50\",\"\",\"y\",\"1946\",\"Domestique\",\"\",\"composite of local Mérino and Mérino Précoce\",\"1790\",\"de 1925 à 1990 de Merino Precoce (France); de 1975 à 1990 d'Est a Laine Merino (France); depuis 1984 de Boorola\",\"Provence\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_181",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"bd618547-6fda-4282-be9d-85ae66aecd53\",\"Mérinos de Rambouillet\",\"fr.\",\"\",\"Rambouillet\",\"Rambouillet\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"La race est connue pour son excellente thermotolérance.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"72\",\"62\",\"80\",\"50\",\"\",\"y\",\"1997\",\"Domestique\",\"Race\",\"composé de différentes souches de mérinos espagnols\",\"\",\"\",\"Bergerie Nationale de Rambouillet, Ile de France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"bd618547-6fda-4282-be9d-85ae66aecd53\",\"Mérinos de Rambouillet\",\"fr.\",\"\",\"Rambouillet\",\"Rambouillet\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"La race est connue pour son excellente thermotolérance.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"72\",\"62\",\"80\",\"50\",\"\",\"y\",\"1997\",\"Domestique\",\"Race\",\"composé de différentes souches de mérinos espagnols\",\"\",\"\",\"Bergerie Nationale de Rambouillet, Ile de France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_182",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"2da7b42b-8911-4a0b-8e9b-f10de3c6133b\",\"Mérinos précoce\",\"fr.\",\"\",\"Precoce\",\"Precoce\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"80\",\"73\",\"105\",\"72\",\"\",\"y\",\"1929\",\"Domestique\",\"Race\",\"importé d'Espagne 1790\",\"\",\"\",\"Bassin parisien oriental\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"2da7b42b-8911-4a0b-8e9b-f10de3c6133b\",\"Mérinos précoce\",\"fr.\",\"\",\"Precoce\",\"Precoce\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"2\",\"0\",\"\",\"80\",\"73\",\"105\",\"72\",\"\",\"y\",\"1929\",\"Domestique\",\"Race\",\"importé d'Espagne 1790\",\"\",\"\",\"Bassin parisien oriental\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_183",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"bb1c458c-fce0-4959-b7e7-b519bdcd7834\",\"Noir du Velay\",\"fr.\",\"\",\"\",\"Velay Black, Velay Black\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: noir avec des taches blanc sur le front et l'extrémité de la queue blanc\",\"\",\"\",\"0\",\"0\",\"\",\"65\",\"60\",\"75\",\"50\",\"\",\"y\",\"1970\",\"Domestique\",\"Race\",\"race indigène race\",\"\",\"\",\"Département Haute Loire, Auvergne, Rhône-Alpes\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"bb1c458c-fce0-4959-b7e7-b519bdcd7834\",\"Noir du Velay\",\"fr.\",\"\",\"\",\"Velay Black, Velay Black\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: noir avec des taches blanc sur le front et l'extrémité de la queue blanc\",\"\",\"\",\"0\",\"0\",\"\",\"65\",\"60\",\"75\",\"50\",\"\",\"y\",\"1970\",\"Domestique\",\"Race\",\"race indigène race\",\"\",\"\",\"Département Haute Loire, Auvergne, Rhône-Alpes\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_184",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"85f786b5-29d4-4daa-b7e6-d249df98c947\",\"Ouessant\",\"fr.\",\"\",\"Ouessant\",\"Ushant, Breton Dwarf\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"tr,s utilis, pour tondre les pelouses\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"D'une seule couleur: noir, rouge, marron, blanc parfois avec des taches sur le front\",\"\",\"\",\"2\",\"0\",\"1 volute, section triangulaire\",\"47\",\"44\",\"16\",\"13\",\"\",\"\",\"1977\",\"Domestique\",\"Race\",\"composite of Ouessant and Monts d'Arrée\",\"1750\",\"\",\"Pays De Loire, western France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"85f786b5-29d4-4daa-b7e6-d249df98c947\",\"Ouessant\",\"fr.\",\"\",\"Ouessant\",\"Ushant, Breton Dwarf\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"tr,s utilis, pour tondre les pelouses\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"D'une seule couleur: noir, rouge, marron, blanc parfois avec des taches sur le front\",\"\",\"\",\"2\",\"0\",\"1 volute, section triangulaire\",\"47\",\"44\",\"16\",\"13\",\"\",\"\",\"1977\",\"Domestique\",\"Race\",\"composite of Ouessant and Monts d'Arrée\",\"1750\",\"\",\"Pays De Loire, western France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_185",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"c33c28d4-69d6-4151-a43a-8e9c78908609\",\"PréAlpes du Sud\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Utilisation de parcours et d'estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"65\",\"85\",\"60\",\"\",\"\",\"1947\",\"Domestique\",\"Race\",\"population locale de race indigène\",\"\",\"\",\"Préalpes, south-eastern France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"c33c28d4-69d6-4151-a43a-8e9c78908609\",\"PréAlpes du Sud\",\"fr.\",\"\",\"\",\"\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"Utilisation de parcours et d'estives\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"65\",\"85\",\"60\",\"\",\"\",\"1947\",\"Domestique\",\"Race\",\"population locale de race indigène\",\"\",\"\",\"Préalpes, south-eastern France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_186",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"1f7e5666-5cf2-48e9-88f3-62ffd40ed79b\",\"Raiole\",\"fr.\",\"\",\"\",\"Rayole, Raiole\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est bien adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"la montagne\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec le visage et les pattes tachetés de rouge\",\"\",\"\",\"2\",\"2\",\"\",\"80\",\"73\",\"100\",\"70\",\"\",\"y\",\"1980\",\"Domestique\",\"Race\",\"souche indigène de Caussenardes\",\"1950\",\"since 1960 from Blanc du Massif Central (France), Tarasconnaise (France)\",\"Cévennes, south-eastern Central Massif, Languedoc-Rousillon\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"1f7e5666-5cf2-48e9-88f3-62ffd40ed79b\",\"Raiole\",\"fr.\",\"\",\"\",\"Rayole, Raiole\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est bien adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"la montagne\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec le visage et les pattes tachetés de rouge\",\"\",\"\",\"2\",\"2\",\"\",\"80\",\"73\",\"100\",\"70\",\"\",\"y\",\"1980\",\"Domestique\",\"Race\",\"souche indigène de Caussenardes\",\"1950\",\"since 1960 from Blanc du Massif Central (France), Tarasconnaise (France)\",\"Cévennes, south-eastern Central Massif, Languedoc-Rousillon\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_187",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"f36ae9e9-d74c-4fbd-9dc2-34cc3ae3a488\",\"Rava\",\"fr.\",\"\",\"\",\"Rava\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec pattes et tête tachetées de noir à rouge\",\"\",\"\",\"0\",\"0\",\"\",\"90\",\"80\",\"90\",\"67\",\"\",\"\",\"1973\",\"Domestique\",\"Race\",\"race indigène population locale d'Auvergne\",\"\",\"\",\"Département Du Puy-De-Dome, Auvergne, Rhône-Alpes\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"f36ae9e9-d74c-4fbd-9dc2-34cc3ae3a488\",\"Rava\",\"fr.\",\"\",\"\",\"Rava\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec pattes et tête tachetées de noir à rouge\",\"\",\"\",\"0\",\"0\",\"\",\"90\",\"80\",\"90\",\"67\",\"\",\"\",\"1973\",\"Domestique\",\"Race\",\"race indigène population locale d'Auvergne\",\"\",\"\",\"Département Du Puy-De-Dome, Auvergne, Rhône-Alpes\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_188",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"ace7dd7b-4608-4555-b2d6-c7bdfd9214e3\",\"Romanov\",\"\",\"\",\"Romanov\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"Une courte grossesse (145 jours) est signalée pour les femelles. Ils entrent en chaleur toute l'année et sont connus pour être très prolifiques.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: gris avec tête et pattes noir et bande blanc sur le visage\",\"\",\"\",\"2\",\"0\",\"\",\"57\",\"56\",\"80\",\"60\",\"\",\"y\",\"1973\",\"Domestique\",\"Race\",\"importé de l'ex-URSS\",\"\",\"depuis 1963 de Romanov (URSS)\",\"dans tout le pays\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"ace7dd7b-4608-4555-b2d6-c7bdfd9214e3\",\"Romanov\",\"\",\"\",\"Romanov\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"Une courte grossesse (145 jours) est signalée pour les femelles. Ils entrent en chaleur toute l'année et sont connus pour être très prolifiques.\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: gris avec tête et pattes noir et bande blanc sur le visage\",\"\",\"\",\"2\",\"0\",\"\",\"57\",\"56\",\"80\",\"60\",\"\",\"y\",\"1973\",\"Domestique\",\"Race\",\"importé de l'ex-URSS\",\"\",\"depuis 1963 de Romanov (URSS)\",\"dans tout le pays\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_189",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"9e90b5a1-6ed6-4f87-9bf3-de886ea72cca\",\"Rouge de l'ouest\",\"fr.\",\"\",\"Rouge De L’ouest\",\"\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage rouge et pattes tachetées de gris-noir\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"110\",\"75\",\"\",\"\",\"1968\",\"Domestique\",\"\",\"composé de Poitevin local, Blue Leicester et Wensleydale\",\"\",\"\",\"ouest de la France et centre ouest de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"9e90b5a1-6ed6-4f87-9bf3-de886ea72cca\",\"Rouge de l'ouest\",\"fr.\",\"\",\"Rouge De L’ouest\",\"\",\"Indigène\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage rouge et pattes tachetées de gris-noir\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"110\",\"75\",\"\",\"\",\"1968\",\"Domestique\",\"\",\"composé de Poitevin local, Blue Leicester et Wensleydale\",\"\",\"\",\"ouest de la France et centre ouest de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_190",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"63b926d3-fb23-4e5d-8d04-67874c3ac1e6\",\"Rouge du Roussillon\",\"fr.\",\"\",\"Rouge Du Roussillon\",\"Roussillon Red\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec tête et pattes rouge ou tachetées\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"65\",\"90\",\"65\",\"\",\"y\",\"1994\",\"Domestique\",\"Race\",\"composé de races locales (Merino, Barbary) (Algérie / Maroc)\",\"1920\",\"de 1960 à 1990 au départ de Lacaune (France)\",\"Roussillon, Languedoc\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"63b926d3-fb23-4e5d-8d04-67874c3ac1e6\",\"Rouge du Roussillon\",\"fr.\",\"\",\"Rouge Du Roussillon\",\"Roussillon Red\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec tête et pattes rouge ou tachetées\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"65\",\"90\",\"65\",\"\",\"y\",\"1994\",\"Domestique\",\"Race\",\"composé de races locales (Merino, Barbary) (Algérie / Maroc)\",\"1920\",\"de 1960 à 1990 au départ de Lacaune (France)\",\"Roussillon, Languedoc\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_191",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"1be852de-e53f-4e1e-8415-2e9980da8be8\",\"Roussin de La Hague\",\"fr.\",\"\",\"Roussin De La Hague\",\"Roussin\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec tête marron foncé, rouge à la naissance\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"70\",\"100\",\"70\",\"\",\"y\",\"1983\",\"Domestique\",\"Race\",\"composé de' une race locale, Suffolk (France 1910), Leicester (Royaume-Uni, 1910) et South Duvet (France, 1910)\",\"1800\",\"\",\"northern Manche Department, Basse-Normandie, Bretagne\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"1be852de-e53f-4e1e-8415-2e9980da8be8\",\"Roussin de La Hague\",\"fr.\",\"\",\"Roussin De La Hague\",\"Roussin\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec tête marron foncé, rouge à la naissance\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"70\",\"100\",\"70\",\"\",\"y\",\"1983\",\"Domestique\",\"Race\",\"composé de' une race locale, Suffolk (France 1910), Leicester (Royaume-Uni, 1910) et South Duvet (France, 1910)\",\"1800\",\"\",\"northern Manche Department, Basse-Normandie, Bretagne\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_192",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"50b2b975-b645-4ad7-8afc-8971de1cfa58\",\"Sasi Ardi\",\"fr.\",\"\",\"\",\"Gorri Tipia, Xaxi Ardia, Petite Manech\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: taches noir, rouge, blanc, rouge et noir , tête colorée\",\"\",\"\",\"2\",\"2\",\"\",\"62\",\"60\",\"\",\"\",\"oreilles courtes\",\"\",\"\",\"\",\"Race\",\"race indigène\",\"\",\"\",\"Aquitaine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"50b2b975-b645-4ad7-8afc-8971de1cfa58\",\"Sasi Ardi\",\"fr.\",\"\",\"\",\"Gorri Tipia, Xaxi Ardia, Petite Manech\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: taches noir, rouge, blanc, rouge et noir , tête colorée\",\"\",\"\",\"2\",\"2\",\"\",\"62\",\"60\",\"\",\"\",\"oreilles courtes\",\"\",\"\",\"\",\"Race\",\"race indigène\",\"\",\"\",\"Aquitaine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_193",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"fbcd4996-e9d5-4635-9ef7-856c32e86899\",\"Shropshire\",\".en\",\"\",\"Shropshire\",\"\",\"Exotique\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"fbcd4996-e9d5-4635-9ef7-856c32e86899\",\"Shropshire\",\".en\",\"\",\"Shropshire\",\"\",\"Exotique\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_194",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"d5b6f481-e9e0-4f48-8205-f46651087356\",\"Solognote\",\"fr.\",\"\",\"Solognot\",\"\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"Les animaux sont adaptés aux mauvaises conditions de végétation.\",\"Les animaux de cette race sont connus pour leur résistance aux parasites gastro-intestinaux.\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation sous-bois,parc.broussailleu\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: rouge\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"65\",\"80\",\"55\",\"\",\"\",\"1942\",\"Domestique\",\"Race\",\"population locale de race indigène de Solognote\",\"\",\"\",\"Sologne and Touraine\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"d5b6f481-e9e0-4f48-8205-f46651087356\",\"Solognote\",\"fr.\",\"\",\"Solognot\",\"\",\"Indigène\",\"Régional\",\"\",\"\",\"\",\"\",\"Les animaux sont adaptés aux mauvaises conditions de végétation.\",\"Les animaux de cette race sont connus pour leur résistance aux parasites gastro-intestinaux.\",\"\",\"\",\"\",\"\",\"\",\"\",\"exploitation sous-bois,parc.broussailleu\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: rouge\",\"\",\"\",\"0\",\"0\",\"\",\"70\",\"65\",\"80\",\"55\",\"\",\"\",\"1942\",\"Domestique\",\"Race\",\"population locale de race indigène de Solognote\",\"\",\"\",\"Sologne and Touraine\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_195",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"a7b19765-2110-42c8-b488-9e2eb800f9dc\",\"Southdown français\",\"fr\",\"\",\"South Down\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage et pattes gris-brun\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"100\",\"70\",\"\",\"y\",\"1947\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"1855\",\"\",\"dans tout le pays, principalement Bourbonnais\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"a7b19765-2110-42c8-b488-9e2eb800f9dc\",\"Southdown français\",\"fr\",\"\",\"South Down\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec visage et pattes gris-brun\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"100\",\"70\",\"\",\"y\",\"1947\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"1855\",\"\",\"dans tout le pays, principalement Bourbonnais\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_196",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"1c0127a4-dbc3-4c3f-a024-27584c0d2409\",\"Suffolk\",\"eng.\",\"\",\"Suffolk\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec tête et pattes noir\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"105\",\"75\",\"\",\"y\",\"1957\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"1925\",\"depuis 1960 de Suffolk (Royaume-Uni)\",\"dans tout le pays\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"1c0127a4-dbc3-4c3f-a024-27584c0d2409\",\"Suffolk\",\"eng.\",\"\",\"Suffolk\",\"\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec tête et pattes noir\",\"\",\"\",\"0\",\"0\",\"\",\"\",\"\",\"105\",\"75\",\"\",\"y\",\"1957\",\"Domestique\",\"Race\",\"importé du Royaume-Uni\",\"1925\",\"depuis 1960 de Suffolk (Royaume-Uni)\",\"dans tout le pays\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_197",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"fbf8ce6e-ba61-4d3e-acf4-75862d890659\",\"Tarasconnaise\",\"fr.\",\"\",\"\",\"Tarasconnais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives en transhumance\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches colorées sur la tête et les pattes\",\"\",\"\",\"2\",\"2\",\"\",\"82\",\"67\",\"80\",\"55\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"race indigène des Pyrénées centrales\",\"\",\"\",\"Central Pyrénées, Languedoc-Rousillon\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"fbf8ce6e-ba61-4d3e-acf4-75862d890659\",\"Tarasconnaise\",\"fr.\",\"\",\"\",\"Tarasconnais\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"La race est adaptée à l'environnement local (montagne).\",\"\",\"\",\"\",\"Les animaux sont capables de marcher sur de longues distances.\",\"\",\"\",\"\",\"exploitation des estives en transhumance\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"multicolore: blanc avec des taches colorées sur la tête et les pattes\",\"\",\"\",\"2\",\"2\",\"\",\"82\",\"67\",\"80\",\"55\",\"\",\"\",\"1975\",\"Domestique\",\"Race\",\"race indigène des Pyrénées centrales\",\"\",\"\",\"Central Pyrénées, Languedoc-Rousillon\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_198",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"e824baf0-e490-438d-906c-198e5f280818\",\"Texel\",\"dutch\",\"\",\"Texel\",\"French Texel\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec nez et sabots noir\",\"\",\"\",\"0\",\"0\",\"\",\"78\",\"70\",\"115\",\"80\",\"\",\"\",\"1935\",\"Domestique\",\"Race\",\"importé des Pays- Pays-Bas\",\"\",\"depuis 1960 de Texel (Pays- Pays-Bas)\",\"nord-est de la France\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"e824baf0-e490-438d-906c-198e5f280818\",\"Texel\",\"dutch\",\"\",\"Texel\",\"French Texel\",\"Localement adaptée\",\"International\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec nez et sabots noir\",\"\",\"\",\"0\",\"0\",\"\",\"78\",\"70\",\"115\",\"80\",\"\",\"\",\"1935\",\"Domestique\",\"Race\",\"importé des Pays- Pays-Bas\",\"\",\"depuis 1960 de Texel (Pays- Pays-Bas)\",\"nord-est de la France\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  },
+  {
+    "code_fao": "FRA_51_199",
+    "nom_local": "\"France\",\"FRA\",\"Sheep\",\"0807b34b-df72-4431-88c0-9a8788ac7a47\",\"Thônes et Marthod\",\"fr.\",\"\",\"\",\"Thones-Marthod, Thones-Marthod\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"montagne pleine libert,, temperature\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec des lunettes noir , le bout du nez, les oreilles et les pieds\",\"\",\"\",\"2\",\"2\",\"horizontal\",\"\",\"\",\"80\",\"60\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"race indigène de Savoie\",\"\",\"\",\"Savoie, Alps, Rhône\"",
+    "nom_anglais": "\"France\",\"FRA\",\"Sheep\",\"0807b34b-df72-4431-88c0-9a8788ac7a47\",\"Thônes et Marthod\",\"fr.\",\"\",\"\",\"Thones-Marthod, Thones-Marthod\",\"Indigène\",\"Local\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"montagne pleine libert,, temperature\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"d'une seule couleur: blanc avec des lunettes noir , le bout du nez, les oreilles et les pieds\",\"\",\"\",\"2\",\"2\",\"horizontal\",\"\",\"\",\"80\",\"60\",\"\",\"\",\"\",\"Domestique\",\"Race\",\"race indigène de Savoie\",\"\",\"\",\"Savoie, Alps, Rhône\"",
+    "code_espece": 51,
+    "pays_origine": "France",
+    "description": "Race française",
+    "classification_adaptation": "Locale",
+    "classification_geographique": "Europe"
+  }
+]

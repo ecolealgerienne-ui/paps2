@@ -1,0 +1,442 @@
+code_substance,libelle
+20,Acétylméthionine
+27,Acide acétylsalicylique
+36,Acide ascorbique
+41,Acide aspartique (sous forme de sel de magnésium et de potassium)
+53,Acide borique
+114,Acide oléique
+122,Acide palmitique
+140,Acide stéarique
+150,Acide tolfénamique
+167,Albendazole
+171,Alfaprostol
+183,Alpha-tocophérol (sous forme d'acétate)
+221,Ampicilline
+313,Bétaïne
+323,Bicarbonate de sodium
+362,Brotizolam
+375,Butafosfan
+426,Carprofène
+450,Céfazoline
+463,Ceftiofur
+464,Ceftiofur (sous forme de chlorhydrate)
+502,Chlortétracycline (sous forme de chlorhydrate)
+506,Chlorure de calcium
+507,Chlorure de calcium (sous forme de dihydrate)
+514,Chlorure de potassium
+515,Chlorure de sodium
+561,Citrulline
+586,Clorsulone
+588,Closantel (sous forme de sel de sodium dihydraté)
+590,Cloxacilline (sous forme de benzathine)
+609,Colécalciférol
+640,Cuivre (sous forme d'oxyde cuivrique)
+642,Cyanocobalamine
+676,Deltaméthrine
+693,Dexaméthasone
+696,Dexaméthasone (sous forme de phosphate de disodium)
+699,Dexaméthasone (sous forme d'isonicotinate)
+720,Diclazuril
+724,Dicyclanil
+769,Diprophylline
+786,Doramectine
+801,Eau pour préparations injectables
+812,Embutramide
+819,Enilconazole
+822,Enrofloxacine
+829,Epinéphrine (sous forme de tartrate)
+831,Eprinomectine
+857,Etamsylate
+890,Fenbendazole
+928,Florfénicol
+941,Fluméquine
+944,Fluméthrine
+969,Follitropine
+985,Furosémide
+992,Gamithromycine
+1012,Glucose (sous forme de monohydrate)
+1013,Glucose
+1027,Gonadotropine chorionique
+1030,Gonadotropine sérique
+1081,Hydrochlorothiazide
+1103,Hypophosphite de magnésium
+1130,Inositol
+1145,Iode
+1150,Iodure de potassium
+1152,Iodure de sodium
+1177,Ivermectine
+1186,Kaolin lourd
+1190,Kétoprofène
+1200,Lactate de sodium
+1218,Léciréline (sous forme d'acétate)
+1229,Lévamisole (sous forme de chlorhydrate)
+1262,Luprostiol
+1263,Lutropine
+1291,Marbofloxacine
+1301,Mébendazole
+1311,Mélatonine
+1314,Méloxicam
+1317,Menbutone
+1337,Métamizole (sous forme de sel de sodium monohydraté)
+1344,Méthionine
+1388,Monépantel
+1392,Moxidectine
+1420,Néomycine (sous forme de sulfate)
+1434,Nicotinamide
+1505,Oxfendazole
+1510,Oxyclozanide
+1519,Oxytétracycline
+1521,Oxytétracycline (sous forme de dihydrate)
+1522,Oxytocine
+1544,Pegbovigrastim
+1611,Phosphoryléthanolamine
+1612,Phoxime
+1647,Policrésulène
+1658,Povidone iodée
+1663,Praziquantel
+1666,Prednisolone
+1667,Prednisolone (sous forme d'acétate)
+1679,Procaïne (sous forme de chlorhydrate)
+1681,Progestérone
+1697,Propylèneglycol
+1754,Rifaximine
+1773,Salicylate d'hydroxyde d'aluminium
+1787,Scopolamine (sous forme de butylbromure)
+1797,Sélénium (sous forme de sélénate de sodium)
+1825,Sorbitol
+1835,Spiramycine
+1854,Sulfadiazine
+1856,Sulfadiméthoxine
+1858,Sulfadimidine
+1861,Sulfadimidine (sous forme d'éthane sulfonate de sodium)
+1862,Sulfadoxine
+1868,Sulfaméthoxypyridazine
+1870,Sulfanilamide
+1918,Terpine
+1943,Thiamphénicol
+1967,Tildipirosine
+1971,Tilmicosine
+1983,Toldimfos
+1986,Toltrazuril
+2004,Trichlorméthiazide
+2005,Triclabendazole
+2006,Tricobalt (sous forme de tétraoxyde)
+2014,Triméthoprime
+2015,Triméthoprime (sous forme d'éthane sulfonate de sodium)
+2030,Tulathromycine
+2032,Tylosine
+2078,Xylazine
+2234,Aspartate de magnésium dihydraté
+3681,Benzylpénicilline (sous forme de procaïne)
+3704,Atropa belladonna 5 CH
+3705,Calcarea sulfurica 7 CH
+3706,Echinacea angustifolia 3 CH
+3707,Hepar sulfuris 7 CH
+3708,Myristica sebifera 3 CH
+3710,Pyrogenium 7 CH
+3711,Silicea 7 CH
+3712,Aconitum napellus 5 CH
+3713,Bryonia 5 CH
+3714,Drosera 3 CH
+3715,Ipeca 3 CH
+3716,Antimonium tartaricum 5 CH
+3717,Sticta pulmonaria 4 CH
+3718,Pulsatilla 5 CH
+3719,Rumex crispus 5 CH
+3720,Oenanthe crocata 7 CH
+3721,Stramonium 5 CH
+3722,Hyoscyamus niger 5 CH
+3723,Moschus 5 CH
+3724,Passiflora incarnata 2 CH
+3725,Ignatia amara 7 CH
+3726,Zincum metallicum 5 CH
+3736,Cynara scolymus 3 DH
+3737,Berberis vulgaris 3 CH
+3738,Chelidonium majus 5 CH
+3739,China 3 DH
+3740,Hydrastis canadensis 3 CH
+3741,Carduus marianus 3 CH
+3742,Solidago virga aurea 3 CH
+3743,Taraxacum dens leonis 3 DH
+3744,China rubra 4 CH
+3747,Ipeca 4 CH
+3761,Millefolium 4 CH
+3762,Arnica montana 4 CH
+3763,Crotalus horridus 7 CH
+3764,Secale cornutum 4 CH
+3766,Lycopodium clavatum 5 CH
+3781,Salvia officinalis 6 CH
+3782,Salvia officinalis 7 CH
+3783,Salvia officinalis 8 CH
+3784,Salvia officinalis 9 CH
+3785,Calcarea ostreica 2 DH
+3786,Calcarea phosphorica 2 DH
+3787,Calcarea fluorica 2 DH
+3788,Sulfur iodatum 3 CH
+3789,Arnica montana 3 DH
+3790,Calcarea fluorica 3 DH
+3791,Calcarea phosphorica 3 DH
+3792,Calcarea carbonica 3 DH
+3793,Ruta graveolens 3 DH
+3794,Sulfur iodatum 3 DH
+3795,Symphytum officinale 3 DH
+3796,Calcarea ostreica 4 CH
+3797,Calcarea fluorica 4 CH
+3798,Calcarea phosphorica 4 CH
+3799,Ferrum phosphoricum 5 CH
+3800,Silicea 5 CH
+3801,Sulfur iodatum 4 CH
+3807,Apis mellifica 4 CH
+3808,Ledum palustre 4 CH
+3809,Rhus toxicodendron 5 CH
+3810,Ruta graveolens 4 CH
+3811,Dulcamara 3 CH
+3820,Bellis perennis 4 CH
+3821,Hypericum perforatum 4 CH
+3822,Ledum palustre 3 CH
+3824,Rhus toxicodendron 4 CH
+3840,Nitricum acidum 5 CH
+3842,Causticum 5 CH
+3862,Lycopodium clavatum 7 CH
+3864,Calcarea ostreica 5 CH
+3865,Thuya occidentalis 5 CH
+3866,Nitricum acidum 7 CH
+3867,Calcarea ostreica 7 CH
+3868,Causticum 7 CH
+3869,Thuya occidentalis 7 CH
+3870,Nitricum acidum 9 CH
+3871,Calcarea ostreica 9 CH
+3872,Causticum 9 CH
+3873,Lycopodium clavatum 9 CH
+3874,Thuya occidentalis 9 CH
+3875,Nitricum acidum 12 CH
+3876,Calcarea ostreica 12 CH
+3877,Causticum 12 CH
+3878,Lycopodium clavatum 12 CH
+3879,Thuya occidentalis 12 CH
+3880,Nitricum acidum 15 CH
+3881,Calcarea ostreica 15 CH
+3882,Causticum 15 CH
+3883,Lycopodium clavatum 15 CH
+3884,Thuya occidentalis 15 CH
+3885,Nitricum acidum 30 CH
+3886,Calcarea ostreica 30 CH
+3887,Causticum 30 CH
+3888,Lycopodium clavatum 30 CH
+3889,Thuya occidentalis 30 CH
+3893,Trillium pendulum 5 CH
+3902,"Foot-and-mouth disease virus, serotype O, Inactivated"
+3907,"Mycobacterium avium, subsp. avium, strain D4ER, avian tuberculin protein derivative"
+3908,"Mycobacterium avium, subsp. avium, strain D4ER, avian tuberculin purified protein derivative"
+3913,"Bluetongue virus, Serotype 1, strain BTV-1/ALG2006/01 E1, Inactivated"
+3914,"Mannheimia haemolytica, serotype A1, strain NL 1009, leucotoxoid"
+3915,"Trichophyton verrucosum, strain Bodin 1902, Live"
+3916,"Mannheimia haemolytica, Serotype A1, Inactivated"
+3917,"Bovine parainfluenza virus 3, strain SF-4 Reisinger, Inactivated"
+3918,"Bovine respiratory syncytial virus, strain EV 908, Inactivated"
+3919,"Mycobacterium bovis, strain AN5, bovine tuberculin purified protein derivative"
+3930,"Chlamydia abortus, strain TS 1B, Live"
+3933,"Clostridium perfringens, type A, alpha toxoid"
+3935,"Clostridium chauvoei, strain Hung 89, Inactivated"
+3936,"Clostridium novyi, type B, toxoid"
+3937,"Clostridium septicum, toxoid"
+3938,"Clostridium tetani, toxoid"
+3949,eau pour préparation injectable
+3951,"Orf virus, Live"
+3961,"Rabies virus, strain G52, Inactivated"
+3971,"Clostridium perfringens, type C, beta toxoid"
+3979,"Escherichia coli, serotype O78, Inactivated"
+3981,"Chlamydia abortus, strain A22, Inactivated"
+3982,"Salmonella enterica, subsp. enterica, serovar Abortusovis, strain Sao, Inactivated"
+3990,"Clostridium chauvoei, Inactivated"
+3991,"Clostridium novyi, toxoid"
+3992,"Clostridium perfringens, type B, beta toxoid"
+3993,"Clostridium sordellii, toxoid"
+3994,"Bovine viral diarrhoea virus, strain Oregon C24, Live"
+4018,"Rabies virus, strain Pasteur RIV, Inactivated"
+4019,"Mannheimia haemolytica, serotype A6, strain S1084/81, Inactivated"
+4020,"Bibersteinia trehalosi, serotype T3, strain S1109/84, Inactivated"
+4021,"Toxoplasma gondii, strain S48, live"
+4022,"Brucella melitensis, strain REV 1, Live"
+4052,"Bluetongue virus, Serotype 8, strain BTV-8/BEL2006/02, Inactivated"
+4054,"Bovine parainfluenza virus 3, strain RLB103, Live"
+4055,"Bovine respiratory syncytial virus, strain 375, Live"
+4056,"Bovine viral diarrhoea virus 1, strain 6309, Inactivated"
+4057,"Infectious Bovine rhinotracheitis virus, strain Cooper, inactivated"
+4058,"Bovine viral diarrhoea virus, strain RIT 4350, Live"
+4059,"Mannheimia haemolytica, Inactivated"
+4061,"Salmonella enterica, subsp. enterica, serovar Dublin, Inactivated"
+4063,"Bovine coronavirus, strain Hansen, Live"
+4064,"Escherichia coli, strain NADC 1471 O101, fimbrial adhesin F5, Inactivated"
+4065,"Bovine rotavirus, strain Lincoln, Live"
+4066,"Clostridium tetani, antitoxin"
+4071,"Mycobacterium avium, subsp. paratuberculosis, strain 316F, Inactivated"
+4087,"Foot-and-mouth disease virus, serotype A, Inactivated"
+4095,"Escherichia coli, strain O15:O8, antigen 31A, Inactivated"
+4096,"Clostridium perfringens, type D, epsilon toxoid"
+4097,"Mannheimia haemolytica, serotype A1, strain S1006/77, Inactivated"
+4098,"Bibersteinia trehalosi, serotype T15, strain S1105/84, Inactivated"
+4101,"Bovine viral diarrhoea virus 1, strain 5960, Inactivated"
+4102,"Mannheimia haemolytica, serotype A1, strain NL 1009, capsular antigen"
+4108,"Escherichia coli, strain O117:O8, antigen Y, Inactivated"
+4109,"Foot-and-mouth disease virus, serotype Asia 1, Inactivated"
+4114,"Escherichia coli, strain O09:O101, fimbrial adhesin F5, Inactivated"
+4115,"Mannheimia haemolytica, serotype A9, strain S994/77, Inactivated"
+4116,"Bibersteinia trehalosi, serotype T10, strain S1075/81, Inactivated"
+4121,"Foot-and-mouth disease virus, serotype SAT2, Inactivated"
+4124,"Mannheimia haemolytica, serotype A2, strain S1126/92, Inactivated"
+4125,"Bibersteinia trehalosi, serotype T4, strain S1085/81, Inactivated"
+4130,"Mannheimia haemolytica, serotype A7, strain S1078/81, Inactivated"
+4189,Acétate de sodium trihydraté
+4190,Aspartate de magnésium et de potassium dihydraté
+4195,Clavulanate de potassium
+4200,Glutamate de calcium tétrahydraté
+4201,Glutamate de magnésium tétrahydraté
+4207,Salicylate de sodium
+4211,Acétate d'alpha-tocophéryl
+4212,Stéarate d'aluminium
+4214,Amoxicilline trihydratée
+4215,Ampicilline sodique
+4216,Ampicilline trihydratée
+4221,Chlorhydrate d'arginine
+4227,Benzathine benzylpénicilline tétrahydratée
+4228,Benzylpénicilline procaïne monohydratée
+4230,Chlorhydrate de bétaïne
+4233,Sous-nitrate de bismuth lourd
+4234,Chlorhydrate de bromhexine
+4239,Borogluconate de calcium 
+4240,Glucoheptonate de calcium
+4241,Gluconate de calcium monohydraté
+4242,Gluconate de calcium
+4243,Gluconoglucoheptonate de calcium monohydraté
+4246,Céfalexine monohydratée
+4249,Céfapirine benzathine
+4253,Sulfate de cefquinome
+4254,Chlorhydrate de ceftiofur
+4255,Ceftiofur sodique
+4257,Digluconate de chlorhexidine
+4258,Maléate de chlorphénamine
+4259,Chlorhydrate de chlortétracycline
+4261,Chlorure de choline
+4265,Chlorhydrate de clenbutérol
+4268,Cloprosténol (d) sodique
+4269,Cloprosténol sodique
+4270,Closantel sodique dihydraté
+4271,Cloxacilline benzathine
+4272,Cloxacilline sodique monohydratée
+4273,Digluconate de cobalt
+4274,Sulfate de cobalt (II) heptahydraté
+4275,Sulfate de colistine
+4276,Carbonate de cuivre
+4278,Mésilate de danofloxacine
+4280,Chlorhydrate de dénavérine
+4283,Chlorhydrate de détomidine
+4284,Acétate de dexaméthasone
+4285,Phénylpropionate de dexaméthasone
+4286,Phosphate sodique de dexaméthasone
+4289,Sulfate de dihydrostreptomycine
+4291,Dinoprost trométamol
+4292,Chlorhydrate de doxapram monohydraté
+4293,Hyclate de doxycycline
+4298,Thiocyanate d'érythromycine
+4301,Etiproston trométamol
+4303,Citrate d'ammonium ferrique
+4304,Fer dextran
+4307,Flunixine méglumine
+4311,Sulfate de gentamicine
+4312,Glucose monohydraté
+4313,Acétate de gonadoréline
+4318,Chlorhydrate d'heptaminol
+4322,Hypophosphite de magnésium hexahydraté
+4324,Dipropionate d'imidocarbe 
+4326,Chlorhydrate de kétamine
+4329,Chlorhydrate de lévamisole
+4332,Chlorhydrate de lincomycine monohydraté
+4334,Chlorhydrate de lysine
+4335,Chlorure de magnésium hexahydraté
+4336,Carbonate de manganèse
+4344,Métamizole sodique monohydraté
+4354,Sulfate de néomycine
+4355,Métilsulfate de néostigmine 
+4357,Chlorhydrate d'ornithine
+4361,Chlorhydrate d'oxytétracycline
+4362,Oxytétracycline dihydratée
+4366,Sulfate de paromomycine
+4367,Iodhydrate de pénéthamate
+4368,Pentobarbital sodique
+4378,Acétate de prednisolone
+4379,Chlorhydrate de procaïne
+4383,Chlorhydrate de pyridoxine
+4385,Palmitate de rétinol
+4386,Propionate de rétinol
+4389,Butylbromure de scopolamine
+4392,Sélénite de sodium
+4394,Dichlorhydrate de spectinomycine pentahydraté
+4395,Sulfate de spectinomycine tétrahydraté
+4398,Sulfadiméthoxine sodique
+4406,Chlorhydrate de tétracaïne
+4408,Chlorhydrate de tétracycline
+4410,Chlorhydrate de thiamine
+4415,Toldimfos sodique trihydraté
+4421,Tartrate de tylosine
+4425,Chlorhydrate de xylazine
+4427,Oxyde de zinc
+4441,"Mycoplasma bovis, strain N2805-1, live"
+4446,"Trichophyton verrucosum, strain LTF-130, Live"
+4455,A DEFINIR IMMUNO UPD
+4472,"bovine coronavirus, live"
+4483,Gel d'hydroxyde d'aluminium
+4493,"Escherichia coli, strain O8:K35, fimbrial adhesin F5, Inactivated"
+4494,"Bovine rotavirus, strain TM-91, Inactivated"
+4495,"Bovine coronavirus, strain C-197, Inactivated"
+4519,Céfalexine sodique
+4520,"Bovine rotavirus, strain UK-Compton, Inactivated"
+4521,"Bovine coronavirus, strain Mebus, Inactivated"
+4522,"Escherichia coli, strain O101:K99:F41, fimbrial adhesin F41, Inactivated"
+4524,"Rabies virus, strain SAD Vnukovo-32, Inactivated"
+4535,Cyperméthrine (Cis:Trans 50:50)
+4536,"Bovine parainfluenza virus 3, strain BIO 23/A, Live"
+4537,"Bovine respiratory syncytial virus, strain BIO 24/A, Live"
+4544,"Bovine viral diarrhoea virus 1, recombinant protein"
+4545,"Bovine viral diarrhoea virus 2, recombinant protein"
+4546,"Bovine respiratory syncytial virus, strain LYM-56, Live"
+4565,"Infectious bovine rhinotracheitis virus, strain CEDDEL, gE- tk- double-gene deleted, Live"
+4567,"Coxiella burnetii, strain Nine Mile, Inactivated"
+4577,"Mannheimia haemolytica, serotype A1, strain DSM 5283, Inactivated"
+4578,"Bovine viral diarrhoea virus, strain BIO-25, Inactivated"
+4579,"Bovine parainfluenza virus 3, strain BIO-23, Inactivated"
+4580,"Bovine respiratory syncytial virus, strain BIO-24, Inactivated"
+4588,"Escherichia coli, strain EC/17, fimbrial adhesin F5, Inactivated"
+4592,(S)-Lactate de sodium
+4614,"Staphylococcus aureus, strain SP 140, Inactivated"
+4636,"Cryptosporidium parvum, glycoprotein gp40"
+4644,Acétate de tout-rac-alpha tocophéryl
+4676,Diiodure de mébézonium
+4677,"Mannheimia haemolytica, serotype A1, strain M4/1, Inactivated"
+4695,"Infectious Bovine rhinotracheitis virus, strain GK/D gE gene-deleted, Live"
+4727,"Clostridium haemolyticum, toxoid"
+4743,"Bluetongue virus, serotype 3, strain Bio-93:BTV3, Inactivated"
+4744,"Histophilus somni, strain Bailie, Inactivated"
+4745,"Bluetongue virus, serotype 3, strain BTV-3/NET2023, Inactivated"
+4749,Acide L-malique
+4761,"Epizootic haemorrhagic disease virus, serotype 8, strain EHDV8 SPA 2022/LCV_03 LCV Cod.:O78, Inactivated"
+4787,Aspartate de potassium hémihydraté
+4805,"Salmonella enterica, subsp. enterica, serovar Typhimurium, antigens O and H"
+4806,"Foot-and-mouth disease virus, serotype SAT1, Inactivated"
+4807,"Foot-and-mouth disease virus, serotype SAT3, Inactivated"
+4809,"Pasteurella multocida, serotype A3, antigens"
+4810,"Pasteurella multocida, serotype D4, antigens"
+4813,Cyperméthrine (Cis:Trans 80:20)
+4814,"Bovine herpesvirus 1, strain GK/D gE gene-deleted, Inactivated"
+4815,"Dichelobacter nodosus, serogroup A, strain 6, Inactivated"
+4816,"Dichelobacter nodosus, serotype B1, strain 44, Inactivated"
+4817,"Dichelobacter nodosus, serotype B2, strain 58, Inactivated"
+4818,"Dichelobacter nodosus, serogroup C, strain 8, Inactivated"
+4819,"Dichelobacter nodosus, serogroup D, strain 16, Inactivated"
+4820,"Dichelobacter nodosus, serogroup E, strain 5, Inactivated"
+4821,"Dichelobacter nodosus, serogroup F, strain 66, Inactivated"
+4822,"Dichelobacter nodosus, serogroup G, strain 52, Inactivated"
+4823,"Dichelobacter nodosus, serogroup H, strain 340, Inactivated"
+4824,"Dichelobacter nodosus, serogroup I, strain 109, Inactivated"
+4831,"Staphylococcus aureus, strain DSM 4910, Inactivated"
+4832,"Escherichia coli, serotype O111, strain J5, Inactivated"

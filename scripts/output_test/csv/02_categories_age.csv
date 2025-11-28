@@ -1,0 +1,10 @@
+code_categorie,code_espece,libelle,description,age_min_jours,age_max_jours,ordre,is_default
+JEUNE,5,Jeune bovin,Veau avant et après sevrage,0,240,1,0
+CROISSANCE,5,En croissance,Jeune bovin en croissance post-sevrage,241,730,2,0
+ADULTE,5,Adulte,Bovin adulte reproducteur,731,,3,1
+JEUNE,51,Jeune ovin,Agneau avant et après sevrage,0,120,1,0
+CROISSANCE,51,En croissance,Jeune ovin en croissance post-sevrage,121,365,2,0
+ADULTE,51,Adulte,Ovin adulte reproducteur,366,,3,1
+JEUNE,11,Jeune caprin,Chevreau avant et après sevrage,0,90,1,0
+CROISSANCE,11,En croissance,Jeune caprin en croissance post-sevrage,91,365,2,0
+ADULTE,11,Adulte,Caprin adulte reproducteur,366,,3,1
