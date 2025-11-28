@@ -43,7 +43,7 @@ async function main() {
   for (const unit of units) {
     await prisma.unit.upsert({
       where: { code: unit.code },
-      update: unit,
+      update: { ...unit, unitType: unit.unitType as any },
       create: unit as any,
     });
   }

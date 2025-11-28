@@ -106,14 +106,14 @@ export class TreatmentsService {
       where: { id: animalId, farmId, deletedAt: null },
       include: {
         breed: { include: { species: true } },
-        farm: { include: { country: true } },
+        farm: true,
       },
     });
 
     if (!animal) return null;
 
     const speciesId = animal.breed?.speciesId;
-    const countryCode = animal.farm?.countryCode;
+    const countryCode = animal.farm?.country;
 
     // Calculate age in days
     let ageCategoryId: string | null = null;
