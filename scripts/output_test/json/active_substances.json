@@ -1,0 +1,114 @@
+[
+  {
+    "code": "amoxicilline",
+    "name": "Amoxicilline",
+    "nameFr": "Amoxicilline",
+    "nameEn": "Amoxicilline",
+    "nameAr": "Amoxicilline",
+    "atcCode": "QJ01CA04"
+  },
+  {
+    "code": "oxyt_tracycline",
+    "name": "Oxytétracycline",
+    "nameFr": "Oxytétracycline",
+    "nameEn": "Oxytétracycline",
+    "nameAr": "Oxytétracycline",
+    "atcCode": "QJ01AA06"
+  },
+  {
+    "code": "p_nicilline_g",
+    "name": "Pénicilline G",
+    "nameFr": "Pénicilline G",
+    "nameEn": "Pénicilline G",
+    "nameAr": "Pénicilline G",
+    "atcCode": "QJ01CE01"
+  },
+  {
+    "code": "streptomycine",
+    "name": "Streptomycine",
+    "nameFr": "Streptomycine",
+    "nameEn": "Streptomycine",
+    "nameAr": "Streptomycine",
+    "atcCode": "QJ01GA01"
+  },
+  {
+    "code": "enrofloxacine",
+    "name": "Enrofloxacine",
+    "nameFr": "Enrofloxacine",
+    "nameEn": "Enrofloxacine",
+    "nameAr": "Enrofloxacine",
+    "atcCode": "QJ01MA90"
+  },
+  {
+    "code": "ivermectine",
+    "name": "Ivermectine",
+    "nameFr": "Ivermectine",
+    "nameEn": "Ivermectine",
+    "nameAr": "Ivermectine",
+    "atcCode": "QP54AA01"
+  },
+  {
+    "code": "l_vamisole",
+    "name": "Lévamisole",
+    "nameFr": "Lévamisole",
+    "nameEn": "Lévamisole",
+    "nameAr": "Lévamisole",
+    "atcCode": "QP52AE01"
+  },
+  {
+    "code": "albendazole",
+    "name": "Albendazole",
+    "nameFr": "Albendazole",
+    "nameEn": "Albendazole",
+    "nameAr": "Albendazole",
+    "atcCode": "QP52AC11"
+  },
+  {
+    "code": "flunixine",
+    "name": "Flunixine",
+    "nameFr": "Flunixine",
+    "nameEn": "Flunixine",
+    "nameAr": "Flunixine",
+    "atcCode": "QM01AG90"
+  },
+  {
+    "code": "m_loxicam",
+    "name": "Méloxicam",
+    "nameFr": "Méloxicam",
+    "nameEn": "Méloxicam",
+    "nameAr": "Méloxicam",
+    "atcCode": "QM01AC06"
+  },
+  {
+    "code": "dexam_thasone",
+    "name": "Dexaméthasone",
+    "nameFr": "Dexaméthasone",
+    "nameEn": "Dexaméthasone",
+    "nameAr": "Dexaméthasone",
+    "atcCode": "QH02AB02"
+  },
+  {
+    "code": "vitamine_e",
+    "name": "Vitamine E",
+    "nameFr": "Vitamine E",
+    "nameEn": "Vitamine E",
+    "nameAr": "Vitamine E",
+    "atcCode": "QA11HA03"
+  },
+  {
+    "code": "s_l_nium",
+    "name": "Sélénium",
+    "nameFr": "Sélénium",
+    "nameEn": "Sélénium",
+    "nameAr": "Sélénium",
+    "atcCode": "QA12CE02"
+  },
+  {
+    "code": "calcium",
+    "name": "Calcium",
+    "nameFr": "Calcium",
+    "nameEn": "Calcium",
+    "nameAr": "Calcium",
+    "atcCode": "QA12AA"
+  }
+]

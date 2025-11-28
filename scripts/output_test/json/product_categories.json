@@ -1,0 +1,74 @@
+[
+  {
+    "code": "antibiotics",
+    "nameFr": "Antibiotiques",
+    "nameEn": "Antibiotics",
+    "nameAr": "مضادات حيوية"
+  },
+  {
+    "code": "antiparasitics",
+    "nameFr": "Antiparasitaires",
+    "nameEn": "Antiparasitics",
+    "nameAr": "مضادات الطفيليات"
+  },
+  {
+    "code": "vaccines",
+    "nameFr": "Vaccins",
+    "nameEn": "Vaccines",
+    "nameAr": "لقاحات"
+  },
+  {
+    "code": "anti_inflammatories",
+    "nameFr": "Anti-inflammatoires",
+    "nameEn": "Anti-inflammatories",
+    "nameAr": "مضادات الالتهاب"
+  },
+  {
+    "code": "vitamins_minerals",
+    "nameFr": "Vitamines et minéraux",
+    "nameEn": "Vitamins & Minerals",
+    "nameAr": "فيتامينات ومعادن"
+  },
+  {
+    "code": "hormones",
+    "nameFr": "Hormones",
+    "nameEn": "Hormones",
+    "nameAr": "هرمونات"
+  },
+  {
+    "code": "anesthetics",
+    "nameFr": "Anesthésiques",
+    "nameEn": "Anesthetics",
+    "nameAr": "مخدرات"
+  },
+  {
+    "code": "antiseptics",
+    "nameFr": "Antiseptiques",
+    "nameEn": "Antiseptics",
+    "nameAr": "مطهرات"
+  },
+  {
+    "code": "antifungals",
+    "nameFr": "Antifongiques",
+    "nameEn": "Antifungals",
+    "nameAr": "مضادات الفطريات"
+  },
+  {
+    "code": "digestive",
+    "nameFr": "Appareil digestif",
+    "nameEn": "Digestive system",
+    "nameAr": "الجهاز الهضمي"
+  },
+  {
+    "code": "cardiovascular",
+    "nameFr": "Cardiovasculaire",
+    "nameEn": "Cardiovascular",
+    "nameAr": "القلب والأوعية الدموية"
+  },
+  {
+    "code": "reproductive",
+    "nameFr": "Reproduction",
+    "nameEn": "Reproductive",
+    "nameAr": "التناسل"
+  }
+]
