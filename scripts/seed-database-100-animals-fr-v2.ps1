@@ -560,8 +560,21 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
     Write-Host ""
     Write-Host "10. Treatments (Traitements + Vaccinations unifies)" -ForegroundColor Cyan
 
+    # Debug: Verify productsArray is populated
+    Write-Host "    DEBUG: productIds.Count = $($productIds.Count)" -ForegroundColor Magenta
+    Write-Host "    DEBUG: productsArray.Count = $($productsArray.Count)" -ForegroundColor Magenta
+
+    if ($productsArray.Count -eq 0) {
+        Write-Host "    ERREUR: productsArray est vide! Les traitements ne peuvent pas etre crees." -ForegroundColor Red
+        Write-Host "    Verifiez que les produits sont bien charges depuis l'API." -ForegroundColor Yellow
+    } else {
+        Write-Host "    Premier produit: $($productsArray[0].id) - $($productsArray[0].nameFr)" -ForegroundColor Gray
+    }
+
     $treatmentCount = 0
     $vaccinationCount = 0
+    $treatmentErrorCount = 0
+    $vaccinationErrorCount = 0
 
     foreach ($animalId in $animalIds) {
         # 2-3 traitements par animal
@@ -584,7 +597,7 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
                 type = "treatment"
                 treatmentDate = $treatmentDate
                 dose = [Math]::Round((Get-Random -Minimum 10 -Maximum 100) / 10.0, 1)
-                doseUnit = @("ml", "mg", "g") | Get-Random
+                dosageUnit = @("ml", "mg", "g") | Get-Random
                 status = @("completed", "in_progress", "scheduled") | Get-Random
                 withdrawalEndDate = $withdrawalEndDate
                 diagnosis = @("Infection respiratoire", "Parasitose", "Boiterie", "Mammite", "Diarrhee", "Fievre", "Plaie", "Reproduction") | Get-Random
@@ -596,9 +609,17 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
             }
 
             $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $treatment -Silent
-            if ($response) { $treatmentCount++ }
+            if ($response) {
+                $treatmentCount++
+            } else {
+                $treatmentErrorCount++
+                # Show first 3 errors for debugging
+                if ($treatmentErrorCount -le 3) {
+                    Write-Host "    ERREUR Treatment #$treatmentErrorCount: productId=$($treatment.productId), animalId=$($treatment.animalId)" -ForegroundColor Red
+                }
+            }
 
-            if ($treatmentCount % 50 -eq 0) {
+            if ($treatmentCount % 50 -eq 0 -and $treatmentCount -gt 0) {
                 Write-Host "    -> Traitements: $treatmentCount crees..." -ForegroundColor Cyan
             }
         }
@@ -622,7 +643,7 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
                 type = "vaccination"
                 treatmentDate = $vaccineDate
                 dose = @(1.0, 2.0, 2.5, 3.0, 5.0) | Get-Random
-                doseUnit = "ml"
+                dosageUnit = "ml"
                 status = "completed"
                 withdrawalEndDate = $nextDueDate
                 diagnosis = @("Vaccination preventive", "Rappel vaccinal", "Primo-vaccination") | Get-Random
@@ -634,15 +655,26 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
             }
 
             $response = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $vaccination -Silent
-            if ($response) { $vaccinationCount++ }
+            if ($response) {
+                $vaccinationCount++
+            } else {
+                $vaccinationErrorCount++
+                # Show first 3 errors for debugging
+                if ($vaccinationErrorCount -le 3) {
+                    Write-Host "    ERREUR Vaccination #$vaccinationErrorCount: productId=$($vaccination.productId), animalId=$($vaccination.animalId)" -ForegroundColor Red
+                }
+            }
 
-            if ($vaccinationCount % 50 -eq 0) {
+            if ($vaccinationCount % 50 -eq 0 -and $vaccinationCount -gt 0) {
                 Write-Host "    -> Vaccinations: $vaccinationCount creees..." -ForegroundColor Cyan
             }
         }
     }
     Write-Host ""
     Write-Host "    -> TOTAL: $treatmentCount traitements + $vaccinationCount vaccinations" -ForegroundColor Green
+    if ($treatmentErrorCount -gt 0 -or $vaccinationErrorCount -gt 0) {
+        Write-Host "    -> ERREURS: $treatmentErrorCount traitements, $vaccinationErrorCount vaccinations" -ForegroundColor Red
+    }
 }
 
 # =============================================================================
