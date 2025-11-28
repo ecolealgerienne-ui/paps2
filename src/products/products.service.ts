@@ -440,4 +440,154 @@ export class ProductsService {
       orderBy: { nameFr: 'asc' },
     });
   }
+
+  // =============================================================================
+  // Global endpoints (no farm scope required)
+  // =============================================================================
+
+  /**
+   * Find all global products (no farm scope required)
+   * Returns only global products (scope='global')
+   */
+  async findAllGlobal(query: QueryProductDto) {
+    const {
+      search,
+      type,
+      categoryId,
+      isActive,
+      vaccinesOnly,
+      page = 1,
+      limit = 50,
+      sort = 'nameFr',
+      order = 'asc',
+    } = query;
+
+    // Build where clause for global products only
+    const where: ProductWhereInput = {
+      scope: DataScope.global,
+      deletedAt: null,
+    };
+
+    if (search) {
+      where.OR = [
+        { nameFr: { contains: search, mode: 'insensitive' } },
+        { nameEn: { contains: search, mode: 'insensitive' } },
+        { commercialName: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+    if (type) {
+      where.type = type;
+    }
+    if (vaccinesOnly) {
+      where.type = ProductType.vaccine;
+    }
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+    if (isActive !== undefined) {
+      where.isActive = isActive;
+    }
+
+    // Execute query with pagination
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where: where as any,
+        include: {
+          category: true,
+          substance: true,
+          packagings: {
+            where: { deletedAt: null },
+            take: 5,
+          },
+        },
+        orderBy: { [sort]: order },
+        skip,
+        take: limit,
+      }),
+      this.prisma.product.count({ where: where as any }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Find a global product by ID (no farm scope required)
+   */
+  async findOneGlobal(id: string) {
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+        scope: DataScope.global,
+        deletedAt: null,
+      },
+      include: {
+        category: true,
+        substance: true,
+        packagings: {
+          where: { deletedAt: null },
+          include: {
+            concentrationUnit: true,
+            volumeUnit: true,
+            country: true,
+          },
+        },
+        indications: {
+          where: { deletedAt: null },
+          include: {
+            species: true,
+            ageCategory: true,
+            route: true,
+          },
+        },
+      },
+    });
+
+    if (!product) {
+      this.logger.warn('Global product not found', { productId: id });
+      throw new EntityNotFoundException(
+        ERROR_CODES.PRODUCT_NOT_FOUND,
+        `Product ${id} not found`,
+        { productId: id },
+      );
+    }
+
+    return product;
+  }
+
+  /**
+   * Search global products by name (autocomplete, no farm scope required)
+   */
+  async searchGlobal(term: string, limit = 10) {
+    return this.prisma.product.findMany({
+      where: {
+        scope: DataScope.global,
+        deletedAt: null,
+        isActive: true,
+        OR: [
+          { nameFr: { contains: term, mode: 'insensitive' } },
+          { nameEn: { contains: term, mode: 'insensitive' } },
+          { commercialName: { contains: term, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        id: true,
+        nameFr: true,
+        nameEn: true,
+        commercialName: true,
+        type: true,
+        manufacturer: true,
+      },
+      take: limit,
+      orderBy: { nameFr: 'asc' },
+    });
+  }
 }

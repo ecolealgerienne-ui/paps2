@@ -123,6 +123,31 @@ export class ProductsController {
   // Global endpoints (admin)
   // =============================================================================
 
+  @Get('products')
+  @ApiOperation({ summary: 'Get all global products (no farm scope required)' })
+  @ApiResponse({ status: 200, description: 'Global products retrieved successfully' })
+  findAllGlobal(@Query() query: QueryProductDto) {
+    return this.productsService.findAllGlobal(query);
+  }
+
+  @Get('products/search')
+  @ApiOperation({ summary: 'Search global products by name (autocomplete)' })
+  @ApiQuery({ name: 'q', description: 'Search term' })
+  @ApiQuery({ name: 'limit', description: 'Max results', required: false })
+  searchGlobal(
+    @Query('q') term: string,
+    @Query('limit') limit?: number,
+  ) {
+    return this.productsService.searchGlobal(term, limit);
+  }
+
+  @Get('products/:id')
+  @ApiOperation({ summary: 'Get a global product by ID' })
+  @ApiParam({ name: 'id', description: 'Product ID' })
+  findOneGlobal(@Param('id') id: string) {
+    return this.productsService.findOneGlobal(id);
+  }
+
   @Post('admin/products')
   @ApiOperation({ summary: 'Create a global product (admin only)' })
   @ApiResponse({ status: 201, description: 'Global product created successfully' })
