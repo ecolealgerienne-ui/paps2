@@ -177,7 +177,14 @@ Write-Host "1. Recuperation des donnees existantes" -ForegroundColor Cyan
 Write-Host "  [FETCH] Recuperation des races..." -ForegroundColor Yellow -NoNewline
 $breedsResponse = Invoke-CurlApi -Method GET -Endpoint "/api/v1/breeds?limit=200" -Silent
 if ($breedsResponse) {
-    $breeds = if ($breedsResponse.data) { $breedsResponse.data } else { $breedsResponse }
+    # Handle nested response: {success, data: {success, data: [...]}}
+    $breeds = if ($breedsResponse.data.data) {
+        $breedsResponse.data.data
+    } elseif ($breedsResponse.data -is [array]) {
+        $breedsResponse.data
+    } else {
+        $breedsResponse
+    }
     foreach ($breed in $breeds) {
         $breedIds += $breed.id
     }
@@ -191,7 +198,14 @@ if ($breedsResponse) {
 Write-Host "  [FETCH] Recuperation des produits..." -ForegroundColor Yellow -NoNewline
 $productsResponse = Invoke-CurlApi -Method GET -Endpoint "/api/v1/products?limit=1000" -Silent
 if ($productsResponse) {
-    $products = if ($productsResponse.data) { $productsResponse.data } else { $productsResponse }
+    # Handle nested response: {success, data: {success, data: [...]}}
+    $products = if ($productsResponse.data.data) {
+        $productsResponse.data.data
+    } elseif ($productsResponse.data -is [array]) {
+        $productsResponse.data
+    } else {
+        $productsResponse
+    }
     foreach ($product in $products) {
         $productIds += $product.id
     }
