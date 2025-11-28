@@ -58,6 +58,33 @@ async function upsertMany<T extends Record<string, any>>(
   console.log(`  ✅ ${tableName}: ${created} created, ${updated} updated`);
 }
 
+async function seedSpecies() {
+  console.log('\n📦 Seeding Species...');
+
+  const speciesData = [
+    { id: 'bovine', nameFr: 'Bovin', nameEn: 'Bovine', nameAr: 'بقري', icon: '🐄', displayOrder: 1, scientificName: 'Bos taurus' },
+    { id: 'ovine', nameFr: 'Ovin', nameEn: 'Ovine', nameAr: 'غنم', icon: '🐑', displayOrder: 2, scientificName: 'Ovis aries' },
+    { id: 'caprine', nameFr: 'Caprin', nameEn: 'Caprine', nameAr: 'ماعز', icon: '🐐', displayOrder: 3, scientificName: 'Capra aegagrus hircus' },
+  ];
+
+  for (const species of speciesData) {
+    await prisma.species.upsert({
+      where: { id: species.id },
+      update: {
+        nameFr: species.nameFr,
+        nameEn: species.nameEn,
+        nameAr: species.nameAr,
+        icon: species.icon,
+        displayOrder: species.displayOrder,
+        scientificName: species.scientificName,
+      },
+      create: species,
+    });
+  }
+
+  console.log(`  ✅ Species: ${speciesData.length} processed`);
+}
+
 async function seedUnits() {
   console.log('\n📦 Seeding Units...');
 
@@ -557,6 +584,7 @@ async function main() {
 
   try {
     // Seed in dependency order
+    await seedSpecies();
     await seedUnits();
     await seedProductCategories();
     await seedActiveSubstances();
