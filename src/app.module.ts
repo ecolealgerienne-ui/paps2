@@ -46,23 +46,23 @@ import { AgeCategoriesModule } from './age-categories/age-categories.module';
       isGlobal: true,
     }),
     // Rate limiting configuration
-    // In MVP mode: high limits for development/testing
+    // In development/MVP mode: very high limits for seed scripts
     // In production: reasonable limits to prevent abuse
     ThrottlerModule.forRoot([
       {
         name: 'short',
         ttl: 1000, // 1 second
-        limit: process.env.MVP_MODE === 'true' ? 100 : 20, // 20 req/sec in prod
+        limit: process.env.NODE_ENV === 'production' ? 50 : 1000, // High limit for dev/seed
       },
       {
         name: 'medium',
         ttl: 10000, // 10 seconds
-        limit: process.env.MVP_MODE === 'true' ? 500 : 100, // 100 req/10sec in prod
+        limit: process.env.NODE_ENV === 'production' ? 200 : 5000, // High limit for dev/seed
       },
       {
         name: 'long',
         ttl: 60000, // 1 minute
-        limit: process.env.MVP_MODE === 'true' ? 2000 : 300, // 300 req/min in prod
+        limit: process.env.NODE_ENV === 'production' ? 500 : 30000, // High limit for dev/seed
       },
     ]),
     PrismaModule,
