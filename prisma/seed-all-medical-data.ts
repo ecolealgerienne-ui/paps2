@@ -63,6 +63,7 @@ async function seedUnits() {
 
   interface UnitData {
     code: string;
+    symbol: string;
     nameFr: string;
     nameEn: string;
     nameAr: string;
@@ -76,6 +77,7 @@ async function seedUnits() {
     await prisma.unit.upsert({
       where: { code: unit.code },
       update: {
+        symbol: unit.symbol,
         nameFr: unit.nameFr,
         nameEn: unit.nameEn,
         nameAr: unit.nameAr,
@@ -84,6 +86,7 @@ async function seedUnits() {
       },
       create: {
         code: unit.code,
+        symbol: unit.symbol,
         nameFr: unit.nameFr,
         nameEn: unit.nameEn,
         nameAr: unit.nameAr,
@@ -509,8 +512,8 @@ async function seedTherapeuticIndications() {
           doseMin: pos.dose_min_mg_par_kg,
           doseMax: pos.dose_max_mg_par_kg,
           doseUnitId: doseUnit?.id,
-          withdrawalMeatDays: pos.temps_attente_viande_jours,
-          withdrawalMilkDays: pos.temps_attente_lait_jours,
+          withdrawalMeatDays: pos.temps_attente_viande_jours ?? 0,
+          withdrawalMilkDays: pos.temps_attente_lait_jours ?? 0,
         },
       });
       created++;
