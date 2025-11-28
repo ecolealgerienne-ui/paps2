@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFarmProductPreferenceDto, UpdateFarmProductPreferenceDto } from './dto';
-import { DataScope } from '@prisma/client';
+import { DataScope } from '../common/types/prisma-types';
 
 @Injectable()
 export class FarmProductPreferencesService {
@@ -19,7 +19,7 @@ export class FarmProductPreferencesService {
 
     // Verify product exists and is accessible to this farm
     // (global products are accessible to all, local products only to their farm)
-    const product = await this.prisma.medicalProduct.findFirst({
+    const product = await this.prisma.product.findFirst({
       where: {
         id: dto.productId,
         deletedAt: null,

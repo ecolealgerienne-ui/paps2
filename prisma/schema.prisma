@@ -82,29 +82,185 @@ enum DataScope {
   local   // Données locales, créées par fermier, spécifiques à une ferme
 }
 
+// ENUM pour types de produits (unifié médicaments + vaccins)
+enum ProductType {
+  antibiotic
+  anti_inflammatory
+  antiparasitic
+  vitamin
+  mineral
+  vaccine
+  anesthetic
+  hormone
+  antiseptic
+  analgesic
+  other
+}
+
+// ENUM pour type de traitement (traitement vs vaccination)
+enum TreatmentType {
+  treatment
+  vaccination
+}
+
+// ENUM pour type de vaccination (obligatoire, recommandée, optionnelle)
+enum VaccinationType {
+  mandatory
+  recommended
+  optional
+}
+
+// ENUM pour type d'unité de mesure
+enum UnitType {
+  mass          // mg, g, kg
+  volume        // ml, L
+  concentration // mg/ml, UI/ml
+  count         // comprimés, doses
+  percentage    // %
+  other
+}
+
 // ============================================================
 // TABLES DE RÉFÉRENCE (Backend)
 // ============================================================
 
-// Table de référence - Espèces
-model Species {
-  id          String    @id                 // Existant : "bovine", "ovine", "caprine"
-  nameFr      String    @map("name_fr")      // Existant
-  nameEn      String    @map("name_en")      // Existant
-  nameAr      String    @map("name_ar")      // Existant
-  icon        String                         // Existant (gardé pour compatibilité)
-  displayOrder Int      @default(0) @map("display_order") // Existant (gardé pour compatibilité)
-  description String?                        // Nouveau champ optionnel
+// Table de référence - Unités de mesure
+model Unit {
+  id              String    @id @default(uuid())
+  code            String    @unique              // "mg", "ml", "kg", "g", "UI", "mg_per_ml"
+  symbol          String                         // "mg", "ml", "kg", "g", "UI", "mg/ml"
+  nameFr          String    @map("name_fr")
+  nameEn          String    @map("name_en")
+  nameAr          String    @map("name_ar")
+  unitType        UnitType  @map("unit_type")
+  description     String?
+  baseUnitCode    String?   @map("base_unit_code")  // Pour conversions (ex: "g" pour "mg")
+  conversionFactor Float?   @map("conversion_factor") // Facteur de conversion vers unité de base
+  displayOrder    Int       @default(0) @map("display_order")
+  isActive        Boolean   @default(true) @map("is_active")
+  version         Int       @default(1)
+  deletedAt       DateTime? @map("deleted_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  // Nouveaux champs - PHASE_01
+  // Relations
+  productPackagingsConcentration ProductPackaging[] @relation("ConcentrationUnit")
+  productPackagingsVolume        ProductPackaging[] @relation("VolumeUnit")
+  therapeuticIndicationsDose     TherapeuticIndication[] @relation("DoseUnit")
+  treatmentsQuantity             Treatment[] @relation("QuantityUnit")
+
+  @@index([code])
+  @@index([unitType])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("units")
+}
+
+// Table de référence - Catégories d'âge par espèce
+model AgeCategory {
+  id           String    @id @default(uuid())
+  code         String                          // "calf", "young", "adult" - unique par espèce
+  speciesId    String    @map("species_id")
+  nameFr       String    @map("name_fr")
+  nameEn       String    @map("name_en")
+  nameAr       String    @map("name_ar")
+  description  String?
+  ageMinDays   Int       @map("age_min_days")   // 0 pour nouveau-né
+  ageMaxDays   Int?      @map("age_max_days")   // NULL = pas de limite (adulte)
+  displayOrder Int       @default(0) @map("display_order")
+  isDefault    Boolean   @default(false) @map("is_default")
+  isActive     Boolean   @default(true) @map("is_active")
+  version      Int       @default(1)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  species      Species   @relation(fields: [speciesId], references: [id])
+  therapeuticIndications TherapeuticIndication[]
+
+  @@unique([speciesId, code])
+  @@index([speciesId])
+  @@index([code])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([speciesId, isActive, deletedAt])
+  @@index([speciesId, ageMinDays, ageMaxDays])
+  @@map("age_categories")
+}
+
+// Table de référence - Substances actives
+model ActiveSubstance {
+  id          String    @id @default(uuid())
+  code        String    @unique               // Code interne unique
+  name        String                          // Nom international (DCI)
+  nameFr      String?   @map("name_fr")
+  nameEn      String?   @map("name_en")
+  nameAr      String?   @map("name_ar")
+  atcCode     String?   @map("atc_code")      // Code ATC/ATCvet (ex: QJ01MA90)
+  description String?
+  isActive    Boolean   @default(true) @map("is_active")
   version     Int       @default(1)
   deletedAt   DateTime? @map("deleted_at")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  animals Animal[]
-  breeds  Breed[]
+  products    Product[]
+
+  @@index([code])
+  @@index([atcCode])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("active_substances")
+}
+
+// Table de référence - Catégories de produits
+model ProductCategory {
+  id           String    @id @default(uuid())
+  code         String    @unique               // "antibiotics", "vaccines", "vitamins"
+  nameFr       String    @map("name_fr")
+  nameEn       String    @map("name_en")
+  nameAr       String    @map("name_ar")
+  description  String?
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
+  version      Int       @default(1)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  products     Product[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("product_categories")
+}
+
+// Table de référence - Espèces
+model Species {
+  id             String    @id                 // Existant : "bovine", "ovine", "caprine"
+  nameFr         String    @map("name_fr")
+  nameEn         String    @map("name_en")
+  nameAr         String    @map("name_ar")
+  icon           String
+  displayOrder   Int       @default(0) @map("display_order")
+  description    String?
+  scientificName String?   @map("scientific_name")  // Nom scientifique (ex: "Bos taurus")
+
+  // Métadonnées
+  version     Int       @default(1)
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  animals       Animal[]
+  breeds        Breed[]
+  ageCategories AgeCategory[]
+  therapeuticIndications TherapeuticIndication[]
 
   // Indexes
   @@index([deletedAt])
@@ -158,11 +314,11 @@ model Country {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  // Relations (BLOC 3 - Phases 16-19)
-  breedCountries    BreedCountry[]       // PHASE_16
-  productCountries  ProductCountry[]     // PHASE_17
-  vaccineCountries  VaccineCountry[]     // PHASE_18
-  campaignCountries CampaignCountry[]    // PHASE_19
+  // Relations
+  breedCountries         BreedCountry[]
+  campaignCountries      CampaignCountry[]
+  productPackagings      ProductPackaging[]
+  therapeuticIndications TherapeuticIndication[]
 
   @@index([isActive])
   @@index([region])
@@ -256,87 +412,41 @@ model FarmBreedPreference {
   @@map("farm_breed_preferences")
 }
 
-// Table de liaison - Vaccins par pays (Master Table Pattern)
-model VaccineCountry {
-  id          String   @id @default(uuid())
-  vaccineId   String   @map("vaccine_id")
-  countryCode String   @map("country_code")
-  numeroAMM   String?  @map("numero_amm")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  vaccine Vaccine @relation(fields: [vaccineId], references: [id], onDelete: Cascade)
-  country Country @relation(fields: [countryCode], references: [code], onDelete: Cascade)
-
-  @@unique([vaccineId, countryCode])
-  @@index([vaccineId])
-  @@index([countryCode])
-  @@map("vaccine_countries")
-}
 
 // ============================================================
 // TABLES MAÎTRES CONSOLIDÉES (Master Table Pattern)
 // ============================================================
 
-// Produits médicaux consolidés (Master Table Pattern)
-// Consolide GlobalMedicalProduct (scope='global') + CustomMedicalProduct (scope='local')
-model MedicalProduct {
+// Produit unifié (médicaments + vaccins)
+// Remplace MedicalProduct + Vaccine
+model Product {
   id                        String              @id @default(uuid())
 
-  // 🆕 SCOPE PATTERN
+  // SCOPE PATTERN
   scope                     DataScope           // "global" | "local"
-  farmId                    String?             @map("farm_id")  // NULL si global, SET si local (farm-spécifique)
+  farmId                    String?             @map("farm_id")  // NULL si global, SET si local
 
-  // Champs d'identification
+  // Identification
   code                      String?             @unique  // Obligatoire pour global, optionnel pour local
-  nameFr                    String              @map("name_fr")  // Nom français (obligatoire)
-  nameEn                    String?             @map("name_en")  // Optionnel pour local
-  nameAr                    String?             @map("name_ar")  // Optionnel pour local
+  nameFr                    String              @map("name_fr")
+  nameEn                    String?             @map("name_en")
+  nameAr                    String?             @map("name_ar")
   commercialName            String?             @map("commercial_name")
   description               String?
 
   // Classification
-  type                      MedicalProductType? // Obligatoire pour global, optionnel pour local
-  category                  String?             // Catégorie (antibiotic, vitamin, etc.)
+  type                      ProductType?        // antibiotic, vaccine, antiparasitic, etc.
+  categoryId                String?             @map("category_id")
+  substanceId               String?             @map("substance_id")
+  atcVetCode                String?             @map("atc_vet_code")  // Code ATCvet (ex: QJ01MA90)
 
-  // Composition et fabrication
-  principeActif             String?             @map("principe_actif")  // Principe actif (global)
-  activeIngredient          String?             @map("active_ingredient")  // Même info, autre nom (custom)
-  laboratoire               String?
+  // Fabrication
   manufacturer              String?
-  numeroAMM                 String?             @map("numero_amm")  // Autorisation Mise sur le Marché
+  form                      String?             // injectable, oral, topical, powder, tablet
 
-  // Posologie
-  form                      String?             // tablet, injection, powder, etc.
-  dosage                    Float?
-  dosageUnit                String?             @map("dosage_unit")
-  dosageFormula             String?             @map("dosage_formula")
-  administrationFrequency   String?             @map("administration_frequency")
-  defaultAdministrationRoute String?            @map("default_administration_route")
-  defaultInjectionSite      String?             @map("default_injection_site")
-  standardCureDays          Int?                @map("standard_cure_days")
-
-  // Délais d'attente
-  withdrawalPeriodMeat      Int?                @map("withdrawal_period_meat")  // jours
-  withdrawalPeriodMilk      Int?                @map("withdrawal_period_milk")  // jours
-
-  // Stock (farm-spécifique)
-  currentStock              Float?              @default(0) @map("current_stock")
-  minStock                  Float?              @default(0) @map("min_stock")
-  stockUnit                 String?             @map("stock_unit")
-  unitPrice                 Float?              @map("unit_price")
-  currency                  String?
-  batchNumber               String?             @map("batch_number")
-  expiryDate                DateTime?           @map("expiry_date")
-  storageConditions         String?             @map("storage_conditions")
-
-  // Usage
-  prescription              String?             // prescription notes/requirements
-  productType               String?             @default("treatment") @map("product_type")  // treatment, vaccine
-  targetSpecies             String?             @map("target_species")
-  vaccinationProtocol       String?             @map("vaccination_protocol")
-  reminderDays              String?             @map("reminder_days")  // comma-separated
+  // Spécifique vaccins (type = vaccine)
+  targetDisease             String?             @map("target_disease")  // Maladie ciblée
+  immunityDurationDays      Int?                @map("immunity_duration_days")  // Durée immunité en jours
 
   // Métadonnées
   notes                     String?
@@ -348,10 +458,13 @@ model MedicalProduct {
 
   // Relations
   farm                      Farm?               @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  category                  ProductCategory?    @relation(fields: [categoryId], references: [id])
+  substance                 ActiveSubstance?    @relation(fields: [substanceId], references: [id])
+  packagings                ProductPackaging[]
+  indications               TherapeuticIndication[]
   treatments                Treatment[]
   lots                      Lot[]
   personalCampaigns         PersonalCampaign[]
-  productCountries          ProductCountry[]
   farmPreferences           FarmProductPreference[]
 
   // Indexes simples
@@ -359,7 +472,9 @@ model MedicalProduct {
   @@index([farmId])
   @@index([code])
   @@index([type])
-  @@index([laboratoire])
+  @@index([categoryId])
+  @@index([substanceId])
+  @@index([manufacturer])
   @@index([isActive])
   @@index([deletedAt])
 
@@ -368,66 +483,104 @@ model MedicalProduct {
   @@index([scope, isActive])
   @@index([scope, isActive, deletedAt])
   @@index([farmId, isActive, deletedAt])
+  @@index([type, isActive, deletedAt])
 
-  @@map("medical_products")
+  @@map("products")
 }
 
-// Vaccins consolidés (Master Table Pattern)
-// Consolide VaccineGlobal (scope='global') + CustomVaccine (scope='local')
-model Vaccine {
-  id                String               @id @default(uuid())
+// Conditionnement produit par pays
+model ProductPackaging {
+  id                    String    @id @default(uuid())
+  productId             String    @map("product_id")
+  countryCode           String    @map("country_code")
 
-  // 🆕 SCOPE PATTERN
-  scope             DataScope            // "global" | "local"
-  farmId            String?              @map("farm_id")  // NULL si global, SET si local
+  // Concentration
+  concentration         Float                           // Ex: 100 (pour 100 mg/ml)
+  concentrationUnitId   String    @map("concentration_unit_id")
 
-  // Champs d'identification
-  code              String?              @unique  // Obligatoire pour global, optionnel pour local
-  nameFr            String               @map("name_fr")  // Nom français (obligatoire)
-  nameEn            String?              @map("name_en")  // Optionnel pour local
-  nameAr            String?              @map("name_ar")  // Optionnel pour local
-  description       String?
+  // Volume/Quantité
+  volume                Float?                          // Ex: 100 (pour 100 ml)
+  volumeUnitId          String?   @map("volume_unit_id")
+  packagingLabel        String    @map("packaging_label")  // "Flacon 100ml", "Boîte 10 comprimés"
 
-  // Classification
-  targetDisease     VaccineTargetDisease? @map("target_disease")  // Obligatoire pour global, optionnel pour local
-
-  // Fabrication
-  laboratoire       String?
-  numeroAMM         String?              @map("numero_amm")
-
-  // Posologie
-  dosage            String?
-  dosageRecommande  String?              @map("dosage_recommande")
-  dureeImmunite     Int?                 @map("duree_immunite")  // En jours
+  // Identification commerciale
+  gtinEan               String?   @map("gtin_ean")      // Code barre EAN/GTIN
+  numeroAMM             String?   @map("numero_amm")    // AMM spécifique au pays
 
   // Métadonnées
-  isActive          Boolean              @default(true) @map("is_active")
-  version           Int                  @default(1)
-  deletedAt         DateTime?            @map("deleted_at")
-  createdAt         DateTime             @default(now()) @map("created_at")
-  updatedAt         DateTime             @updatedAt @map("updated_at")
+  isActive              Boolean   @default(true) @map("is_active")
+  version               Int       @default(1)
+  deletedAt             DateTime? @map("deleted_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  farm              Farm?                @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  vaccinations      Vaccination[]
-  vaccineCountries  VaccineCountry[]
-  farmPreferences   FarmVaccinePreference[]
+  product               Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  country               Country   @relation(fields: [countryCode], references: [code], onDelete: Cascade)
+  concentrationUnit     Unit      @relation("ConcentrationUnit", fields: [concentrationUnitId], references: [id])
+  volumeUnit            Unit?     @relation("VolumeUnit", fields: [volumeUnitId], references: [id])
+  treatments            Treatment[]
 
-  // Indexes simples
-  @@index([scope])
-  @@index([farmId])
-  @@index([code])
-  @@index([targetDisease])
+  @@unique([productId, countryCode, gtinEan])
+  @@index([productId])
+  @@index([countryCode])
+  @@index([gtinEan])
   @@index([isActive])
   @@index([deletedAt])
+  @@index([productId, countryCode])
+  @@map("product_packagings")
+}
 
-  // Indexes composites (performance)
-  @@index([scope, farmId])
-  @@index([scope, isActive])
-  @@index([scope, isActive, deletedAt])
-  @@index([farmId, isActive, deletedAt])
+// Indication thérapeutique (posologie + temps d'attente)
+model TherapeuticIndication {
+  id                    String    @id @default(uuid())
+  productId             String    @map("product_id")
+  countryCode           String?   @map("country_code")  // NULL = règle universelle
+  speciesId             String    @map("species_id")
+  ageCategoryId         String?   @map("age_category_id")  // NULL = tous âges
+  routeId               String    @map("route_id")
 
-  @@map("vaccines")
+  // Posologie
+  doseMin               Float?    @map("dose_min")      // mg/kg minimum
+  doseMax               Float?    @map("dose_max")      // mg/kg maximum
+  doseUnitId            String?   @map("dose_unit_id")
+  doseOriginalText      String?   @map("dose_original_text")  // Texte RCP original
+  protocolDurationDays  Int?      @map("protocol_duration_days")
+
+  // Temps d'attente (CRITIQUE pour traçabilité)
+  withdrawalMeatDays    Int       @map("withdrawal_meat_days")
+  withdrawalMilkDays    Int?      @map("withdrawal_milk_days")
+
+  // Validation
+  isVerified            Boolean   @default(false) @map("is_verified")
+  validationNotes       String?   @map("validation_notes")
+
+  // Métadonnées
+  isActive              Boolean   @default(true) @map("is_active")
+  version               Int       @default(1)
+  deletedAt             DateTime? @map("deleted_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  product               Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  country               Country?  @relation(fields: [countryCode], references: [code])
+  species               Species   @relation(fields: [speciesId], references: [id])
+  ageCategory           AgeCategory? @relation(fields: [ageCategoryId], references: [id])
+  route                 AdministrationRoute @relation(fields: [routeId], references: [id])
+  doseUnit              Unit?     @relation("DoseUnit", fields: [doseUnitId], references: [id])
+  treatments            Treatment[]
+
+  @@unique([productId, countryCode, speciesId, ageCategoryId, routeId])
+  @@index([productId])
+  @@index([countryCode])
+  @@index([speciesId])
+  @@index([ageCategoryId])
+  @@index([routeId])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@index([productId, speciesId, routeId])
+  @@map("therapeutic_indications")
 }
 
 // Vétérinaires (Master Table Pattern - multi-scope)
@@ -475,7 +628,6 @@ model Veterinarian {
 
   farm Farm? @relation(fields: [farmId], references: [id], onDelete: Cascade)
   treatments Treatment[]
-  vaccinations Vaccination[]
   farmPreferences FarmVeterinarianPreference[]
 
   // Index simples
@@ -498,48 +650,32 @@ model Veterinarian {
 
 // Table de référence - Voies d'administration
 model AdministrationRoute {
-  id          String    @id @default(uuid())
-  code        String    @unique                // "oral", "injectable", etc.
-  nameFr      String    @map("name_fr")
-  nameEn      String    @map("name_en")
-  nameAr      String    @map("name_ar")
-  description String?
-
-  // Nouveaux champs
+  id           String    @id @default(uuid())
+  code         String    @unique                // "oral", "injectable", "topical", etc.
+  nameFr       String    @map("name_fr")
+  nameEn       String    @map("name_en")
+  nameAr       String    @map("name_ar")
+  abbreviation String?                          // "PO", "IM", "IV", "SC", "TOP"
+  description  String?
   displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
   version      Int       @default(1)
   deletedAt    DateTime? @map("deleted_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  treatments  Treatment[]
+  treatments             Treatment[]
+  therapeuticIndications TherapeuticIndication[]
 
   // Indexes
   @@index([code])
+  @@index([isActive])
   @@index([deletedAt])
 
   @@map("administration_routes")
 }
 
-// Table de liaison - Produits médicaux ↔ Pays (Master Table Pattern)
-model ProductCountry {
-  id          String   @id @default(uuid())
-  productId   String   @map("product_id")
-  countryCode String   @map("country_code")
-  numeroAMM   String?  @map("numero_amm")    // AMM spécifique au pays
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  product MedicalProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-  country Country        @relation(fields: [countryCode], references: [code], onDelete: Cascade)
-
-  @@unique([productId, countryCode])
-  @@index([productId])
-  @@index([countryCode])
-  @@map("product_countries")
-}
 
 // Templates d'alertes (catalogue global)
 model AlertTemplate {
@@ -638,15 +774,12 @@ model Farm {
   documents Document[]
   weights Weight[]
   treatments Treatment[]
-  vaccinations Vaccination[]
   breedings Breeding[]
   lotAnimals LotAnimal[]
   veterinarians Veterinarian[]
-  medicalProducts MedicalProduct[]  // 🆕 Master Table (scope='local' pour cette ferme)
-  vaccines Vaccine[]                // 🆕 Master Table (scope='local' pour cette ferme)
+  products Product[]               // Produits locaux (scope='local')
   preferences FarmPreferences?
   alertConfigurations AlertConfiguration[]
-  vaccinePreferences FarmVaccinePreference[]
   campaignPreferences FarmNationalCampaignPreference[]
   veterinarianPreferences FarmVeterinarianPreference[]
   breedPreferences FarmBreedPreference[]
@@ -702,7 +835,6 @@ model Animal {
 
   lotAnimals LotAnimal[]
   treatments Treatment[]
-  vaccinations Vaccination[]
   weights Weight[]
   breedingsAsMother Breeding[] @relation("BreedingMother")
   breedingsAsFather Breeding[] @relation("BreedingFather")
@@ -747,7 +879,7 @@ model Lot {
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  product MedicalProduct? @relation(fields: [productId], references: [id])
+  product Product? @relation(fields: [productId], references: [id])
   lotAnimals LotAnimal[]
   personalCampaigns PersonalCampaign[]
 
@@ -778,85 +910,96 @@ model LotAnimal {
   @@map("lot_animals")
 }
 
-// Traitement médical
+// Traitement unifié (traitement + vaccination)
 model Treatment {
-  id                  String   @id @default(uuid())
-  farmId              String   @map("farm_id")
-  animalId            String   @map("animal_id")
-  productId           String   @map("product_id")
-  productName         String   @map("product_name")
-  veterinarianId      String?  @map("veterinarian_id")
-  veterinarianName    String?  @map("veterinarian_name")
-  campaignId          String?  @map("campaign_id")
-  routeId             String?  @map("route_id")
-  diagnosis           String?
-  treatmentDate       DateTime @map("treatment_date")
-  dose                Float
-  dosage              Float?
-  dosageUnit          String?  @map("dosage_unit")
-  duration            Int?     // jours
-  status              String   @default("completed")
-  withdrawalEndDate   DateTime @map("withdrawal_end_date")
-  cost                Float?
-  notes               String?
-  version             Int      @default(1)
-  deletedAt           DateTime? @map("deleted_at")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  id                          String           @id @default(uuid())
+  farmId                      String           @map("farm_id")
+  type                        TreatmentType    @default(treatment)  // treatment | vaccination
 
-  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  product MedicalProduct? @relation(fields: [productId], references: [id])
-  veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id])
-  route AdministrationRoute? @relation(fields: [routeId], references: [id])
+  // Animal
+  animalId                    String           @map("animal_id")
+  animalWeightKg              Float?           @map("animal_weight_kg")  // Snapshot du poids
 
+  // Produit utilisé (via packaging) - optionnels pour rétrocompatibilité
+  packagingId                 String?          @map("packaging_id")
+  productId                   String?          @map("product_id")      // Pour requêtes rapides
+  indicationId                String?          @map("indication_id")   // Règle utilisée
+  routeId                     String?          @map("route_id")
+
+  // Traçabilité lot - optionnels pour rétrocompatibilité
+  batchNumber                 String?          @map("batch_number")
+  batchExpiryDate             DateTime?        @map("batch_expiry_date")
+
+  // Administration (nouvelle structure)
+  treatmentDate               DateTime         @map("treatment_date")
+  quantityAdministered        Float?           @map("quantity_administered")  // ml
+  quantityUnitId              String?          @map("quantity_unit_id")
+
+  // Anciens champs (rétrocompatibilité) - sera supprimé après migration frontend
+  productName                 String?          @map("product_name")
+  dose                        Float?
+  dosage                      Float?
+  dosageUnit                  String?          @map("dosage_unit")
+  withdrawalEndDate           DateTime?        @map("withdrawal_end_date")
+
+  // Calculs stockés (audit)
+  computedDoseMgPerKg         Float?           @map("computed_dose_mg_per_kg")
+  computedWithdrawalMeatDate  DateTime?        @map("computed_withdrawal_meat_date")
+  computedWithdrawalMilkDate  DateTime?        @map("computed_withdrawal_milk_date")
+
+  // Responsable
+  veterinarianId              String?          @map("veterinarian_id")
+  veterinarianName            String?          @map("veterinarian_name")
+
+  // Spécifique traitement (type = treatment)
+  diagnosis                   String?
+  duration                    Int?             // jours de traitement
+
+  // Spécifique vaccination (type = vaccination)
+  targetDisease               String?          @map("target_disease")
+  nextDueDate                 DateTime?        @map("next_due_date")     // Rappel
+  vaccinationType             VaccinationType? @map("vaccination_type")  // mandatory, recommended, optional
+  protocolStep                Int?             @map("protocol_step")     // 1, 2, 3...
+
+  // Autres
+  campaignId                  String?          @map("campaign_id")
+  status                      String           @default("completed")
+  cost                        Float?
+  notes                       String?
+
+  // Métadonnées
+  version                     Int              @default(1)
+  deletedAt                   DateTime?        @map("deleted_at")
+  createdAt                   DateTime         @default(now()) @map("created_at")
+  updatedAt                   DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  farm                        Farm             @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  animal                      Animal           @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  packaging                   ProductPackaging? @relation(fields: [packagingId], references: [id])
+  product                     Product?         @relation(fields: [productId], references: [id])
+  indication                  TherapeuticIndication? @relation(fields: [indicationId], references: [id])
+  route                       AdministrationRoute? @relation(fields: [routeId], references: [id])
+  quantityUnit                Unit?            @relation("QuantityUnit", fields: [quantityUnitId], references: [id])
+  veterinarian                Veterinarian?    @relation(fields: [veterinarianId], references: [id])
+
+  // Indexes
   @@index([farmId])
   @@index([animalId])
+  @@index([packagingId])
   @@index([productId])
+  @@index([indicationId])
+  @@index([routeId])
+  @@index([type])
   @@index([treatmentDate])
+  @@index([batchNumber])
   @@index([deletedAt])
+  @@index([farmId, type, deletedAt])
+  @@index([animalId, type, deletedAt])
+  @@index([computedWithdrawalMeatDate])
+  @@index([computedWithdrawalMilkDate])
+
   @@map("treatments")
-}
-
-// Vaccination
-model Vaccination {
-  id                    String    @id @default(uuid())
-  farmId                String    @map("farm_id")
-  animalId              String?   @map("animal_id") // nullable for group vaccinations
-  animalIds             String    @map("animal_ids") // comma-separated or JSON string
-  protocolId            String?   @map("protocol_id")
-  vaccineId             String?   @map("vaccine_id")  // 🆕 FK vers Vaccine (Master Table)
-  vaccineName           String    @map("vaccine_name") // Garder pour traçabilité historique
-  type                  String    // obligatoire, recommandee, optionnelle
-  disease               String
-  vaccinationDate       DateTime  @map("vaccination_date")
-  batchNumber           String?   @map("batch_number")
-  expiryDate            DateTime? @map("expiry_date")
-  dose                  String
-  administrationRoute   String    @map("administration_route")
-  nextDueDate           DateTime? @map("next_due_date")
-  veterinarianId        String?   @map("veterinarian_id")
-  veterinarianName      String?   @map("veterinarian_name")
-  withdrawalPeriodDays  Int       @map("withdrawal_period_days")
-  dosage                Float?
-  cost                  Float?
-  notes                 String?
-  version               Int       @default(1)
-  deletedAt             DateTime? @map("deleted_at")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
-
-  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  animal Animal? @relation(fields: [animalId], references: [id], onDelete: Cascade)
-  vaccine Vaccine? @relation(fields: [vaccineId], references: [id])
-  veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id])
-
-  @@index([farmId])
-  @@index([animalId])
-  @@index([vaccineId])
-  @@index([vaccinationDate])
-  @@index([deletedAt])
-  @@map("vaccinations")
 }
 
 // Mouvement (entrée/sortie)
@@ -1014,7 +1157,7 @@ model PersonalCampaign {
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   lot Lot? @relation(fields: [lotId], references: [id])
-  product MedicalProduct @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 
   @@index([farmId])
   @@index([productId])
@@ -1097,19 +1240,19 @@ model FarmPreferences {
   @@map("farm_preferences")
 }
 
-// Préférences produits de la ferme (Master Table Pattern - FK simplifié)
+// Préférences produits de la ferme
 model FarmProductPreference {
   id           String   @id @default(uuid())
   farmId       String   @map("farm_id")
-  productId    String   @map("product_id")  // 🆕 FK unique vers MedicalProduct (global ou local)
+  productId    String   @map("product_id")
 
   displayOrder Int      @default(0) @map("display_order")
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  farm    Farm           @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  product MedicalProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  farm    Farm    @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([farmId, productId])
   @@index([farmId])
@@ -1136,25 +1279,6 @@ model FarmVeterinarianPreference {
   @@map("farm_veterinarian_preferences")
 }
 
-// Préférences vaccins de la ferme (Master Table Pattern - FK simplifié)
-model FarmVaccinePreference {
-  id           String   @id @default(uuid())
-  farmId       String   @map("farm_id")
-  vaccineId    String   @map("vaccine_id")  // 🆕 FK unique vers Vaccine (global ou local)
-
-  displayOrder Int      @default(0) @map("display_order")
-  isActive     Boolean  @default(true) @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
-
-  farm    Farm    @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  vaccine Vaccine @relation(fields: [vaccineId], references: [id], onDelete: Cascade)
-
-  @@unique([farmId, vaccineId])
-  @@index([farmId])
-  @@index([vaccineId])
-  @@map("farm_vaccine_preferences")
-}
 
 // Préférences campagnes nationales de la ferme (PHASE_24 - BLOC 4)
 model FarmNationalCampaignPreference {

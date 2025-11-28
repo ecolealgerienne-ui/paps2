@@ -16,28 +16,22 @@ import { CampaignsModule } from './campaigns/campaigns.module';
 import { CampaignCountriesModule } from './campaign-countries/campaign-countries.module';
 import { CountriesModule } from './countries/countries.module';
 import { FarmBreedPreferencesModule } from './farm-breed-preferences/farm-breed-preferences.module';
-import { ProductCountriesModule } from './product-countries/product-countries.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
 import { FarmProductPreferencesModule } from './farm-product-preferences/farm-product-preferences.module';
 import { FarmsModule } from './farms/farms.module';
-import { GlobalMedicalProductsModule } from './global-medical-products/global-medical-products.module';
 import { LotsModule } from './lots/lots.module';
-import { MedicalProductsModule } from './medical-products/medical-products.module';
 import { MovementsModule } from './movements/movements.module';
 import { NationalCampaignsModule } from './national-campaigns/national-campaigns.module';
 import { PersonalCampaignsModule } from './personal-campaigns/personal-campaigns.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ProductsModule } from './products/products.module';
+import { ProductPackagingsModule } from './product-packagings/product-packagings.module';
 import { SpeciesModule } from './species/species.module';
 import { SyncModule } from './sync/sync.module';
 import { TreatmentsModule } from './treatments/treatments.module';
-import { VaccinationsModule } from './vaccinations/vaccinations.module';
-import { VaccinesModule } from './vaccines/vaccines.module';
-import { VaccinesGlobalModule } from './vaccines-global/vaccines-global.module';
 import { VeterinariansModule } from './veterinarians/veterinarians.module';
 import { WeightsModule } from './weights/weights.module';
-import { VaccineCountriesModule } from './vaccine-countries/vaccine-countries.module';
-import { FarmVaccinePreferencesModule } from './farm-vaccine-preferences/farm-vaccine-preferences.module';
 import { FarmVeterinarianPreferencesModule } from './farm-veterinarian-preferences/farm-veterinarian-preferences.module';
 import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-preferences/farm-national-campaign-preferences.module';
 
@@ -71,7 +65,6 @@ import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-
     AnimalsModule,
     LotsModule,
     TreatmentsModule,
-    VaccinationsModule,
     WeightsModule,
     MovementsModule,
     BreedingsModule,
@@ -79,10 +72,8 @@ import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-
     DocumentsModule,
     // Reference tables (admin)
     VeterinariansModule,
-    MedicalProductsModule,
-    VaccinesModule,
-    VaccinesGlobalModule,
-    GlobalMedicalProductsModule,
+    ProductsModule,
+    ProductPackagingsModule,
     NationalCampaignsModule,
     AlertTemplatesModule,
     AdministrationRoutesModule,
@@ -92,15 +83,12 @@ import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-
     CampaignCountriesModule,
     FarmBreedPreferencesModule,
     CountriesModule,
-    ProductCountriesModule,
     // Farm settings
     FarmsModule,
     AlertConfigurationsModule,
     FarmPreferencesModule,
     FarmProductPreferencesModule,
     SyncModule,
-    VaccineCountriesModule,
-    FarmVaccinePreferencesModule,
     FarmVeterinarianPreferencesModule,
     FarmNationalCampaignPreferencesModule,
   ],
