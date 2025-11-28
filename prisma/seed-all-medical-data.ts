@@ -81,7 +81,7 @@ async function seedUnits() {
         nameFr: unit.nameFr,
         nameEn: unit.nameEn,
         nameAr: unit.nameAr,
-        unitType: unit.type.toUpperCase() as any,
+        unitType: unit.type as any,
         conversionFactor: unit.factor,
       },
       create: {
@@ -90,7 +90,7 @@ async function seedUnits() {
         nameFr: unit.nameFr,
         nameEn: unit.nameEn,
         nameAr: unit.nameAr,
-        unitType: unit.type.toUpperCase() as any,
+        unitType: unit.type as any,
         conversionFactor: unit.factor,
       },
     });
