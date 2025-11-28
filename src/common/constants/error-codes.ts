@@ -61,13 +61,13 @@ export const ERROR_CODES = {
   VETERINARIAN_NOT_FOUND: 'VETERINARIAN_NOT_FOUND',
 
   // ========================================
-  // MEDICAL PRODUCTS
+  // PRODUCTS (unified)
   // ========================================
-  MEDICAL_PRODUCT_NOT_FOUND: 'MEDICAL_PRODUCT_NOT_FOUND',
+  PRODUCT_NOT_FOUND: 'PRODUCT_NOT_FOUND',
+  PRODUCT_PACKAGING_NOT_FOUND: 'PRODUCT_PACKAGING_NOT_FOUND',
 
-  // ========================================
-  // VACCINES
-  // ========================================
+  // Legacy (deprecated - use PRODUCT_NOT_FOUND)
+  MEDICAL_PRODUCT_NOT_FOUND: 'MEDICAL_PRODUCT_NOT_FOUND',
   VACCINE_NOT_FOUND: 'VACCINE_NOT_FOUND',
 
   // ========================================

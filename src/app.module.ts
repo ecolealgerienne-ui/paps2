@@ -25,6 +25,8 @@ import { MovementsModule } from './movements/movements.module';
 import { NationalCampaignsModule } from './national-campaigns/national-campaigns.module';
 import { PersonalCampaignsModule } from './personal-campaigns/personal-campaigns.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ProductsModule } from './products/products.module';
+import { ProductPackagingsModule } from './product-packagings/product-packagings.module';
 import { SpeciesModule } from './species/species.module';
 import { SyncModule } from './sync/sync.module';
 import { TreatmentsModule } from './treatments/treatments.module';
@@ -70,6 +72,8 @@ import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-
     DocumentsModule,
     // Reference tables (admin)
     VeterinariansModule,
+    ProductsModule,
+    ProductPackagingsModule,
     NationalCampaignsModule,
     AlertTemplatesModule,
     AdministrationRoutesModule,
