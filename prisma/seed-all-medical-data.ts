@@ -443,12 +443,21 @@ async function seedTherapeuticIndications() {
 
   const posologies: PosologyData[] = loadJson('medicaments_especes_age_posologie.json');
 
-  // Map species codes to IDs
-  const speciesMap: Record<number, string> = {
+  // Map species numeric codes to species codes
+  const speciesCodeMap: Record<number, string> = {
     5: 'bovine',
     11: 'caprine',
     51: 'ovine',
   };
+
+  // Fetch species from DB and build ID map
+  const speciesMap: Record<number, string> = {};
+  for (const [numCode, code] of Object.entries(speciesCodeMap)) {
+    const species = await prisma.species.findFirst({ where: { code } });
+    if (species) {
+      speciesMap[parseInt(numCode)] = species.id;
+    }
+  }
 
   // Map route codes to route IDs (will be populated from DB)
   const routeCodeMap: Record<number, string> = {};
