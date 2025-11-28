@@ -114,6 +114,7 @@ function Get-RandomDate {
 $nationalCampaignIds = @()
 $breedIds = @()
 $productIds = @()
+$productsArray = @()  # Full product objects for name lookup
 $farmId = "550e8400-e29b-41d4-a716-446655440000"
 $farmResponse = $null
 $vetIds = @()
@@ -197,20 +198,19 @@ if ($breedsResponse) {
 # Récupérer les produits existants (endpoint global, pas besoin de farmId)
 Write-Host "  [FETCH] Recuperation des produits..." -ForegroundColor Yellow -NoNewline
 $productsResponse = Invoke-CurlApi -Method GET -Endpoint "/api/v1/products?limit=1000" -Silent
-$productsArray = @()  # Store full product objects for name lookup
 if ($productsResponse) {
-    # Handle nested response: {success, data: {success, data: [...]}}
-    $productsArray = if ($productsResponse.data.data) {
-        $productsResponse.data.data
+    # Handle nested response: {success, data: {data: [...], meta: {...}}}
+    if ($productsResponse.data.data) {
+        $script:productsArray = @($productsResponse.data.data)
     } elseif ($productsResponse.data -is [array]) {
-        $productsResponse.data
+        $script:productsArray = @($productsResponse.data)
     } else {
-        @($productsResponse)
+        $script:productsArray = @($productsResponse)
     }
     foreach ($product in $productsArray) {
         $productIds += $product.id
     }
-    Write-Host " OK ($($productIds.Count) produits)" -ForegroundColor Green
+    Write-Host " OK ($($productIds.Count) produits, $($productsArray.Count) avec noms)" -ForegroundColor Green
 } else {
     Write-Host " ATTENTION - Aucun produit trouve" -ForegroundColor Yellow
 }
@@ -833,16 +833,21 @@ if ($farmResponse -and $animalIds.Count -gt 0 -and $productIds.Count -gt 0) {
     foreach ($campaignData in $campaignsData) {
         $targetAnimals = $animalIds | Get-Random -Count ([Math]::Min($campaignData.targetCount, $animalIds.Count))
 
+        # Get random product with name
+        $selectedProduct = $productsArray | Get-Random
+        $productName = if ($selectedProduct.nameFr) { $selectedProduct.nameFr } else { "Produit" }
+
         $personalCampaign = @{
             name = $campaignData.name
             description = "Campagne personnalisee de la ferme"
-            productId = $productIds | Get-Random
+            productId = $selectedProduct.id
+            productName = $productName
             type = $campaignData.type
             campaignDate = $campaignData.campaignDate
             withdrawalEndDate = $campaignData.withdrawalEndDate
             animalIdsJson = ($targetAnimals | ConvertTo-Json -Compress)
             targetCount = $campaignData.targetCount
-            status = @("planned", "in_progress", "completed") | Get-Random
+            status = @("scheduled", "in_progress", "completed") | Get-Random
             notes = "Campagne de gestion sanitaire"
         }
 
