@@ -114,25 +114,53 @@ function Get-RandomDate {
 $nationalCampaignIds = @()
 $breedIds = @()
 $productIds = @()
-$farmId = $null
+$farmId = "550e8400-e29b-41d4-a716-446655440000"
 $farmResponse = $null
 $vetIds = @()
 $lotIds = @()
 $animalIds = @()
+$breeds = @()
 
 # Dates de référence (2023-2025)
 $startDate = Get-Date "2023-01-01"
 $endDate = Get-Date "2025-11-24"
 
 # =============================================================================
-# 0. RÉCUPÉRATION DES DONNÉES EXISTANTES (pré-seedées par TypeScript)
+# 0. CRÉATION DE LA FERME (nécessaire pour récupérer les produits)
 # =============================================================================
 Write-Host ""
-Write-Host "0. Recuperation des donnees existantes" -ForegroundColor Cyan
+Write-Host "0. Creation de la ferme" -ForegroundColor Cyan
+
+$farm = @{
+    id = $farmId
+    name = "GAEC de la Vallee Verte"
+    ownerId = "owner-gaec-001"
+    location = "Lyon, Rhone-Alpes, France"
+    address = "125 Chemin des Pres, 69100 Villeurbanne"
+    commune = "69266"
+    city = "Villeurbanne"
+    postalCode = "69100"
+    country = "FR"
+    department = "69"
+}
+
+$farmResponse = Invoke-CurlApi -Method POST -Endpoint "/farms" -Body $farm `
+    -Description "Ferme: $($farm.name)"
+
+if (-not $farmResponse) {
+    Write-Host "  ERREUR - Impossible de creer la ferme" -ForegroundColor Red
+    exit 1
+}
+
+# =============================================================================
+# 1. RÉCUPÉRATION DES DONNÉES EXISTANTES (pré-seedées par TypeScript)
+# =============================================================================
+Write-Host ""
+Write-Host "1. Recuperation des donnees existantes" -ForegroundColor Cyan
 
 # Récupérer les races existantes
 Write-Host "  [FETCH] Recuperation des races..." -ForegroundColor Yellow -NoNewline
-$breedsResponse = Invoke-CurlApi -Method GET -Endpoint "/breeds?limit=200" -Silent
+$breedsResponse = Invoke-CurlApi -Method GET -Endpoint "/api/v1/breeds?limit=200" -Silent
 if ($breedsResponse) {
     $breeds = if ($breedsResponse.data) { $breedsResponse.data } else { $breedsResponse }
     foreach ($breed in $breeds) {
@@ -144,9 +172,9 @@ if ($breedsResponse) {
     exit 1
 }
 
-# Récupérer les produits existants
+# Récupérer les produits existants (endpoint global, pas besoin de farmId)
 Write-Host "  [FETCH] Recuperation des produits..." -ForegroundColor Yellow -NoNewline
-$productsResponse = Invoke-CurlApi -Method GET -Endpoint "/products?limit=100" -Silent
+$productsResponse = Invoke-CurlApi -Method GET -Endpoint "/api/v1/products?limit=1000" -Silent
 if ($productsResponse) {
     $products = if ($productsResponse.data) { $productsResponse.data } else { $productsResponse }
     foreach ($product in $products) {
@@ -161,9 +189,9 @@ if ($productsResponse) {
 $bovineBreeds = @()
 $ovineBreeds = @()
 foreach ($breed in $breeds) {
-    if ($breed.speciesId -eq "bovine") {
+    if ($breed.speciesId -eq "bovine" -or $breed.species_id -eq "bovine") {
         $bovineBreeds += $breed.id
-    } elseif ($breed.speciesId -eq "ovine") {
+    } elseif ($breed.speciesId -eq "ovine" -or $breed.species_id -eq "ovine") {
         $ovineBreeds += $breed.id
     }
 }
@@ -216,34 +244,11 @@ foreach ($template in $templates) {
 }
 
 # =============================================================================
-# 3. FARM (1 ferme principale)
-# =============================================================================
-Write-Host ""
-Write-Host "3. Farm (1 ferme)" -ForegroundColor Cyan
-
-$farmId = "550e8400-e29b-41d4-a716-446655440000"
-$farm = @{
-    id = $farmId
-    name = "GAEC de la Vallee Verte"
-    ownerId = "owner-gaec-001"
-    location = "Lyon, Rhone-Alpes, France"
-    address = "125 Chemin des Pres, 69100 Villeurbanne"
-    commune = "69266"
-    city = "Villeurbanne"
-    postalCode = "69100"
-    country = "FR"
-    department = "69"
-}
-
-$farmResponse = Invoke-CurlApi -Method POST -Endpoint "/farms" -Body $farm `
-    -Description "Ferme: $($farm.name)"
-
-# =============================================================================
-# 4. VETERINARIANS (5 veterinaires)
+# 3. VETERINARIANS (5 veterinaires)
 # =============================================================================
 if ($farmResponse) {
     Write-Host ""
-    Write-Host "4. Veterinarians (5 veterinaires)" -ForegroundColor Cyan
+    Write-Host "3. Veterinarians (5 veterinaires)" -ForegroundColor Cyan
 
     $vets = @(
         @{ firstName = "Marie"; lastName = "Martin"; title = "Dr."; phone = "0612345678"; email = "m.martin@vetfrance.fr"; licenseNumber = "VET-FR-001"; specialties = "Bovins laitiers" }
