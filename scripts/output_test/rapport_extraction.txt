@@ -1,0 +1,49 @@
+================================================================================
+RAPPORT D'EXTRACTION - DONNÉES ANSES VÉTÉRINAIRES
+Animal Trace - Phase 1B/1C
+Date : 2025-11-27 23:34:19
+================================================================================
+
+1. RÉFÉRENTIELS EXTRAITS
+-------------------------
+✓ Espèces                  : 2327
+✓ Catégories âge           : 9
+✓ Catégories produit       : 3
+✓ Substances actives       : 441
+✓ Voies administration     : 49
+✓ Denrées                  : 14
+✓ Unités                   : 69
+
+2. RACES
+--------
+✓ Races OBC totales        : 199
+
+  - Bovins               : 57
+  - Caprins              : 19
+  - Ovins                : 123
+
+3. MÉDICAMENTS
+--------------
+✓ Médicaments OBC          : 680
+✓ Avec ATCvet              : 680
+✓ Avec RCP posologie       : 175
+
+4. POSOLOGIE
+------------
+✓ Lignes posologie totales : 1067
+✓ Avec dosages extraits    : 118
+✓ Parsing vérifié          : 121
+
+5. CONDITIONNEMENTS
+-------------------
+✓ Conditionnements totaux  : 2688
+
+6. FICHIERS GÉNÉRÉS
+--------------------
+✓ CSV  : output_test\csv/
+✓ JSON : output_test\json/
+✓ SQL  : output_test\sql/
+
+================================================================================
+EXTRACTION TERMINÉE AVEC SUCCÈS
+================================================================================

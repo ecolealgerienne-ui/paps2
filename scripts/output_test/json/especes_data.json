@@ -1,0 +1,17 @@
+[
+  {
+    "code_espece": 5,
+    "nom": "Bovins",
+    "nom_scientifique": "Bos taurus"
+  },
+  {
+    "code_espece": 11,
+    "nom": "Caprins",
+    "nom_scientifique": "Capra hircus"
+  },
+  {
+    "code_espece": 51,
+    "nom": "Ovins",
+    "nom_scientifique": "Ovis aries"
+  }
+]

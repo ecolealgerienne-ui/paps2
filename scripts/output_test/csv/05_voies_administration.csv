@@ -1,0 +1,50 @@
+code_voie,libelle
+1,Auriculaire
+2,Cutanée
+3,In-ovo
+4,Intra-articulaire
+5,Intracardiaque
+6,Intradermique
+8,Intramammaire
+9,Intramusculaire
+10,Intranasale
+11,Intrapéritonéale
+12,Intrapulmonaire
+13,Intrarachidienne
+14,Intraruminale
+15,Intra-utérine
+16,Intraveineuse
+17,Oculaire
+18,Oculo-nasale
+19,Orale
+20,Paravertébrale
+21,Péri-articulaire
+22,Périneurale
+23,Sous-conjonctivale
+24,Sous-cutanée
+25,Sublinguale
+26,Traitement dans la ruche
+27,Transdermique
+28,Transfixion
+29,Trempage/Immersion
+30,Vaginale
+31,Péri-osseuse
+537,Trempage du bec
+1239,Inhalée
+1349,Péridurale
+1980,Intratumorale
+4109,Nasale
+4110,Rétrobulbaire
+4112,Intraartérielle
+5871,Voie d'administration inconnue
+5872,Autre usage
+6703,à définir
+7088,Intrathoracique
+7455,Intralésionelle
+9073,Intra-synoviale
+9379,Endosinusale
+9638,Nébulisation (administration par)
+9704,Eau de boisson (administration par)
+9705,Eau de boisson/lait (administration par)
+9949,Administration dans l'alimentation
+10432,Administration mammaire
