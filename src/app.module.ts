@@ -34,6 +34,8 @@ import { VeterinariansModule } from './veterinarians/veterinarians.module';
 import { WeightsModule } from './weights/weights.module';
 import { FarmVeterinarianPreferencesModule } from './farm-veterinarian-preferences/farm-veterinarian-preferences.module';
 import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-preferences/farm-national-campaign-preferences.module';
+import { UnitsModule } from './units/units.module';
+import { TherapeuticIndicationsModule } from './therapeutic-indications/therapeutic-indications.module';
 
 @Module({
   imports: [
@@ -74,6 +76,8 @@ import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-
     VeterinariansModule,
     ProductsModule,
     ProductPackagingsModule,
+    UnitsModule,
+    TherapeuticIndicationsModule,
     NationalCampaignsModule,
     AlertTemplatesModule,
     AdministrationRoutesModule,
