@@ -99,17 +99,16 @@ export class CountriesService {
   }
 
   private async checkUsage(code: string): Promise<number> {
-    // Pour l'instant, seul ProductCountry existe
-    const products = await this.prisma.productCountry.count({
+    // Vérifier l'utilisation dans ProductPackaging
+    const packagings = await this.prisma.productPackaging.count({
       where: { countryCode: code }
     });
 
     // TODO: Ajouter les autres compteurs quand les phases seront implémentées
     // const breeds = await this.prisma.breedCountry.count({ where: { countryCode: code } });
-    // const vaccines = await this.prisma.vaccineCountry.count({ where: { countryCode: code } });
     // const campaigns = await this.prisma.campaignCountry.count({ where: { countryCode: code } });
 
-    return products;
+    return packagings;
   }
 
   /**

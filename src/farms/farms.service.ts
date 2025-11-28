@@ -141,7 +141,6 @@ export class FarmsService {
               movements: true,
               personalCampaigns: true,
               treatments: true,
-              vaccinations: true,
               breedings: true,
               weights: true,
               documents: true,
