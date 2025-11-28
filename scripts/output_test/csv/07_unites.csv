@@ -1,0 +1,70 @@
+code_unite,libelle
+1,%
+2,µg
+4,cm²
+5,g
+6,UI
+7,MUI
+8,kg
+9,L
+10,mg
+11,mL
+12,ppm
+13,CH
+14,CH aa
+15,DH
+16,TM
+19,UFIP
+20,DH aa
+21,heure
+22,jour
+23,degré x jour
+6702,A DEFINIR
+6946,Unité
+7133,log 10 Dose infectant 50% des cultures cellulaires/dose
+7134,Dose
+7135,Unité formant colonie (UFC)
+7209,log 10 Dose infectant 50 % des œufs
+7211,log 10 Dose infectant 50% des cultures tissulaires (log10 DICT50)
+7212,Dose infectant 50% des cultures cellulaires (DICC50)
+7223,Pourcentage de survie relatif (PSR)
+7224,Activité relative (AR)
+7225,Ph. Eur. = Protection chez le hamster >80%
+7226,log10 Unités Immunofluorescence
+7227,Dose infectant 50% des oeufs (DIO50)
+7228,Dose infectant 50% de culture tissulaire (DICT50)
+7229,log10 titre séroneutralisant
+7230,Unité ELISA
+7232,Organismes
+7234,Dose protectrice 100 (DP100)
+7235,Dose protectrice 90 (DP90)
+7236,Pourcentage de dose protectrice (% DP)
+7237,log2 titre en anticorps
+7238,log2 titre séroneutralisant
+7245,Unité formant plaque (UFP)
+7479,Titre K agglutinant
+7503,Copies génomiques
+7504,Titre
+7505,Unité d'hémagglutination
+7613,unité relative
+7614,log10 unités IHA
+7661,Dose protectrice 50 (DP50)
+7662,unité d'inhibition de l'hémagglutination (UIHA)
+7677,90% de séroconversion
+7678,100% de séroconversion
+7838,log10 UFP
+8326,log10 unités formant colonie
+8973,log10 copies génomiques
+9047,Unité antigénique
+9079,Dose protectrice 90 chez le cobaye (Ph. Eur.)
+9085,log 10 Dose infectant 50% des cultures cellulaires
+9086,log10 unité ELISA
+9415,log2 titre d'inhibition de l'hémagglutination
+9454,log10 unités
+9579,Unité de séroneutralisation
+9585,unité de séroagglutination lente
+9702,unité formant inclusion
+9714,log2 unité ELISA
+10288,log10 Dose létale pour 50 % des embryons
+10731,log10 dose protectrice poule
+11025,cellules
