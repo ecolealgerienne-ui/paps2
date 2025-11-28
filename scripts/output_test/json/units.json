@@ -1,6 +1,7 @@
 [
   {
     "code": "mg",
+    "symbol": "mg",
     "nameFr": "Milligramme",
     "nameEn": "Milligram",
     "nameAr": "ملليغرام",
@@ -9,6 +10,7 @@
   },
   {
     "code": "g",
+    "symbol": "g",
     "nameFr": "Gramme",
     "nameEn": "Gram",
     "nameAr": "غرام",
@@ -17,6 +19,7 @@
   },
   {
     "code": "kg",
+    "symbol": "kg",
     "nameFr": "Kilogramme",
     "nameEn": "Kilogram",
     "nameAr": "كيلوغرام",
@@ -25,6 +28,7 @@
   },
   {
     "code": "ml",
+    "symbol": "ml",
     "nameFr": "Millilitre",
     "nameEn": "Milliliter",
     "nameAr": "ملليلتر",
@@ -33,6 +37,7 @@
   },
   {
     "code": "l",
+    "symbol": "L",
     "nameFr": "Litre",
     "nameEn": "Liter",
     "nameAr": "لتر",
@@ -41,6 +46,7 @@
   },
   {
     "code": "cl",
+    "symbol": "cl",
     "nameFr": "Centilitre",
     "nameEn": "Centiliter",
     "nameAr": "سنتيلتر",
@@ -49,6 +55,7 @@
   },
   {
     "code": "mg_ml",
+    "symbol": "mg/ml",
     "nameFr": "mg/ml",
     "nameEn": "mg/ml",
     "nameAr": "ملغ/مل",
@@ -57,6 +64,7 @@
   },
   {
     "code": "mg_kg",
+    "symbol": "mg/kg",
     "nameFr": "mg/kg",
     "nameEn": "mg/kg",
     "nameAr": "ملغ/كغ",
@@ -65,6 +73,7 @@
   },
   {
     "code": "g_l",
+    "symbol": "g/L",
     "nameFr": "g/L",
     "nameEn": "g/L",
     "nameAr": "غ/ل",
@@ -73,6 +82,7 @@
   },
   {
     "code": "ui_ml",
+    "symbol": "UI/ml",
     "nameFr": "UI/ml",
     "nameEn": "IU/ml",
     "nameAr": "وحدة دولية/مل",
@@ -81,6 +91,7 @@
   },
   {
     "code": "percent",
+    "symbol": "%",
     "nameFr": "Pourcentage",
     "nameEn": "Percentage",
     "nameAr": "نسبة مئوية",
@@ -89,6 +100,7 @@
   },
   {
     "code": "unit",
+    "symbol": "u",
     "nameFr": "Unité",
     "nameEn": "Unit",
     "nameAr": "وحدة",
@@ -97,6 +109,7 @@
   },
   {
     "code": "dose",
+    "symbol": "dose",
     "nameFr": "Dose",
     "nameEn": "Dose",
     "nameAr": "جرعة",
@@ -105,6 +118,7 @@
   },
   {
     "code": "tablet",
+    "symbol": "cp",
     "nameFr": "Comprimé",
     "nameEn": "Tablet",
     "nameAr": "قرص",
@@ -113,6 +127,7 @@
   },
   {
     "code": "capsule",
+    "symbol": "gél",
     "nameFr": "Gélule",
     "nameEn": "Capsule",
     "nameAr": "كبسولة",
@@ -121,6 +136,7 @@
   },
   {
     "code": "bolus",
+    "symbol": "bol",
     "nameFr": "Bolus",
     "nameEn": "Bolus",
     "nameAr": "بلعة",
@@ -129,6 +145,7 @@
   },
   {
     "code": "sachet",
+    "symbol": "sach",
     "nameFr": "Sachet",
     "nameEn": "Sachet",
     "nameAr": "كيس",
@@ -137,6 +154,7 @@
   },
   {
     "code": "syringe",
+    "symbol": "ser",
     "nameFr": "Seringue",
     "nameEn": "Syringe",
     "nameAr": "حقنة",
@@ -145,6 +163,7 @@
   },
   {
     "code": "day",
+    "symbol": "j",
     "nameFr": "Jour",
     "nameEn": "Day",
     "nameAr": "يوم",
@@ -153,6 +172,7 @@
   },
   {
     "code": "hour",
+    "symbol": "h",
     "nameFr": "Heure",
     "nameEn": "Hour",
     "nameAr": "ساعة",

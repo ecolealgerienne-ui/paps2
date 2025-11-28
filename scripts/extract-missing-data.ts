@@ -108,30 +108,30 @@ console.log(administrationRoutes.map(r => `${r.numericCode}:${r.code}`).join(', 
 // ============================================
 const unitsData = [
   // Mass
-  { code: 'mg', nameFr: 'Milligramme', nameEn: 'Milligram', nameAr: 'ملليغرام', type: 'mass', factor: 0.001 },
-  { code: 'g', nameFr: 'Gramme', nameEn: 'Gram', nameAr: 'غرام', type: 'mass', factor: 1 },
-  { code: 'kg', nameFr: 'Kilogramme', nameEn: 'Kilogram', nameAr: 'كيلوغرام', type: 'mass', factor: 1000 },
+  { code: 'mg', symbol: 'mg', nameFr: 'Milligramme', nameEn: 'Milligram', nameAr: 'ملليغرام', type: 'mass', factor: 0.001 },
+  { code: 'g', symbol: 'g', nameFr: 'Gramme', nameEn: 'Gram', nameAr: 'غرام', type: 'mass', factor: 1 },
+  { code: 'kg', symbol: 'kg', nameFr: 'Kilogramme', nameEn: 'Kilogram', nameAr: 'كيلوغرام', type: 'mass', factor: 1000 },
   // Volume
-  { code: 'ml', nameFr: 'Millilitre', nameEn: 'Milliliter', nameAr: 'ملليلتر', type: 'volume', factor: 0.001 },
-  { code: 'l', nameFr: 'Litre', nameEn: 'Liter', nameAr: 'لتر', type: 'volume', factor: 1 },
-  { code: 'cl', nameFr: 'Centilitre', nameEn: 'Centiliter', nameAr: 'سنتيلتر', type: 'volume', factor: 0.01 },
+  { code: 'ml', symbol: 'ml', nameFr: 'Millilitre', nameEn: 'Milliliter', nameAr: 'ملليلتر', type: 'volume', factor: 0.001 },
+  { code: 'l', symbol: 'L', nameFr: 'Litre', nameEn: 'Liter', nameAr: 'لتر', type: 'volume', factor: 1 },
+  { code: 'cl', symbol: 'cl', nameFr: 'Centilitre', nameEn: 'Centiliter', nameAr: 'سنتيلتر', type: 'volume', factor: 0.01 },
   // Concentration
-  { code: 'mg_ml', nameFr: 'mg/ml', nameEn: 'mg/ml', nameAr: 'ملغ/مل', type: 'concentration', factor: 1 },
-  { code: 'mg_kg', nameFr: 'mg/kg', nameEn: 'mg/kg', nameAr: 'ملغ/كغ', type: 'concentration', factor: 1 },
-  { code: 'g_l', nameFr: 'g/L', nameEn: 'g/L', nameAr: 'غ/ل', type: 'concentration', factor: 1 },
-  { code: 'ui_ml', nameFr: 'UI/ml', nameEn: 'IU/ml', nameAr: 'وحدة دولية/مل', type: 'concentration', factor: 1 },
-  { code: 'percent', nameFr: 'Pourcentage', nameEn: 'Percentage', nameAr: 'نسبة مئوية', type: 'percentage', factor: 1 },
+  { code: 'mg_ml', symbol: 'mg/ml', nameFr: 'mg/ml', nameEn: 'mg/ml', nameAr: 'ملغ/مل', type: 'concentration', factor: 1 },
+  { code: 'mg_kg', symbol: 'mg/kg', nameFr: 'mg/kg', nameEn: 'mg/kg', nameAr: 'ملغ/كغ', type: 'concentration', factor: 1 },
+  { code: 'g_l', symbol: 'g/L', nameFr: 'g/L', nameEn: 'g/L', nameAr: 'غ/ل', type: 'concentration', factor: 1 },
+  { code: 'ui_ml', symbol: 'UI/ml', nameFr: 'UI/ml', nameEn: 'IU/ml', nameAr: 'وحدة دولية/مل', type: 'concentration', factor: 1 },
+  { code: 'percent', symbol: '%', nameFr: 'Pourcentage', nameEn: 'Percentage', nameAr: 'نسبة مئوية', type: 'percentage', factor: 1 },
   // Count
-  { code: 'unit', nameFr: 'Unité', nameEn: 'Unit', nameAr: 'وحدة', type: 'count', factor: 1 },
-  { code: 'dose', nameFr: 'Dose', nameEn: 'Dose', nameAr: 'جرعة', type: 'count', factor: 1 },
-  { code: 'tablet', nameFr: 'Comprimé', nameEn: 'Tablet', nameAr: 'قرص', type: 'count', factor: 1 },
-  { code: 'capsule', nameFr: 'Gélule', nameEn: 'Capsule', nameAr: 'كبسولة', type: 'count', factor: 1 },
-  { code: 'bolus', nameFr: 'Bolus', nameEn: 'Bolus', nameAr: 'بلعة', type: 'count', factor: 1 },
-  { code: 'sachet', nameFr: 'Sachet', nameEn: 'Sachet', nameAr: 'كيس', type: 'count', factor: 1 },
-  { code: 'syringe', nameFr: 'Seringue', nameEn: 'Syringe', nameAr: 'حقنة', type: 'count', factor: 1 },
+  { code: 'unit', symbol: 'u', nameFr: 'Unité', nameEn: 'Unit', nameAr: 'وحدة', type: 'count', factor: 1 },
+  { code: 'dose', symbol: 'dose', nameFr: 'Dose', nameEn: 'Dose', nameAr: 'جرعة', type: 'count', factor: 1 },
+  { code: 'tablet', symbol: 'cp', nameFr: 'Comprimé', nameEn: 'Tablet', nameAr: 'قرص', type: 'count', factor: 1 },
+  { code: 'capsule', symbol: 'gél', nameFr: 'Gélule', nameEn: 'Capsule', nameAr: 'كبسولة', type: 'count', factor: 1 },
+  { code: 'bolus', symbol: 'bol', nameFr: 'Bolus', nameEn: 'Bolus', nameAr: 'بلعة', type: 'count', factor: 1 },
+  { code: 'sachet', symbol: 'sach', nameFr: 'Sachet', nameEn: 'Sachet', nameAr: 'كيس', type: 'count', factor: 1 },
+  { code: 'syringe', symbol: 'ser', nameFr: 'Seringue', nameEn: 'Syringe', nameAr: 'حقنة', type: 'count', factor: 1 },
   // Time (for withdrawal)
-  { code: 'day', nameFr: 'Jour', nameEn: 'Day', nameAr: 'يوم', type: 'time', factor: 1 },
-  { code: 'hour', nameFr: 'Heure', nameEn: 'Hour', nameAr: 'ساعة', type: 'time', factor: 1/24 },
+  { code: 'day', symbol: 'j', nameFr: 'Jour', nameEn: 'Day', nameAr: 'يوم', type: 'time', factor: 1 },
+  { code: 'hour', symbol: 'h', nameFr: 'Heure', nameEn: 'Hour', nameAr: 'ساعة', type: 'time', factor: 1/24 },
 ];
 
 console.log(`\n=== Units: ${unitsData.length} ===`);
