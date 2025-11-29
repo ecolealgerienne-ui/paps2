@@ -149,7 +149,7 @@ export class TreatmentAlertsService {
       return {
         treatmentId: t.id,
         treatmentDate: t.treatmentDate,
-        productName: t.product?.commercialName || t.product?.nameFr || t.productName,
+        productName: t.product?.commercialName || t.product?.nameFr || t.productName || 'Produit inconnu',
         meatWithdrawalEndDate: meatEndDate || undefined,
         milkWithdrawalEndDate: milkEndDate || undefined,
         meatDaysRemaining,
