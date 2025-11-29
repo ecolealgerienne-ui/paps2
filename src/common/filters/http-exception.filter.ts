@@ -63,11 +63,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
       }
 
-      this.logger.error(
-        `HTTP ${status} | ${message}`,
-        exception.stack,
-        HttpExceptionFilter.name,
-      );
+      // Log validation errors with full details
+      if (errors) {
+        this.logger.warn(
+          `HTTP ${status} | ${message} | Errors: ${JSON.stringify(errors)}`,
+          HttpExceptionFilter.name,
+        );
+      } else {
+        this.logger.error(
+          `HTTP ${status} | ${message}`,
+          exception.stack,
+          HttpExceptionFilter.name,
+        );
+      }
     }
     // Cas 3 : Exception JS standard
     else if (exception instanceof Error) {
