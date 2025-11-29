@@ -41,6 +41,7 @@ import { ProductCategoriesModule } from './product-categories/product-categories
 import { AgeCategoriesModule } from './age-categories/age-categories.module';
 import { AnimalStatusModule } from './animal-status/animal-status.module';
 import { FarmerProductLotsModule } from './farmer-product-lots/farmer-product-lots.module';
+import { TreatmentAlertsModule } from './treatment-alerts/treatment-alerts.module';
 
 @Module({
   imports: [
@@ -107,6 +108,8 @@ import { FarmerProductLotsModule } from './farmer-product-lots/farmer-product-lo
     AnimalStatusModule,
     // Farmer product lots (medication batch management)
     FarmerProductLotsModule,
+    // Treatment alerts (contraindication, withdrawal, expiry)
+    TreatmentAlertsModule,
   ],
   controllers: [AppController],
   providers: [
