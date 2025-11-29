@@ -120,6 +120,22 @@ enum UnitType {
   other
 }
 
+// ENUM pour type de statut physiologique animal
+enum AnimalStatusType {
+  WEIGHT        // Poids
+  GESTATION     // Gestation
+  LACTATION     // Lactation
+  VET_CHECK     // Contrôle vétérinaire
+}
+
+// ENUM pour unité de dosage personnalisé (surcharge éleveur)
+enum DoseUnitType {
+  ML_PER_KG     // ml/kg
+  ML_PER_HEAD   // ml/tête
+  MG_PER_KG     // mg/kg
+  G_PER_HEAD    // g/tête
+}
+
 // ============================================================
 // TABLES DE RÉFÉRENCE (Backend)
 // ============================================================
@@ -520,6 +536,7 @@ model ProductPackaging {
   concentrationUnit     Unit      @relation("ConcentrationUnit", fields: [concentrationUnitId], references: [id])
   volumeUnit            Unit?     @relation("VolumeUnit", fields: [volumeUnitId], references: [id])
   treatments            Treatment[]
+  farmPreferences       FarmProductPreference[]
 
   @@unique([productId, countryCode, gtinEan])
   @@index([productId])
@@ -839,6 +856,7 @@ model Animal {
   breedingsAsMother Breeding[] @relation("BreedingMother")
   breedingsAsFather Breeding[] @relation("BreedingFather")
   movementAnimals MovementAnimal[]
+  statusHistory AnimalStatusHistory[]
 
   @@unique([farmId, currentEid])
   @@unique([farmId, officialNumber])
@@ -846,6 +864,33 @@ model Animal {
   @@index([status])
   @@index([deletedAt])
   @@map("animals")
+}
+
+// Historique des statuts physiologiques de l'animal
+model AnimalStatusHistory {
+  id          String            @id @default(uuid())
+  animalId    String            @map("animal_id")
+  statusType  AnimalStatusType  @map("status_type")
+  startDate   DateTime          @map("start_date")
+  endDate     DateTime?         @map("end_date")
+  value       String
+  notes       String?
+  version     Int               @default(1)
+  deletedAt   DateTime?         @map("deleted_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  animal      Animal            @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([animalId])
+  @@index([statusType])
+  @@index([deletedAt])
+  @@index([animalId, statusType, endDate])  // Requête statut actif
+  @@index([animalId, deletedAt])
+
+  @@map("animal_status_history")
 }
 
 // ============================================================
@@ -926,9 +971,8 @@ model Treatment {
   indicationId                String?          @map("indication_id")   // Règle utilisée
   routeId                     String?          @map("route_id")
 
-  // Traçabilité lot - optionnels pour rétrocompatibilité
-  batchNumber                 String?          @map("batch_number")
-  batchExpiryDate             DateTime?        @map("batch_expiry_date")
+  // Traçabilité lot médicament (via FarmerProductLot)
+  farmerLotId                 String?          @map("farmer_lot_id")
 
   // Administration (nouvelle structure)
   treatmentDate               DateTime         @map("treatment_date")
@@ -982,6 +1026,7 @@ model Treatment {
   route                       AdministrationRoute? @relation(fields: [routeId], references: [id])
   quantityUnit                Unit?            @relation("QuantityUnit", fields: [quantityUnitId], references: [id])
   veterinarian                Veterinarian?    @relation(fields: [veterinarianId], references: [id])
+  farmerLot                   FarmerProductLot? @relation(fields: [farmerLotId], references: [id])
 
   // Indexes
   @@index([farmId])
@@ -990,9 +1035,9 @@ model Treatment {
   @@index([productId])
   @@index([indicationId])
   @@index([routeId])
+  @@index([farmerLotId])
   @@index([type])
   @@index([treatmentDate])
-  @@index([batchNumber])
   @@index([deletedAt])
   @@index([farmId, type, deletedAt])
   @@index([animalId, type, deletedAt])
@@ -1240,24 +1285,67 @@ model FarmPreferences {
   @@map("farm_preferences")
 }
 
-// Préférences produits de la ferme
+// Préférences produits de la ferme (+ Configuration personnalisée éleveur)
 model FarmProductPreference {
   id           String   @id @default(uuid())
   farmId       String   @map("farm_id")
   productId    String   @map("product_id")
 
+  // Préférences de base
   displayOrder Int      @default(0) @map("display_order")
   isActive     Boolean  @default(true) @map("is_active")
+
+  // Configuration personnalisée éleveur (surcharge AMM/RCP)
+  packagingId               String?       @map("packaging_id")
+  userDefinedDose           Decimal?      @map("user_defined_dose") @db.Decimal(10, 4)
+  userDefinedDoseUnit       DoseUnitType? @map("user_defined_dose_unit")
+  userDefinedMeatWithdrawal Int?          @map("user_defined_meat_withdrawal")  // Jours
+  userDefinedMilkWithdrawal Int?          @map("user_defined_milk_withdrawal")  // Heures
+
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  farm    Farm    @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // Relations
+  farm      Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  product   Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  packaging ProductPackaging? @relation(fields: [packagingId], references: [id])
+  lots      FarmerProductLot[]
 
   @@unique([farmId, productId])
   @@index([farmId])
   @@index([productId])
+  @@index([packagingId])
   @@map("farm_product_preferences")
+}
+
+// Lots de médicaments gérés par l'éleveur
+model FarmerProductLot {
+  id                String   @id @default(uuid())
+  configId          String   @map("config_id")
+  nickname          String                          // "Lot 1", "Flacon Janvier"
+  officialLotNumber String   @map("official_lot_number") // "C4567-9A"
+  expiryDate        DateTime @map("expiry_date")
+  isActive          Boolean  @default(true) @map("is_active")
+  version           Int      @default(1)
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  config     FarmProductPreference @relation(fields: [configId], references: [id], onDelete: Cascade)
+  treatments Treatment[]
+
+  // Constraints
+  @@unique([configId, officialLotNumber])
+
+  // Indexes
+  @@index([configId])
+  @@index([configId, isActive])
+  @@index([expiryDate])
+  @@index([deletedAt])
+  @@index([configId, isActive, deletedAt])
+
+  @@map("farmer_product_lots")
 }
 
 // Préférences vétérinaires de la ferme (PHASE_23 - BLOC 4)
