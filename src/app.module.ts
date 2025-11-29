@@ -40,6 +40,7 @@ import { ActiveSubstancesModule } from './active-substances/active-substances.mo
 import { ProductCategoriesModule } from './product-categories/product-categories.module';
 import { AgeCategoriesModule } from './age-categories/age-categories.module';
 import { AnimalStatusModule } from './animal-status/animal-status.module';
+import { FarmerProductLotsModule } from './farmer-product-lots/farmer-product-lots.module';
 
 @Module({
   imports: [
@@ -104,6 +105,8 @@ import { AnimalStatusModule } from './animal-status/animal-status.module';
     FarmNationalCampaignPreferencesModule,
     // Animal status history (physiological states)
     AnimalStatusModule,
+    // Farmer product lots (medication batch management)
+    FarmerProductLotsModule,
   ],
   controllers: [AppController],
   providers: [
