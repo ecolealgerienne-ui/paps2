@@ -179,6 +179,27 @@ export class TreatmentsService {
       );
     }
 
+    // Validate farmerLotId if provided
+    if (dto.farmerLotId) {
+      const farmerLot = await this.prisma.farmerProductLot.findFirst({
+        where: {
+          id: dto.farmerLotId,
+          deletedAt: null,
+          config: {
+            farmId,
+          },
+        },
+      });
+
+      if (!farmerLot) {
+        throw new EntityNotFoundException(
+          ERROR_CODES.ENTITY_NOT_FOUND,
+          `Farmer lot with ID "${dto.farmerLotId}" not found or does not belong to this farm`,
+          { farmerLotId: dto.farmerLotId, farmId },
+        );
+      }
+    }
+
     try {
       // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
       const {
@@ -278,6 +299,14 @@ export class TreatmentsService {
             veterinarian: true,
             route: true,
             indication: true,
+            farmerLot: {
+              select: {
+                id: true,
+                nickname: true,
+                officialLotNumber: true,
+                expiryDate: true,
+              },
+            },
           },
         });
 
@@ -312,6 +341,14 @@ export class TreatmentsService {
           veterinarian: true,
           route: true,
           indication: true,
+          farmerLot: {
+            select: {
+              id: true,
+              nickname: true,
+              officialLotNumber: true,
+              expiryDate: true,
+            },
+          },
         },
       });
 
@@ -348,6 +385,14 @@ export class TreatmentsService {
         animal: { select: { id: true, visualId: true, currentEid: true } },
         product: { select: { id: true, nameFr: true } },
         veterinarian: { select: { id: true, firstName: true, lastName: true } },
+        farmerLot: {
+          select: {
+            id: true,
+            nickname: true,
+            officialLotNumber: true,
+            expiryDate: true,
+          },
+        },
       },
       orderBy: { treatmentDate: 'desc' },
     });
@@ -365,6 +410,14 @@ export class TreatmentsService {
         product: true,
         veterinarian: true,
         route: true,
+        farmerLot: {
+          select: {
+            id: true,
+            nickname: true,
+            officialLotNumber: true,
+            expiryDate: true,
+          },
+        },
       },
     });
 
@@ -441,6 +494,14 @@ export class TreatmentsService {
           product: true,
           veterinarian: true,
           route: true,
+          farmerLot: {
+            select: {
+              id: true,
+              nickname: true,
+              officialLotNumber: true,
+              expiryDate: true,
+            },
+          },
         },
       });
 

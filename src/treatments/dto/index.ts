@@ -113,12 +113,26 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   quantityUnitId?: string;
 
-  @ApiPropertyOptional({ description: 'Batch/lot number' })
+  @ApiPropertyOptional({
+    description: 'ID du lot médicament (FarmerProductLot) - Nouvelle approche recommandée',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsOptional()
+  @IsString()
+  farmerLotId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Batch/lot number (DEPRECATED - use farmerLotId instead)',
+    deprecated: true,
+  })
   @IsOptional()
   @IsString()
   batchNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Batch expiry date' })
+  @ApiPropertyOptional({
+    description: 'Batch expiry date (DEPRECATED - use farmerLotId instead)',
+    deprecated: true,
+  })
   @IsOptional()
   @IsDateString()
   batchExpiryDate?: string;
@@ -218,6 +232,14 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsString()
   dosageUnit?: string;
+
+  @ApiPropertyOptional({
+    description: 'ID du lot médicament (FarmerProductLot)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @IsOptional()
+  @IsString()
+  farmerLotId?: string;
 
   @ApiProperty({ description: 'Duration in days', required: false })
   @IsOptional()
