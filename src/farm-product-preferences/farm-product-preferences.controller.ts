@@ -1,7 +1,11 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { FarmProductPreferencesService } from './farm-product-preferences.service';
-import { CreateFarmProductPreferenceDto, UpdateFarmProductPreferenceDto } from './dto';
+import {
+  CreateFarmProductPreferenceDto,
+  UpdateFarmProductPreferenceDto,
+  UpdateProductConfigDto,
+} from './dto';
 
 @ApiTags('farm-product-preferences')
 @Controller('farms/:farmId/product-preferences')
@@ -60,5 +64,50 @@ export class FarmProductPreferencesController {
   @ApiResponse({ status: 404, description: 'Preference not found' })
   remove(@Param('id') id: string) {
     return this.service.remove(id);
+  }
+
+  // ============================================================
+  // CONFIGURATION PERSONNALISÉE (surcharge AMM/RCP)
+  // ============================================================
+
+  @Get(':id/config')
+  @ApiOperation({ summary: 'Récupérer la configuration personnalisée d\'une préférence' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Config with packaging, lots and userDefined fields' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
+  getConfig(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+  ) {
+    return this.service.getConfig(farmId, id);
+  }
+
+  @Put(':id/config')
+  @ApiOperation({ summary: 'Mettre à jour la configuration personnalisée (surcharge AMM/RCP)' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Config updated' })
+  @ApiResponse({ status: 400, description: 'Validation error (dose without unit)' })
+  @ApiResponse({ status: 404, description: 'Preference or packaging not found' })
+  updateConfig(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateProductConfigDto,
+  ) {
+    return this.service.updateConfig(farmId, id, dto);
+  }
+
+  @Delete(':id/config')
+  @ApiOperation({ summary: 'Réinitialiser la configuration personnalisée (remet à NULL)' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Config reset to NULL values' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
+  resetConfig(
+    @Param('farmId') farmId: string,
+    @Param('id') id: string,
+  ) {
+    return this.service.resetConfig(farmId, id);
   }
 }

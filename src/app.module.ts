@@ -39,6 +39,7 @@ import { TherapeuticIndicationsModule } from './therapeutic-indications/therapeu
 import { ActiveSubstancesModule } from './active-substances/active-substances.module';
 import { ProductCategoriesModule } from './product-categories/product-categories.module';
 import { AgeCategoriesModule } from './age-categories/age-categories.module';
+import { AnimalStatusModule } from './animal-status/animal-status.module';
 
 @Module({
   imports: [
@@ -101,6 +102,8 @@ import { AgeCategoriesModule } from './age-categories/age-categories.module';
     SyncModule,
     FarmVeterinarianPreferencesModule,
     FarmNationalCampaignPreferencesModule,
+    // Animal status history (physiological states)
+    AnimalStatusModule,
   ],
   controllers: [AppController],
   providers: [

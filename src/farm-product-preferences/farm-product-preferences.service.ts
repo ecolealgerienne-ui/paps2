@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateFarmProductPreferenceDto, UpdateFarmProductPreferenceDto } from './dto';
+import {
+  CreateFarmProductPreferenceDto,
+  UpdateFarmProductPreferenceDto,
+  UpdateProductConfigDto,
+} from './dto';
 import { DataScope } from '../common/types/prisma-types';
 
 @Injectable()
@@ -202,5 +206,136 @@ export class FarmProductPreferencesService {
     await this.prisma.$transaction(updates);
 
     return this.findByFarm(farmId);
+  }
+
+  /**
+   * Récupérer la configuration personnalisée d'une préférence produit
+   * Inclut packaging, lots et les champs userDefined*
+   */
+  async getConfig(farmId: string, id: string) {
+    const preference = await this.prisma.farmProductPreference.findFirst({
+      where: {
+        id,
+        farmId,
+      },
+      include: {
+        product: true,
+        packaging: true,
+        lots: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!preference) {
+      throw new NotFoundException(
+        `Farm product preference with ID "${id}" not found in farm "${farmId}"`,
+      );
+    }
+
+    return preference;
+  }
+
+  /**
+   * Mettre à jour la configuration personnalisée d'une préférence produit
+   * Permet de surcharger les valeurs AMM/RCP avec des valeurs éleveur
+   */
+  async updateConfig(farmId: string, id: string, dto: UpdateProductConfigDto) {
+    // Vérifier que la préférence existe et appartient à la ferme
+    const preference = await this.prisma.farmProductPreference.findFirst({
+      where: {
+        id,
+        farmId,
+      },
+    });
+
+    if (!preference) {
+      throw new NotFoundException(
+        `Farm product preference with ID "${id}" not found in farm "${farmId}"`,
+      );
+    }
+
+    // Validation: si dose défini, unité obligatoire
+    if (
+      dto.userDefinedDose !== null &&
+      dto.userDefinedDose !== undefined &&
+      !dto.userDefinedDoseUnit
+    ) {
+      throw new BadRequestException(
+        'Dose unit is required when dose is defined',
+      );
+    }
+
+    // Vérifier que le packaging appartient au même produit si fourni
+    if (dto.packagingId) {
+      const packaging = await this.prisma.productPackaging.findFirst({
+        where: {
+          id: dto.packagingId,
+          productId: preference.productId,
+          deletedAt: null,
+        },
+      });
+
+      if (!packaging) {
+        throw new NotFoundException(
+          `Packaging with ID "${dto.packagingId}" not found for this product`,
+        );
+      }
+    }
+
+    return this.prisma.farmProductPreference.update({
+      where: { id },
+      data: {
+        ...(dto.packagingId !== undefined && { packagingId: dto.packagingId }),
+        ...(dto.userDefinedDose !== undefined && { userDefinedDose: dto.userDefinedDose }),
+        ...(dto.userDefinedDoseUnit !== undefined && { userDefinedDoseUnit: dto.userDefinedDoseUnit as any }),
+        ...(dto.userDefinedMeatWithdrawal !== undefined && { userDefinedMeatWithdrawal: dto.userDefinedMeatWithdrawal }),
+        ...(dto.userDefinedMilkWithdrawal !== undefined && { userDefinedMilkWithdrawal: dto.userDefinedMilkWithdrawal }),
+      },
+      include: {
+        product: true,
+        packaging: true,
+        lots: {
+          where: { deletedAt: null },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+  }
+
+  /**
+   * Réinitialiser la configuration personnalisée (remet tous les userDefined* à NULL)
+   * Réinitialise également packagingId à NULL
+   */
+  async resetConfig(farmId: string, id: string) {
+    // Vérifier que la préférence existe et appartient à la ferme
+    const preference = await this.prisma.farmProductPreference.findFirst({
+      where: {
+        id,
+        farmId,
+      },
+    });
+
+    if (!preference) {
+      throw new NotFoundException(
+        `Farm product preference with ID "${id}" not found in farm "${farmId}"`,
+      );
+    }
+
+    return this.prisma.farmProductPreference.update({
+      where: { id },
+      data: {
+        packagingId: null,
+        userDefinedDose: null,
+        userDefinedDoseUnit: null,
+        userDefinedMeatWithdrawal: null,
+        userDefinedMilkWithdrawal: null,
+      },
+      include: {
+        product: true,
+        packaging: true,
+      },
+    });
   }
 }
