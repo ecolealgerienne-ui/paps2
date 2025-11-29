@@ -1,0 +1,48 @@
+# 📑 DOCUMENT DE SPÉCIFICATIONS TECHNIQUES
+## MODULE : GESTION DE L'ANIMAL ET DU REGISTRE DE TRAITEMENT (CORE)
+
+---
+
+## PARTIE I : MODÈLE DE L'ENTITÉ ANIMAL (`ANIMALS`)
+
+Cette table contient les informations statiques et semi-statiques de base nécessaires à l'identification de chaque individu de l'élevage.
+
+## PARTIE II : HISTORIQUE DE STATUT CRITIQUE (`ANIMAL_STATUS_HISTORY`)
+
+Les règles de sécurité dépendent souvent du statut physiologique (gestation, lactation) et du poids récent. Ces informations étant dynamiques, elles nécessitent une table d'historique.
+
+| Champ | Type | Obligatoire | Description | Rôle pour l'Application |
+| :--- | :--- | :--- | :--- | :--- |
+| `Status_History_ID` | PK | Oui | - | Clé primaire. |
+| `Animal_ID` | FK | Oui | Lien vers l'animal concerné. | - |
+| **`Status_Type`** | Enum | Oui | Nature du statut (POIDS, GESTATION, LACTATION, VÉTO_CHECK). | Permet de filtrer l'historique. |
+| **`Start_Date`** | Date | Oui | Date à laquelle le statut a été enregistré (ex: date du dernier pesage). | Référence temporelle. |
+| `End_Date` | Date | Non | Date de fin du statut (ex: date de mise bas pour la gestation). | Permet de clore la période d'alerte. |
+| **`Value`** | Texte/Décimal | Oui | Valeur associée (ex: `650.5` pour le poids, `Confirmée` pour la gestation). | Déclenche les alertes et les calculs. |
+
+### 🚨 Alerte Contre-Indication
+
+C'est cette table qui permet de générer des **alertes proactives**. Exemple de logique métier :
+
+> *SI une `TRANSACTION` utilise un produit marqué comme Contre-Indiqué en Gestation **ET** que `ANIMAL_STATUS_HISTORY` indique `Gestation = Confirmée` sans `End_Date` pour l'animal, ALORS déclencher une alerte de sécurité.*
+
+---
+
+## PARTIE III : REGISTRE DES TRANSACTIONS Traitement/vaccination
+
+C'est le cœur du système de traçabilité, l'enregistrement de l'acte d'intervention. Il agrège les informations des protocoles et des lots.
+
+Avec l'ajout de :
+Product_Lot_ID
+Quantity_Administered
+Quantité de la Dose
+
+
+### 🚨 Alerte de Sortie (Le Dégagement de Responsabilité)
+
+La puissance de ce modèle réside dans l'alerte de sortie :
+
+> *L'éleveur essaie de changer le `Status` de l'animal à `Vendu` ou `Abattu`.*
+> *SI **`Is_Withdrawal_Active`** est Vrai, ALORS le système affiche une alerte avec la date de fin de délai (`Calculated_Withdrawal_End`).*
+Ceci garantit que le système met un veto réglementaire sur les mouvements illégaux, protégeant l'éleveur (et la plateforme) des sanctions.
+
