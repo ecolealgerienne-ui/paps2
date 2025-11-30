@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { FeaturesConfigService } from './common/config/features.config';
+import { ConditionalThrottlerGuard } from './common/guards/conditional-throttler.guard';
 import { AdministrationRoutesModule } from './administration-routes/administration-routes.module';
 import { AlertConfigurationsModule } from './alert-configurations/alert-configurations.module';
 import { AlertTemplatesModule } from './alert-templates/alert-templates.module';
@@ -20,6 +22,7 @@ import { DocumentsModule } from './documents/documents.module';
 import { FarmPreferencesModule } from './farm-preferences/farm-preferences.module';
 import { FarmProductPreferencesModule } from './farm-product-preferences/farm-product-preferences.module';
 import { FarmsModule } from './farms/farms.module';
+import { HealthModule } from './health/health.module';
 import { LotsModule } from './lots/lots.module';
 import { MovementsModule } from './movements/movements.module';
 import { NationalCampaignsModule } from './national-campaigns/national-campaigns.module';
@@ -43,33 +46,38 @@ import { AnimalStatusModule } from './animal-status/animal-status.module';
 import { FarmerProductLotsModule } from './farmer-product-lots/farmer-product-lots.module';
 import { TreatmentAlertsModule } from './treatment-alerts/treatment-alerts.module';
 
+// Get rate limiting configuration
+const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    // Rate limiting configuration
-    // In development/MVP mode: very high limits for seed scripts
-    // In production: reasonable limits to prevent abuse
+    // Rate limiting configuration (configurable via .env)
+    // Set RATE_LIMIT_ENABLED=false to disable rate limiting (useful for seed scripts)
+    // Adjust limits via RATE_LIMIT_*_LIMIT environment variables
     ThrottlerModule.forRoot([
       {
         name: 'short',
-        ttl: 1000, // 1 second
-        limit: process.env.NODE_ENV === 'production' ? 50 : 1000, // High limit for dev/seed
+        ttl: rateLimitConfig.limits.short.ttl,
+        limit: rateLimitConfig.limits.short.limit,
       },
       {
         name: 'medium',
-        ttl: 10000, // 10 seconds
-        limit: process.env.NODE_ENV === 'production' ? 200 : 5000, // High limit for dev/seed
+        ttl: rateLimitConfig.limits.medium.ttl,
+        limit: rateLimitConfig.limits.medium.limit,
       },
       {
         name: 'long',
-        ttl: 60000, // 1 minute
-        limit: process.env.NODE_ENV === 'production' ? 500 : 30000, // High limit for dev/seed
+        ttl: rateLimitConfig.limits.long.ttl,
+        limit: rateLimitConfig.limits.long.limit,
       },
     ]),
     PrismaModule,
     AuthModule,
+    // Health checks (liveness/readiness probes)
+    HealthModule,
     AnimalsModule,
     LotsModule,
     TreatmentsModule,
@@ -116,7 +124,7 @@ import { TreatmentAlertsModule } from './treatment-alerts/treatment-alerts.modul
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: ConditionalThrottlerGuard, // Can be disabled with RATE_LIMIT_ENABLED=false
     },
   ],
 })
