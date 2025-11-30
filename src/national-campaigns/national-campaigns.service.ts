@@ -277,7 +277,7 @@ export class NationalCampaignsService {
         where: { campaignId: id },
       }),
       this.prisma.farmNationalCampaignPreference.count({
-        where: { campaignId: id, deletedAt: null },
+        where: { campaignId: id },
       }),
     ]);
 
