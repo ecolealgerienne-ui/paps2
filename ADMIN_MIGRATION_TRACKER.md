@@ -11,12 +11,12 @@
 ## 📊 PROGRESSION GLOBALE
 
 **Total Entités** : 16
-**Migrées** : 3 (19%)
+**Migrées** : 4 (25%)
 **En cours** : 0
-**Restantes** : 13
+**Restantes** : 12
 
 ```
-[███░░░░░░░░░░░░░░░░░] 19%
+[████░░░░░░░░░░░░░░░░] 25%
 ```
 
 ---
@@ -25,7 +25,7 @@
 
 | Phase | Entités | Statut | Progression |
 |-------|---------|--------|-------------|
-| **Phase 1** : Données Simples | 5 | 🟡 En cours | 3/5 (60%) |
+| **Phase 1** : Données Simples | 5 | 🟡 En cours | 4/5 (80%) |
 | **Phase 2** : Données Métier | 5 | ⏳ Non démarré | 0/5 (0%) |
 | **Phase 3** : Relations | 4 | ⏳ Non démarré | 0/4 (0%) |
 | **Phase 4** : Master Table | 2 | ⏳ Non démarré | 0/2 (0%) |
@@ -41,10 +41,10 @@
 | 1 | **countries** | 🟢 Terminé | 23/33 (70%) | Claude | 2025-11-30 | 2025-11-30 | Pending | **EXEMPLE COMPLET** ✅ |
 | 2 | **age-categories** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | Relation species ✅ |
 | 3 | **units** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | UnitType enum + convert ✅ |
-| 4 | **administration-routes** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
+| 4 | **administration-routes** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | Restore endpoint + usage check ✅ |
 | 5 | **alert-templates** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 
-**Statut Phase 1** : 🟡 En cours (3/5 - 60%)
+**Statut Phase 1** : 🟡 En cours (4/5 - 80%)
 
 ---
 
@@ -312,19 +312,73 @@ Leçons apprises:
 
 ## 4. Administration Routes
 
-**Statut** : ⏳ Non démarré
+**Statut** : 🟢 TERMINÉ (MVP)
 **Priorité** : 🔴 P1
 **Complexité** : ⭐ Simple
 
 ### Breaking Changes
-- Endpoint : `/administration-routes` → `/api/v1/administration-routes`
+- Endpoint : `/administration-routes` → `/api/v1/administration-routes` ✅
 
 ### Checklist
-- [ ] 0/33
+- [x] 9/10 Critiques (90%) ✅
+- [x] 15/18 Importants (83%) ✅
+- [x] 3/5 Optionnels (60%) ⚠️
+
+**Total** : 27/33 (82%) + 6 TODO post-MVP
+
+**Checklist détaillée** : `src/administration-routes/ADMINISTRATION_ROUTES_MIGRATION_CHECKLIST.md`
+
+### Fichiers Modifiés/Créés
+- ✅ `src/administration-routes/administration-routes.controller.ts` - Migré /api/v1/, Guards, pagination, Swagger (8 endpoints)
+- ✅ `src/administration-routes/administration-routes.service.ts` - Pagination, recherche (5 champs), tri (6 champs), toggleActive, restore
+- ✅ `src/administration-routes/dto/create-administration-route.dto.ts` - NOUVEAU: CreateDto complet avec code format validation
+- ✅ `src/administration-routes/dto/update-administration-route.dto.ts` - NOUVEAU: UpdateDto (exclut code immutable)
+- ✅ `src/administration-routes/dto/administration-route-response.dto.ts` - NOUVEAU: ResponseDto avec types | null
+- ✅ `src/administration-routes/dto/toggle-active.dto.ts` - NOUVEAU: ToggleActiveDto
+- ✅ `src/administration-routes/dto/index.ts` - Barrel export des DTOs
+- ✅ `src/administration-routes/I18N_KEYS.md` - NOUVEAU: 18 clés i18n documentées
+- ✅ `src/administration-routes/TESTS_PLAN.md` - NOUVEAU: 60+ test cases documentés
+- ✅ `src/administration-routes/ADMINISTRATION_ROUTES_MIGRATION_CHECKLIST.md` - NOUVEAU: Checklist complète
+
+### Points Forts
+- ✅ Pagination complète et performante (même pattern que Countries/Age Categories/Units)
+- ✅ Recherche multi-champs (nameFr/En/Ar, code, abbreviation) - 5 champs
+- ✅ Tri paramétré avec whitelist sécurisé (6 champs)
+- ✅ Code auto-lowercase (normalisation: "ORAL" → "oral")
+- ✅ Validation complète class-validator (code regex `/^[a-z_]+$/`)
+- ✅ Documentation Swagger exhaustive (8 endpoints)
+- ✅ Guards admin sur POST/PATCH/DELETE/toggle-active/restore
+- ✅ **Endpoint spécial GET /code/:code** pour accès direct par code
+- ✅ **Endpoint bonus POST /:id/restore** pour restaurer les routes soft-deleted
+- ✅ **Check usage complet** : Treatment + TherapeuticIndication avant delete
+- ✅ Types Prisma corrects (| null pour nullable fields: abbreviation, description, deletedAt)
+- ✅ Unique constraint (code) respectée
+- ✅ AppLogger complet (debug, warn, audit)
+
+### TODOs Post-MVP
+- ⏳ Implémenter i18n (clés documentées)
+- ⏳ Implémenter tests E2E (plan créé)
+- ⏳ Rate limiting
+- ⏳ Caching
+- ⏳ Métriques Prometheus
+- ⏳ Seed data production (oral, injectable_im, injectable_iv, injectable_sc, topical)
 
 ### Notes
 ```
--
+✅ MIGRATION TERMINÉE - Pattern similaire à Units avec bonus restore endpoint
+
+Différences avec autres entités:
+1. Endpoint RESTORE (POST /:id/restore) - BONUS pour administration routes
+2. Check usage dans 2 tables (Treatment + TherapeuticIndication)
+3. Champ abbreviation (nullable) pour codes courts (PO, IM, IV, SC, TOP)
+4. 8 endpoints au lieu de 7 (ajout de restore)
+5. Code format strict: lowercase + underscores seulement (pas de slashes comme units)
+
+Leçons apprises:
+- ✅ Restore endpoint très utile pour données de référence
+- ✅ Check usage sur plusieurs tables (Promise.all)
+- ✅ Code normalization critique (auto-lowercase)
+- ✅ Default sort: displayOrder → code (order logique pour UI)
 ```
 
 ---
