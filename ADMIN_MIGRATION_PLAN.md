@@ -396,6 +396,17 @@ GET/POST/PUT/DELETE /api/v1/farms/:farmId/products     # User, scope='local'
   - Tous les champs DB
   - Métadonnées (id, createdAt, updatedAt, version, deletedAt)
   - Swagger `@ApiProperty()`
+  - ⚠️ **IMPORTANT** : Utiliser `type | null` (pas `type?`) pour les champs nullable Prisma
+
+#### 4️⃣-bis VÉRIFICATION TYPES (CRITIQUE)
+- [ ] **Vérifier cohérence types Prisma ↔️ DTOs**
+  - Prisma `String?` → DTO `string | null` (PAS `string?` qui = `string | undefined`)
+  - Prisma `Int?` → DTO `number | null`
+  - Prisma `Boolean?` → DTO `boolean | null`
+- [ ] Exporter les interfaces utilisées dans le controller
+  - Si interface dans service utilisée par controller → `export interface`
+- [ ] Ajouter types de retour explicites sur méthodes controller
+  - Exemple : `findAll(): Promise<PaginatedResponse>`
 
 #### 5️⃣ SERVICE
 - [ ] Ajouter soft delete : `where: { deletedAt: null }`
@@ -447,8 +458,20 @@ GET/POST/PUT/DELETE /api/v1/farms/:farmId/products     # User, scope='local'
 - [ ] Code review
 - [ ] Tests passent
 - [ ] Swagger validé
+- [ ] **🔥 BUILD TypeScript : `npm run build`** (OBLIGATOIRE)
+  - Vérifier 0 erreur de compilation
+  - Corriger immédiatement si erreurs
+- [ ] **🔥 TEST démarrage backend : `npm run start:dev`** (OBLIGATOIRE)
+  - Vérifier que le serveur démarre sans erreur
+  - Vérifier les logs de démarrage
+  - Tester manuellement 1-2 endpoints (GET)
 - [ ] Commit + Push
 - [ ] Mettre à jour `ADMIN_MIGRATION_TRACKER.md`
+
+**⚠️ RÈGLE CRITIQUE** : Ne JAMAIS passer à l'entité suivante sans :
+1. Build réussi (0 erreur TypeScript)
+2. Backend qui démarre correctement
+3. Tests manuels basiques OK
 
 ---
 
@@ -570,6 +593,131 @@ GET/POST/PUT/DELETE /api/v1/farms/:farmId/products     # User, scope='local'
 - ✅ Template et pattern réplicable
 - ✅ Automatisation (scripts, generators)
 - ✅ Focus MVP (critiques uniquement)
+
+---
+
+## 🚨 PIÈGES À ÉVITER (Leçons de Countries)
+
+### Piège #1 : Types null vs undefined (CRITIQUE)
+
+**Problème rencontré** :
+```typescript
+// ❌ ERREUR : Prisma retourne `string | null` mais DTO a `string | undefined`
+// schema.prisma
+region String? // = string | null en Prisma
+
+// DTO INCORRECT
+region?: string; // = string | undefined en TypeScript
+
+// ERREUR TypeScript
+// Type 'string | null' is not assignable to type 'string | undefined'
+```
+
+**Solution** :
+```typescript
+// ✅ CORRECT
+region: string | null; // Match exactement Prisma
+```
+
+**Règle** : Pour les champs nullable Prisma (`String?`, `Int?`, `Boolean?`), utiliser TOUJOURS `type | null` dans les DTOs, JAMAIS `type?`.
+
+---
+
+### Piège #2 : Interfaces non exportées
+
+**Problème rencontré** :
+```typescript
+// ❌ ERREUR : Interface non exportée utilisée dans controller
+// service.ts
+interface PaginatedResponse { ... } // PAS exporté
+
+// controller.ts
+import { MyService } from './my.service';
+findAll(): PaginatedResponse { ... } // TS4053 error
+```
+
+**Solution** :
+```typescript
+// ✅ CORRECT
+export interface PaginatedResponse { ... }
+
+// controller.ts
+import { MyService, PaginatedResponse } from './my.service';
+findAll(): Promise<PaginatedResponse> { ... }
+```
+
+**Règle** : Si une interface du service est utilisée comme type de retour dans le controller, elle DOIT être exportée.
+
+---
+
+### Piège #3 : Types de retour manquants
+
+**Problème** :
+```typescript
+// ❌ Pas de type de retour explicite
+findAll(...) {
+  return this.service.findAll(...);
+}
+```
+
+**Solution** :
+```typescript
+// ✅ Type de retour explicite
+findAll(...): Promise<PaginatedResponse> {
+  return this.service.findAll(...);
+}
+```
+
+**Règle** : Toujours spécifier les types de retour explicitement sur les méthodes publiques des controllers.
+
+---
+
+### Piège #4 : Ne pas tester le build
+
+**Problème** : Erreurs TypeScript découvertes seulement au déploiement.
+
+**Solution** :
+```bash
+# OBLIGATOIRE après chaque migration
+npm run build
+
+# Si erreurs → corriger IMMÉDIATEMENT
+# Ne PAS passer à l'entité suivante
+```
+
+**Règle** : Build + démarrage backend = étapes OBLIGATOIRES avant de committer.
+
+---
+
+### Piège #5 : Ne pas tester le démarrage
+
+**Problème** : Code compile mais backend crash au démarrage (injection dependencies, modules mal configurés, etc.).
+
+**Solution** :
+```bash
+# Tester le démarrage
+npm run start:dev
+
+# Vérifier :
+# 1. Serveur démarre sans erreur
+# 2. Logs affichent routes correctement
+# 3. Tester 1-2 endpoints manuellement
+```
+
+**Règle** : Backend doit démarrer proprement avant de committer.
+
+---
+
+### Checklist Anti-Erreurs (Appliquer Systématiquement)
+
+Après chaque modification DTO :
+- [ ] Vérifier types Prisma `?` → `type | null` (PAS `type?`)
+- [ ] Exporter interfaces si utilisées dans controller
+- [ ] Ajouter types de retour explicites sur méthodes controller
+- [ ] `npm run build` → 0 erreur
+- [ ] `npm run start:dev` → démarrage OK
+- [ ] Test manuel 1-2 endpoints
+- [ ] Commit uniquement si tout est vert ✅
 
 ---
 
