@@ -30,11 +30,11 @@ import { AdminGuard } from '../auth/guards/admin.guard';
  * Controller for managing Products (PHASE_15 - Scope Pattern)
  * Supports both farm-scoped (local) and global (admin) products
  * Dual endpoint structure:
- * - farms/:farmId/products - Local products (farm-scoped)
+ * - api/v1/farms/:farmId/products - Local products (farm-scoped)
  * - api/v1/products - Global products (admin)
  */
 @ApiTags('Products')
-@Controller()
+@Controller('api/v1')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -185,7 +185,7 @@ export class ProductsController {
   // Global endpoints (admin)
   // =============================================================================
 
-  @Get('api/v1/products')
+  @Get('products')
   @ApiOperation({ summary: 'Get all global products with pagination, filters, search, and sorting' })
   @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default: 50, max: 100)', example: 50 })
@@ -201,7 +201,7 @@ export class ProductsController {
     return this.productsService.findAllGlobal(query);
   }
 
-  @Get('api/v1/products/search')
+  @Get('products/search')
   @ApiOperation({ summary: 'Search global products by name (autocomplete)' })
   @ApiQuery({ name: 'term', description: 'Search term' })
   @ApiQuery({ name: 'limit', required: false, description: 'Max results (default: 10)' })
@@ -213,7 +213,7 @@ export class ProductsController {
     return this.productsService.searchGlobal(term, limit);
   }
 
-  @Get('api/v1/products/:id')
+  @Get('products/:id')
   @ApiOperation({ summary: 'Get a global product by ID' })
   @ApiParam({ name: 'id', description: 'Product UUID' })
   @ApiResponse({ status: 200, description: 'Global product found', type: ProductResponseDto })
@@ -222,7 +222,7 @@ export class ProductsController {
     return this.productsService.findOneGlobal(id);
   }
 
-  @Post('api/v1/admin/products')
+  @Post('admin/products')
   @UseGuards(AuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a global product (Admin only)' })
@@ -234,7 +234,7 @@ export class ProductsController {
     return this.productsService.createGlobal(createDto);
   }
 
-  @Post('api/v1/admin/products/:id/restore')
+  @Post('admin/products/:id/restore')
   @UseGuards(AuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Restore a soft-deleted global product (Admin only)' })
