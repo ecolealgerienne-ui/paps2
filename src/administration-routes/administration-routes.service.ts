@@ -54,7 +54,7 @@ export class AdministrationRoutesService {
 
     // If soft-deleted, restore and update
     if (existing && existing.deletedAt) {
-      this.logger.info(`Restoring soft-deleted route: ${dto.code}`);
+      this.logger.debug(`Restoring soft-deleted route: ${dto.code}`);
       const restored = await this.prisma.administrationRoute.update({
         where: { id: existing.id },
         data: {
