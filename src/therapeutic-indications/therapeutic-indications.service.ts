@@ -266,6 +266,17 @@ export class TherapeuticIndicationsService {
       throw new NotFoundException(`Indication ${id} not found`);
     }
 
+    // Check dependencies before deleting
+    const treatmentsCount = await this.prisma.treatment.count({
+      where: { therapeuticIndicationId: id, deletedAt: null },
+    });
+
+    if (treatmentsCount > 0) {
+      throw new ConflictException(
+        `Cannot delete therapeutic indication: ${treatmentsCount} treatment(s) depend on it`,
+      );
+    }
+
     try {
       const deleted = await this.prisma.therapeuticIndication.update({
         where: { id },
