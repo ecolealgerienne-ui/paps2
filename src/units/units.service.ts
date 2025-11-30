@@ -1,7 +1,34 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUnitDto, UpdateUnitDto, QueryUnitDto } from './dto';
+import { Prisma, UnitType } from '@prisma/client';
+import { CreateUnitDto, UpdateUnitDto, UnitResponseDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
+
+/**
+ * Options for findAll pagination, filtering, search, and sorting
+ */
+export interface FindAllOptions {
+  page?: number;
+  limit?: number;
+  unitType?: UnitType;
+  isActive?: boolean;
+  search?: string;
+  orderBy?: string;
+  order?: 'ASC' | 'DESC';
+}
+
+/**
+ * Paginated response with metadata
+ */
+export interface PaginatedResponse {
+  data: UnitResponseDto[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
 
 /**
  * Service for managing Units of measurement
@@ -13,37 +40,36 @@ export class UnitsService {
 
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateUnitDto) {
+  async create(dto: CreateUnitDto): Promise<UnitResponseDto> {
     this.logger.debug(`Creating unit with code ${dto.code}`);
 
     // Check for duplicate code
     const existing = await this.prisma.unit.findUnique({
-      where: { code: dto.code },
+      where: { code: dto.code.toLowerCase() },
     });
 
     if (existing) {
-      throw new ConflictException(`Unit with code ${dto.code} already exists`);
+      throw new ConflictException(`Unit with code "${dto.code}" already exists`);
     }
 
     try {
       const unit = await this.prisma.unit.create({
         data: {
-          ...(dto.id && { id: dto.id }),
-          code: dto.code,
+          code: dto.code.toLowerCase(),
           symbol: dto.symbol,
           nameFr: dto.nameFr,
           nameEn: dto.nameEn,
           nameAr: dto.nameAr,
           unitType: dto.unitType,
           description: dto.description,
-          baseUnitCode: dto.baseUnitCode,
+          baseUnitCode: dto.baseUnitCode?.toLowerCase(),
           conversionFactor: dto.conversionFactor,
           displayOrder: dto.displayOrder ?? 0,
           isActive: dto.isActive ?? true,
         },
       });
 
-      this.logger.audit('Unit created', { unitId: unit.id, code: dto.code });
+      this.logger.audit('Unit created', { unitId: unit.id, code: unit.code });
       return unit;
     } catch (error) {
       this.logger.error(`Failed to create unit ${dto.code}`, error.stack);
@@ -51,28 +77,87 @@ export class UnitsService {
     }
   }
 
-  async findAll(query: QueryUnitDto) {
-    const where: any = {
+  async findAll(options: FindAllOptions = {}): Promise<PaginatedResponse> {
+    const page = Math.max(1, options.page || 1);
+    const limit = Math.min(100, Math.max(1, options.limit || 20));
+    const skip = (page - 1) * limit;
+
+    // Build WHERE clause
+    const where: Prisma.UnitWhereInput = {
       deletedAt: null,
     };
 
-    if (query.unitType) where.unitType = query.unitType;
-    if (query.isActive !== undefined) where.isActive = query.isActive;
+    if (options.unitType) {
+      where.unitType = options.unitType;
+    }
 
-    return this.prisma.unit.findMany({
-      where,
-      orderBy: [
-        { unitType: 'asc' },
-        { displayOrder: 'asc' },
-        { code: 'asc' },
-      ],
-    });
+    if (options.isActive !== undefined) {
+      where.isActive = options.isActive;
+    }
+
+    // Search in names, code, symbol, and description
+    if (options.search) {
+      const searchTerm = options.search;
+      where.OR = [
+        { nameFr: { contains: searchTerm, mode: 'insensitive' } },
+        { nameEn: { contains: searchTerm, mode: 'insensitive' } },
+        { nameAr: { contains: searchTerm, mode: 'insensitive' } },
+        { code: { contains: searchTerm.toLowerCase(), mode: 'insensitive' } },
+        { symbol: { contains: searchTerm, mode: 'insensitive' } },
+        { description: { contains: searchTerm, mode: 'insensitive' } },
+      ];
+    }
+
+    // Build ORDER BY clause
+    const orderBy = this.buildOrderBy(options.orderBy, options.order);
+
+    // Execute queries
+    const [total, data] = await Promise.all([
+      this.prisma.unit.count({ where }),
+      this.prisma.unit.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
+      },
+    };
   }
 
-  async findByType(unitType: string) {
+  /**
+   * Build orderBy clause with whitelisted fields
+   */
+  private buildOrderBy(
+    field?: string,
+    order: 'ASC' | 'DESC' = 'ASC',
+  ): Prisma.UnitOrderByWithRelationInput[] {
+    const allowedFields = ['nameFr', 'nameEn', 'code', 'symbol', 'unitType', 'displayOrder', 'createdAt'];
+
+    if (field && allowedFields.includes(field)) {
+      return [{ [field]: order.toLowerCase() as Prisma.SortOrder }];
+    }
+
+    // Default: sort by unitType, then displayOrder, then code
+    return [
+      { unitType: 'asc' },
+      { displayOrder: 'asc' },
+      { code: 'asc' },
+    ];
+  }
+
+  async findByType(unitType: UnitType): Promise<UnitResponseDto[]> {
     return this.prisma.unit.findMany({
       where: {
-        unitType: unitType as any,
+        unitType,
         isActive: true,
         deletedAt: null,
       },
@@ -80,31 +165,31 @@ export class UnitsService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<UnitResponseDto> {
     const unit = await this.prisma.unit.findFirst({
       where: { id, deletedAt: null },
     });
 
     if (!unit) {
-      throw new NotFoundException(`Unit ${id} not found`);
+      throw new NotFoundException(`Unit with ID "${id}" not found`);
     }
 
     return unit;
   }
 
-  async findByCode(code: string) {
+  async findByCode(code: string): Promise<UnitResponseDto> {
     const unit = await this.prisma.unit.findFirst({
-      where: { code, deletedAt: null },
+      where: { code: code.toLowerCase(), deletedAt: null },
     });
 
     if (!unit) {
-      throw new NotFoundException(`Unit with code ${code} not found`);
+      throw new NotFoundException(`Unit with code "${code}" not found`);
     }
 
     return unit;
   }
 
-  async update(id: string, dto: UpdateUnitDto) {
+  async update(id: string, dto: UpdateUnitDto): Promise<UnitResponseDto> {
     this.logger.debug(`Updating unit ${id}`);
 
     const existing = await this.prisma.unit.findFirst({
@@ -112,15 +197,15 @@ export class UnitsService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Unit ${id} not found`);
-    }
-
-    if (dto.version !== undefined && existing.version !== dto.version) {
-      throw new ConflictException('Version conflict');
+      throw new NotFoundException(`Unit with ID "${id}" not found`);
     }
 
     try {
-      const { version, ...updateData } = dto;
+      // Normalize baseUnitCode if provided
+      const updateData = {
+        ...dto,
+        ...(dto.baseUnitCode && { baseUnitCode: dto.baseUnitCode.toLowerCase() }),
+      };
 
       const updated = await this.prisma.unit.update({
         where: { id },
@@ -138,7 +223,30 @@ export class UnitsService {
     }
   }
 
-  async remove(id: string) {
+  async toggleActive(id: string, isActive: boolean): Promise<UnitResponseDto> {
+    this.logger.debug(`Toggling unit ${id} active status to ${isActive}`);
+
+    const existing = await this.prisma.unit.findFirst({
+      where: { id, deletedAt: null },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Unit with ID "${id}" not found`);
+    }
+
+    const updated = await this.prisma.unit.update({
+      where: { id },
+      data: {
+        isActive,
+        version: existing.version + 1,
+      },
+    });
+
+    this.logger.audit('Unit active status toggled', { unitId: id, isActive });
+    return updated;
+  }
+
+  async remove(id: string): Promise<void> {
     this.logger.debug(`Soft deleting unit ${id}`);
 
     const existing = await this.prisma.unit.findFirst({
@@ -146,11 +254,14 @@ export class UnitsService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Unit ${id} not found`);
+      throw new NotFoundException(`Unit with ID "${id}" not found`);
     }
 
+    // Check if unit is in use (future: check relations)
+    // For now, soft delete is always allowed since we're using soft delete pattern
+
     try {
-      const deleted = await this.prisma.unit.update({
+      await this.prisma.unit.update({
         where: { id },
         data: {
           deletedAt: new Date(),
@@ -159,7 +270,6 @@ export class UnitsService {
       });
 
       this.logger.audit('Unit soft deleted', { unitId: id });
-      return deleted;
     } catch (error) {
       this.logger.error(`Failed to delete unit ${id}`, error.stack);
       throw error;
@@ -168,18 +278,21 @@ export class UnitsService {
 
   /**
    * Convert a value from one unit to another
+   * Units must be of the same type and have conversion factors defined
    */
   async convert(value: number, fromCode: string, toCode: string): Promise<number> {
     const fromUnit = await this.findByCode(fromCode);
     const toUnit = await this.findByCode(toCode);
 
-    // Check if units are compatible (same type or same base)
+    // Check if units are compatible (same type)
     if (fromUnit.unitType !== toUnit.unitType) {
-      throw new ConflictException(`Cannot convert between ${fromUnit.unitType} and ${toUnit.unitType}`);
+      throw new ConflictException(
+        `Cannot convert between ${fromUnit.unitType} and ${toUnit.unitType}`
+      );
     }
 
     // If same unit, return as is
-    if (fromCode === toCode) {
+    if (fromCode.toLowerCase() === toCode.toLowerCase()) {
       return value;
     }
 

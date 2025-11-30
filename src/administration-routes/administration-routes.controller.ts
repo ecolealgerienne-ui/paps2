@@ -1,69 +1,134 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { AdministrationRoutesService } from './administration-routes.service';
-import { CreateAdministrationRouteDto } from './dto/create-administration-route.dto';
-import { UpdateAdministrationRouteDto } from './dto/update-administration-route.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { AdministrationRoutesService, PaginatedResponse } from './administration-routes.service';
+import {
+  CreateAdministrationRouteDto,
+  UpdateAdministrationRouteDto,
+  AdministrationRouteResponseDto,
+  ToggleActiveDto,
+} from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
-@ApiTags('administration-routes')
-@Controller('administration-routes')
+@ApiTags('Administration Routes')
+@Controller('api/v1/administration-routes')
 export class AdministrationRoutesController {
-  constructor(private readonly service: AdministrationRoutesService) {}
+  constructor(private readonly administrationRoutesService: AdministrationRoutesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new administration route' })
-  @ApiResponse({ status: 201, description: 'Administration route created successfully' })
-  @ApiResponse({ status: 409, description: 'Administration route with this code already exists' })
-  create(@Body() dto: CreateAdministrationRouteDto) {
-    return this.service.create(dto);
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create an administration route (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Route created successfully', type: AdministrationRouteResponseDto })
+  @ApiResponse({ status: 409, description: 'Duplicate code' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
+  create(@Body() createDto: CreateAdministrationRouteDto): Promise<AdministrationRouteResponseDto> {
+    return this.administrationRoutesService.create(createDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all administration routes' })
-  @ApiResponse({ status: 200, description: 'List of administration routes' })
-  findAll(@Query('includeDeleted') includeDeleted?: string) {
-    return this.service.findAll(includeDeleted === 'true');
+  @ApiOperation({ summary: 'Get all administration routes with pagination, filters, and search' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 20, max: 100)' })
+  @ApiQuery({ name: 'isActive', required: false, type: Boolean, description: 'Filter by active status' })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search in names, code, and abbreviation' })
+  @ApiQuery({ name: 'orderBy', required: false, enum: ['nameFr', 'nameEn', 'code', 'abbreviation', 'displayOrder', 'createdAt'] })
+  @ApiQuery({ name: 'order', required: false, enum: ['ASC', 'DESC'] })
+  @ApiResponse({ status: 200, description: 'List of administration routes with pagination' })
+  findAll(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('isActive') isActive?: boolean,
+    @Query('search') search?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('order') order?: 'ASC' | 'DESC',
+  ): Promise<PaginatedResponse> {
+    return this.administrationRoutesService.findAll({ page, limit, isActive, search, orderBy, order });
   }
 
   @Get('code/:code')
   @ApiOperation({ summary: 'Find administration route by code' })
-  @ApiResponse({ status: 200, description: 'Administration route found' })
-  @ApiResponse({ status: 404, description: 'Administration route not found' })
-  findByCode(@Param('code') code: string) {
-    return this.service.findByCode(code);
+  @ApiParam({ name: 'code', description: 'Route code', example: 'oral' })
+  @ApiResponse({ status: 200, description: 'Route found', type: AdministrationRouteResponseDto })
+  @ApiResponse({ status: 404, description: 'Route not found' })
+  findByCode(@Param('code') code: string): Promise<AdministrationRouteResponseDto> {
+    return this.administrationRoutesService.findByCode(code);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get administration route by ID' })
-  @ApiResponse({ status: 200, description: 'Administration route found' })
-  @ApiResponse({ status: 404, description: 'Administration route not found' })
-  findOne(@Param('id') id: string) {
-    return this.service.findOne(id);
+  @ApiParam({ name: 'id', description: 'Route ID (UUID)' })
+  @ApiResponse({ status: 200, description: 'Route found', type: AdministrationRouteResponseDto })
+  @ApiResponse({ status: 404, description: 'Route not found' })
+  findOne(@Param('id') id: string): Promise<AdministrationRouteResponseDto> {
+    return this.administrationRoutesService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update administration route' })
-  @ApiResponse({ status: 200, description: 'Administration route updated successfully' })
-  @ApiResponse({ status: 404, description: 'Administration route not found' })
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update administration route (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Route ID (UUID)' })
+  @ApiResponse({ status: 200, description: 'Route updated successfully', type: AdministrationRouteResponseDto })
+  @ApiResponse({ status: 404, description: 'Route not found' })
   @ApiResponse({ status: 409, description: 'Version conflict' })
-  update(@Param('id') id: string, @Body() dto: UpdateAdministrationRouteDto) {
-    return this.service.update(id, dto);
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
+  update(@Param('id') id: string, @Body() updateDto: UpdateAdministrationRouteDto): Promise<AdministrationRouteResponseDto> {
+    return this.administrationRoutesService.update(id, updateDto);
+  }
+
+  @Patch(':id/toggle-active')
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Toggle active status of administration route (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Route ID (UUID)' })
+  @ApiResponse({ status: 200, description: 'Active status toggled successfully', type: AdministrationRouteResponseDto })
+  @ApiResponse({ status: 404, description: 'Route not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
+  toggleActive(@Param('id') id: string, @Body() toggleDto: ToggleActiveDto): Promise<AdministrationRouteResponseDto> {
+    return this.administrationRoutesService.toggleActive(id, toggleDto.isActive);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Soft delete administration route' })
-  @ApiResponse({ status: 200, description: 'Administration route deleted successfully' })
-  @ApiResponse({ status: 404, description: 'Administration route not found' })
-  @ApiResponse({ status: 409, description: 'Cannot delete: route is in use' })
-  remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Soft delete administration route (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Route ID (UUID)' })
+  @ApiResponse({ status: 200, description: 'Route deleted successfully', type: AdministrationRouteResponseDto })
+  @ApiResponse({ status: 404, description: 'Route not found' })
+  @ApiResponse({ status: 409, description: 'Cannot delete: route is in use by treatments or therapeutic indications' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
+  remove(@Param('id') id: string): Promise<AdministrationRouteResponseDto> {
+    return this.administrationRoutesService.remove(id);
   }
 
   @Post(':id/restore')
-  @ApiOperation({ summary: 'Restore soft-deleted administration route' })
-  @ApiResponse({ status: 200, description: 'Administration route restored successfully' })
-  @ApiResponse({ status: 404, description: 'Administration route not found' })
-  @ApiResponse({ status: 409, description: 'Administration route is not deleted' })
-  restore(@Param('id') id: string) {
-    return this.service.restore(id);
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Restore soft-deleted administration route (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Route ID (UUID)' })
+  @ApiResponse({ status: 200, description: 'Route restored successfully', type: AdministrationRouteResponseDto })
+  @ApiResponse({ status: 404, description: 'Route not found or not deleted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin only' })
+  restore(@Param('id') id: string): Promise<AdministrationRouteResponseDto> {
+    return this.administrationRoutesService.restore(id);
   }
 }
