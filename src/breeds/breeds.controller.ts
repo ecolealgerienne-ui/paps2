@@ -1,224 +1,143 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { BreedsService } from './breeds.service';
-import { CreateBreedDto, UpdateBreedDto } from './dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  ParseIntPipe,
+  ParseBoolPipe,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { BreedsService, FindAllOptions, PaginatedResponse } from './breeds.service';
+import { CreateBreedDto, UpdateBreedDto, BreedResponseDto } from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
-/**
- * Controller for breeds reference data
- * Based on BACKEND_DELTA.md section 5.2
- * PHASE_12: Enhanced with soft delete, versioning, code field, and findBySpecies endpoint
- */
-@ApiTags('breeds')
+@ApiTags('Breeds')
 @Controller('api/v1/breeds')
 export class BreedsController {
   constructor(private readonly breedsService: BreedsService) {}
 
   @Post()
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new breed (Admin only)' })
-  @ApiResponse({ status: 201, description: 'Breed created successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid input' })
-  async create(@Body() createBreedDto: CreateBreedDto) {
-    const breed = await this.breedsService.create(createBreedDto);
-
-    return {
-      success: true,
-      data: {
-        id: breed.id,
-        code: breed.code,
-        species_id: breed.speciesId,
-        name_fr: breed.nameFr,
-        name_en: breed.nameEn,
-        name_ar: breed.nameAr,
-        description: breed.description,
-        display_order: breed.displayOrder,
-        is_active: breed.isActive,
-        version: breed.version,
-        created_at: breed.createdAt,
-        updated_at: breed.updatedAt,
-      },
-    };
+  @ApiResponse({ status: 201, description: 'Breed created successfully', type: BreedResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 409, description: 'Conflict - Code already exists' })
+  create(@Body() createDto: CreateBreedDto): Promise<BreedResponseDto> {
+    return this.breedsService.create(createDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all breeds, optionally filtered by species' })
-  @ApiQuery({
-    name: 'speciesId',
-    required: false,
-    type: String,
-    description: 'Filter breeds by species ID',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of all active breeds',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              species_id: { type: 'string' },
-              name_fr: { type: 'string' },
-              name_en: { type: 'string' },
-              name_ar: { type: 'string' },
-              description: { type: 'string' },
-              display_order: { type: 'number' },
-              is_active: { type: 'boolean' },
-            },
-          },
-        },
-      },
-    },
-  })
-  async findAll(@Query('speciesId') speciesId?: string) {
-    const breeds = await this.breedsService.findAll(speciesId);
-
-    return {
-      success: true,
-      data: breeds.map(b => ({
-        id: b.id,
-        code: b.code,
-        species_id: b.speciesId,
-        name_fr: b.nameFr,
-        name_en: b.nameEn,
-        name_ar: b.nameAr,
-        description: b.description,
-        display_order: b.displayOrder,
-        is_active: b.isActive,
-        version: b.version,
-        created_at: b.createdAt,
-        updated_at: b.updatedAt,
-      })),
-    };
+  @ApiOperation({ summary: 'Get all breeds with pagination, filters, search, and sorting' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default: 20, max: 100)', example: 20 })
+  @ApiQuery({ name: 'speciesId', required: false, description: 'Filter by species ID' })
+  @ApiQuery({ name: 'isActive', required: false, description: 'Filter by active status', example: true })
+  @ApiQuery({ name: 'search', required: false, description: 'Search in code, names, and description', example: 'holstein' })
+  @ApiQuery({ name: 'orderBy', required: false, description: 'Field to sort by (nameFr, nameEn, code, displayOrder, createdAt)', example: 'nameFr' })
+  @ApiQuery({ name: 'order', required: false, description: 'Sort order (ASC or DESC)', example: 'ASC' })
+  @ApiResponse({ status: 200, description: 'Breeds list with pagination metadata' })
+  async findAll(
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('speciesId') speciesId?: string,
+    @Query('isActive', new ParseBoolPipe({ optional: true })) isActive?: boolean,
+    @Query('search') search?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('order') order?: 'ASC' | 'DESC',
+  ): Promise<PaginatedResponse> {
+    return this.breedsService.findAll({ page, limit, speciesId, isActive, search, orderBy, order });
   }
 
   @Get('species/:speciesId')
   @ApiOperation({ summary: 'Get breeds by species (uses composite index)' })
+  @ApiParam({ name: 'speciesId', description: 'Species ID' })
   @ApiQuery({
     name: 'activeOnly',
     required: false,
-    type: Boolean,
     description: 'Filter only active breeds (default: true)',
+    example: true,
   })
-  @ApiResponse({
-    status: 200,
-    description: 'List of breeds for the specified species',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              code: { type: 'string' },
-              species_id: { type: 'string' },
-              name_fr: { type: 'string' },
-              name_en: { type: 'string' },
-              name_ar: { type: 'string' },
-              description: { type: 'string' },
-              display_order: { type: 'number' },
-              is_active: { type: 'boolean' },
-              version: { type: 'number' },
-            },
-          },
-        },
-      },
-    },
-  })
+  @ApiResponse({ status: 200, description: 'Breeds list for the specified species', type: [BreedResponseDto] })
   async findBySpecies(
     @Param('speciesId') speciesId: string,
-    @Query('activeOnly') activeOnly?: string,
-  ) {
-    // Uses composite index: idx_breeds_species_active (speciesId, isActive, deletedAt)
-    const active = activeOnly === undefined ? true : activeOnly === 'true';
-    const breeds = await this.breedsService.findBySpecies(speciesId, active);
+    @Query('activeOnly', new ParseBoolPipe({ optional: true })) activeOnly?: boolean,
+  ): Promise<BreedResponseDto[]> {
+    const active = activeOnly !== undefined ? activeOnly : true;
+    return this.breedsService.findBySpecies(speciesId, active);
+  }
 
-    return {
-      success: true,
-      data: breeds.map(b => ({
-        id: b.id,
-        code: b.code,
-        species_id: b.speciesId,
-        name_fr: b.nameFr,
-        name_en: b.nameEn,
-        name_ar: b.nameAr,
-        description: b.description,
-        display_order: b.displayOrder,
-        is_active: b.isActive,
-        version: b.version,
-        created_at: b.createdAt,
-        updated_at: b.updatedAt,
-      })),
-    };
+  @Get('code/:code')
+  @ApiOperation({ summary: 'Get breed by code' })
+  @ApiParam({ name: 'code', description: 'Breed code (e.g., holstein)' })
+  @ApiResponse({ status: 200, description: 'Breed found', type: BreedResponseDto })
+  @ApiResponse({ status: 404, description: 'Breed not found' })
+  findByCode(@Param('code') code: string): Promise<BreedResponseDto> {
+    return this.breedsService.findByCode(code);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a breed by ID' })
-  @ApiResponse({ status: 200, description: 'Breed found' })
+  @ApiParam({ name: 'id', description: 'Breed UUID' })
+  @ApiResponse({ status: 200, description: 'Breed found', type: BreedResponseDto })
   @ApiResponse({ status: 404, description: 'Breed not found' })
-  async findOne(@Param('id') id: string) {
-    const breed = await this.breedsService.findOne(id);
-
-    return {
-      success: true,
-      data: {
-        id: breed.id,
-        code: breed.code,
-        species_id: breed.speciesId,
-        name_fr: breed.nameFr,
-        name_en: breed.nameEn,
-        name_ar: breed.nameAr,
-        description: breed.description,
-        display_order: breed.displayOrder,
-        is_active: breed.isActive,
-        version: breed.version,
-        created_at: breed.createdAt,
-        updated_at: breed.updatedAt,
-      },
-    };
+  findOne(@Param('id') id: string): Promise<BreedResponseDto> {
+    return this.breedsService.findOne(id);
   }
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Update a breed (Admin only) - PHASE_12: with optimistic locking' })
-  @ApiResponse({ status: 200, description: 'Breed updated successfully' })
+  @Patch(':id')
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update a breed (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Breed UUID' })
+  @ApiResponse({ status: 200, description: 'Breed updated successfully', type: BreedResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
   @ApiResponse({ status: 404, description: 'Breed not found' })
-  @ApiResponse({ status: 409, description: 'Version conflict (optimistic locking)' })
-  async update(@Param('id') id: string, @Body() updateBreedDto: UpdateBreedDto) {
-    // Extract version for optimistic locking
-    const { version, ...dto } = updateBreedDto;
-    const breed = await this.breedsService.update(id, dto, version);
-
-    return {
-      success: true,
-      data: {
-        id: breed.id,
-        code: breed.code,
-        species_id: breed.speciesId,
-        name_fr: breed.nameFr,
-        name_en: breed.nameEn,
-        name_ar: breed.nameAr,
-        description: breed.description,
-        display_order: breed.displayOrder,
-        is_active: breed.isActive,
-        version: breed.version,
-        created_at: breed.createdAt,
-        updated_at: breed.updatedAt,
-      },
-    };
+  @ApiResponse({ status: 409, description: 'Conflict - Version mismatch' })
+  update(@Param('id') id: string, @Body() updateDto: UpdateBreedDto): Promise<BreedResponseDto> {
+    return this.breedsService.update(id, updateDto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a breed (Admin only)' })
-  @ApiResponse({ status: 204, description: 'Breed deleted successfully' })
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Soft delete a breed (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Breed UUID' })
+  @ApiResponse({ status: 200, description: 'Breed deleted successfully', type: BreedResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
   @ApiResponse({ status: 404, description: 'Breed not found' })
-  async remove(@Param('id') id: string) {
-    await this.breedsService.remove(id);
+  @ApiResponse({ status: 409, description: 'Conflict - Breed is used by active animals' })
+  remove(@Param('id') id: string): Promise<BreedResponseDto> {
+    return this.breedsService.remove(id);
+  }
+
+  @Post(':id/restore')
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Restore a soft-deleted breed (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Breed UUID' })
+  @ApiResponse({ status: 200, description: 'Breed restored successfully', type: BreedResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 404, description: 'Breed not found' })
+  @ApiResponse({ status: 409, description: 'Conflict - Breed is not deleted' })
+  restore(@Param('id') id: string): Promise<BreedResponseDto> {
+    return this.breedsService.restore(id);
   }
 }

@@ -38,14 +38,15 @@ export class CreateSpeciesDto {
   @MaxLength(100)
   nameAr: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Icône de l\'espèce',
-    example: 'cow'
+    example: 'cow',
+    default: ''
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MaxLength(50)
-  icon: string;
+  icon?: string;
 
   @ApiPropertyOptional({
     description: 'Ordre d\'affichage',
@@ -62,4 +63,13 @@ export class CreateSpeciesDto {
   @IsOptional()
   @MaxLength(500)
   description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nom scientifique',
+    example: 'Bos taurus'
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  scientificName?: string;
 }

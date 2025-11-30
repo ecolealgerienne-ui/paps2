@@ -6,226 +6,119 @@ import {
   Body,
   Param,
   Query,
-  HttpCode,
-  HttpStatus,
+  UseGuards,
+  ParseIntPipe,
+  ParseBoolPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
-import { CampaignCountriesService } from './campaign-countries.service';
-import { LinkCampaignCountryDto } from './dto';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { CampaignCountriesService, FindAllOptions, PaginatedResponse } from './campaign-countries.service';
+import { LinkCampaignCountryDto, CampaignCountryResponseDto } from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 /**
  * Controller for managing NationalCampaign-Country associations
- * PHASE_19: CampaignCountries
+ * PHASE_19: CampaignCountries - Migrated to /api/v1 with pagination, search, and Guards
  */
-@ApiTags('campaign-countries')
+@ApiTags('Campaign-Countries')
 @Controller('api/v1/campaign-countries')
 export class CampaignCountriesController {
   constructor(private readonly campaignCountriesService: CampaignCountriesService) {}
 
-  @Get()
-  @ApiOperation({ summary: 'Get all campaign-country associations (Admin)' })
-  @ApiQuery({
-    name: 'includeInactive',
-    required: false,
-    type: Boolean,
-    description: 'Include inactive associations',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of all campaign-country associations',
-  })
-  async findAll(@Query('includeInactive') includeInactive?: string) {
-    const include = includeInactive === 'true';
-    const associations = await this.campaignCountriesService.findAll(include);
+  @Post()
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Link a campaign to a country (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Campaign successfully linked to country', type: CampaignCountryResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 404, description: 'Campaign or Country not found' })
+  @ApiResponse({ status: 409, description: 'Conflict - Association already exists' })
+  link(@Body() dto: LinkCampaignCountryDto): Promise<CampaignCountryResponseDto> {
+    return this.campaignCountriesService.link(dto.campaignId, dto.countryCode);
+  }
 
-    return {
-      success: true,
-      data: associations.map((a) => ({
-        id: a.id,
-        campaign_id: a.campaignId,
-        country_code: a.countryCode,
-        is_active: a.isActive,
-        created_at: a.createdAt,
-        updated_at: a.updatedAt,
-        campaign: a.campaign
-          ? {
-              id: a.campaign.id,
-              code: a.campaign.code,
-              name_fr: a.campaign.nameFr,
-              name_en: a.campaign.nameEn,
-              name_ar: a.campaign.nameAr,
-              type: a.campaign.type,
-            }
-          : null,
-        country: a.country
-          ? {
-              code: a.country.code,
-              name_fr: a.country.nameFr,
-              name_en: a.country.nameEn,
-              name_ar: a.country.nameAr,
-              region: a.country.region,
-            }
-          : null,
-      })),
-    };
+  @Get()
+  @ApiOperation({ summary: 'Get all campaign-country associations with pagination, filters, search, and sorting' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default: 50, max: 100)', example: 50 })
+  @ApiQuery({ name: 'campaignId', required: false, description: 'Filter by campaign ID' })
+  @ApiQuery({ name: 'countryCode', required: false, description: 'Filter by country code (ISO 3166-1 alpha-2)', example: 'DZ' })
+  @ApiQuery({ name: 'isActive', required: false, description: 'Filter by active status', example: true })
+  @ApiQuery({ name: 'search', required: false, description: 'Search in campaign code, names, country code, names', example: 'vaccination' })
+  @ApiQuery({ name: 'orderBy', required: false, description: 'Field to sort by (createdAt, updatedAt, isActive)', example: 'createdAt' })
+  @ApiQuery({ name: 'order', required: false, description: 'Sort order (ASC or DESC)', example: 'ASC' })
+  @ApiResponse({ status: 200, description: 'Campaign-country associations list with pagination metadata' })
+  async findAll(
+    @Query('page', new ParseIntPipe({ optional: true })) page?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('campaignId') campaignId?: string,
+    @Query('countryCode') countryCode?: string,
+    @Query('isActive', new ParseBoolPipe({ optional: true })) isActive?: boolean,
+    @Query('search') search?: string,
+    @Query('orderBy') orderBy?: string,
+    @Query('order') order?: 'ASC' | 'DESC',
+  ): Promise<PaginatedResponse> {
+    return this.campaignCountriesService.findAll({ page, limit, campaignId, countryCode, isActive, search, orderBy, order });
   }
 
   @Get('campaign/:campaignId')
   @ApiOperation({ summary: 'Get all countries for a specific campaign' })
-  @ApiParam({
-    name: 'campaignId',
-    description: 'Campaign UUID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of countries associated with the campaign',
-  })
+  @ApiParam({ name: 'campaignId', description: 'Campaign UUID' })
+  @ApiResponse({ status: 200, description: 'List of countries associated with the campaign', type: [CampaignCountryResponseDto] })
   @ApiResponse({ status: 404, description: 'Campaign not found' })
-  async findCountriesByCampaign(@Param('campaignId') campaignId: string) {
-    const associations = await this.campaignCountriesService.findCountriesByCampaign(
-      campaignId,
-    );
-
-    return {
-      success: true,
-      data: associations.map((a) => ({
-        id: a.id,
-        campaign_id: a.campaignId,
-        country_code: a.countryCode,
-        is_active: a.isActive,
-        created_at: a.createdAt,
-        updated_at: a.updatedAt,
-        campaign: {
-          id: a.campaign.id,
-          code: a.campaign.code,
-          name_fr: a.campaign.nameFr,
-          name_en: a.campaign.nameEn,
-          name_ar: a.campaign.nameAr,
-          type: a.campaign.type,
-        },
-        country: {
-          code: a.country.code,
-          name_fr: a.country.nameFr,
-          name_en: a.country.nameEn,
-          name_ar: a.country.nameAr,
-          region: a.country.region,
-        },
-      })),
-    };
+  findCountriesByCampaign(@Param('campaignId') campaignId: string): Promise<CampaignCountryResponseDto[]> {
+    return this.campaignCountriesService.findCountriesByCampaign(campaignId);
   }
 
   @Get('country/:countryCode')
   @ApiOperation({ summary: 'Get all campaigns for a specific country' })
-  @ApiParam({
-    name: 'countryCode',
-    description: 'Country code (ISO 3166-1 alpha-2)',
-    example: 'DZ',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of campaigns associated with the country',
-  })
+  @ApiParam({ name: 'countryCode', description: 'Country code (ISO 3166-1 alpha-2)', example: 'DZ' })
+  @ApiResponse({ status: 200, description: 'List of campaigns associated with the country', type: [CampaignCountryResponseDto] })
   @ApiResponse({ status: 404, description: 'Country not found' })
-  async findCampaignsByCountry(@Param('countryCode') countryCode: string) {
-    const associations = await this.campaignCountriesService.findCampaignsByCountry(
-      countryCode,
-    );
-
-    return {
-      success: true,
-      data: associations.map((a) => ({
-        id: a.id,
-        campaign_id: a.campaignId,
-        country_code: a.countryCode,
-        is_active: a.isActive,
-        created_at: a.createdAt,
-        updated_at: a.updatedAt,
-        campaign: {
-          id: a.campaign.id,
-          code: a.campaign.code,
-          name_fr: a.campaign.nameFr,
-          name_en: a.campaign.nameEn,
-          name_ar: a.campaign.nameAr,
-          type: a.campaign.type,
-        },
-        country: {
-          code: a.country.code,
-          name_fr: a.country.nameFr,
-          name_en: a.country.nameEn,
-          name_ar: a.country.nameAr,
-          region: a.country.region,
-        },
-      })),
-    };
+  findCampaignsByCountry(@Param('countryCode') countryCode: string): Promise<CampaignCountryResponseDto[]> {
+    return this.campaignCountriesService.findCampaignsByCountry(countryCode);
   }
 
-  @Post()
-  @ApiOperation({ summary: 'Link a campaign to a country' })
-  @ApiResponse({
-    status: 201,
-    description: 'Campaign successfully linked to country',
-  })
-  @ApiResponse({ status: 404, description: 'Campaign or Country not found' })
-  @ApiResponse({ status: 409, description: 'Association already exists' })
-  async link(@Body() dto: LinkCampaignCountryDto) {
-    const association = await this.campaignCountriesService.link(
-      dto.campaignId,
-      dto.countryCode,
-    );
-
-    return {
-      success: true,
-      message: 'Campaign successfully linked to country',
-      data: {
-        id: association.id,
-        campaign_id: association.campaignId,
-        country_code: association.countryCode,
-        is_active: association.isActive,
-        created_at: association.createdAt,
-        updated_at: association.updatedAt,
-        campaign: {
-          id: association.campaign.id,
-          code: association.campaign.code,
-          name_fr: association.campaign.nameFr,
-          name_en: association.campaign.nameEn,
-          name_ar: association.campaign.nameAr,
-          type: association.campaign.type,
-        },
-        country: {
-          code: association.country.code,
-          name_fr: association.country.nameFr,
-          name_en: association.country.nameEn,
-          name_ar: association.country.nameAr,
-          region: association.country.region,
-        },
-      },
-    };
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a campaign-country association by ID' })
+  @ApiParam({ name: 'id', description: 'Association UUID' })
+  @ApiResponse({ status: 200, description: 'Association found', type: CampaignCountryResponseDto })
+  @ApiResponse({ status: 404, description: 'Association not found' })
+  findOne(@Param('id') id: string): Promise<CampaignCountryResponseDto> {
+    return this.campaignCountriesService.findOne(id);
   }
 
   @Delete()
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Unlink a campaign from a country' })
-  @ApiResponse({
-    status: 200,
-    description: 'Campaign successfully unlinked from country',
-  })
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Unlink a campaign from a country (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Campaign successfully unlinked from country', type: CampaignCountryResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
   @ApiResponse({ status: 404, description: 'Association not found' })
-  async unlink(@Body() dto: LinkCampaignCountryDto) {
-    const association = await this.campaignCountriesService.unlink(
-      dto.campaignId,
-      dto.countryCode,
-    );
+  unlink(@Body() dto: LinkCampaignCountryDto): Promise<CampaignCountryResponseDto> {
+    return this.campaignCountriesService.unlink(dto.campaignId, dto.countryCode);
+  }
 
-    return {
-      success: true,
-      message: 'Campaign successfully unlinked from country',
-      data: {
-        id: association.id,
-        campaign_id: association.campaignId,
-        country_code: association.countryCode,
-        is_active: association.isActive,
-      },
-    };
+  @Post(':id/restore')
+  @UseGuards(AuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Restore a deactivated campaign-country association (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Association UUID' })
+  @ApiResponse({ status: 200, description: 'Association restored successfully', type: CampaignCountryResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 404, description: 'Association not found' })
+  @ApiResponse({ status: 409, description: 'Conflict - Association is not deactivated' })
+  restore(@Param('id') id: string): Promise<CampaignCountryResponseDto> {
+    return this.campaignCountriesService.restore(id);
   }
 }

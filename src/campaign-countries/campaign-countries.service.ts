@@ -1,10 +1,33 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+import { CampaignCountryResponseDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
+
+export interface FindAllOptions {
+  page?: number;
+  limit?: number;
+  campaignId?: string;
+  countryCode?: string;
+  isActive?: boolean;
+  search?: string;
+  orderBy?: string;
+  order?: 'ASC' | 'DESC';
+}
+
+export interface PaginatedResponse {
+  data: CampaignCountryResponseDto[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
 
 /**
  * Service for managing NationalCampaign-Country associations
- * PHASE_19: CampaignCountries
+ * PHASE_19: CampaignCountries - Migrated to /api/v1 with pagination and search
  */
 @Injectable()
 export class CampaignCountriesService {
@@ -13,11 +36,95 @@ export class CampaignCountriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * Find all campaign-country associations with pagination, filters, search, and sorting
+   * @param options - Query options
+   * @returns Paginated associations list
+   */
+  async findAll(options: FindAllOptions = {}): Promise<PaginatedResponse> {
+    const page = Math.max(1, options.page || 1);
+    const limit = Math.min(100, Math.max(1, options.limit || 50));
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.CampaignCountryWhereInput = {};
+
+    // Filters
+    if (options.campaignId) where.campaignId = options.campaignId;
+    if (options.countryCode) where.countryCode = options.countryCode;
+    if (options.isActive !== undefined) where.isActive = options.isActive;
+
+    // Filter out deleted campaigns
+    where.campaign = { deletedAt: null };
+
+    // Search in campaign code, campaign names, country code, country names
+    if (options.search) {
+      const searchTerm = options.search;
+      where.OR = [
+        { campaign: { code: { contains: searchTerm, mode: 'insensitive' } } },
+        { campaign: { nameFr: { contains: searchTerm, mode: 'insensitive' } } },
+        { campaign: { nameEn: { contains: searchTerm, mode: 'insensitive' } } },
+        { campaign: { nameAr: { contains: searchTerm, mode: 'insensitive' } } },
+        { country: { code: { contains: searchTerm, mode: 'insensitive' } } },
+        { country: { nameFr: { contains: searchTerm, mode: 'insensitive' } } },
+        { country: { nameEn: { contains: searchTerm, mode: 'insensitive' } } },
+      ];
+    }
+
+    const orderBy = this.buildOrderBy(options.orderBy, options.order);
+
+    const [total, data] = await Promise.all([
+      this.prisma.campaignCountry.count({ where }),
+      this.prisma.campaignCountry.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+        include: {
+          campaign: {
+            select: {
+              id: true,
+              code: true,
+              nameFr: true,
+              nameEn: true,
+              nameAr: true,
+              type: true,
+            },
+          },
+          country: true,
+        },
+      }),
+    ]);
+
+    this.logger.debug(`Found ${total} campaign-country associations (page ${page}/${Math.ceil(total / limit)})`);
+
+    return {
+      data,
+      meta: { total, page, limit, pages: Math.ceil(total / limit) },
+    };
+  }
+
+  private buildOrderBy(
+    field?: string,
+    order: 'ASC' | 'DESC' = 'ASC',
+  ): Prisma.CampaignCountryOrderByWithRelationInput[] {
+    const allowedFields = ['createdAt', 'updatedAt', 'isActive'];
+
+    if (field && allowedFields.includes(field)) {
+      return [{ [field]: order.toLowerCase() as Prisma.SortOrder }];
+    }
+
+    // Default: sort by campaign name, then country name
+    return [
+      { campaign: { nameFr: 'asc' } },
+      { country: { nameFr: 'asc' } },
+    ];
+  }
+
+  /**
    * Find all countries associated with a campaign
    * @param campaignId - Campaign UUID
    * @returns List of countries with association details
    */
-  async findCountriesByCampaign(campaignId: string) {
+  async findCountriesByCampaign(campaignId: string): Promise<CampaignCountryResponseDto[]> {
     this.logger.debug('Finding countries for campaign', { campaignId });
 
     // Verify campaign exists
@@ -26,7 +133,8 @@ export class CampaignCountriesService {
     });
 
     if (!campaign) {
-      throw new NotFoundException(`Campaign with ID ${campaignId} not found`);
+      this.logger.warn(`Campaign not found: ${campaignId}`);
+      throw new NotFoundException(`Campaign with ID "${campaignId}" not found`);
     }
 
     const associations = await this.prisma.campaignCountry.findMany({
@@ -35,7 +143,6 @@ export class CampaignCountriesService {
         isActive: true,
       },
       include: {
-        country: true,
         campaign: {
           select: {
             id: true,
@@ -46,6 +153,7 @@ export class CampaignCountriesService {
             type: true,
           },
         },
+        country: true,
       },
       orderBy: {
         country: {
@@ -67,7 +175,7 @@ export class CampaignCountriesService {
    * @param countryCode - Country code (ISO 3166-1 alpha-2)
    * @returns List of campaigns with association details
    */
-  async findCampaignsByCountry(countryCode: string) {
+  async findCampaignsByCountry(countryCode: string): Promise<CampaignCountryResponseDto[]> {
     this.logger.debug('Finding campaigns for country', { countryCode });
 
     // Verify country exists
@@ -76,13 +184,15 @@ export class CampaignCountriesService {
     });
 
     if (!country) {
-      throw new NotFoundException(`Country with code ${countryCode} not found`);
+      this.logger.warn(`Country not found: ${countryCode}`);
+      throw new NotFoundException(`Country with code "${countryCode}" not found`);
     }
 
     const associations = await this.prisma.campaignCountry.findMany({
       where: {
         countryCode,
         isActive: true,
+        campaign: { deletedAt: null },
       },
       include: {
         campaign: {
@@ -93,7 +203,6 @@ export class CampaignCountriesService {
             nameEn: true,
             nameAr: true,
             type: true,
-            deletedAt: true,
           },
         },
         country: true,
@@ -105,24 +214,52 @@ export class CampaignCountriesService {
       },
     });
 
-    // Filter out deleted campaigns
-    const activeAssociations = associations.filter(a => !a.campaign.deletedAt);
-
     this.logger.debug('Found campaigns for country', {
       countryCode,
-      count: activeAssociations.length,
+      count: associations.length,
     });
 
-    return activeAssociations;
+    return associations;
+  }
+
+  /**
+   * Get a single association by ID
+   * @param id - Association ID
+   * @returns Association or throws NotFoundException
+   */
+  async findOne(id: string): Promise<CampaignCountryResponseDto> {
+    const association = await this.prisma.campaignCountry.findFirst({
+      where: { id, isActive: true },
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            code: true,
+            nameFr: true,
+            nameEn: true,
+            nameAr: true,
+            type: true,
+          },
+        },
+        country: true,
+      },
+    });
+
+    if (!association) {
+      this.logger.warn(`Association not found: ${id}`);
+      throw new NotFoundException(`Campaign-Country association with ID "${id}" not found`);
+    }
+
+    return association;
   }
 
   /**
    * Link a campaign to a country
    * @param campaignId - Campaign UUID
    * @param countryCode - Country code (ISO 3166-1 alpha-2)
-   * @returns Created association
+   * @returns Created or reactivated association
    */
-  async link(campaignId: string, countryCode: string) {
+  async link(campaignId: string, countryCode: string): Promise<CampaignCountryResponseDto> {
     this.logger.debug('Linking campaign to country', { campaignId, countryCode });
 
     // Verify campaign exists
@@ -131,7 +268,8 @@ export class CampaignCountriesService {
     });
 
     if (!campaign) {
-      throw new NotFoundException(`Campaign with ID ${campaignId} not found`);
+      this.logger.warn(`Campaign not found: ${campaignId}`);
+      throw new NotFoundException(`Campaign with ID "${campaignId}" not found`);
     }
 
     // Verify country exists
@@ -140,58 +278,28 @@ export class CampaignCountriesService {
     });
 
     if (!country) {
-      throw new NotFoundException(`Country with code ${countryCode} not found`);
+      this.logger.warn(`Country not found: ${countryCode}`);
+      throw new NotFoundException(`Country with code "${countryCode}" not found`);
     }
 
     // Check if association already exists
-    const existing = await this.prisma.campaignCountry.findFirst({
+    const existing = await this.prisma.campaignCountry.findUnique({
       where: {
-        campaignId,
-        countryCode,
+        campaignId_countryCode: { campaignId, countryCode },
       },
     });
 
-    if (existing) {
-      if (existing.isActive) {
-        throw new ConflictException(
-          `Campaign ${campaignId} is already linked to country ${countryCode}`,
-        );
-      } else {
-        // Reactivate existing association
-        const reactivated = await this.prisma.campaignCountry.update({
-          where: { id: existing.id },
-          data: { isActive: true },
-          include: {
-            campaign: {
-              select: {
-                id: true,
-                code: true,
-                nameFr: true,
-                nameEn: true,
-                nameAr: true,
-                type: true,
-              },
-            },
-            country: true,
-          },
-        });
-
-        this.logger.audit('Campaign-Country association reactivated', {
-          campaignId,
-          countryCode,
-        });
-
-        return reactivated;
-      }
+    if (existing && existing.isActive) {
+      throw new ConflictException(
+        `Campaign "${campaign.code}" is already linked to country "${countryCode}"`,
+      );
     }
 
-    // Create new association
-    try {
-      const association = await this.prisma.campaignCountry.create({
-        data: {
-          campaignId,
-          countryCode,
-        },
+    if (existing && !existing.isActive) {
+      // Reactivate existing association
+      const reactivated = await this.prisma.campaignCountry.update({
+        where: { id: existing.id },
+        data: { isActive: true },
         include: {
           campaign: {
             select: {
@@ -207,26 +315,52 @@ export class CampaignCountriesService {
         },
       });
 
-      this.logger.audit('Campaign-Country association created', {
+      this.logger.audit('Campaign-Country association reactivated', {
         campaignId,
         countryCode,
-        associationId: association.id,
+        associationId: reactivated.id,
       });
 
-      return association;
-    } catch (error) {
-      this.logger.error('Failed to link campaign to country', error.stack);
-      throw error;
+      return reactivated;
     }
+
+    // Create new association
+    const association = await this.prisma.campaignCountry.create({
+      data: {
+        campaignId,
+        countryCode,
+      },
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            code: true,
+            nameFr: true,
+            nameEn: true,
+            nameAr: true,
+            type: true,
+          },
+        },
+        country: true,
+      },
+    });
+
+    this.logger.audit('Campaign-Country association created', {
+      campaignId,
+      countryCode,
+      associationId: association.id,
+    });
+
+    return association;
   }
 
   /**
-   * Unlink a campaign from a country
+   * Unlink a campaign from a country (deactivate)
    * @param campaignId - Campaign UUID
    * @param countryCode - Country code (ISO 3166-1 alpha-2)
-   * @returns Deleted/deactivated association
+   * @returns Deactivated association
    */
-  async unlink(campaignId: string, countryCode: string) {
+  async unlink(campaignId: string, countryCode: string): Promise<CampaignCountryResponseDto> {
     this.logger.debug('Unlinking campaign from country', { campaignId, countryCode });
 
     const association = await this.prisma.campaignCountry.findFirst({
@@ -238,15 +372,29 @@ export class CampaignCountriesService {
     });
 
     if (!association) {
+      this.logger.warn(`Active association not found: ${campaignId} - ${countryCode}`);
       throw new NotFoundException(
-        `Active association between campaign ${campaignId} and country ${countryCode} not found`,
+        `Active association between campaign "${campaignId}" and country "${countryCode}" not found`,
       );
     }
 
-    // Soft delete by setting isActive to false
+    // Deactivate by setting isActive to false
     const updated = await this.prisma.campaignCountry.update({
       where: { id: association.id },
       data: { isActive: false },
+      include: {
+        campaign: {
+          select: {
+            id: true,
+            code: true,
+            nameFr: true,
+            nameEn: true,
+            nameAr: true,
+            type: true,
+          },
+        },
+        country: true,
+      },
     });
 
     this.logger.audit('Campaign-Country association deactivated', {
@@ -259,21 +407,29 @@ export class CampaignCountriesService {
   }
 
   /**
-   * Find all associations (for admin purposes)
-   * @returns All campaign-country associations
+   * Restore a deactivated association
+   * @param id - Association ID
+   * @returns Restored association
    */
-  async findAll(includeInactive = false) {
-    this.logger.debug('Finding all campaign-country associations', {
-      includeInactive,
+  async restore(id: string): Promise<CampaignCountryResponseDto> {
+    this.logger.debug(`Restoring campaign-country association ${id}`);
+
+    const association = await this.prisma.campaignCountry.findUnique({
+      where: { id },
     });
 
-    const where: any = {};
-    if (!includeInactive) {
-      where.isActive = true;
+    if (!association) {
+      this.logger.warn(`Association not found for restore: ${id}`);
+      throw new NotFoundException(`Campaign-Country association with ID "${id}" not found`);
     }
 
-    const associations = await this.prisma.campaignCountry.findMany({
-      where,
+    if (association.isActive) {
+      throw new ConflictException(`Association "${id}" is not deactivated`);
+    }
+
+    const restored = await this.prisma.campaignCountry.update({
+      where: { id },
+      data: { isActive: true },
       include: {
         campaign: {
           select: {
@@ -283,20 +439,13 @@ export class CampaignCountriesService {
             nameEn: true,
             nameAr: true,
             type: true,
-            deletedAt: true,
           },
         },
         country: true,
       },
-      orderBy: [
-        { campaign: { nameFr: 'asc' } },
-        { country: { nameFr: 'asc' } },
-      ],
     });
 
-    // Filter out deleted campaigns
-    const activeAssociations = associations.filter(a => !a.campaign.deletedAt);
-
-    return activeAssociations;
+    this.logger.audit('Campaign-Country association restored', { associationId: id });
+    return restored;
   }
 }
