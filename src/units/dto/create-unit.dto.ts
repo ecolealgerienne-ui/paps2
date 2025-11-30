@@ -12,7 +12,7 @@ import {
   Matches,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { UnitType } from '../../common/types/prisma-types';
+import { UnitType } from '@prisma/client';
 
 export class CreateUnitDto {
   @ApiProperty({

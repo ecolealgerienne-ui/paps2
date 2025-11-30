@@ -19,7 +19,7 @@ import {
   UnitResponseDto,
   ToggleActiveDto,
 } from './dto';
-import { UnitType } from '../common/types/prisma-types';
+import { UnitType } from '@prisma/client';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 

@@ -1,8 +1,7 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, UnitType } from '@prisma/client';
 import { CreateUnitDto, UpdateUnitDto, UnitResponseDto } from './dto';
-import { UnitType } from '../common/types/prisma-types';
 import { AppLogger } from '../common/utils/logger.service';
 
 /**

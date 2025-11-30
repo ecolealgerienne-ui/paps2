@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { UnitType } from '../../common/types/prisma-types';
+import { UnitType } from '@prisma/client';
 
 /**
  * Response DTO for Unit
