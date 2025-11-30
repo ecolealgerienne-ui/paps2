@@ -271,6 +271,26 @@ export class NationalCampaignsService {
 
     const existing = await this.findOne(id);
 
+    // Check dependencies
+    const [countriesCount, preferencesCount] = await Promise.all([
+      this.prisma.campaignCountry.count({
+        where: { campaignId: id },
+      }),
+      this.prisma.farmNationalCampaignPreference.count({
+        where: { campaignId: id },
+      }),
+    ]);
+
+    if (countriesCount > 0 || preferencesCount > 0) {
+      this.logger.warn(`Cannot delete campaign ${id}: has dependencies`, {
+        countriesCount,
+        preferencesCount,
+      });
+      throw new ConflictException(
+        `Cannot delete campaign "${existing.code}": linked to ${countriesCount} country/countries and ${preferencesCount} farm preference(s)`,
+      );
+    }
+
     const campaign = await this.prisma.nationalCampaign.update({
       where: { id },
       data: {
