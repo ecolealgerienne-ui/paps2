@@ -257,8 +257,31 @@ export class UnitsService {
       throw new NotFoundException(`Unit with ID "${id}" not found`);
     }
 
-    // Check if unit is in use (future: check relations)
-    // For now, soft delete is always allowed since we're using soft delete pattern
+    // Check dependencies
+    const [packagingConcentrationCount, packagingVolumeCount, therapeuticIndicationsCount] = await Promise.all([
+      this.prisma.productPackaging.count({
+        where: { concentrationUnitId: id },
+      }),
+      this.prisma.productPackaging.count({
+        where: { volumeUnitId: id },
+      }),
+      this.prisma.therapeuticIndication.count({
+        where: { doseUnitId: id, deletedAt: null },
+      }),
+    ]);
+
+    const totalUsage = packagingConcentrationCount + packagingVolumeCount + therapeuticIndicationsCount;
+
+    if (totalUsage > 0) {
+      this.logger.warn(`Cannot delete unit ${id}: has dependencies`, {
+        packagingConcentrationCount,
+        packagingVolumeCount,
+        therapeuticIndicationsCount,
+      });
+      throw new ConflictException(
+        `Cannot delete unit "${existing.code}": used in ${packagingConcentrationCount} packaging concentration(s), ${packagingVolumeCount} packaging volume(s), and ${therapeuticIndicationsCount} therapeutic indication(s)`,
+      );
+    }
 
     try {
       await this.prisma.unit.update({

@@ -245,6 +245,26 @@ export class ProductPackagingsService {
 
     const existing = await this.findOne(id);
 
+    // Check dependencies
+    const [treatmentsCount, farmPreferencesCount] = await Promise.all([
+      this.prisma.treatment.count({
+        where: { packagingId: id, deletedAt: null },
+      }),
+      this.prisma.farmProductPreference.count({
+        where: { packagingId: id },
+      }),
+    ]);
+
+    if (treatmentsCount > 0 || farmPreferencesCount > 0) {
+      this.logger.warn(`Cannot delete packaging ${id}: has dependencies`, {
+        treatmentsCount,
+        farmPreferencesCount,
+      });
+      throw new ConflictException(
+        `Cannot delete packaging "${existing.packagingLabel}": used in ${treatmentsCount} treatment(s) and ${farmPreferencesCount} farm preference(s)`,
+      );
+    }
+
     const packaging = await this.prisma.productPackaging.update({
       where: { id },
       data: {

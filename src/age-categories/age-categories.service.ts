@@ -294,8 +294,19 @@ export class AgeCategoriesService {
       throw new NotFoundException(`Age category with ID "${id}" not found`);
     }
 
-    // Check if category is in use (future: check Animal references)
-    // For now, soft delete is always allowed since we're using soft delete pattern
+    // Check dependencies
+    const therapeuticIndicationsCount = await this.prisma.therapeuticIndication.count({
+      where: { ageCategoryId: id, deletedAt: null },
+    });
+
+    if (therapeuticIndicationsCount > 0) {
+      this.logger.warn(`Cannot delete age category ${id}: has dependencies`, {
+        therapeuticIndicationsCount,
+      });
+      throw new ConflictException(
+        `Cannot delete age category "${existing.code}": used in ${therapeuticIndicationsCount} therapeutic indication(s)`,
+      );
+    }
 
     try {
       await this.prisma.ageCategory.update({
