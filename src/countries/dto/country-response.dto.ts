@@ -14,7 +14,7 @@ export class CountryResponseDto {
   nameAr: string;
 
   @ApiPropertyOptional({ example: 'Africa' })
-  region?: string;
+  region: string | null;
 
   @ApiProperty({ example: true })
   isActive: boolean;

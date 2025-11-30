@@ -20,7 +20,7 @@ import {
   ApiBearerAuth,
   ApiParam
 } from '@nestjs/swagger';
-import { CountriesService } from './countries.service';
+import { CountriesService, PaginatedResponse } from './countries.service';
 import { CreateCountryDto, UpdateCountryDto, CountryResponseDto } from './dto';
 import { AuthGuard, AdminGuard } from '../auth/guards';
 
@@ -60,7 +60,7 @@ export class CountriesController {
     @Query('search') search?: string,
     @Query('orderBy', new DefaultValuePipe('nameFr')) orderBy?: string,
     @Query('order', new DefaultValuePipe('ASC')) order?: 'ASC' | 'DESC',
-  ) {
+  ): Promise<PaginatedResponse> {
     return this.service.findAll({
       page,
       limit: Math.min(limit, 100), // Max 100 items per page

@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCountryDto, UpdateCountryDto, CountryResponseDto } from './dto';
 
-interface FindAllOptions {
+export interface FindAllOptions {
   page?: number;
   limit?: number;
   region?: string;
@@ -13,7 +13,7 @@ interface FindAllOptions {
   order?: 'ASC' | 'DESC';
 }
 
-interface PaginatedResponse {
+export interface PaginatedResponse {
   data: CountryResponseDto[];
   meta: {
     total: number;
