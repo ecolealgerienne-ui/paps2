@@ -268,7 +268,7 @@ export class TherapeuticIndicationsService {
 
     // Check dependencies before deleting
     const treatmentsCount = await this.prisma.treatment.count({
-      where: { therapeuticIndicationId: id, deletedAt: null },
+      where: { indicationId: id, deletedAt: null },
     });
 
     if (treatmentsCount > 0) {

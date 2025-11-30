@@ -416,7 +416,12 @@ export class ProductsService {
         where: { productId: id, deletedAt: null },
       }),
       this.prisma.farmerProductLot.count({
-        where: { productId: id, deletedAt: null },
+        where: {
+          deletedAt: null,
+          config: {
+            productId: id,
+          },
+        },
       }),
     ]);
 
