@@ -11,12 +11,12 @@
 ## 📊 PROGRESSION GLOBALE
 
 **Total Entités** : 16
-**Migrées** : 5 (31%)
+**Migrées** : 6 (38%)
 **En cours** : 0
-**Restantes** : 11
+**Restantes** : 10
 
 ```
-[█████░░░░░░░░░░░░░░░] 31%
+[██████░░░░░░░░░░░░░░] 38%
 ```
 
 ---
@@ -26,7 +26,7 @@
 | Phase | Entités | Statut | Progression |
 |-------|---------|--------|-------------|
 | **Phase 1** : Données Simples | 5 | 🟢 Terminé | 5/5 (100%) |
-| **Phase 2** : Données Métier | 5 | ⏳ Non démarré | 0/5 (0%) |
+| **Phase 2** : Données Métier | 5 | 🟡 En cours | 1/5 (20%) |
 | **Phase 3** : Relations | 4 | ⏳ Non démarré | 0/4 (0%) |
 | **Phase 4** : Master Table | 2 | ⏳ Non démarré | 0/2 (0%) |
 
@@ -54,13 +54,13 @@
 
 | # | Entité | Statut | Progression | Développeur | Début | Fin | Commit | Notes |
 |---|--------|--------|-------------|-------------|-------|-----|--------|-------|
-| 6 | **species** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | Fix `scientificName` |
+| 6 | **species** | 🟢 Terminé | 33/33 (100%) | Claude | 2025-11-30 | 2025-11-30 | Pending | scientificName + pagination ✅ |
 | 7 | **active-substances** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 | 8 | **therapeutic-indications** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 | 9 | **product-categories** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 | 10 | **product-packagings** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 
-**Statut Phase 2** : ⏳ Non démarré (0/5)
+**Statut Phase 2** : 🟡 EN COURS (1/5 - 20%)
 
 ---
 
@@ -787,6 +787,110 @@ Leçons apprises:
 - ✅ AlertPriority: low, medium, high, urgent
 - ✅ Default priority: medium (défini dans schema)
 - ✅ Endpoints byCategory/byPriority retournent seulement actives
+```
+
+---
+
+## species (6/16) - Phase 2
+
+**Type** : Données Métier (8 champs + scientificName)
+**Statut** : 🟢 Terminé (33/33 - 100%)
+**Développeur** : Claude
+**Dates** : 2025-11-30 → 2025-11-30
+
+### Caractéristiques
+- **ID custom** (String @id, pas UUID): "bovine", "ovine", "caprine"
+- **scientificName** ajouté (nullable)
+- **displayOrder** pour tri personnalisé
+- **icon** pour affichage UI
+- **Relations** : animals, breeds, ageCategories
+- **Pagination** complète (page, limit, total, pages)
+- **Recherche** 4 champs (nameFr, nameEn, nameAr, scientificName)
+- **Tri** 5 champs (nameFr, nameEn, id, displayOrder, createdAt)
+- **Default sort** : displayOrder → nameFr
+- **Dependency check** : breeds (avant soft delete)
+
+### Endpoints (6)
+1. `POST /api/v1/species` - Create (Admin) ✅
+2. `GET /api/v1/species` - FindAll + pagination + search + sort ✅
+3. `GET /api/v1/species/:id` - FindOne ✅
+4. `PATCH /api/v1/species/:id` - Update (Admin) ✅
+5. `DELETE /api/v1/species/:id` - Soft delete (Admin) ✅
+6. `POST /api/v1/species/:id/restore` - Restore (Admin) ✅
+
+### Checklist (33/33 - 100%)
+- ✅ Schema audit (8 champs + metadata)
+- ✅ DTOs (Create, Update, Response)
+- ✅ scientificName ajouté aux DTOs
+- ✅ Types nullable (| null, pas ?)
+- ✅ Controller (/api/v1/species)
+- ✅ Guards (Auth + Admin sur mutations)
+- ✅ Supprimé wrapper custom {success: true}
+- ✅ Retourne DTOs directement
+- ✅ Service pagination (FindAllOptions, PaginatedResponse)
+- ✅ Interfaces exportées
+- ✅ Recherche multi-champs
+- ✅ Tri configurable
+- ✅ Default sort logique
+- ✅ update() gère undefined
+- ✅ AppLogger partout
+- ✅ Soft delete + restore
+- ✅ Dependency check (breeds)
+- ✅ Optimistic locking (version)
+- ✅ Swagger complet
+- ✅ I18N_KEYS.md (20 clés)
+- ✅ TESTS_PLAN.md (60+ tests)
+- ✅ SPECIES_MIGRATION_CHECKLIST.md
+
+### Fichiers Modifiés/Créés
+- ✅ `src/species/species.controller.ts` - Migré /api/v1/, Guards, pagination, Swagger (6 endpoints)
+- ✅ `src/species/species.service.ts` - Pagination, recherche (4 champs), tri (5 champs), dependency check
+- ✅ `src/species/dto/create-species.dto.ts` - CreateDto avec scientificName + icon optional
+- ✅ `src/species/dto/update-species.dto.ts` - UpdateDto (exclut id, inclut version)
+- ✅ `src/species/dto/species-response.dto.ts` - ResponseDto avec types | null + scientificName
+- ✅ `src/species/dto/index.ts` - Barrel exports
+- ✅ `src/species/I18N_KEYS.md` - 20 clés i18n
+- ✅ `src/species/TESTS_PLAN.md` - 60+ test cases
+- ✅ `src/species/SPECIES_MIGRATION_CHECKLIST.md` - Checklist
+
+### Points Forts
+- ✅ **ID custom** (non-UUID) géré correctement
+- ✅ **scientificName** ajouté (absent avant)
+- ✅ **displayOrder** pour tri UI
+- ✅ **Pagination complète** avec meta
+- ✅ **Recherche** 4 champs case-insensitive
+- ✅ **Tri** 5 champs + default logique
+- ✅ **Dependency check** avant delete (breeds)
+- ✅ **Guards admin** sur mutations
+- ✅ **Types | null** corrects (fix type local)
+- ✅ **update() handles undefined** (fix partiel)
+- ✅ **Wrapper supprimé** (retourne DTOs)
+- ✅ **Prisma imports** (pas de type local)
+- ✅ **AppLogger** complet
+
+### TODOs Post-MVP
+- ⏳ Implémenter i18n (20 clés documentées)
+- ⏳ Implémenter tests E2E (60+ cas)
+- ⏳ Ajouter relation UI avec breeds/animals
+- ⏳ Rate limiting
+- ⏳ Caching
+
+### Notes
+```
+✅ PHASE 2 EN COURS (1/5 - 20%)
+
+Species est la première entité de Phase 2.
+Pattern ID custom (String @id) au lieu de UUID.
+
+Leçons apprises:
+- ✅ ID custom type String @id (pas @default(uuid()))
+- ✅ scientificName nullable ajouté (manquant avant)
+- ✅ displayOrder pour tri UI personnalisé
+- ✅ Dependency check avec breeds avant delete
+- ✅ Type local remplacé par Prisma imports
+- ✅ update() doit gérer undefined (ternaires)
+- ✅ Wrapper custom supprimé (retourne DTOs)
+- ✅ ParseIntPipe({ optional: true }) pour query params
 ```
 
 ---

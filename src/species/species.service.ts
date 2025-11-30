@@ -1,26 +1,31 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateSpeciesDto, UpdateSpeciesDto } from './dto';
+import { SpeciesResponseDto } from './dto/species-response.dto';
 import { AppLogger } from '../common/utils/logger.service';
 
-// Type temporaire pour Species jusqu'à régénération du client Prisma
-type Species = {
-  id: string;
-  nameFr: string;
-  nameEn: string;
-  nameAr: string;
-  icon: string;
-  displayOrder: number;
-  description: string | null;
-  version: number;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+export interface FindAllOptions {
+  page?: number;
+  limit?: number;
+  search?: string;
+  orderBy?: string;
+  order?: 'ASC' | 'DESC';
+}
+
+export interface PaginatedResponse {
+  data: SpeciesResponseDto[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
 
 /**
  * Service for managing species reference data
- * PHASE_01: Added soft delete, versioning, timestamps
+ * PHASE_02: Added pagination, search, sort, scientificName
  */
 @Injectable()
 export class SpeciesService {
@@ -33,81 +38,119 @@ export class SpeciesService {
    * @param dto - Species creation data
    * @returns Created species
    */
-  async create(dto: CreateSpeciesDto): Promise<Species> {
-    this.logger.debug(`Creating species`, { id: dto.id, nameFr: dto.nameFr });
+  async create(dto: CreateSpeciesDto): Promise<SpeciesResponseDto> {
+    this.logger.debug(`Creating species with id ${dto.id}`);
 
-    try {
-      // Vérifier si l'ID existe déjà
-      const existing = await this.prisma.species.findUnique({
+    const existing = await this.prisma.species.findUnique({
+      where: { id: dto.id },
+    });
+
+    if (existing && !existing.deletedAt) {
+      this.logger.warn(`Duplicate id attempt: ${dto.id}`);
+      throw new ConflictException(`Species with id "${dto.id}" already exists`);
+    }
+
+    if (existing && existing.deletedAt) {
+      this.logger.debug(`Restoring soft-deleted species: ${dto.id}`);
+      const restored = await this.prisma.species.update({
         where: { id: dto.id },
-      });
-
-      if (existing && !existing.deletedAt) {
-        throw new ConflictException(`Species with id "${dto.id}" already exists`);
-      }
-
-      // Si existait et était soft-deleted, le restaurer
-      if (existing && existing.deletedAt) {
-        this.logger.debug(`Restoring soft-deleted species`, { id: dto.id });
-        const species = await this.prisma.species.update({
-          where: { id: dto.id },
-          data: {
-            ...dto,
-            deletedAt: null,
-            version: existing.version + 1,
-          },
-        });
-        this.logger.audit('Species restored on create', { speciesId: species.id, nameFr: species.nameFr });
-        return species;
-      }
-
-      // Créer nouvelle espèce
-      const species = await this.prisma.species.create({
         data: {
-          id: dto.id,
           nameFr: dto.nameFr,
           nameEn: dto.nameEn,
           nameAr: dto.nameAr,
           icon: dto.icon || '',
           displayOrder: dto.displayOrder ?? 0,
-          description: dto.description,
+          description: dto.description || null,
+          scientificName: dto.scientificName || null,
+          deletedAt: null,
+          version: existing.version + 1,
         },
       });
-
-      this.logger.audit('Species created', { speciesId: species.id, nameFr: species.nameFr });
-      return species;
-    } catch (error) {
-      this.logger.error(`Failed to create species`, error.stack);
-      throw error;
+      this.logger.audit('Species restored', { speciesId: restored.id, nameFr: restored.nameFr });
+      return restored;
     }
+
+    const species = await this.prisma.species.create({
+      data: {
+        id: dto.id,
+        nameFr: dto.nameFr,
+        nameEn: dto.nameEn,
+        nameAr: dto.nameAr,
+        icon: dto.icon || '',
+        displayOrder: dto.displayOrder ?? 0,
+        description: dto.description || null,
+        scientificName: dto.scientificName || null,
+      },
+    });
+
+    this.logger.audit('Species created', { speciesId: species.id, nameFr: species.nameFr });
+    return species;
   }
 
   /**
-   * Get all species ordered by nameFr
-   * @param includeDeleted - Include soft-deleted species
-   * @returns All species (active or all if includeDeleted=true)
+   * Get all species with pagination, search, and sorting
+   * @param options - Query options
+   * @returns Paginated species list
    */
-  async findAll(includeDeleted = false): Promise<Species[]> {
-    return this.prisma.species.findMany({
-      where: includeDeleted ? {} : { deletedAt: null },
-      orderBy: {
-        nameFr: 'asc',
-      },
-    });
+  async findAll(options: FindAllOptions = {}): Promise<PaginatedResponse> {
+    const page = Math.max(1, options.page || 1);
+    const limit = Math.min(100, Math.max(1, options.limit || 20));
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.SpeciesWhereInput = { deletedAt: null };
+
+    // Search in 4 fields
+    if (options.search) {
+      const searchTerm = options.search;
+      where.OR = [
+        { nameFr: { contains: searchTerm, mode: 'insensitive' } },
+        { nameEn: { contains: searchTerm, mode: 'insensitive' } },
+        { nameAr: { contains: searchTerm, mode: 'insensitive' } },
+        { scientificName: { contains: searchTerm, mode: 'insensitive' } },
+      ];
+    }
+
+    const orderBy = this.buildOrderBy(options.orderBy, options.order);
+
+    const [total, data] = await Promise.all([
+      this.prisma.species.count({ where }),
+      this.prisma.species.findMany({ where, orderBy, skip, take: limit }),
+    ]);
+
+    this.logger.debug(`Found ${total} species (page ${page}/${Math.ceil(total / limit)})`);
+
+    return {
+      data,
+      meta: { total, page, limit, pages: Math.ceil(total / limit) },
+    };
+  }
+
+  private buildOrderBy(
+    field?: string,
+    order: 'ASC' | 'DESC' = 'ASC',
+  ): Prisma.SpeciesOrderByWithRelationInput[] {
+    const allowedFields = ['nameFr', 'nameEn', 'id', 'displayOrder', 'createdAt'];
+
+    if (field && allowedFields.includes(field)) {
+      return [{ [field]: order.toLowerCase() as Prisma.SortOrder }];
+    }
+
+    // Default: sort by displayOrder, then nameFr
+    return [{ displayOrder: 'asc' }, { nameFr: 'asc' }];
   }
 
   /**
    * Get a single species by ID
    * @param id - Species ID
-   * @param includeDeleted - Include soft-deleted species
    * @returns Species or throws NotFoundException
    */
-  async findOne(id: string, includeDeleted = false): Promise<Species> {
-    const species = await this.prisma.species.findUnique({
-      where: { id },
+  async findOne(id: string): Promise<SpeciesResponseDto> {
+    const species = await this.prisma.species.findFirst({
+      where: { id, deletedAt: null },
     });
 
-    if (!species || (!includeDeleted && species.deletedAt)) {
+    if (!species) {
+      this.logger.warn(`Species not found: ${id}`);
       throw new NotFoundException(`Species with id "${id}" not found`);
     }
 
@@ -120,39 +163,34 @@ export class SpeciesService {
    * @param dto - Update data
    * @returns Updated species
    */
-  async update(id: string, dto: UpdateSpeciesDto): Promise<Species> {
-    this.logger.debug(`Updating species`, { id });
+  async update(id: string, dto: UpdateSpeciesDto): Promise<SpeciesResponseDto> {
+    this.logger.debug(`Updating species ${id}`);
 
-    try {
-      // Check if species exists
-      const existing = await this.findOne(id);
+    const existing = await this.findOne(id);
 
-      // Optimistic locking
-      if (dto.version !== undefined && existing.version !== dto.version) {
-        throw new ConflictException(
-          `Version conflict: expected ${dto.version}, found ${existing.version}`
-        );
-      }
-
-      const species = await this.prisma.species.update({
-        where: { id },
-        data: {
-          nameFr: dto.nameFr,
-          nameEn: dto.nameEn,
-          nameAr: dto.nameAr,
-          icon: dto.icon,
-          displayOrder: dto.displayOrder,
-          description: dto.description,
-          version: existing.version + 1,
-        },
-      });
-
-      this.logger.audit('Species updated', { speciesId: species.id, nameFr: species.nameFr, newVersion: species.version });
-      return species;
-    } catch (error) {
-      this.logger.error(`Failed to update species`, error.stack);
-      throw error;
+    // Optimistic locking
+    if (dto.version !== undefined && existing.version !== dto.version) {
+      throw new ConflictException(
+        `Version conflict: expected ${dto.version}, found ${existing.version}`,
+      );
     }
+
+    const species = await this.prisma.species.update({
+      where: { id },
+      data: {
+        nameFr: dto.nameFr !== undefined ? dto.nameFr : existing.nameFr,
+        nameEn: dto.nameEn !== undefined ? dto.nameEn : existing.nameEn,
+        nameAr: dto.nameAr !== undefined ? dto.nameAr : existing.nameAr,
+        icon: dto.icon !== undefined ? dto.icon : existing.icon,
+        displayOrder: dto.displayOrder !== undefined ? dto.displayOrder : existing.displayOrder,
+        description: dto.description !== undefined ? dto.description : existing.description,
+        scientificName: dto.scientificName !== undefined ? dto.scientificName : existing.scientificName,
+        version: existing.version + 1,
+      },
+    });
+
+    this.logger.audit('Species updated', { speciesId: id, newVersion: species.version });
+    return species;
   }
 
   /**
@@ -160,38 +198,32 @@ export class SpeciesService {
    * @param id - Species ID
    * @returns Soft-deleted species
    */
-  async remove(id: string): Promise<Species> {
-    this.logger.debug(`Soft deleting species`, { id });
+  async remove(id: string): Promise<SpeciesResponseDto> {
+    this.logger.debug(`Soft deleting species ${id}`);
 
-    try {
-      // Check if species exists
-      const existing = await this.findOne(id);
+    const existing = await this.findOne(id);
 
-      // Vérifier si utilisé par des breeds ou animals
-      const usageCount = await this.prisma.breed.count({
-        where: { speciesId: id, deletedAt: null },
-      });
+    // Check if used by active breeds
+    const usageCount = await this.prisma.breed.count({
+      where: { speciesId: id, deletedAt: null },
+    });
 
-      if (usageCount > 0) {
-        throw new ConflictException(
-          `Cannot delete species "${id}": ${usageCount} active breeds depend on it`
-        );
-      }
-
-      const species = await this.prisma.species.update({
-        where: { id },
-        data: {
-          deletedAt: new Date(),
-          version: existing.version + 1,
-        },
-      });
-
-      this.logger.audit('Species soft deleted', { speciesId: id, newVersion: species.version });
-      return species;
-    } catch (error) {
-      this.logger.error(`Failed to delete species`, error.stack);
-      throw error;
+    if (usageCount > 0) {
+      throw new ConflictException(
+        `Cannot delete species "${id}": ${usageCount} active breeds depend on it`,
+      );
     }
+
+    const species = await this.prisma.species.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        version: existing.version + 1,
+      },
+    });
+
+    this.logger.audit('Species soft deleted', { speciesId: id });
+    return species;
   }
 
   /**
@@ -199,35 +231,31 @@ export class SpeciesService {
    * @param id - Species ID
    * @returns Restored species
    */
-  async restore(id: string): Promise<Species> {
-    this.logger.debug(`Restoring species`, { id });
+  async restore(id: string): Promise<SpeciesResponseDto> {
+    this.logger.debug(`Restoring species ${id}`);
 
-    try {
-      const species = await this.prisma.species.findUnique({
-        where: { id },
-      });
+    const species = await this.prisma.species.findUnique({
+      where: { id },
+    });
 
-      if (!species) {
-        throw new NotFoundException(`Species with id "${id}" not found`);
-      }
-
-      if (!species.deletedAt) {
-        throw new ConflictException(`Species "${id}" is not deleted`);
-      }
-
-      const restored = await this.prisma.species.update({
-        where: { id },
-        data: {
-          deletedAt: null,
-          version: species.version + 1,
-        },
-      });
-
-      this.logger.audit('Species restored', { speciesId: id, newVersion: restored.version });
-      return restored;
-    } catch (error) {
-      this.logger.error(`Failed to restore species`, error.stack);
-      throw error;
+    if (!species) {
+      this.logger.warn(`Species not found for restore: ${id}`);
+      throw new NotFoundException(`Species with id "${id}" not found`);
     }
+
+    if (!species.deletedAt) {
+      throw new ConflictException(`Species "${id}" is not deleted`);
+    }
+
+    const restored = await this.prisma.species.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        version: species.version + 1,
+      },
+    });
+
+    this.logger.audit('Species restored', { speciesId: id });
+    return restored;
   }
 }
