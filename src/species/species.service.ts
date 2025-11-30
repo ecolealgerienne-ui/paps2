@@ -203,14 +203,29 @@ export class SpeciesService {
 
     const existing = await this.findOne(id);
 
-    // Check if used by active breeds
-    const usageCount = await this.prisma.breed.count({
-      where: { speciesId: id, deletedAt: null },
-    });
+    // Check dependencies
+    const [breedsCount, animalsCount, ageCategoriesCount] = await Promise.all([
+      this.prisma.breed.count({
+        where: { speciesId: id, deletedAt: null },
+      }),
+      this.prisma.animal.count({
+        where: { speciesId: id, deletedAt: null },
+      }),
+      this.prisma.ageCategory.count({
+        where: { speciesId: id, deletedAt: null },
+      }),
+    ]);
 
-    if (usageCount > 0) {
+    const totalUsage = breedsCount + animalsCount + ageCategoriesCount;
+
+    if (totalUsage > 0) {
+      this.logger.warn(`Cannot delete species ${id}: has dependencies`, {
+        breedsCount,
+        animalsCount,
+        ageCategoriesCount,
+      });
       throw new ConflictException(
-        `Cannot delete species "${id}": ${usageCount} active breeds depend on it`,
+        `Cannot delete species "${id}": used in ${breedsCount} breed(s), ${animalsCount} animal(s), and ${ageCategoriesCount} age category/categories`,
       );
     }
 
