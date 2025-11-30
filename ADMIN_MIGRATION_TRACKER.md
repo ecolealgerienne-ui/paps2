@@ -11,12 +11,12 @@
 ## 📊 PROGRESSION GLOBALE
 
 **Total Entités** : 16
-**Migrées** : 1 (6%)
+**Migrées** : 2 (13%)
 **En cours** : 0
-**Restantes** : 15
+**Restantes** : 14
 
 ```
-[█░░░░░░░░░░░░░░░░░░░] 6%
+[██░░░░░░░░░░░░░░░░░░] 13%
 ```
 
 ---
@@ -25,7 +25,7 @@
 
 | Phase | Entités | Statut | Progression |
 |-------|---------|--------|-------------|
-| **Phase 1** : Données Simples | 5 | 🟡 En cours | 1/5 (20%) |
+| **Phase 1** : Données Simples | 5 | 🟡 En cours | 2/5 (40%) |
 | **Phase 2** : Données Métier | 5 | ⏳ Non démarré | 0/5 (0%) |
 | **Phase 3** : Relations | 4 | ⏳ Non démarré | 0/4 (0%) |
 | **Phase 4** : Master Table | 2 | ⏳ Non démarré | 0/2 (0%) |
@@ -39,12 +39,12 @@
 | # | Entité | Statut | Progression | Développeur | Début | Fin | Commit | Notes |
 |---|--------|--------|-------------|-------------|-------|-----|--------|-------|
 | 1 | **countries** | 🟢 Terminé | 23/33 (70%) | Claude | 2025-11-30 | 2025-11-30 | Pending | **EXEMPLE COMPLET** ✅ |
-| 2 | **age-categories** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
+| 2 | **age-categories** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | Relation species ✅ |
 | 3 | **units** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 | 4 | **administration-routes** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 | 5 | **alert-templates** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 
-**Statut Phase 1** : 🟡 En cours (1/5 - 20%)
+**Statut Phase 1** : 🟡 En cours (2/5 - 40%)
 
 ---
 
@@ -163,19 +163,70 @@ Ce pattern doit être répliqué sur toutes les autres entités :
 
 ## 2. Age Categories
 
-**Statut** : ⏳ Non démarré
+**Statut** : 🟢 TERMINÉ (MVP)
 **Priorité** : 🔴 P1
-**Complexité** : ⭐ Simple
+**Complexité** : ⭐⭐ Moyen (relation species)
 
 ### Breaking Changes
-- Endpoint : `/age-categories` → `/api/v1/age-categories`
+- Endpoint : `/age-categories` → `/api/v1/age-categories` ✅
 
 ### Checklist
-- [ ] 0/33
+- [x] 9/10 Critiques (90%) ✅
+- [x] 15/18 Importants (83%) ✅
+- [x] 3/5 Optionnels (60%) ⚠️
+
+**Total** : 27/33 (82%) + 6 TODO post-MVP
+
+**Checklist détaillée** : `AGE_CATEGORIES_MIGRATION_CHECKLIST.md`
+
+### Fichiers Modifiés/Créés
+- ✅ `src/age-categories/age-categories.controller.ts` - Migré /api/v1/, Guards, pagination, Swagger
+- ✅ `src/age-categories/age-categories.service.ts` - Pagination, recherche, tri, validation FK species
+- ✅ `src/age-categories/dto/create-age-category.dto.ts` - NOUVEAU: CreateDto complet
+- ✅ `src/age-categories/dto/update-age-category.dto.ts` - NOUVEAU: UpdateDto (exclut code + speciesId)
+- ✅ `src/age-categories/dto/age-category-response.dto.ts` - NOUVEAU: ResponseDto avec types | null
+- ✅ `src/age-categories/dto/toggle-active.dto.ts` - NOUVEAU: ToggleActiveDto
+- ✅ `src/age-categories/dto/index.ts` - Barrel export des DTOs
+- ✅ `src/age-categories/I18N_KEYS.md` - NOUVEAU: 11 clés i18n documentées
+- ✅ `src/age-categories/TESTS_PLAN.md` - NOUVEAU: 60+ test cases documentés
+- ✅ `src/age-categories/AGE_CATEGORIES_MIGRATION_CHECKLIST.md` - NOUVEAU: Checklist complète
+
+### Points Forts
+- ✅ Pagination complète et performante (même pattern que Countries)
+- ✅ Recherche multi-champs (nameFr/En/Ar, code, description)
+- ✅ Tri paramétré avec whitelist sécurisé (6 champs)
+- ✅ Validation FK species (vérification exists avant create/findBySpecies)
+- ✅ Validation complète class-validator (code format, UUIDs, ranges)
+- ✅ Documentation Swagger exhaustive (8 endpoints)
+- ✅ Guards admin sur POST/PATCH/DELETE/toggle-active
+- ✅ Endpoint spécial GET /match pour trouver catégorie par âge
+- ✅ Types Prisma corrects (| null pour nullable fields)
+- ✅ Unique constraint (speciesId, code) respectée
+
+### TODOs Post-MVP
+- ⏳ Implémenter i18n (clés documentées)
+- ⏳ Implémenter tests E2E (plan créé)
+- ⏳ Ajouter check usage avant delete (Animal.ageCategoryId)
+- ⏳ Rate limiting
+- ⏳ Caching
+- ⏳ Métriques Prometheus
 
 ### Notes
 ```
--
+✅ MIGRATION TERMINÉE - Plus complexe que Countries (relation species + endpoint /match)
+
+Différences avec Countries:
+1. Unique constraint sur (speciesId, code) vs (code) seul
+2. Validation FK species avant create/findBySpecies
+3. Endpoint spécial GET /match pour matching d'âge
+4. Champs ageMaxDays nullable (pas de limite supérieure)
+5. Champ isDefault pour fallback
+
+Leçons apprises:
+- ✅ Types | null critiques pour nullable Prisma fields
+- ✅ Toujours vérifier FK existence (species)
+- ✅ Endpoints spécialisés ok (findForAnimalAge)
+- ✅ Export interfaces critiques (PaginatedResponse, FindAllOptions)
 ```
 
 ---
@@ -540,7 +591,9 @@ Ces entités suivent le pattern farm-scoped et seront migrées dans une phase ul
 ### 2025-11-30
 - ✅ Création du tracker
 - ✅ Inventaire de 16 entités
-- ⏳ Phase 1 en attente de démarrage
+- ✅ Migration Countries (1/16) - Exemple de référence
+- ✅ Migration Age Categories (2/16) - Relation species
+- 🟡 Phase 1 en cours (2/5 - 40%)
 
 ---
 
@@ -554,4 +607,4 @@ Ces entités suivent le pattern farm-scoped et seront migrées dans une phase ul
 
 **Créé le** : 2025-11-30
 **Dernière mise à jour** : 2025-11-30
-**Prochain checkpoint** : Après Phase 1 (countries migré)
+**Prochain checkpoint** : Après Phase 1 (5/5 entités, target: units)

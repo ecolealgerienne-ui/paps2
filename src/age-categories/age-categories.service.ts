@@ -1,7 +1,34 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateAgeCategoryDto, UpdateAgeCategoryDto, QueryAgeCategoryDto } from './dto';
+import { Prisma } from '@prisma/client';
+import { CreateAgeCategoryDto, UpdateAgeCategoryDto, AgeCategoryResponseDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
+
+/**
+ * Options for findAll pagination, filtering, search, and sorting
+ */
+export interface FindAllOptions {
+  page?: number;
+  limit?: number;
+  speciesId?: string;
+  isActive?: boolean;
+  search?: string;
+  orderBy?: string;
+  order?: 'ASC' | 'DESC';
+}
+
+/**
+ * Paginated response with metadata
+ */
+export interface PaginatedResponse {
+  data: AgeCategoryResponseDto[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
 
 @Injectable()
 export class AgeCategoriesService {
@@ -9,7 +36,7 @@ export class AgeCategoriesService {
 
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateAgeCategoryDto) {
+  async create(dto: CreateAgeCategoryDto): Promise<AgeCategoryResponseDto> {
     this.logger.debug(`Creating age category ${dto.code} for species ${dto.speciesId}`);
 
     // Verify species exists
@@ -18,39 +45,46 @@ export class AgeCategoriesService {
     });
 
     if (!species) {
-      throw new NotFoundException(`Species ${dto.speciesId} not found`);
+      throw new NotFoundException(`Species with ID "${dto.speciesId}" not found`);
     }
 
     // Check for duplicate code within species
     const existing = await this.prisma.ageCategory.findFirst({
-      where: { speciesId: dto.speciesId, code: dto.code, deletedAt: null },
+      where: {
+        speciesId: dto.speciesId,
+        code: dto.code.toUpperCase(),
+        deletedAt: null
+      },
     });
 
     if (existing) {
-      throw new ConflictException(`Age category ${dto.code} already exists for species ${dto.speciesId}`);
+      throw new ConflictException(
+        `Age category with code "${dto.code}" already exists for this species`
+      );
     }
 
     try {
       const category = await this.prisma.ageCategory.create({
         data: {
-          ...(dto.id && { id: dto.id }),
-          code: dto.code,
+          code: dto.code.toUpperCase(),
           speciesId: dto.speciesId,
           nameFr: dto.nameFr,
-          nameEn: dto.nameEn ?? dto.nameFr,
-          nameAr: dto.nameAr ?? dto.nameFr,
-          ageMinDays: dto.ageMinDays ?? 0,
+          nameEn: dto.nameEn,
+          nameAr: dto.nameAr,
+          description: dto.description,
+          ageMinDays: dto.ageMinDays,
           ageMaxDays: dto.ageMaxDays,
           displayOrder: dto.displayOrder ?? 0,
           isDefault: dto.isDefault ?? false,
           isActive: dto.isActive ?? true,
         },
-        include: {
-          species: true,
-        },
       });
 
-      this.logger.audit('Age category created', { categoryId: category.id, code: dto.code, speciesId: dto.speciesId });
+      this.logger.audit('Age category created', {
+        categoryId: category.id,
+        code: category.code,
+        speciesId: dto.speciesId
+      });
       return category;
     } catch (error) {
       this.logger.error(`Failed to create age category ${dto.code}`, error.stack);
@@ -58,27 +92,88 @@ export class AgeCategoriesService {
     }
   }
 
-  async findAll(query: QueryAgeCategoryDto) {
-    const where: any = {
+  async findAll(options: FindAllOptions = {}): Promise<PaginatedResponse> {
+    const page = Math.max(1, options.page || 1);
+    const limit = Math.min(100, Math.max(1, options.limit || 20));
+    const skip = (page - 1) * limit;
+
+    // Build WHERE clause
+    const where: Prisma.AgeCategoryWhereInput = {
       deletedAt: null,
     };
 
-    if (query.speciesId) where.speciesId = query.speciesId;
-    if (query.isActive !== undefined) where.isActive = query.isActive;
+    if (options.speciesId) {
+      where.speciesId = options.speciesId;
+    }
 
-    return this.prisma.ageCategory.findMany({
-      where,
-      include: {
-        species: true,
+    if (options.isActive !== undefined) {
+      where.isActive = options.isActive;
+    }
+
+    // Search in names and code
+    if (options.search) {
+      const searchTerm = options.search;
+      where.OR = [
+        { nameFr: { contains: searchTerm, mode: 'insensitive' } },
+        { nameEn: { contains: searchTerm, mode: 'insensitive' } },
+        { nameAr: { contains: searchTerm, mode: 'insensitive' } },
+        { code: { contains: searchTerm.toUpperCase(), mode: 'insensitive' } },
+        { description: { contains: searchTerm, mode: 'insensitive' } },
+      ];
+    }
+
+    // Build ORDER BY clause
+    const orderBy = this.buildOrderBy(options.orderBy, options.order);
+
+    // Execute queries
+    const [total, data] = await Promise.all([
+      this.prisma.ageCategory.count({ where }),
+      this.prisma.ageCategory.findMany({
+        where,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit),
       },
-      orderBy: [
-        { species: { displayOrder: 'asc' } },
-        { displayOrder: 'asc' },
-      ],
-    });
+    };
   }
 
-  async findBySpecies(speciesId: string) {
+  /**
+   * Build orderBy clause with whitelisted fields
+   */
+  private buildOrderBy(
+    field?: string,
+    order: 'ASC' | 'DESC' = 'ASC',
+  ): Prisma.AgeCategoryOrderByWithRelationInput {
+    const allowedFields = ['nameFr', 'nameEn', 'code', 'ageMinDays', 'displayOrder', 'createdAt'];
+
+    if (field && allowedFields.includes(field)) {
+      return { [field]: order.toLowerCase() as Prisma.SortOrder };
+    }
+
+    // Default: sort by displayOrder ASC
+    return { displayOrder: 'asc' };
+  }
+
+  async findBySpecies(speciesId: string): Promise<AgeCategoryResponseDto[]> {
+    // Verify species exists
+    const species = await this.prisma.species.findUnique({
+      where: { id: speciesId },
+    });
+
+    if (!species) {
+      throw new NotFoundException(`Species with ID "${speciesId}" not found`);
+    }
+
     return this.prisma.ageCategory.findMany({
       where: {
         speciesId,
@@ -89,16 +184,13 @@ export class AgeCategoriesService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<AgeCategoryResponseDto> {
     const category = await this.prisma.ageCategory.findFirst({
       where: { id, deletedAt: null },
-      include: {
-        species: true,
-      },
     });
 
     if (!category) {
-      throw new NotFoundException(`Age category ${id} not found`);
+      throw new NotFoundException(`Age category with ID "${id}" not found`);
     }
 
     return category;
@@ -107,7 +199,10 @@ export class AgeCategoriesService {
   /**
    * Find the appropriate age category for an animal based on age
    */
-  async findForAnimalAge(speciesId: string, ageInDays: number) {
+  async findForAnimalAge(
+    speciesId: string,
+    ageInDays: number
+  ): Promise<AgeCategoryResponseDto | null> {
     const category = await this.prisma.ageCategory.findFirst({
       where: {
         speciesId,
@@ -137,7 +232,7 @@ export class AgeCategoriesService {
     return category;
   }
 
-  async update(id: string, dto: UpdateAgeCategoryDto) {
+  async update(id: string, dto: UpdateAgeCategoryDto): Promise<AgeCategoryResponseDto> {
     this.logger.debug(`Updating age category ${id}`);
 
     const existing = await this.prisma.ageCategory.findFirst({
@@ -145,24 +240,15 @@ export class AgeCategoriesService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Age category ${id} not found`);
-    }
-
-    if (dto.version !== undefined && existing.version !== dto.version) {
-      throw new ConflictException('Version conflict');
+      throw new NotFoundException(`Age category with ID "${id}" not found`);
     }
 
     try {
-      const { version, ...updateData } = dto;
-
       const updated = await this.prisma.ageCategory.update({
         where: { id },
         data: {
-          ...updateData,
+          ...dto,
           version: existing.version + 1,
-        },
-        include: {
-          species: true,
         },
       });
 
@@ -174,7 +260,30 @@ export class AgeCategoriesService {
     }
   }
 
-  async remove(id: string) {
+  async toggleActive(id: string, isActive: boolean): Promise<AgeCategoryResponseDto> {
+    this.logger.debug(`Toggling age category ${id} active status to ${isActive}`);
+
+    const existing = await this.prisma.ageCategory.findFirst({
+      where: { id, deletedAt: null },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Age category with ID "${id}" not found`);
+    }
+
+    const updated = await this.prisma.ageCategory.update({
+      where: { id },
+      data: {
+        isActive,
+        version: existing.version + 1,
+      },
+    });
+
+    this.logger.audit('Age category active status toggled', { categoryId: id, isActive });
+    return updated;
+  }
+
+  async remove(id: string): Promise<void> {
     this.logger.debug(`Soft deleting age category ${id}`);
 
     const existing = await this.prisma.ageCategory.findFirst({
@@ -182,11 +291,14 @@ export class AgeCategoriesService {
     });
 
     if (!existing) {
-      throw new NotFoundException(`Age category ${id} not found`);
+      throw new NotFoundException(`Age category with ID "${id}" not found`);
     }
 
+    // Check if category is in use (future: check Animal references)
+    // For now, soft delete is always allowed since we're using soft delete pattern
+
     try {
-      const deleted = await this.prisma.ageCategory.update({
+      await this.prisma.ageCategory.update({
         where: { id },
         data: {
           deletedAt: new Date(),
@@ -195,7 +307,6 @@ export class AgeCategoriesService {
       });
 
       this.logger.audit('Age category soft deleted', { categoryId: id });
-      return deleted;
     } catch (error) {
       this.logger.error(`Failed to delete age category ${id}`, error.stack);
       throw error;
