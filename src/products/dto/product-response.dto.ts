@@ -28,14 +28,17 @@ class ActiveSubstanceInfo {
   @ApiProperty({ description: 'Substance code' })
   code: string;
 
-  @ApiProperty({ description: 'Substance name in French' })
-  nameFr: string;
+  @ApiProperty({ description: 'International name (INN)' })
+  name: string;
 
-  @ApiProperty({ description: 'Substance name in English' })
-  nameEn: string;
+  @ApiPropertyOptional({ description: 'Substance name in French' })
+  nameFr: string | null;
 
-  @ApiProperty({ description: 'Substance name in Arabic' })
-  nameAr: string;
+  @ApiPropertyOptional({ description: 'Substance name in English' })
+  nameEn: string | null;
+
+  @ApiPropertyOptional({ description: 'Substance name in Arabic' })
+  nameAr: string | null;
 }
 
 /**
