@@ -11,12 +11,12 @@
 ## 📊 PROGRESSION GLOBALE
 
 **Total Entités** : 16
-**Migrées** : 2 (13%)
+**Migrées** : 3 (19%)
 **En cours** : 0
-**Restantes** : 14
+**Restantes** : 13
 
 ```
-[██░░░░░░░░░░░░░░░░░░] 13%
+[███░░░░░░░░░░░░░░░░░] 19%
 ```
 
 ---
@@ -25,7 +25,7 @@
 
 | Phase | Entités | Statut | Progression |
 |-------|---------|--------|-------------|
-| **Phase 1** : Données Simples | 5 | 🟡 En cours | 2/5 (40%) |
+| **Phase 1** : Données Simples | 5 | 🟡 En cours | 3/5 (60%) |
 | **Phase 2** : Données Métier | 5 | ⏳ Non démarré | 0/5 (0%) |
 | **Phase 3** : Relations | 4 | ⏳ Non démarré | 0/4 (0%) |
 | **Phase 4** : Master Table | 2 | ⏳ Non démarré | 0/2 (0%) |
@@ -40,11 +40,11 @@
 |---|--------|--------|-------------|-------------|-------|-----|--------|-------|
 | 1 | **countries** | 🟢 Terminé | 23/33 (70%) | Claude | 2025-11-30 | 2025-11-30 | Pending | **EXEMPLE COMPLET** ✅ |
 | 2 | **age-categories** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | Relation species ✅ |
-| 3 | **units** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
+| 3 | **units** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | UnitType enum + convert ✅ |
 | 4 | **administration-routes** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 | 5 | **alert-templates** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
 
-**Statut Phase 1** : 🟡 En cours (2/5 - 40%)
+**Statut Phase 1** : 🟡 En cours (3/5 - 60%)
 
 ---
 
@@ -233,19 +233,79 @@ Leçons apprises:
 
 ## 3. Units
 
-**Statut** : ⏳ Non démarré
+**Statut** : 🟢 TERMINÉ (MVP)
 **Priorité** : 🔴 P1
-**Complexité** : ⭐ Simple
+**Complexité** : ⭐⭐ Moyen (enum UnitType + conversion logic)
 
 ### Breaking Changes
-- Endpoint : `/units` → `/api/v1/units`
+- Endpoint : `/units` → `/api/v1/units` ✅
 
 ### Checklist
-- [ ] 0/33
+- [x] 9/10 Critiques (90%) ✅
+- [x] 15/18 Importants (83%) ✅
+- [x] 3/5 Optionnels (60%) ⚠️
+
+**Total** : 27/33 (82%) + 6 TODO post-MVP
+
+**Checklist détaillée** : `src/units/UNITS_MIGRATION_CHECKLIST.md`
+
+### Fichiers Modifiés/Créés
+- ✅ `src/units/units.controller.ts` - Migré /api/v1/, Guards, pagination, Swagger (10 endpoints)
+- ✅ `src/units/units.service.ts` - Pagination, recherche (6 champs), tri (7 champs), toggleActive
+- ✅ `src/units/dto/create-unit.dto.ts` - NOUVEAU: CreateDto complet avec validation code format
+- ✅ `src/units/dto/update-unit.dto.ts` - NOUVEAU: UpdateDto (exclut code + unitType immutables)
+- ✅ `src/units/dto/unit-response.dto.ts` - NOUVEAU: ResponseDto avec types | null
+- ✅ `src/units/dto/toggle-active.dto.ts` - NOUVEAU: ToggleActiveDto
+- ✅ `src/units/dto/index.ts` - Barrel export des DTOs
+- ✅ `src/units/I18N_KEYS.md` - NOUVEAU: 13 clés i18n documentées
+- ✅ `src/units/TESTS_PLAN.md` - NOUVEAU: 70+ test cases documentés
+- ✅ `src/units/UNITS_MIGRATION_CHECKLIST.md` - NOUVEAU: Checklist complète
+
+### Points Forts
+- ✅ Pagination complète et performante (même pattern que Countries/Age Categories)
+- ✅ Recherche multi-champs (nameFr/En/Ar, code, symbol, description) - 6 champs
+- ✅ Tri paramétré avec whitelist sécurisé (7 champs)
+- ✅ Enum UnitType complet (mass, volume, concentration, count, percentage, other)
+- ✅ Code auto-lowercase (normalisation: "MG" → "mg")
+- ✅ baseUnitCode auto-lowercase (normalisation)
+- ✅ Validation complète class-validator (code regex `/^[a-z0-9_/]+$/`)
+- ✅ Documentation Swagger exhaustive (10 endpoints)
+- ✅ Guards admin sur POST/PATCH/DELETE/toggle-active
+- ✅ **Endpoint spécial GET /convert** pour conversions entre unités
+- ✅ **Endpoint spécial GET /type/:type** pour filtrer par UnitType
+- ✅ **Endpoint spécial GET /code/:code** pour accès direct par code
+- ✅ Conversion logic avec vérification de compatibilité des types
+- ✅ Types Prisma corrects (| null pour nullable fields)
+- ✅ Unique constraint (code) respectée
+
+### TODOs Post-MVP
+- ⏳ Implémenter i18n (clés documentées)
+- ⏳ Implémenter tests E2E (plan créé)
+- ⏳ Ajouter check usage avant delete (ProductPackaging, TherapeuticIndication, Treatment)
+- ⏳ Rate limiting
+- ⏳ Caching
+- ⏳ Métriques Prometheus
 
 ### Notes
 ```
--
+✅ MIGRATION TERMINÉE - Pattern similaire à Age Categories avec endpoints spéciaux
+
+Différences avec Countries/Age Categories:
+1. Enum UnitType (6 valeurs) avec validation stricte
+2. Endpoint spécial GET /convert pour conversions inter-unités
+3. Logic de conversion: (value * fromFactor) / toFactor
+4. Validation compatibilité des types (mass ≠ volume)
+5. Code format strict: lowercase + underscores + slashes seulement
+6. baseUnitCode pour chaînes de conversion (mg → g → kg)
+7. conversionFactor nullable (default: 1)
+8. UpdateDto exclut code ET unitType (immutables)
+
+Leçons apprises:
+- ✅ Code normalization critique pour cohérence (auto-lowercase)
+- ✅ Conversion logic nécessite validation type compatibility
+- ✅ Enum UnitType bien défini (6 types standards)
+- ✅ Endpoint /convert très utile pour frontend
+- ✅ Default sort: unitType → displayOrder → code (grouping par type)
 ```
 
 ---
