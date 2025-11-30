@@ -92,6 +92,50 @@ export class ProductsService {
   async createGlobal(dto: CreateGlobalProductDto): Promise<ProductResponseDto> {
     this.logger.debug(`Creating global product with code ${dto.code}`);
 
+    // Check if a soft-deleted product with this code exists
+    const existingDeleted = await this.prisma.product.findUnique({
+      where: { code: dto.code },
+    });
+
+    if (existingDeleted && existingDeleted.deletedAt) {
+      this.logger.debug(`Restoring soft-deleted product with code ${dto.code}`);
+
+      const restored = await this.prisma.product.update({
+        where: { code: dto.code },
+        data: {
+          deletedAt: null,
+          nameFr: dto.nameFr,
+          nameEn: dto.nameEn || null,
+          nameAr: dto.nameAr || null,
+          commercialName: dto.commercialName || null,
+          description: dto.description || null,
+          type: dto.type || null,
+          categoryId: dto.categoryId || null,
+          substanceId: dto.substanceId || null,
+          atcVetCode: dto.atcVetCode || null,
+          manufacturer: dto.manufacturer || null,
+          form: dto.form || null,
+          targetDisease: dto.targetDisease || null,
+          immunityDurationDays: dto.immunityDurationDays || null,
+          notes: dto.notes || null,
+          isActive: dto.isActive ?? true,
+          version: existingDeleted.version + 1,
+        },
+        include: {
+          category: true,
+          substance: true,
+        },
+      });
+
+      this.logger.audit('Product restored from soft delete', {
+        productId: restored.id,
+        code: dto.code,
+        scope: 'global',
+      });
+
+      return restored;
+    }
+
     try {
       const product = await this.prisma.product.create({
         data: {
@@ -363,6 +407,33 @@ export class ProductsService {
         ERROR_CODES.PRODUCT_NOT_FOUND,
         `Product ${id} not found`,
         { productId: id, farmId },
+      );
+    }
+
+    // Check dependencies before deleting
+    const [therapeuticIndicationsCount, lotsCount] = await Promise.all([
+      this.prisma.therapeuticIndication.count({
+        where: { productId: id, deletedAt: null },
+      }),
+      this.prisma.farmerProductLot.count({
+        where: {
+          deletedAt: null,
+          config: {
+            productId: id,
+          },
+        },
+      }),
+    ]);
+
+    if (therapeuticIndicationsCount > 0) {
+      throw new ConflictException(
+        `Cannot delete product: ${therapeuticIndicationsCount} therapeutic indication(s) depend on it`,
+      );
+    }
+
+    if (lotsCount > 0) {
+      throw new ConflictException(
+        `Cannot delete product: ${lotsCount} lot(s) depend on it`,
       );
     }
 

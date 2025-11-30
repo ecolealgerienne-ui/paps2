@@ -1,10 +1,37 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTherapeuticIndicationDto, UpdateTherapeuticIndicationDto, QueryTherapeuticIndicationDto } from './dto';
+import {
+  CreateTherapeuticIndicationDto,
+  UpdateTherapeuticIndicationDto,
+  QueryTherapeuticIndicationDto,
+  TherapeuticIndicationResponseDto,
+} from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 
+export interface FindAllOptions {
+  page?: number;
+  limit?: number;
+  productId?: string;
+  speciesId?: string;
+  countryCode?: string;
+  routeId?: string;
+  isVerified?: boolean;
+  isActive?: boolean;
+}
+
+export interface PaginatedResponse {
+  data: TherapeuticIndicationResponseDto[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 /**
- * Service for managing Therapeutic Indications
+ * Service for managing Therapeutic Indications (PHASE_10)
  * Contains withdrawal times and dosage information per product/species/route
  */
 @Injectable()
@@ -13,7 +40,7 @@ export class TherapeuticIndicationsService {
 
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateTherapeuticIndicationDto) {
+  async create(dto: CreateTherapeuticIndicationDto): Promise<TherapeuticIndicationResponseDto> {
     this.logger.debug(`Creating indication for product ${dto.productId}`);
 
     // Verify product exists
@@ -60,14 +87,6 @@ export class TherapeuticIndicationsService {
           validationNotes: dto.validationNotes,
           isActive: dto.isActive ?? true,
         },
-        include: {
-          product: { select: { id: true, nameFr: true, type: true } },
-          species: true,
-          ageCategory: true,
-          route: true,
-          doseUnit: true,
-          country: true,
-        },
       });
 
       this.logger.audit('Therapeutic indication created', {
@@ -83,8 +102,12 @@ export class TherapeuticIndicationsService {
     }
   }
 
-  async findAll(query: QueryTherapeuticIndicationDto) {
-    const where: any = {
+  async findAll(query: QueryTherapeuticIndicationDto): Promise<PaginatedResponse> {
+    const page = query.page || 1;
+    const limit = Math.min(query.limit || 50, 100);
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.TherapeuticIndicationWhereInput = {
       deletedAt: null,
     };
 
@@ -95,41 +118,32 @@ export class TherapeuticIndicationsService {
     if (query.isVerified !== undefined) where.isVerified = query.isVerified;
     if (query.isActive !== undefined) where.isActive = query.isActive;
 
-    return this.prisma.therapeuticIndication.findMany({
-      where,
-      include: {
-        product: { select: { id: true, nameFr: true, type: true, manufacturer: true } },
-        species: true,
-        ageCategory: true,
-        route: true,
-        doseUnit: true,
-        country: true,
-      },
-      orderBy: [
-        { product: { nameFr: 'asc' } },
-        { species: { displayOrder: 'asc' } },
-      ],
-    });
+    const [total, data] = await Promise.all([
+      this.prisma.therapeuticIndication.count({ where }),
+      this.prisma.therapeuticIndication.findMany({
+        where,
+        orderBy: [{ createdAt: Prisma.SortOrder.desc }],
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: { total, page, limit, totalPages },
+    };
   }
 
-  async findByProduct(productId: string) {
+  async findByProduct(productId: string): Promise<TherapeuticIndicationResponseDto[]> {
     return this.prisma.therapeuticIndication.findMany({
       where: {
         productId,
         deletedAt: null,
         isActive: true,
       },
-      include: {
-        species: true,
-        ageCategory: true,
-        route: true,
-        doseUnit: true,
-        country: true,
-      },
-      orderBy: [
-        { species: { displayOrder: 'asc' } },
-        { route: { displayOrder: 'asc' } },
-      ],
+      orderBy: [{ createdAt: Prisma.SortOrder.asc }],
     });
   }
 
@@ -143,7 +157,7 @@ export class TherapeuticIndicationsService {
     routeId: string,
     countryCode?: string,
     ageCategoryId?: string,
-  ) {
+  ): Promise<TherapeuticIndicationResponseDto | null> {
     // Build priority-based query
     const indications = await this.prisma.therapeuticIndication.findMany({
       where: {
@@ -153,13 +167,7 @@ export class TherapeuticIndicationsService {
         deletedAt: null,
         isActive: true,
       },
-      include: {
-        species: true,
-        ageCategory: true,
-        route: true,
-        doseUnit: true,
-      },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: Prisma.SortOrder.asc },
     });
 
     if (indications.length === 0) {
@@ -194,17 +202,9 @@ export class TherapeuticIndicationsService {
     return best;
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<TherapeuticIndicationResponseDto> {
     const indication = await this.prisma.therapeuticIndication.findFirst({
       where: { id, deletedAt: null },
-      include: {
-        product: true,
-        species: true,
-        ageCategory: true,
-        route: true,
-        doseUnit: true,
-        country: true,
-      },
     });
 
     if (!indication) {
@@ -214,7 +214,7 @@ export class TherapeuticIndicationsService {
     return indication;
   }
 
-  async update(id: string, dto: UpdateTherapeuticIndicationDto) {
+  async update(id: string, dto: UpdateTherapeuticIndicationDto): Promise<TherapeuticIndicationResponseDto> {
     this.logger.debug(`Updating indication ${id}`);
 
     const existing = await this.prisma.therapeuticIndication.findFirst({
@@ -230,21 +230,20 @@ export class TherapeuticIndicationsService {
     }
 
     try {
-      const { version, ...updateData } = dto;
-
       const updated = await this.prisma.therapeuticIndication.update({
         where: { id },
         data: {
-          ...updateData,
+          doseMin: dto.doseMin !== undefined ? dto.doseMin : existing.doseMin,
+          doseMax: dto.doseMax !== undefined ? dto.doseMax : existing.doseMax,
+          doseUnitId: dto.doseUnitId !== undefined ? dto.doseUnitId : existing.doseUnitId,
+          doseOriginalText: dto.doseOriginalText !== undefined ? dto.doseOriginalText : existing.doseOriginalText,
+          protocolDurationDays: dto.protocolDurationDays !== undefined ? dto.protocolDurationDays : existing.protocolDurationDays,
+          withdrawalMeatDays: dto.withdrawalMeatDays !== undefined ? dto.withdrawalMeatDays : existing.withdrawalMeatDays,
+          withdrawalMilkDays: dto.withdrawalMilkDays !== undefined ? dto.withdrawalMilkDays : existing.withdrawalMilkDays,
+          isVerified: dto.isVerified !== undefined ? dto.isVerified : existing.isVerified,
+          validationNotes: dto.validationNotes !== undefined ? dto.validationNotes : existing.validationNotes,
+          isActive: dto.isActive !== undefined ? dto.isActive : existing.isActive,
           version: existing.version + 1,
-        },
-        include: {
-          product: { select: { id: true, nameFr: true, type: true } },
-          species: true,
-          ageCategory: true,
-          route: true,
-          doseUnit: true,
-          country: true,
         },
       });
 
@@ -256,7 +255,7 @@ export class TherapeuticIndicationsService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<TherapeuticIndicationResponseDto> {
     this.logger.debug(`Soft deleting indication ${id}`);
 
     const existing = await this.prisma.therapeuticIndication.findFirst({
@@ -265,6 +264,17 @@ export class TherapeuticIndicationsService {
 
     if (!existing) {
       throw new NotFoundException(`Indication ${id} not found`);
+    }
+
+    // Check dependencies before deleting
+    const treatmentsCount = await this.prisma.treatment.count({
+      where: { indicationId: id, deletedAt: null },
+    });
+
+    if (treatmentsCount > 0) {
+      throw new ConflictException(
+        `Cannot delete therapeutic indication: ${treatmentsCount} treatment(s) depend on it`,
+      );
     }
 
     try {
@@ -282,6 +292,33 @@ export class TherapeuticIndicationsService {
       this.logger.error(`Failed to delete indication ${id}`, error.stack);
       throw error;
     }
+  }
+
+  async restore(id: string): Promise<TherapeuticIndicationResponseDto> {
+    this.logger.debug(`Restoring indication ${id}`);
+
+    const existing = await this.prisma.therapeuticIndication.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Indication ${id} not found`);
+    }
+
+    if (!existing.deletedAt) {
+      throw new ConflictException('Indication is not deleted');
+    }
+
+    const restored = await this.prisma.therapeuticIndication.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        version: existing.version + 1,
+      },
+    });
+
+    this.logger.audit('Therapeutic indication restored', { indicationId: id });
+    return restored;
   }
 
   /**

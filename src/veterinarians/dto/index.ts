@@ -422,3 +422,6 @@ export class QueryVeterinarianDto {
   @IsEnum(['asc', 'desc'])
   order?: 'asc' | 'desc';
 }
+
+// Export response DTO
+export * from './veterinarian-response.dto';
