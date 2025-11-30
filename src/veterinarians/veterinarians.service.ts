@@ -375,6 +375,17 @@ export class VeterinariansService {
       );
     }
 
+    // Check dependencies before deleting
+    const treatmentsCount = await this.prisma.treatment.count({
+      where: { veterinarianId: id, deletedAt: null },
+    });
+
+    if (treatmentsCount > 0) {
+      throw new ConflictException(
+        `Cannot delete veterinarian: ${treatmentsCount} treatment(s) depend on it`,
+      );
+    }
+
     try {
       const deleted = await this.prisma.veterinarian.update({
         where: { id },
