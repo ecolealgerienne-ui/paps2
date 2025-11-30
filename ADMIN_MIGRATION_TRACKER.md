@@ -11,12 +11,12 @@
 ## 📊 PROGRESSION GLOBALE
 
 **Total Entités** : 16
-**Migrées** : 4 (25%)
+**Migrées** : 5 (31%)
 **En cours** : 0
-**Restantes** : 12
+**Restantes** : 11
 
 ```
-[████░░░░░░░░░░░░░░░░] 25%
+[█████░░░░░░░░░░░░░░░] 31%
 ```
 
 ---
@@ -25,7 +25,7 @@
 
 | Phase | Entités | Statut | Progression |
 |-------|---------|--------|-------------|
-| **Phase 1** : Données Simples | 5 | 🟡 En cours | 4/5 (80%) |
+| **Phase 1** : Données Simples | 5 | 🟢 Terminé | 5/5 (100%) |
 | **Phase 2** : Données Métier | 5 | ⏳ Non démarré | 0/5 (0%) |
 | **Phase 3** : Relations | 4 | ⏳ Non démarré | 0/4 (0%) |
 | **Phase 4** : Master Table | 2 | ⏳ Non démarré | 0/2 (0%) |
@@ -42,9 +42,9 @@
 | 2 | **age-categories** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | Relation species ✅ |
 | 3 | **units** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | UnitType enum + convert ✅ |
 | 4 | **administration-routes** | 🟢 Terminé | 27/33 (82%) | Claude | 2025-11-30 | 2025-11-30 | Pending | Restore endpoint + usage check ✅ |
-| 5 | **alert-templates** | ⏳ Non démarré | 0/33 (0%) | - | - | - | - | - |
+| 5 | **alert-templates** | 🟢 Terminé | 28/33 (85%) | Claude | 2025-11-30 | 2025-11-30 | Pending | 2 enums + multilingue ✅ |
 
-**Statut Phase 1** : 🟡 En cours (4/5 - 80%)
+**Statut Phase 1** : 🟢 TERMINÉ (5/5 - 100%) 🎉
 
 ---
 
@@ -722,3 +722,71 @@ Ces entités suivent le pattern farm-scoped et seront migrées dans une phase ul
 **Créé le** : 2025-11-30
 **Dernière mise à jour** : 2025-11-30
 **Prochain checkpoint** : Après Phase 1 (5/5 entités, target: units)
+
+## 5. Alert Templates
+
+**Statut** : 🟢 TERMINÉ (MVP)
+**Priorité** : 🔴 P1
+**Complexité** : ⭐⭐ Moyen (2 enums + descriptions multilingues)
+
+### Breaking Changes
+- Endpoint : `/alert-templates` → `/api/v1/alert-templates` ✅
+
+### Checklist
+- [x] 10/10 Critiques (100%) ✅
+- [x] 15/18 Importants (83%) ✅
+- [x] 3/5 Optionnels (60%) ⚠️
+
+**Total** : 28/33 (85%) + 5 TODO post-MVP
+
+**Checklist détaillée** : `src/alert-templates/ALERT_TEMPLATES_MIGRATION_CHECKLIST.md`
+
+### Fichiers Modifiés/Créés
+- ✅ `src/alert-templates/alert-templates.controller.ts` - Migré /api/v1/, Guards, pagination, Swagger (10 endpoints)
+- ✅ `src/alert-templates/alert-templates.service.ts` - Pagination, recherche (4 champs), tri (6 champs), toggleActive, restore
+- ✅ `src/alert-templates/dto/create-alert-template.dto.ts` - CreateDto avec 2 enums
+- ✅ `src/alert-templates/dto/update-alert-template.dto.ts` - UpdateDto (exclut code)
+- ✅ `src/alert-templates/dto/alert-template-response.dto.ts` - ResponseDto avec types | null
+- ✅ `src/alert-templates/dto/toggle-active.dto.ts` - ToggleActiveDto
+- ✅ `src/alert-templates/dto/index.ts` - Barrel exports
+- ✅ `src/alert-templates/I18N_KEYS.md` - 23 clés i18n
+- ✅ `src/alert-templates/TESTS_PLAN.md` - 70+ test cases
+- ✅ `src/alert-templates/ALERT_TEMPLATES_MIGRATION_CHECKLIST.md` - Checklist
+
+### Points Forts
+- ✅ **2 enums Prisma**: AlertCategory (5 valeurs), AlertPriority (4 valeurs)
+- ✅ **Descriptions multilingues** (Fr/En/Ar) nullables
+- ✅ **10 endpoints**: CRUD + byCategory + byPriority + byCode + toggle + restore
+- ✅ **Code auto-lowercase**
+- ✅ **Filtres multiples**: category, priority, isActive
+- ✅ **Recherche** 4 champs (nameFr/En/Ar, code)
+- ✅ **Tri** 6 champs whitelist
+- ✅ **Default sort**: category → priority → nameFr
+- ✅ **Guards admin** sur mutations
+- ✅ **AppLogger** complet
+- ✅ **Types | null** corrects
+
+### TODOs Post-MVP
+- ⏳ Implémenter i18n (23 clés documentées)
+- ⏳ Implémenter tests E2E (70+ cas)
+- ⏳ Rate limiting
+- ⏳ Caching
+- ⏳ Métriques Prometheus
+
+### Notes
+```
+✅ PHASE 1 TERMINÉE (5/5 - 100%) 🎉
+
+Alert Templates est la dernière entité de Phase 1.
+Pattern complexe avec 2 enums + descriptions multilingues.
+
+Leçons apprises:
+- ✅ Enums Prisma (@prisma/client) au lieu de locaux
+- ✅ Descriptions multilingues (Fr/En/Ar) = 3x plus de champs nullables
+- ✅ AlertCategory: health, vaccination, treatment, reproduction, nutrition
+- ✅ AlertPriority: low, medium, high, urgent
+- ✅ Default priority: medium (défini dans schema)
+- ✅ Endpoints byCategory/byPriority retournent seulement actives
+```
+
+---

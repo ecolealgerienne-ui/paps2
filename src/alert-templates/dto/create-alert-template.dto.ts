@@ -1,59 +1,112 @@
-import { IsString, IsNotEmpty, IsEnum, IsOptional, IsBoolean, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AlertCategory } from '../types/alert-category.enum';
-import { AlertPriority } from '../types/alert-priority.enum';
+import {
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsBoolean,
+  IsOptional,
+  MaxLength,
+  Matches,
+} from 'class-validator';
+import { AlertCategory, AlertPriority } from '@prisma/client';
 
 export class CreateAlertTemplateDto {
-  @ApiProperty({ description: 'Unique code for the template', example: 'vaccination_due' })
+  @ApiProperty({
+    description: 'Unique code for the alert template',
+    example: 'vaccination_due',
+    maxLength: 50,
+  })
   @IsString()
   @IsNotEmpty()
-  @MaxLength(100)
+  @MaxLength(50)
+  @Matches(/^[a-z0-9_]+$/, {
+    message: 'Code must contain only lowercase letters, numbers, and underscores',
+  })
   code: string;
 
-  @ApiProperty({ description: 'Name in French', example: 'Vaccination à venir' })
+  @ApiProperty({
+    description: 'French name',
+    example: 'Vaccination à venir',
+    maxLength: 200,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
   nameFr: string;
 
-  @ApiProperty({ description: 'Name in English', example: 'Vaccination Due' })
+  @ApiProperty({
+    description: 'English name',
+    example: 'Vaccination Due',
+    maxLength: 200,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
   nameEn: string;
 
-  @ApiProperty({ description: 'Name in Arabic', example: 'التطعيم المستحق' })
+  @ApiProperty({
+    description: 'Arabic name',
+    example: 'التطعيم المستحق',
+    maxLength: 200,
+  })
   @IsString()
   @IsNotEmpty()
   @MaxLength(200)
   nameAr: string;
 
-  @ApiPropertyOptional({ description: 'Description in French' })
+  @ApiPropertyOptional({
+    description: 'French description',
+    example: 'Alerte pour rappel de vaccination',
+    maxLength: 500,
+  })
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   descriptionFr?: string;
 
-  @ApiPropertyOptional({ description: 'Description in English' })
+  @ApiPropertyOptional({
+    description: 'English description',
+    example: 'Alert for vaccination reminder',
+    maxLength: 500,
+  })
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   descriptionEn?: string;
 
-  @ApiPropertyOptional({ description: 'Description in Arabic' })
+  @ApiPropertyOptional({
+    description: 'Arabic description',
+    example: 'تنبيه لتذكير التطعيم',
+    maxLength: 500,
+  })
   @IsString()
   @IsOptional()
+  @MaxLength(500)
   descriptionAr?: string;
 
-  @ApiProperty({ description: 'Alert category', enum: AlertCategory })
+  @ApiProperty({
+    description: 'Alert category',
+    enum: AlertCategory,
+    example: AlertCategory.vaccination,
+  })
   @IsEnum(AlertCategory)
-  @IsNotEmpty()
   category: AlertCategory;
 
-  @ApiPropertyOptional({ description: 'Alert priority', enum: AlertPriority, default: AlertPriority.medium })
+  @ApiPropertyOptional({
+    description: 'Alert priority',
+    enum: AlertPriority,
+    example: AlertPriority.medium,
+    default: AlertPriority.medium,
+  })
   @IsEnum(AlertPriority)
   @IsOptional()
   priority?: AlertPriority;
 
-  @ApiPropertyOptional({ description: 'Is the template active', default: true })
+  @ApiPropertyOptional({
+    description: 'Whether the template is active',
+    example: true,
+    default: true,
+  })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
