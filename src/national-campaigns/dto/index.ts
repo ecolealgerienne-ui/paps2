@@ -1,15 +1,9 @@
 import { IsString, IsNotEmpty, IsOptional, IsBoolean, IsEnum, IsDateString, MaxLength, Matches, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CampaignType } from '@prisma/client';
 
-// Enum CampaignType (correspond à l'ENUM Prisma)
-export enum CampaignType {
-  vaccination = 'vaccination',
-  deworming = 'deworming',
-  screening = 'screening',
-  treatment = 'treatment',
-  census = 'census',
-  other = 'other',
-}
+// Re-export Prisma's CampaignType enum for convenience
+export { CampaignType };
 
 /**
  * DTO for creating a National Campaign (PHASE_07)
