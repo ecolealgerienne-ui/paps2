@@ -114,8 +114,8 @@ export class ProductResponseDto {
 
   // Optional relations (when included)
   @ApiPropertyOptional({ description: 'Product category', type: ProductCategoryInfo })
-  category?: ProductCategoryInfo;
+  category: ProductCategoryInfo | null;
 
   @ApiPropertyOptional({ description: 'Active substance', type: ActiveSubstanceInfo })
-  substance?: ActiveSubstanceInfo;
+  substance: ActiveSubstanceInfo | null;
 }
