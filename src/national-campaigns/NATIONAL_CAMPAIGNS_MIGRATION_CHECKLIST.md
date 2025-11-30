@@ -40,7 +40,7 @@
 - [x] Default sort: startDate desc, code asc
 - [x] AppLogger throughout
 - [x] Soft delete + restore
-- [ ] ❌ Dependency check needed (campaignCountries, farmPreferences)
+- [x] Dependency check (campaignCountries, farmPreferences)
 - [x] Optimistic locking (version field)
 - [x] update() handles undefined properly (ternaries)
 - [x] Restore on duplicate in create() (lines 58-78)
@@ -62,12 +62,10 @@
 
 ## Completion Status
 
-### Implemented: 32/33 (97%) ✅
+### Implemented: 33/33 (100%) ✅
 
-**Missing:**
-1. ❌ Dependency check in remove() - must verify no related records exist in:
-   - campaignCountries
-   - farmPreferences (FarmNationalCampaignPreference)
+**All Requirements Met:**
+- ✅ Dependency check in remove() - verifies campaignCountries and farmPreferences
 
 **Notes:**
 - National campaigns are admin-only entities
@@ -78,31 +76,6 @@
 - Soft delete preserves historical data
 - Restore on duplicate allows re-creating deleted campaigns
 
-## Next Actions
+## Migration Complete ✅
 
-1. Add dependency check in `remove()` method:
-   ```typescript
-   // Check campaignCountries
-   const countriesCount = await this.prisma.campaignCountry.count({
-     where: { campaignId: id },
-   });
-
-   if (countriesCount > 0) {
-     throw new ConflictException(
-       `Cannot delete campaign: ${countriesCount} country association(s) exist`,
-     );
-   }
-
-   // Check farmPreferences
-   const preferencesCount = await this.prisma.farmNationalCampaignPreference.count({
-     where: { campaignId: id, deletedAt: null },
-   });
-
-   if (preferencesCount > 0) {
-     throw new ConflictException(
-       `Cannot delete campaign: ${preferencesCount} farm preference(s) depend on it`,
-     );
-   }
-   ```
-
-2. Update to 33/33 (100%) ✅
+This entity meets all 33 points of the standard migration checklist. National Campaigns is a core admin entity with full CRUD operations, optimistic locking, and dependency management.
