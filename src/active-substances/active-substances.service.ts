@@ -227,7 +227,7 @@ export class ActiveSubstancesService {
 
     // Check if used by active products
     const usageCount = await this.prisma.product.count({
-      where: { activeSubstanceId: id, deletedAt: null },
+      where: { substanceId: id, deletedAt: null },
     });
 
     if (usageCount > 0) {
