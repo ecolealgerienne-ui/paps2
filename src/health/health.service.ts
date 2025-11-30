@@ -66,7 +66,7 @@ export class HealthService {
 
     // If not ready, throw 503 Service Unavailable
     if (!allHealthy) {
-      this.logger.error('Readiness check failed', response);
+      this.logger.warn('Readiness check failed', response);
       throw new ServiceUnavailableException(response);
     }
 
@@ -95,7 +95,7 @@ export class HealthService {
     } catch (error) {
       const duration = Date.now() - startTime;
 
-      this.logger.error('Database health check failed', {
+      this.logger.warn('Database health check failed', {
         error: error.message,
         responseTime: `${duration}ms`,
       });
