@@ -295,3 +295,6 @@ export class QueryProductDto {
   @IsEnum(['asc', 'desc'])
   order?: 'asc' | 'desc';
 }
+
+// Export response DTO
+export * from './product-response.dto';

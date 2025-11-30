@@ -1,28 +1,36 @@
 import { Injectable, ForbiddenException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateProductDto, CreateGlobalProductDto, UpdateProductDto, QueryProductDto } from './dto';
+import { Prisma, DataScope, ProductType } from '@prisma/client';
+import { CreateProductDto, CreateGlobalProductDto, UpdateProductDto, QueryProductDto, ProductResponseDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import { EntityNotFoundException } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
-import { DataScope, ProductType } from '../common/types/prisma-types';
 
-// Type for Product where queries
-type ProductWhereInput = {
-  id?: string;
-  scope?: DataScope;
-  farmId?: string | null;
+export interface FindAllOptions {
+  search?: string;
+  scope?: 'global' | 'local' | 'all';
   type?: ProductType;
   categoryId?: string;
-  deletedAt?: null | Date;
   isActive?: boolean;
-  nameFr?: { contains: string; mode: 'insensitive' };
-  nameEn?: { contains: string; mode: 'insensitive' };
-  commercialName?: { contains: string; mode: 'insensitive' };
-  OR?: ProductWhereInput[];
-};
+  vaccinesOnly?: boolean;
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
+}
+
+export interface PaginatedResponse {
+  data: ProductResponseDto[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
 
 /**
- * Service for managing Products (Master Table Pattern)
+ * Service for managing Products (PHASE_15 - Scope Pattern)
  * Supports both global (admin) and local (farm-specific) products
  * Unified model replacing MedicalProduct + Vaccine
  */
@@ -36,7 +44,7 @@ export class ProductsService {
    * Create a local product for a farm
    * Local products have scope='local' and farmId set
    */
-  async create(farmId: string, dto: CreateProductDto) {
+  async create(farmId: string, dto: CreateProductDto): Promise<ProductResponseDto> {
     this.logger.debug(`Creating local product in farm ${farmId}`);
 
     try {
@@ -46,19 +54,19 @@ export class ProductsService {
           scope: DataScope.local,
           farmId,
           nameFr: dto.nameFr,
-          nameEn: dto.nameEn,
-          nameAr: dto.nameAr,
-          commercialName: dto.commercialName,
-          description: dto.description,
-          type: dto.type,
-          categoryId: dto.categoryId,
-          substanceId: dto.substanceId,
-          atcVetCode: dto.atcVetCode,
-          manufacturer: dto.manufacturer,
-          form: dto.form,
-          targetDisease: dto.targetDisease,
-          immunityDurationDays: dto.immunityDurationDays,
-          notes: dto.notes,
+          nameEn: dto.nameEn || null,
+          nameAr: dto.nameAr || null,
+          commercialName: dto.commercialName || null,
+          description: dto.description || null,
+          type: dto.type || null,
+          categoryId: dto.categoryId || null,
+          substanceId: dto.substanceId || null,
+          atcVetCode: dto.atcVetCode || null,
+          manufacturer: dto.manufacturer || null,
+          form: dto.form || null,
+          targetDisease: dto.targetDisease || null,
+          immunityDurationDays: dto.immunityDurationDays || null,
+          notes: dto.notes || null,
           isActive: dto.isActive ?? true,
           ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
           ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
@@ -81,7 +89,7 @@ export class ProductsService {
    * Create a global product (admin only)
    * Global products have scope='global' and farmId=null
    */
-  async createGlobal(dto: CreateGlobalProductDto) {
+  async createGlobal(dto: CreateGlobalProductDto): Promise<ProductResponseDto> {
     this.logger.debug(`Creating global product with code ${dto.code}`);
 
     try {
@@ -92,20 +100,22 @@ export class ProductsService {
           farmId: null,
           code: dto.code,
           nameFr: dto.nameFr,
-          nameEn: dto.nameEn,
-          nameAr: dto.nameAr,
-          commercialName: dto.commercialName,
-          description: dto.description,
-          type: dto.type,
-          categoryId: dto.categoryId,
-          substanceId: dto.substanceId,
-          atcVetCode: dto.atcVetCode,
-          manufacturer: dto.manufacturer,
-          form: dto.form,
-          targetDisease: dto.targetDisease,
-          immunityDurationDays: dto.immunityDurationDays,
-          notes: dto.notes,
+          nameEn: dto.nameEn || null,
+          nameAr: dto.nameAr || null,
+          commercialName: dto.commercialName || null,
+          description: dto.description || null,
+          type: dto.type || null,
+          categoryId: dto.categoryId || null,
+          substanceId: dto.substanceId || null,
+          atcVetCode: dto.atcVetCode || null,
+          manufacturer: dto.manufacturer || null,
+          form: dto.form || null,
+          targetDisease: dto.targetDisease || null,
+          immunityDurationDays: dto.immunityDurationDays || null,
+          notes: dto.notes || null,
           isActive: dto.isActive ?? true,
+          ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
+          ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
         },
         include: {
           category: true,
@@ -113,7 +123,7 @@ export class ProductsService {
         },
       });
 
-      this.logger.audit('Global product created', { productId: product.id, code: dto.code });
+      this.logger.audit('Product created', { productId: product.id, code: dto.code, scope: 'global' });
       return product;
     } catch (error) {
       this.logger.error(`Failed to create global product ${dto.code}`, error.stack);
@@ -122,10 +132,10 @@ export class ProductsService {
   }
 
   /**
-   * Find all products accessible to a farm
+   * Find all products for a farm with filters, search, and pagination
    * Returns global products + farm's local products
    */
-  async findAll(farmId: string, query: QueryProductDto) {
+  async findAll(farmId: string, query: QueryProductDto): Promise<PaginatedResponse> {
     const {
       search,
       scope = 'all',
@@ -140,66 +150,69 @@ export class ProductsService {
     } = query;
 
     // Build scope filter
-    let scopeFilter: ProductWhereInput;
+    const where: Prisma.ProductWhereInput = { deletedAt: null };
+
+    // Scope filtering
     if (scope === 'global') {
-      scopeFilter = { scope: DataScope.global };
+      where.scope = DataScope.global;
     } else if (scope === 'local') {
-      scopeFilter = { scope: DataScope.local, farmId };
+      where.scope = DataScope.local;
+      where.farmId = farmId;
     } else {
       // 'all' - return global + farm's local products
-      scopeFilter = {
-        OR: [
-          { scope: DataScope.global },
-          { scope: DataScope.local, farmId },
-        ],
-      };
-    }
-
-    // Build complete where clause
-    const where: ProductWhereInput = {
-      ...scopeFilter,
-      deletedAt: null,
-    };
-
-    if (search) {
       where.OR = [
-        { nameFr: { contains: search, mode: 'insensitive' } },
-        { nameEn: { contains: search, mode: 'insensitive' } },
-        { commercialName: { contains: search, mode: 'insensitive' } },
+        { scope: DataScope.global },
+        { scope: DataScope.local, farmId },
       ];
     }
-    if (type) {
-      where.type = type;
-    }
-    if (vaccinesOnly) {
-      where.type = ProductType.vaccine;
-    }
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
-    if (isActive !== undefined) {
-      where.isActive = isActive;
+
+    // Other filters
+    if (type) where.type = type;
+    if (vaccinesOnly) where.type = ProductType.vaccine;
+    if (categoryId) where.categoryId = categoryId;
+    if (isActive !== undefined) where.isActive = isActive;
+
+    // Search in multiple fields
+    if (search) {
+      const searchCondition: Prisma.ProductWhereInput = {
+        OR: [
+          { nameFr: { contains: search, mode: 'insensitive' } },
+          { nameEn: { contains: search, mode: 'insensitive' } },
+          { commercialName: { contains: search, mode: 'insensitive' } },
+        ],
+      };
+
+      // Combine search with existing filters
+      if (where.OR) {
+        // If we have scope OR, wrap everything in AND
+        where.AND = [
+          { OR: where.OR },
+          searchCondition,
+        ];
+        delete where.OR;
+      } else {
+        // Otherwise, use the search OR directly
+        where.OR = searchCondition.OR;
+      }
     }
 
     // Execute query with pagination
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({
-        where: where as any,
+        where,
         include: {
           category: true,
           substance: true,
-          packagings: {
-            where: { deletedAt: null },
-            take: 5,
-          },
         },
         orderBy: { [sort]: order },
         skip,
         take: limit,
       }),
-      this.prisma.product.count({ where: where as any }),
+      this.prisma.product.count({ where }),
     ]);
+
+    this.logger.debug(`Found ${total} products for farm ${farmId} (page ${page}/${Math.ceil(total / limit)})`);
 
     return {
       data,
@@ -213,10 +226,10 @@ export class ProductsService {
   }
 
   /**
-   * Find a product by ID
+   * Find a single product by ID (scope-aware)
    * Returns global products or farm's local products
    */
-  async findOne(farmId: string, id: string) {
+  async findOne(farmId: string, id: string): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: {
         id,
@@ -229,22 +242,6 @@ export class ProductsService {
       include: {
         category: true,
         substance: true,
-        packagings: {
-          where: { deletedAt: null },
-          include: {
-            concentrationUnit: true,
-            volumeUnit: true,
-            country: true,
-          },
-        },
-        indications: {
-          where: { deletedAt: null },
-          include: {
-            species: true,
-            ageCategory: true,
-            route: true,
-          },
-        },
       },
     });
 
@@ -265,7 +262,7 @@ export class ProductsService {
    * Only local products owned by the farm can be updated
    * Global products are read-only for farmers
    */
-  async update(farmId: string, id: string, dto: UpdateProductDto) {
+  async update(farmId: string, id: string, dto: UpdateProductDto): Promise<ProductResponseDto> {
     this.logger.debug(`Updating product ${id}`);
 
     const existing = await this.prisma.product.findFirst({
@@ -303,14 +300,26 @@ export class ProductsService {
     }
 
     try {
-      const { version, updated_at, ...updateData } = dto;
-
       const updated = await this.prisma.product.update({
         where: { id },
         data: {
-          ...updateData,
+          nameFr: dto.nameFr !== undefined ? dto.nameFr : existing.nameFr,
+          nameEn: dto.nameEn !== undefined ? dto.nameEn : existing.nameEn,
+          nameAr: dto.nameAr !== undefined ? dto.nameAr : existing.nameAr,
+          commercialName: dto.commercialName !== undefined ? dto.commercialName : existing.commercialName,
+          description: dto.description !== undefined ? dto.description : existing.description,
+          type: dto.type !== undefined ? dto.type : existing.type,
+          categoryId: dto.categoryId !== undefined ? dto.categoryId : existing.categoryId,
+          substanceId: dto.substanceId !== undefined ? dto.substanceId : existing.substanceId,
+          atcVetCode: dto.atcVetCode !== undefined ? dto.atcVetCode : existing.atcVetCode,
+          manufacturer: dto.manufacturer !== undefined ? dto.manufacturer : existing.manufacturer,
+          form: dto.form !== undefined ? dto.form : existing.form,
+          targetDisease: dto.targetDisease !== undefined ? dto.targetDisease : existing.targetDisease,
+          immunityDurationDays: dto.immunityDurationDays !== undefined ? dto.immunityDurationDays : existing.immunityDurationDays,
+          notes: dto.notes !== undefined ? dto.notes : existing.notes,
+          isActive: dto.isActive !== undefined ? dto.isActive : existing.isActive,
           version: existing.version + 1,
-          ...(updated_at && { updatedAt: new Date(updated_at) }),
+          ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
         },
         include: {
           category: true,
@@ -330,7 +339,7 @@ export class ProductsService {
    * Soft delete a product
    * Only local products owned by the farm can be deleted
    */
-  async remove(farmId: string, id: string) {
+  async remove(farmId: string, id: string): Promise<ProductResponseDto> {
     this.logger.debug(`Soft deleting product ${id}`);
 
     const existing = await this.prisma.product.findFirst({
@@ -364,6 +373,10 @@ export class ProductsService {
           deletedAt: new Date(),
           version: existing.version + 1,
         },
+        include: {
+          category: true,
+          substance: true,
+        },
       });
 
       this.logger.audit('Product soft deleted', { productId: id, farmId });
@@ -374,6 +387,49 @@ export class ProductsService {
     }
   }
 
+  /**
+   * Restore a soft-deleted product (farm-scoped)
+   * Only local products owned by the farm can be restored
+   */
+  async restore(farmId: string, id: string): Promise<ProductResponseDto> {
+    this.logger.debug(`Restoring product ${id}`);
+
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+        scope: DataScope.local,
+        farmId,
+      },
+    });
+
+    if (!product) {
+      throw new EntityNotFoundException(
+        ERROR_CODES.PRODUCT_NOT_FOUND,
+        `Product ${id} not found`,
+        { productId: id, farmId },
+      );
+    }
+
+    if (!product.deletedAt) {
+      throw new ConflictException(`Product \"${product.nameFr}\" is not deleted`);
+    }
+
+    const restored = await this.prisma.product.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        version: product.version + 1,
+      },
+      include: {
+        category: true,
+        substance: true,
+      },
+    });
+
+    this.logger.audit('Product restored', { productId: id, farmId });
+    return restored;
+  }
+
   // =============================================================================
   // Additional methods
   // =============================================================================
@@ -381,14 +437,14 @@ export class ProductsService {
   /**
    * Find vaccines only (type = vaccine)
    */
-  async findVaccines(farmId: string, query: QueryProductDto) {
+  async findVaccines(farmId: string, query: QueryProductDto): Promise<PaginatedResponse> {
     return this.findAll(farmId, { ...query, vaccinesOnly: true });
   }
 
   /**
    * Find products by type
    */
-  async findByType(farmId: string, type: ProductType) {
+  async findByType(farmId: string, type: ProductType): Promise<ProductResponseDto[]> {
     return this.prisma.product.findMany({
       where: {
         type,
@@ -449,7 +505,7 @@ export class ProductsService {
    * Find all global products (no farm scope required)
    * Returns only global products (scope='global')
    */
-  async findAllGlobal(query: QueryProductDto) {
+  async findAllGlobal(query: QueryProductDto): Promise<PaginatedResponse> {
     const {
       search,
       type,
@@ -463,7 +519,7 @@ export class ProductsService {
     } = query;
 
     // Build where clause for global products only
-    const where: ProductWhereInput = {
+    const where: Prisma.ProductWhereInput = {
       scope: DataScope.global,
       deletedAt: null,
     };
@@ -492,21 +548,19 @@ export class ProductsService {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({
-        where: where as any,
+        where,
         include: {
           category: true,
           substance: true,
-          packagings: {
-            where: { deletedAt: null },
-            take: 5,
-          },
         },
         orderBy: { [sort]: order },
         skip,
         take: limit,
       }),
-      this.prisma.product.count({ where: where as any }),
+      this.prisma.product.count({ where }),
     ]);
+
+    this.logger.debug(`Found ${total} global products (page ${page}/${Math.ceil(total / limit)})`);
 
     return {
       data,
@@ -522,7 +576,7 @@ export class ProductsService {
   /**
    * Find a global product by ID (no farm scope required)
    */
-  async findOneGlobal(id: string) {
+  async findOneGlobal(id: string): Promise<ProductResponseDto> {
     const product = await this.prisma.product.findFirst({
       where: {
         id,
@@ -532,22 +586,6 @@ export class ProductsService {
       include: {
         category: true,
         substance: true,
-        packagings: {
-          where: { deletedAt: null },
-          include: {
-            concentrationUnit: true,
-            volumeUnit: true,
-            country: true,
-          },
-        },
-        indications: {
-          where: { deletedAt: null },
-          include: {
-            species: true,
-            ageCategory: true,
-            route: true,
-          },
-        },
       },
     });
 
@@ -589,5 +627,46 @@ export class ProductsService {
       take: limit,
       orderBy: { nameFr: 'asc' },
     });
+  }
+
+  /**
+   * Restore a soft-deleted global product (admin only)
+   */
+  async restoreGlobal(id: string): Promise<ProductResponseDto> {
+    this.logger.debug(`Restoring global product ${id}`);
+
+    const product = await this.prisma.product.findFirst({
+      where: {
+        id,
+        scope: DataScope.global,
+      },
+    });
+
+    if (!product) {
+      throw new EntityNotFoundException(
+        ERROR_CODES.PRODUCT_NOT_FOUND,
+        `Product ${id} not found`,
+        { productId: id },
+      );
+    }
+
+    if (!product.deletedAt) {
+      throw new ConflictException(`Product \"${product.nameFr}\" is not deleted`);
+    }
+
+    const restored = await this.prisma.product.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        version: product.version + 1,
+      },
+      include: {
+        category: true,
+        substance: true,
+      },
+    });
+
+    this.logger.audit('Global product restored', { productId: id, code: product.code });
+    return restored;
   }
 }
