@@ -162,3 +162,7 @@ export class QueryNationalCampaignDto {
   @IsOptional()
   includeDeleted?: boolean;
 }
+
+// Export separate DTO files
+export * from './update-national-campaign.dto';
+export * from './national-campaign-response.dto';

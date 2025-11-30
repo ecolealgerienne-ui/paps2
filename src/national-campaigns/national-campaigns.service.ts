@@ -1,10 +1,33 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateNationalCampaignDto, UpdateNationalCampaignDto, QueryNationalCampaignDto, CampaignType } from './dto';
+import { Prisma } from '@prisma/client';
+import { CreateNationalCampaignDto, UpdateNationalCampaignDto, NationalCampaignResponseDto, CampaignType } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
-import { EntityNotFoundException } from '../common/exceptions';
-import { ERROR_CODES } from '../common/constants/error-codes';
 
+export interface FindAllOptions {
+  page?: number;
+  limit?: number;
+  type?: CampaignType;
+  isActive?: boolean;
+  search?: string;
+  orderBy?: string;
+  order?: 'ASC' | 'DESC';
+}
+
+export interface PaginatedResponse {
+  data: NationalCampaignResponseDto[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+/**
+ * Service for managing National Campaigns
+ * PHASE_07: NationalCampaigns - Migrated to /api/v1 with pagination and search
+ */
 @Injectable()
 export class NationalCampaignsService {
   private readonly logger = new AppLogger(NationalCampaignsService.name);
@@ -12,89 +35,131 @@ export class NationalCampaignsService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Créer une nouvelle campagne nationale (PHASE_07)
+   * Create a new national campaign
+   * @param dto - Campaign creation data
+   * @returns Created campaign
    */
-  async create(dto: CreateNationalCampaignDto) {
+  async create(dto: CreateNationalCampaignDto): Promise<NationalCampaignResponseDto> {
     this.logger.debug(`Creating national campaign`, { code: dto.code, type: dto.type });
 
-    // Valider les dates
+    // Validate dates
     this.validateDates(dto.startDate, dto.endDate);
 
-    // Vérifier unicité du code
+    // Check for duplicate code
     const existing = await this.prisma.nationalCampaign.findUnique({
       where: { code: dto.code },
     });
 
     if (existing && !existing.deletedAt) {
       this.logger.warn('Campaign code already exists', { code: dto.code });
-      throw new ConflictException(`Campaign with code '${dto.code}' already exists`);
+      throw new ConflictException(`Campaign with code "${dto.code}" already exists`);
     }
 
-    try {
-      const campaign = await this.prisma.nationalCampaign.create({
+    if (existing && existing.deletedAt) {
+      // Restore soft-deleted campaign with new data
+      this.logger.debug(`Restoring soft-deleted campaign: ${dto.code}`);
+      const restored = await this.prisma.nationalCampaign.update({
+        where: { id: existing.id },
         data: {
-          code: dto.code,
           nameFr: dto.nameFr,
           nameEn: dto.nameEn,
           nameAr: dto.nameAr,
-          description: dto.description,
+          description: dto.description || null,
           type: dto.type,
           startDate: new Date(dto.startDate),
           endDate: new Date(dto.endDate),
           isActive: dto.isActive ?? true,
+          deletedAt: null,
+          version: existing.version + 1,
         },
       });
-
-      this.logger.audit('National campaign created', { campaignId: campaign.id, code: campaign.code });
-      return campaign;
-    } catch (error) {
-      this.logger.error(`Failed to create national campaign`, error.stack);
-      throw error;
+      this.logger.audit('National campaign restored', { campaignId: restored.id, code: dto.code });
+      return restored;
     }
+
+    const campaign = await this.prisma.nationalCampaign.create({
+      data: {
+        code: dto.code,
+        nameFr: dto.nameFr,
+        nameEn: dto.nameEn,
+        nameAr: dto.nameAr,
+        description: dto.description || null,
+        type: dto.type,
+        startDate: new Date(dto.startDate),
+        endDate: new Date(dto.endDate),
+        isActive: dto.isActive ?? true,
+      },
+    });
+
+    this.logger.audit('National campaign created', { campaignId: campaign.id, code: campaign.code });
+    return campaign;
   }
 
   /**
-   * Récupérer toutes les campagnes avec filtres (PHASE_07)
+   * Get all campaigns with pagination, filters, search, and sorting
+   * @param options - Query options
+   * @returns Paginated campaigns list
    */
-  async findAll(query: QueryNationalCampaignDto) {
-    const where: any = {};
+  async findAll(options: FindAllOptions = {}): Promise<PaginatedResponse> {
+    const page = Math.max(1, options.page || 1);
+    const limit = Math.min(100, Math.max(1, options.limit || 20));
+    const skip = (page - 1) * limit;
 
-    // Filtres
-    if (query.type) where.type = query.type;
-    if (query.isActive !== undefined) where.isActive = query.isActive;
+    const where: Prisma.NationalCampaignWhereInput = { deletedAt: null };
 
-    // Soft delete filter
-    if (!query.includeDeleted) {
-      where.deletedAt = null;
-    }
+    // Filters
+    if (options.type) where.type = options.type;
+    if (options.isActive !== undefined) where.isActive = options.isActive;
 
-    // Recherche textuelle
-    if (query.search) {
+    // Search in code and names
+    if (options.search) {
+      const searchTerm = options.search;
       where.OR = [
-        { code: { contains: query.search, mode: 'insensitive' as const } },
-        { nameFr: { contains: query.search, mode: 'insensitive' as const } },
-        { nameEn: { contains: query.search, mode: 'insensitive' as const } },
-        { nameAr: { contains: query.search, mode: 'insensitive' as const } },
+        { code: { contains: searchTerm, mode: 'insensitive' } },
+        { nameFr: { contains: searchTerm, mode: 'insensitive' } },
+        { nameEn: { contains: searchTerm, mode: 'insensitive' } },
+        { nameAr: { contains: searchTerm, mode: 'insensitive' } },
       ];
     }
 
-    return this.prisma.nationalCampaign.findMany({
-      where,
-      orderBy: [
-        { startDate: 'desc' },
-        { code: 'asc' },
-      ],
-    });
+    const orderBy = this.buildOrderBy(options.orderBy, options.order);
+
+    const [total, data] = await Promise.all([
+      this.prisma.nationalCampaign.count({ where }),
+      this.prisma.nationalCampaign.findMany({ where, orderBy, skip, take: limit }),
+    ]);
+
+    this.logger.debug(`Found ${total} national campaigns (page ${page}/${Math.ceil(total / limit)})`);
+
+    return {
+      data,
+      meta: { total, page, limit, pages: Math.ceil(total / limit) },
+    };
+  }
+
+  private buildOrderBy(
+    field?: string,
+    order: 'ASC' | 'DESC' = 'ASC',
+  ): Prisma.NationalCampaignOrderByWithRelationInput[] {
+    const allowedFields = ['nameFr', 'nameEn', 'code', 'startDate', 'endDate', 'type', 'createdAt'];
+
+    if (field && allowedFields.includes(field)) {
+      return [{ [field]: order.toLowerCase() as Prisma.SortOrder }];
+    }
+
+    // Default: sort by start date descending, then code
+    return [{ startDate: 'desc' }, { code: 'asc' }];
   }
 
   /**
-   * Récupérer les campagnes en cours (PHASE_07)
-   * Campagnes où la date actuelle est entre startDate et endDate
+   * Get current national campaigns
+   * Campaigns where today is between startDate and endDate
+   * @returns List of currently active campaigns
    */
-  async findCurrent() {
+  async findCurrent(): Promise<NationalCampaignResponseDto[]> {
     const now = new Date();
 
-    return this.prisma.nationalCampaign.findMany({
+    const campaigns = await this.prisma.nationalCampaign.findMany({
       where: {
         startDate: { lte: now },
         endDate: { gte: now },
@@ -106,58 +171,59 @@ export class NationalCampaignsService {
         { code: 'asc' },
       ],
     });
+
+    this.logger.debug('Found current campaigns', { count: campaigns.length });
+    return campaigns;
   }
 
   /**
-   * Récupérer une campagne par ID (PHASE_07)
+   * Get a single campaign by ID
+   * @param id - Campaign ID
+   * @returns Campaign or throws NotFoundException
    */
-  async findOne(id: string) {
-    this.logger.debug(`Finding national campaign ${id}`);
-
-    const campaign = await this.prisma.nationalCampaign.findUnique({
-      where: { id },
+  async findOne(id: string): Promise<NationalCampaignResponseDto> {
+    const campaign = await this.prisma.nationalCampaign.findFirst({
+      where: { id, deletedAt: null },
     });
 
-    if (!campaign || campaign.deletedAt) {
-      this.logger.warn('National campaign not found or deleted', { campaignId: id });
-      throw new EntityNotFoundException(
-        ERROR_CODES.ENTITY_NOT_FOUND,
-        `National campaign ${id} not found`,
-        { campaignId: id },
-      );
+    if (!campaign) {
+      this.logger.warn(`National campaign not found: ${id}`);
+      throw new NotFoundException(`National campaign with ID "${id}" not found`);
     }
 
     return campaign;
   }
 
   /**
-   * Récupérer une campagne par code (PHASE_07)
+   * Get a campaign by code
+   * @param code - Campaign code
+   * @returns Campaign or throws NotFoundException
    */
-  async findByCode(code: string) {
-    this.logger.debug(`Finding national campaign by code ${code}`);
-
-    const campaign = await this.prisma.nationalCampaign.findUnique({
-      where: { code },
+  async findByCode(code: string): Promise<NationalCampaignResponseDto> {
+    const campaign = await this.prisma.nationalCampaign.findFirst({
+      where: { code, deletedAt: null },
     });
 
-    if (!campaign || campaign.deletedAt) {
-      this.logger.warn('National campaign not found or deleted', { code });
-      throw new NotFoundException(`National campaign with code '${code}' not found`);
+    if (!campaign) {
+      this.logger.warn(`National campaign not found by code: ${code}`);
+      throw new NotFoundException(`National campaign with code "${code}" not found`);
     }
 
     return campaign;
   }
 
   /**
-   * Mettre à jour une campagne (PHASE_07)
+   * Update a campaign (with optimistic locking)
+   * @param id - Campaign ID
+   * @param dto - Update data
+   * @returns Updated campaign
    */
-  async update(id: string, dto: UpdateNationalCampaignDto) {
+  async update(id: string, dto: UpdateNationalCampaignDto): Promise<NationalCampaignResponseDto> {
     this.logger.debug(`Updating national campaign ${id}`);
 
-    // Vérifier que la campagne existe
     const existing = await this.findOne(id);
 
-    // Valider les dates si fournies
+    // Validate dates if provided
     if (dto.startDate || dto.endDate) {
       const startDate = dto.startDate || existing.startDate.toISOString();
       const endDate = dto.endDate || existing.endDate.toISOString();
@@ -166,74 +232,95 @@ export class NationalCampaignsService {
 
     // Optimistic locking
     if (dto.version !== undefined && existing.version !== dto.version) {
-      this.logger.warn('Version conflict detected', { campaignId: id, expected: existing.version, received: dto.version });
-      throw new ConflictException('Version conflict: the campaign has been modified by another user');
-    }
-
-    // Vérifier unicité du code si modifié
-    if (dto.code && dto.code !== existing.code) {
-      const codeExists = await this.prisma.nationalCampaign.findUnique({
-        where: { code: dto.code },
+      this.logger.warn('Version conflict detected', {
+        campaignId: id,
+        expected: existing.version,
+        received: dto.version,
       });
-
-      if (codeExists && !codeExists.deletedAt) {
-        throw new ConflictException(`Campaign with code '${dto.code}' already exists`);
-      }
+      throw new ConflictException(
+        `Version conflict: expected ${dto.version}, found ${existing.version}`,
+      );
     }
 
-    try {
-      const updated = await this.prisma.nationalCampaign.update({
-        where: { id },
-        data: {
-          ...(dto.code !== undefined && { code: dto.code }),
-          ...(dto.nameFr !== undefined && { nameFr: dto.nameFr }),
-          ...(dto.nameEn !== undefined && { nameEn: dto.nameEn }),
-          ...(dto.nameAr !== undefined && { nameAr: dto.nameAr }),
-          ...(dto.description !== undefined && { description: dto.description }),
-          ...(dto.type !== undefined && { type: dto.type }),
-          ...(dto.startDate !== undefined && { startDate: new Date(dto.startDate) }),
-          ...(dto.endDate !== undefined && { endDate: new Date(dto.endDate) }),
-          ...(dto.isActive !== undefined && { isActive: dto.isActive }),
-          version: existing.version + 1,
-        },
-      });
+    const campaign = await this.prisma.nationalCampaign.update({
+      where: { id },
+      data: {
+        nameFr: dto.nameFr !== undefined ? dto.nameFr : existing.nameFr,
+        nameEn: dto.nameEn !== undefined ? dto.nameEn : existing.nameEn,
+        nameAr: dto.nameAr !== undefined ? dto.nameAr : existing.nameAr,
+        description: dto.description !== undefined ? dto.description : existing.description,
+        type: dto.type !== undefined ? dto.type : existing.type,
+        startDate: dto.startDate !== undefined ? new Date(dto.startDate) : existing.startDate,
+        endDate: dto.endDate !== undefined ? new Date(dto.endDate) : existing.endDate,
+        isActive: dto.isActive !== undefined ? dto.isActive : existing.isActive,
+        version: existing.version + 1,
+      },
+    });
 
-      this.logger.audit('National campaign updated', { campaignId: id, code: updated.code });
-      return updated;
-    } catch (error) {
-      this.logger.error(`Failed to update national campaign ${id}`, error.stack);
-      throw error;
-    }
+    this.logger.audit('National campaign updated', { campaignId: id, code: campaign.code, newVersion: campaign.version });
+    return campaign;
   }
 
   /**
-   * Soft delete d'une campagne (PHASE_07)
+   * Soft delete a campaign
+   * @param id - Campaign ID
+   * @returns Soft-deleted campaign
    */
-  async remove(id: string) {
+  async remove(id: string): Promise<NationalCampaignResponseDto> {
     this.logger.debug(`Soft deleting national campaign ${id}`);
 
     const existing = await this.findOne(id);
 
-    try {
-      const deleted = await this.prisma.nationalCampaign.update({
-        where: { id },
-        data: {
-          deletedAt: new Date(),
-          isActive: false,
-          version: existing.version + 1,
-        },
-      });
+    const campaign = await this.prisma.nationalCampaign.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        isActive: false,
+        version: existing.version + 1,
+      },
+    });
 
-      this.logger.audit('National campaign soft deleted', { campaignId: id, code: deleted.code });
-      return deleted;
-    } catch (error) {
-      this.logger.error(`Failed to delete national campaign ${id}`, error.stack);
-      throw error;
-    }
+    this.logger.audit('National campaign soft deleted', { campaignId: id, code: campaign.code });
+    return campaign;
   }
 
   /**
-   * Validation des dates (PHASE_07)
+   * Restore a soft-deleted campaign
+   * @param id - Campaign ID
+   * @returns Restored campaign
+   */
+  async restore(id: string): Promise<NationalCampaignResponseDto> {
+    this.logger.debug(`Restoring national campaign ${id}`);
+
+    const campaign = await this.prisma.nationalCampaign.findUnique({
+      where: { id },
+    });
+
+    if (!campaign) {
+      this.logger.warn(`Campaign not found for restore: ${id}`);
+      throw new NotFoundException(`National campaign with ID "${id}" not found`);
+    }
+
+    if (!campaign.deletedAt) {
+      throw new ConflictException(`Campaign "${campaign.code}" is not deleted`);
+    }
+
+    const restored = await this.prisma.nationalCampaign.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        version: campaign.version + 1,
+      },
+    });
+
+    this.logger.audit('National campaign restored', { campaignId: id, code: restored.code });
+    return restored;
+  }
+
+  /**
+   * Validate campaign dates
+   * @param startDate - Start date string
+   * @param endDate - End date string
    */
   private validateDates(startDate: string, endDate: string) {
     const start = new Date(startDate);
