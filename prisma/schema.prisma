@@ -1378,8 +1378,10 @@ model FarmNationalCampaignPreference {
   campaignId String    @map("campaign_id")
   isEnrolled Boolean   @default(false) @map("is_enrolled")
   enrolledAt DateTime? @map("enrolled_at")
+  version    Int       @default(1)
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   farm     Farm             @relation(fields: [farmId], references: [id], onDelete: Cascade)
   campaign NationalCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -1388,6 +1390,7 @@ model FarmNationalCampaignPreference {
   @@index([farmId])
   @@index([campaignId])
   @@index([isEnrolled])
+  @@index([farmId, deletedAt])
   @@map("farm_national_campaign_preferences")
 }
 

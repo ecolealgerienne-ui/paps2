@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsDateString, IsOptional } from 'class-validator';
+import { IsBoolean, IsDateString, IsOptional, IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class UpdateFarmNationalCampaignPreferenceDto {
   @ApiPropertyOptional({
@@ -16,4 +17,11 @@ export class UpdateFarmNationalCampaignPreferenceDto {
   @IsOptional()
   @IsDateString()
   enrolledAt?: string;
+
+  @ApiPropertyOptional({ description: 'Version for optimistic locking', example: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  version?: number;
 }
