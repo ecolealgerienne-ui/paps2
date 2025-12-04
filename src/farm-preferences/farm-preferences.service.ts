@@ -19,7 +19,9 @@ export class FarmPreferencesService {
     if (!preferences) {
       this.logger.debug(`No preferences found for farm ${farmId}, returning defaults`);
       // Return default preferences if none exist
+      const now = new Date();
       return {
+        id: '',
         farmId,
         defaultVeterinarianId: null,
         defaultSpeciesId: null,
@@ -30,6 +32,9 @@ export class FarmPreferencesService {
         dateFormat: 'DD/MM/YYYY',
         enableNotifications: true,
         version: 1,
+        createdAt: now,
+        updatedAt: now,
+        deletedAt: null,
       };
     }
 

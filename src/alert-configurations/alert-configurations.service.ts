@@ -195,4 +195,42 @@ export class AlertConfigurationsService {
       throw error;
     }
   }
+
+  /**
+   * Restore a soft-deleted alert configuration
+   */
+  async restore(farmId: string) {
+    this.logger.debug(`Restoring alert configuration for farm ${farmId}`);
+
+    const existing = await this.prisma.alertConfiguration.findFirst({
+      where: { farmId },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(
+        `No alert configuration found for farm ${farmId}`
+      );
+    }
+
+    if (!existing.deletedAt) {
+      throw new ConflictException('This configuration is not deleted');
+    }
+
+    try {
+      const restored = await this.prisma.alertConfiguration.update({
+        where: { id: existing.id },
+        data: {
+          deletedAt: null,
+          version: existing.version + 1,
+        },
+        include: { farm: true },
+      });
+
+      this.logger.audit('Alert configuration restored', { configId: restored.id, farmId });
+      return restored;
+    } catch (error) {
+      this.logger.error(`Failed to restore alert configuration for farm ${farmId}`, error.stack);
+      throw error;
+    }
+  }
 }

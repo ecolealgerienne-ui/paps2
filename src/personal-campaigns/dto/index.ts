@@ -160,3 +160,5 @@ export class QueryPersonalCampaignDto {
   @IsDateString()
   toDate?: string;
 }
+
+export { PersonalCampaignResponseDto } from './personal-campaign-response.dto';

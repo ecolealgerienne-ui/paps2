@@ -106,3 +106,5 @@ export class UpdateAlertConfigurationDto {
   @IsOptional()
   version?: number;
 }
+
+export { AlertConfigurationResponseDto } from './alert-configuration-response.dto';

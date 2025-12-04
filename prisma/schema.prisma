@@ -277,6 +277,7 @@ model Species {
   breeds        Breed[]
   ageCategories AgeCategory[]
   therapeuticIndications TherapeuticIndication[]
+  farmSpeciesPreferences FarmSpeciesPreference[]
 
   // Indexes
   @@index([deletedAt])
@@ -410,13 +411,15 @@ model CampaignCountry {
 
 // Table de préférences - Farm ↔ Breeds (PHASE_20)
 model FarmBreedPreference {
-  id          String   @id @default(uuid())
-  farmId      String   @map("farm_id")
-  breedId     String   @map("breed_id")
-  displayOrder Int     @default(0) @map("display_order")
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String    @id @default(uuid())
+  farmId       String    @map("farm_id")
+  breedId      String    @map("breed_id")
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
+  version      Int       @default(1)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   farm  Farm  @relation(fields: [farmId], references: [id], onDelete: Cascade)
   breed Breed @relation(fields: [breedId], references: [id], onDelete: Cascade)
@@ -425,7 +428,31 @@ model FarmBreedPreference {
   @@index([farmId])
   @@index([breedId])
   @@index([displayOrder])
+  @@index([farmId, deletedAt])
   @@map("farm_breed_preferences")
+}
+
+// Table de préférences - Farm ↔ Species
+model FarmSpeciesPreference {
+  id           String    @id @default(uuid())
+  farmId       String    @map("farm_id")
+  speciesId    String    @map("species_id")
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
+  version      Int       @default(1)
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  farm    Farm    @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  species Species @relation(fields: [speciesId], references: [id], onDelete: Cascade)
+
+  @@unique([farmId, speciesId])
+  @@index([farmId])
+  @@index([speciesId])
+  @@index([displayOrder])
+  @@index([farmId, deletedAt])
+  @@map("farm_species_preferences")
 }
 
 
@@ -801,6 +828,7 @@ model Farm {
   veterinarianPreferences FarmVeterinarianPreference[]
   breedPreferences FarmBreedPreference[]
   productPreferences FarmProductPreference[]
+  speciesPreferences FarmSpeciesPreference[]
 
   // Indexes
   @@index([ownerId])
@@ -1287,13 +1315,13 @@ model FarmPreferences {
 
 // Préférences produits de la ferme (+ Configuration personnalisée éleveur)
 model FarmProductPreference {
-  id           String   @id @default(uuid())
-  farmId       String   @map("farm_id")
-  productId    String   @map("product_id")
+  id           String    @id @default(uuid())
+  farmId       String    @map("farm_id")
+  productId    String    @map("product_id")
 
   // Préférences de base
-  displayOrder Int      @default(0) @map("display_order")
-  isActive     Boolean  @default(true) @map("is_active")
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
 
   // Configuration personnalisée éleveur (surcharge AMM/RCP)
   packagingId               String?       @map("packaging_id")
@@ -1302,8 +1330,10 @@ model FarmProductPreference {
   userDefinedMeatWithdrawal Int?          @map("user_defined_meat_withdrawal")  // Jours
   userDefinedMilkWithdrawal Int?          @map("user_defined_milk_withdrawal")  // Heures
 
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  version      Int       @default(1)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
 
   // Relations
   farm      Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
@@ -1315,6 +1345,7 @@ model FarmProductPreference {
   @@index([farmId])
   @@index([productId])
   @@index([packagingId])
+  @@index([farmId, deletedAt])
   @@map("farm_product_preferences")
 }
 
@@ -1350,13 +1381,15 @@ model FarmerProductLot {
 
 // Préférences vétérinaires de la ferme (PHASE_23 - BLOC 4)
 model FarmVeterinarianPreference {
-  id              String   @id @default(uuid())
-  farmId          String   @map("farm_id")
-  veterinarianId  String   @map("veterinarian_id")
-  displayOrder    Int      @default(0) @map("display_order")
-  isActive        Boolean  @default(true) @map("is_active")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id              String    @id @default(uuid())
+  farmId          String    @map("farm_id")
+  veterinarianId  String    @map("veterinarian_id")
+  displayOrder    Int       @default(0) @map("display_order")
+  isActive        Boolean   @default(true) @map("is_active")
+  version         Int       @default(1)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
 
   farm         Farm         @relation(fields: [farmId], references: [id], onDelete: Cascade)
   veterinarian Veterinarian @relation(fields: [veterinarianId], references: [id], onDelete: Cascade)
@@ -1364,6 +1397,7 @@ model FarmVeterinarianPreference {
   @@unique([farmId, veterinarianId])
   @@index([farmId])
   @@index([veterinarianId])
+  @@index([farmId, deletedAt])
   @@map("farm_veterinarian_preferences")
 }
 
@@ -1375,8 +1409,10 @@ model FarmNationalCampaignPreference {
   campaignId String    @map("campaign_id")
   isEnrolled Boolean   @default(false) @map("is_enrolled")
   enrolledAt DateTime? @map("enrolled_at")
+  version    Int       @default(1)
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
 
   farm     Farm             @relation(fields: [farmId], references: [id], onDelete: Cascade)
   campaign NationalCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -1385,6 +1421,7 @@ model FarmNationalCampaignPreference {
   @@index([farmId])
   @@index([campaignId])
   @@index([isEnrolled])
+  @@index([farmId, deletedAt])
   @@map("farm_national_campaign_preferences")
 }
 

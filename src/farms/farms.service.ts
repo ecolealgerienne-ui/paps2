@@ -395,7 +395,56 @@ export class FarmsService {
   }
 
   /**
-   * Validation des codes géographiques (PHASE_03)
+   * Restore a soft-deleted farm
+   */
+  async restore(id: string) {
+    this.logger.debug(`Restoring farm ${id}`);
+
+    const existing = await this.prisma.farm.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      throw new EntityNotFoundException(
+        ERROR_CODES.ENTITY_NOT_FOUND,
+        `Farm ${id} not found`,
+        { farmId: id },
+      );
+    }
+
+    if (!existing.deletedAt) {
+      throw new ConflictException('This farm is not deleted');
+    }
+
+    try {
+      const restored = await this.prisma.farm.update({
+        where: { id },
+        data: {
+          deletedAt: null,
+          version: existing.version + 1,
+        },
+        include: {
+          preferences: true,
+          _count: {
+            select: {
+              animals: true,
+              lots: true,
+              veterinarians: true,
+            },
+          },
+        },
+      });
+
+      this.logger.audit('Farm restored', { farmId: id, name: restored.name });
+      return restored;
+    } catch (error) {
+      this.logger.error(`Failed to restore farm ${id}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Validation des codes géographiques
    */
   private validateGeoCodes(dto: Partial<CreateFarmDto | UpdateFarmDto>) {
     if (dto.country && !/^[A-Z]{2}$/.test(dto.country)) {

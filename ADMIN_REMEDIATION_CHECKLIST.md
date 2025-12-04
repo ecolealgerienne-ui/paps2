@@ -542,13 +542,94 @@ displayOrder = (maxOrder?.displayOrder || 0) + 1;
 
 ---
 
+#### 34. Compatibilité Types Prisma ↔ TypeScript (Critique)
+
+- [ ] **Enums** : Utiliser `string` dans ResponseDto au lieu d'enums TypeScript locaux
+- [ ] **Nullable** : Utiliser `Type | null` (pas juste `Type?`) pour champs nullable Prisma
+- [ ] **Decimal** : Importer `Decimal` de `@prisma/client/runtime/library`
+- [ ] **Default values** : Retourner objet complet avec tous les champs si pas de données
+
+**Pattern Enums** :
+```typescript
+// ❌ Incompatible avec Prisma
+import { CampaignType } from '../types/campaign-type.enum';
+type: CampaignType;
+
+// ✅ Compatible
+@ApiProperty({ enum: ['vaccination', 'deworming', 'screening', 'treatment', 'census', 'other'] })
+type: string;
+```
+
+**Pattern Nullable** :
+```typescript
+// ❌ Prisma retourne null, pas undefined
+lot?: LotSummaryDto;
+packaging?: object;
+
+// ✅ Accepter null ET undefined
+lot?: LotSummaryDto | null;
+packaging?: object | null;
+```
+
+**Pattern Decimal** :
+```typescript
+import { Decimal } from '@prisma/client/runtime/library';
+
+@ApiPropertyOptional({ type: 'number', nullable: true })
+userDefinedDose: Decimal | null;
+```
+
+**Pattern Default Values (quand entité n'existe pas)** :
+```typescript
+if (!preferences) {
+  const now = new Date();
+  return {
+    id: '',           // ID vide = pas encore créé
+    farmId,
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    deletedAt: null,
+    // ... tous les autres champs avec valeurs par défaut
+  };
+}
+```
+
+---
+
+#### 35. ResponseDto avec _count (Recommandé)
+
+- [ ] Inclure `_count` pour les compteurs de relations
+- [ ] Créer un DTO séparé pour les counts
+- [ ] Documenter avec `@ApiPropertyOptional`
+
+**Pattern** :
+```typescript
+class EntityCountsDto {
+  @ApiProperty({ description: 'Number of animals' })
+  animals: number;
+
+  @ApiProperty({ description: 'Number of lots' })
+  lots: number;
+}
+
+export class EntityResponseDto {
+  // ... autres champs ...
+
+  @ApiPropertyOptional({ description: 'Entity counts', type: EntityCountsDto })
+  _count?: EntityCountsDto;
+}
+```
+
+---
+
 ## 📊 RÉSUMÉ
 
-**Critiques (10)** : ☐ 0/10
+**Critiques (12)** : ☐ 0/12
 **Importants (18)** : ☐ 0/18
 **Optionnels (5)** : ☐ 0/5
 
-**Total** : ☐ 0/33
+**Total** : ☐ 0/35
 
 **Statut** : 🔴 NON DÉMARRÉ | 🟡 EN COURS | 🟢 TERMINÉ
 

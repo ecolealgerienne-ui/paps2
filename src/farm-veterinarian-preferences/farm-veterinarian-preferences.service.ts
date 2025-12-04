@@ -1,12 +1,17 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateFarmVeterinarianPreferenceDto, UpdateFarmVeterinarianPreferenceDto } from './dto';
+import { CreateFarmVeterinarianPreferenceDto, UpdateFarmVeterinarianPreferenceDto, FarmVeterinarianPreferenceResponseDto } from './dto';
+import { AppLogger } from '../common/utils/logger.service';
 
 @Injectable()
 export class FarmVeterinarianPreferencesService {
+  private readonly logger = new AppLogger(FarmVeterinarianPreferencesService.name);
+
   constructor(private prisma: PrismaService) {}
 
-  async create(farmId: string, dto: CreateFarmVeterinarianPreferenceDto) {
+  async create(farmId: string, dto: CreateFarmVeterinarianPreferenceDto): Promise<FarmVeterinarianPreferenceResponseDto> {
+    this.logger.debug(`Creating veterinarian preference for farm ${farmId}`);
+
     // Vérifier que la ferme existe
     const farm = await this.prisma.farm.findUnique({
       where: { id: farmId },
@@ -17,15 +22,15 @@ export class FarmVeterinarianPreferencesService {
     }
 
     // Vérifier que le vétérinaire existe
-    const veterinarian = await this.prisma.veterinarian.findUnique({
-      where: { id: dto.veterinarianId },
+    const veterinarian = await this.prisma.veterinarian.findFirst({
+      where: { id: dto.veterinarianId, deletedAt: null },
     });
 
     if (!veterinarian) {
       throw new NotFoundException(`Veterinarian with ID "${dto.veterinarianId}" not found`);
     }
 
-    // Vérifier si la préférence existe déjà (UNIQUE constraint)
+    // Vérifier si la préférence existe déjà (incluant les soft-deleted)
     const existing = await this.prisma.farmVeterinarianPreference.findFirst({
       where: {
         farmId,
@@ -34,44 +39,57 @@ export class FarmVeterinarianPreferencesService {
     });
 
     if (existing) {
+      // Si soft-deleted, restaurer
+      if (existing.deletedAt) {
+        const restored = await this.prisma.farmVeterinarianPreference.update({
+          where: { id: existing.id },
+          data: {
+            deletedAt: null,
+            isActive: dto.isActive ?? true,
+            displayOrder: dto.displayOrder ?? existing.displayOrder,
+            version: existing.version + 1,
+          },
+          include: {
+            veterinarian: true,
+            farm: { select: { id: true, name: true } },
+          },
+        });
+        this.logger.audit('Farm veterinarian preference restored', { preferenceId: existing.id, farmId });
+        return restored;
+      }
       throw new ConflictException(`This veterinarian is already in the preferences for this farm`);
     }
 
-    return this.prisma.farmVeterinarianPreference.create({
+    // Auto-increment displayOrder si non fourni
+    let displayOrder = dto.displayOrder;
+    if (displayOrder === undefined) {
+      const maxOrder = await this.prisma.farmVeterinarianPreference.findFirst({
+        where: { farmId, deletedAt: null },
+        orderBy: { displayOrder: 'desc' },
+        select: { displayOrder: true },
+      });
+      displayOrder = (maxOrder?.displayOrder ?? -1) + 1;
+    }
+
+    const preference = await this.prisma.farmVeterinarianPreference.create({
       data: {
         ...dto,
         farmId,
+        displayOrder,
       },
       include: {
         veterinarian: true,
-        farm: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        farm: { select: { id: true, name: true } },
       },
     });
+
+    this.logger.audit('Farm veterinarian preference created', { preferenceId: preference.id, farmId });
+    return preference;
   }
 
-  async findAll() {
-    return this.prisma.farmVeterinarianPreference.findMany({
-      include: {
-        veterinarian: true,
-        farm: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      orderBy: {
-        displayOrder: 'asc',
-      },
-    });
-  }
+  async findByFarm(farmId: string, includeInactive = false): Promise<FarmVeterinarianPreferenceResponseDto[]> {
+    this.logger.debug(`Finding veterinarian preferences for farm ${farmId}`);
 
-  async findByFarm(farmId: string) {
     // Vérifier que la ferme existe
     const farm = await this.prisma.farm.findUnique({
       where: { id: farmId },
@@ -81,8 +99,13 @@ export class FarmVeterinarianPreferencesService {
       throw new NotFoundException(`Farm with ID "${farmId}" not found`);
     }
 
+    const where: any = { farmId, deletedAt: null };
+    if (!includeInactive) {
+      where.isActive = true;
+    }
+
     return this.prisma.farmVeterinarianPreference.findMany({
-      where: { farmId },
+      where,
       include: {
         veterinarian: true,
       },
@@ -92,17 +115,12 @@ export class FarmVeterinarianPreferencesService {
     });
   }
 
-  async findOne(id: string) {
-    const preference = await this.prisma.farmVeterinarianPreference.findUnique({
-      where: { id },
+  async findOne(id: string): Promise<FarmVeterinarianPreferenceResponseDto> {
+    const preference = await this.prisma.farmVeterinarianPreference.findFirst({
+      where: { id, deletedAt: null },
       include: {
         veterinarian: true,
-        farm: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        farm: { select: { id: true, name: true } },
       },
     });
 
@@ -113,45 +131,94 @@ export class FarmVeterinarianPreferencesService {
     return preference;
   }
 
-  async update(id: string, dto: UpdateFarmVeterinarianPreferenceDto) {
-    await this.findOne(id);
+  async update(id: string, dto: UpdateFarmVeterinarianPreferenceDto): Promise<FarmVeterinarianPreferenceResponseDto> {
+    this.logger.debug(`Updating veterinarian preference ${id}`);
 
-    return this.prisma.farmVeterinarianPreference.update({
+    const existing = await this.prisma.farmVeterinarianPreference.findFirst({
+      where: { id, deletedAt: null },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Farm veterinarian preference with ID "${id}" not found`);
+    }
+
+    // Optimistic locking
+    if (dto.version !== undefined && existing.version !== dto.version) {
+      throw new ConflictException('Version conflict: the preference has been modified by another user');
+    }
+
+    const updated = await this.prisma.farmVeterinarianPreference.update({
       where: { id },
-      data: dto,
+      data: {
+        displayOrder: dto.displayOrder ?? existing.displayOrder,
+        isActive: dto.isActive ?? existing.isActive,
+        version: existing.version + 1,
+      },
       include: {
         veterinarian: true,
-        farm: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        farm: { select: { id: true, name: true } },
       },
     });
+
+    this.logger.audit('Farm veterinarian preference updated', { preferenceId: id });
+    return updated;
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: string): Promise<FarmVeterinarianPreferenceResponseDto> {
+    this.logger.debug(`Soft deleting veterinarian preference ${id}`);
 
-    return this.prisma.farmVeterinarianPreference.delete({
-      where: { id },
+    const existing = await this.prisma.farmVeterinarianPreference.findFirst({
+      where: { id, deletedAt: null },
     });
-  }
 
-  async toggleActive(id: string, isActive: boolean) {
-    await this.findOne(id);
+    if (!existing) {
+      throw new NotFoundException(`Farm veterinarian preference with ID "${id}" not found`);
+    }
 
-    return this.prisma.farmVeterinarianPreference.update({
+    const deleted = await this.prisma.farmVeterinarianPreference.update({
       where: { id },
-      data: { isActive },
+      data: {
+        deletedAt: new Date(),
+        version: existing.version + 1,
+      },
       include: {
         veterinarian: true,
       },
     });
+
+    this.logger.audit('Farm veterinarian preference soft deleted', { preferenceId: id });
+    return deleted;
   }
 
-  async reorder(farmId: string, orderedIds: string[]) {
+  async toggleActive(id: string, isActive: boolean): Promise<FarmVeterinarianPreferenceResponseDto> {
+    this.logger.debug(`Toggling active status for preference ${id} to ${isActive}`);
+
+    const existing = await this.prisma.farmVeterinarianPreference.findFirst({
+      where: { id, deletedAt: null },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Farm veterinarian preference with ID "${id}" not found`);
+    }
+
+    const updated = await this.prisma.farmVeterinarianPreference.update({
+      where: { id },
+      data: {
+        isActive,
+        version: existing.version + 1,
+      },
+      include: {
+        veterinarian: true,
+      },
+    });
+
+    this.logger.audit('Farm veterinarian preference toggled', { preferenceId: id, isActive });
+    return updated;
+  }
+
+  async reorder(farmId: string, orderedIds: string[]): Promise<FarmVeterinarianPreferenceResponseDto[]> {
+    this.logger.debug(`Reordering veterinarian preferences for farm ${farmId}`);
+
     // Vérifier que la ferme existe
     const farm = await this.prisma.farm.findUnique({
       where: { id: farmId },
@@ -166,6 +233,7 @@ export class FarmVeterinarianPreferencesService {
       where: {
         id: { in: orderedIds },
         farmId,
+        deletedAt: null,
       },
     });
 
@@ -173,7 +241,7 @@ export class FarmVeterinarianPreferencesService {
       throw new BadRequestException('Some preference IDs are invalid or do not belong to this farm');
     }
 
-    // Mettre à jour l'ordre
+    // Mettre à jour l'ordre dans une transaction
     const updates = orderedIds.map((id, index) =>
       this.prisma.farmVeterinarianPreference.update({
         where: { id },
@@ -183,6 +251,38 @@ export class FarmVeterinarianPreferencesService {
 
     await this.prisma.$transaction(updates);
 
-    return this.findByFarm(farmId);
+    this.logger.audit('Farm veterinarian preferences reordered', { farmId, count: orderedIds.length });
+    return this.findByFarm(farmId, true);
+  }
+
+  async restore(id: string): Promise<FarmVeterinarianPreferenceResponseDto> {
+    this.logger.debug(`Restoring veterinarian preference ${id}`);
+
+    const existing = await this.prisma.farmVeterinarianPreference.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Farm veterinarian preference with ID "${id}" not found`);
+    }
+
+    if (!existing.deletedAt) {
+      throw new ConflictException('This preference is not deleted');
+    }
+
+    const restored = await this.prisma.farmVeterinarianPreference.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+        version: existing.version + 1,
+      },
+      include: {
+        veterinarian: true,
+        farm: { select: { id: true, name: true } },
+      },
+    });
+
+    this.logger.audit('Farm veterinarian preference restored', { preferenceId: id });
+    return restored;
   }
 }
