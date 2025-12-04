@@ -154,3 +154,5 @@ export class UpdateFarmPreferencesDto {
   @IsOptional()
   version?: number;
 }
+
+export { FarmPreferencesResponseDto } from './farm-preferences-response.dto';
