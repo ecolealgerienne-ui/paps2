@@ -50,8 +50,8 @@ export class FarmProductPreferenceResponseDto {
   @ApiPropertyOptional({ description: 'Associated farm details' })
   farm?: object;
 
-  @ApiPropertyOptional({ description: 'Selected packaging details' })
-  packaging?: object;
+  @ApiPropertyOptional({ description: 'Selected packaging details', nullable: true })
+  packaging?: object | null;
 
   @ApiPropertyOptional({ description: 'Associated farmer product lots' })
   lots?: object[];

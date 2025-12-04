@@ -84,6 +84,6 @@ export class PersonalCampaignResponseDto {
   @ApiPropertyOptional({ description: 'Deletion timestamp (soft delete)', nullable: true })
   deletedAt: Date | null;
 
-  @ApiPropertyOptional({ description: 'Associated lot details', type: LotSummaryDto })
-  lot?: LotSummaryDto;
+  @ApiPropertyOptional({ description: 'Associated lot details', type: LotSummaryDto, nullable: true })
+  lot?: LotSummaryDto | null;
 }
