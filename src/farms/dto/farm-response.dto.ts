@@ -1,11 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 class FarmCountsDto {
-  @ApiProperty({ description: 'Number of animals' })
-  animals: number;
+  @ApiPropertyOptional({ description: 'Number of animals' })
+  animals?: number;
 
-  @ApiProperty({ description: 'Number of lots' })
-  lots: number;
+  @ApiPropertyOptional({ description: 'Number of lots' })
+  lots?: number;
 
   @ApiPropertyOptional({ description: 'Number of veterinarians' })
   veterinarians?: number;
