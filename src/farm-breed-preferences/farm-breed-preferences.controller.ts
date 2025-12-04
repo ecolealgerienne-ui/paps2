@@ -2,216 +2,148 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Patch,
   Body,
   Param,
   Query,
-  HttpCode,
-  HttpStatus,
+  ParseUUIDPipe,
+  ParseBoolPipe,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { FarmBreedPreferencesService } from './farm-breed-preferences.service';
 import {
   AddFarmBreedPreferenceDto,
-  ReorderFarmBreedPreferenceDto,
-  ToggleActiveFarmBreedPreferenceDto,
+  UpdateFarmBreedPreferenceDto,
+  FarmBreedPreferenceResponseDto,
 } from './dto';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
-/**
- * Controller for managing Farm-Breed preferences
- * PHASE_20: FarmBreedPreferences
- */
-@ApiTags('farm-breed-preferences')
-@Controller('farms/:farmId/breed-preferences')
+@ApiTags('Farm Breed Preferences')
+@Controller('api/v1/farms/:farmId/breed-preferences')
+@UseGuards(AuthGuard)
+@ApiBearerAuth()
 export class FarmBreedPreferencesController {
-  constructor(
-    private readonly farmBreedPreferencesService: FarmBreedPreferencesService,
-  ) {}
+  constructor(private readonly service: FarmBreedPreferencesService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all breed preferences for a farm' })
-  @ApiParam({
-    name: 'farmId',
-    description: 'Farm UUID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiQuery({
-    name: 'includeInactive',
-    required: false,
-    type: Boolean,
-    description: 'Include inactive preferences',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of breed preferences for the farm',
-  })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiQuery({ name: 'includeInactive', required: false, description: 'Include inactive preferences', example: false })
+  @ApiResponse({ status: 200, description: 'List of breed preferences', type: [FarmBreedPreferenceResponseDto] })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Farm not found' })
-  async findByFarm(
-    @Param('farmId') farmId: string,
-    @Query('includeInactive') includeInactive?: string,
-  ) {
-    const include = includeInactive === 'true';
-    const preferences = await this.farmBreedPreferencesService.findByFarm(
-      farmId,
-      include,
-    );
+  findByFarm(
+    @Param('farmId', ParseUUIDPipe) farmId: string,
+    @Query('includeInactive') includeInactive?: boolean,
+  ): Promise<FarmBreedPreferenceResponseDto[]> {
+    return this.service.findByFarm(farmId, includeInactive === true);
+  }
 
-    return {
-      success: true,
-      data: preferences.map((p) => ({
-        id: p.id,
-        farm_id: p.farmId,
-        breed_id: p.breedId,
-        display_order: p.displayOrder,
-        is_active: p.isActive,
-        created_at: p.createdAt,
-        updated_at: p.updatedAt,
-        breed: p.breed
-          ? {
-              id: p.breed.id,
-              code: p.breed.code,
-              name_fr: p.breed.nameFr,
-              name_en: p.breed.nameEn,
-              name_ar: p.breed.nameAr,
-              species_id: p.breed.speciesId,
-            }
-          : null,
-      })),
-    };
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a specific breed preference' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Preference details', type: FarmBreedPreferenceResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
+  findOne(
+    @Param('farmId', ParseUUIDPipe) _farmId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FarmBreedPreferenceResponseDto> {
+    return this.service.findOne(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Add a breed preference to a farm' })
   @ApiParam({ name: 'farmId', description: 'Farm UUID' })
-  @ApiResponse({
-    status: 201,
-    description: 'Breed preference successfully added',
-  })
-  @ApiResponse({ status: 404, description: 'Farm or Breed not found' })
+  @ApiResponse({ status: 201, description: 'Preference created successfully', type: FarmBreedPreferenceResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Farm or breed not found' })
   @ApiResponse({ status: 409, description: 'Preference already exists' })
-  async add(@Param('farmId') farmId: string, @Body() dto: { breedId: string }) {
-    const preference = await this.farmBreedPreferencesService.add(
-      farmId,
-      dto.breedId,
-    );
-
-    return {
-      success: true,
-      message: 'Breed preference successfully added to farm',
-      data: {
-        id: preference.id,
-        farm_id: preference.farmId,
-        breed_id: preference.breedId,
-        display_order: preference.displayOrder,
-        is_active: preference.isActive,
-        created_at: preference.createdAt,
-        updated_at: preference.updatedAt,
-        breed: preference.breed
-          ? {
-              id: preference.breed.id,
-              code: preference.breed.code,
-              name_fr: preference.breed.nameFr,
-              name_en: preference.breed.nameEn,
-              name_ar: preference.breed.nameAr,
-              species_id: preference.breed.speciesId,
-            }
-          : null,
-      },
-    };
+  add(
+    @Param('farmId', ParseUUIDPipe) farmId: string,
+    @Body() dto: AddFarmBreedPreferenceDto,
+  ): Promise<FarmBreedPreferenceResponseDto> {
+    return this.service.add(farmId, dto.breedId);
   }
 
-  @Delete()
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Remove a breed preference from a farm' })
+  @Put(':id')
+  @ApiOperation({ summary: 'Update a breed preference' })
   @ApiParam({ name: 'farmId', description: 'Farm UUID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Breed preference successfully removed',
-  })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Preference updated successfully', type: FarmBreedPreferenceResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Preference not found' })
-  async remove(@Param('farmId') farmId: string, @Body() dto: { breedId: string }) {
-    await this.farmBreedPreferencesService.remove(farmId, dto.breedId);
+  @ApiResponse({ status: 409, description: 'Version conflict' })
+  update(
+    @Param('farmId', ParseUUIDPipe) _farmId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateFarmBreedPreferenceDto,
+  ): Promise<FarmBreedPreferenceResponseDto> {
+    return this.service.update(id, dto);
+  }
 
-    return {
-      success: true,
-      message: 'Breed preference successfully removed from farm',
-    };
+  @Patch(':id/toggle-active')
+  @ApiOperation({ summary: 'Toggle active status of a breed preference' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiQuery({ name: 'isActive', description: 'Active status', type: 'boolean', required: true })
+  @ApiResponse({ status: 200, description: 'Preference status toggled successfully', type: FarmBreedPreferenceResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
+  toggleActive(
+    @Param('farmId', ParseUUIDPipe) _farmId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('isActive', ParseBoolPipe) isActive: boolean,
+  ): Promise<FarmBreedPreferenceResponseDto> {
+    return this.service.toggleActive(id, isActive);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Soft delete a breed preference' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Preference soft deleted successfully', type: FarmBreedPreferenceResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
+  remove(
+    @Param('farmId', ParseUUIDPipe) _farmId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FarmBreedPreferenceResponseDto> {
+    return this.service.remove(id);
+  }
+
+  @Post(':id/restore')
+  @ApiOperation({ summary: 'Restore a soft-deleted breed preference' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Preference restored successfully', type: FarmBreedPreferenceResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
+  @ApiResponse({ status: 409, description: 'Preference is not deleted' })
+  restore(
+    @Param('farmId', ParseUUIDPipe) _farmId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FarmBreedPreferenceResponseDto> {
+    return this.service.restore(id);
   }
 
   @Patch('reorder')
-  @ApiOperation({ summary: 'Reorder a breed preference for a farm' })
+  @ApiOperation({ summary: 'Reorder breed preferences for a farm' })
   @ApiParam({ name: 'farmId', description: 'Farm UUID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Breed preference successfully reordered',
-  })
-  @ApiResponse({ status: 404, description: 'Preference not found' })
-  async reorder(@Param('farmId') farmId: string, @Body() dto: { breedId: string; displayOrder: number }) {
-    const preference = await this.farmBreedPreferencesService.reorder(
-      farmId,
-      dto.breedId,
-      dto.displayOrder,
-    );
-
-    return {
-      success: true,
-      message: 'Breed preference successfully reordered',
-      data: {
-        id: preference.id,
-        farm_id: preference.farmId,
-        breed_id: preference.breedId,
-        display_order: preference.displayOrder,
-        is_active: preference.isActive,
-        breed: preference.breed
-          ? {
-              id: preference.breed.id,
-              code: preference.breed.code,
-              name_fr: preference.breed.nameFr,
-              name_en: preference.breed.nameEn,
-              name_ar: preference.breed.nameAr,
-              species_id: preference.breed.speciesId,
-            }
-          : null,
-      },
-    };
-  }
-
-  @Patch('toggle-active')
-  @ApiOperation({ summary: 'Toggle active status of a breed preference' })
-  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Breed preference active status successfully toggled',
-  })
-  @ApiResponse({ status: 404, description: 'Preference not found' })
-  async toggleActive(@Param('farmId') farmId: string, @Body() dto: { breedId: string; isActive: boolean }) {
-    const preference = await this.farmBreedPreferencesService.toggleActive(
-      farmId,
-      dto.breedId,
-      dto.isActive,
-    );
-
-    return {
-      success: true,
-      message: 'Breed preference active status successfully toggled',
-      data: {
-        id: preference.id,
-        farm_id: preference.farmId,
-        breed_id: preference.breedId,
-        display_order: preference.displayOrder,
-        is_active: preference.isActive,
-        breed: preference.breed
-          ? {
-              id: preference.breed.id,
-              code: preference.breed.code,
-              name_fr: preference.breed.nameFr,
-              name_en: preference.breed.nameEn,
-              name_ar: preference.breed.nameAr,
-              species_id: preference.breed.speciesId,
-            }
-          : null,
-      },
-    };
+  @ApiResponse({ status: 200, description: 'Preferences reordered successfully', type: [FarmBreedPreferenceResponseDto] })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid preference IDs' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Farm not found' })
+  reorder(
+    @Param('farmId', ParseUUIDPipe) farmId: string,
+    @Body() dto: { orderedIds: string[] },
+  ): Promise<FarmBreedPreferenceResponseDto[]> {
+    return this.service.reorder(farmId, dto.orderedIds);
   }
 }
