@@ -275,4 +275,48 @@ export class PersonalCampaignsService {
       throw error;
     }
   }
+
+  // Restore a soft-deleted campaign
+  async restore(farmId: string, id: string) {
+    this.logger.debug(`Restoring personal campaign ${id}`);
+
+    const existing = await this.prisma.personalCampaign.findFirst({
+      where: { id, farmId },
+    });
+
+    if (!existing) {
+      throw new EntityNotFoundException(
+        ERROR_CODES.CAMPAIGN_NOT_FOUND,
+        `Personal campaign ${id} not found`,
+        { campaignId: id, farmId },
+      );
+    }
+
+    if (!existing.deletedAt) {
+      throw new EntityConflictException(
+        ERROR_CODES.VERSION_CONFLICT,
+        'This campaign is not deleted',
+        { campaignId: id, farmId },
+      );
+    }
+
+    try {
+      const restored = await this.prisma.personalCampaign.update({
+        where: { id },
+        data: {
+          deletedAt: null,
+          version: existing.version + 1,
+        },
+        include: {
+          lot: { select: { id: true, name: true, type: true } },
+        },
+      });
+
+      this.logger.audit('Personal campaign restored', { campaignId: id, farmId });
+      return restored;
+    } catch (error) {
+      this.logger.error(`Failed to restore personal campaign ${id}`, error.stack);
+      throw error;
+    }
+  }
 }
