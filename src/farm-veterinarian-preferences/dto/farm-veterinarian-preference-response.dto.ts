@@ -16,6 +16,9 @@ export class FarmVeterinarianPreferenceResponseDto {
   @ApiProperty({ description: 'Whether this preference is active', example: true })
   isActive: boolean;
 
+  @ApiProperty({ description: 'Whether this is the default veterinarian for the farm', example: false })
+  isDefault: boolean;
+
   @ApiProperty({ description: 'Version for optimistic locking', example: 1 })
   version: number;
 

@@ -71,6 +71,14 @@ export class FarmVeterinarianPreferencesService {
       displayOrder = (maxOrder?.displayOrder ?? -1) + 1;
     }
 
+    // Si isDefault=true, retirer le flag des autres préférences
+    if (dto.isDefault) {
+      await this.prisma.farmVeterinarianPreference.updateMany({
+        where: { farmId, isDefault: true, deletedAt: null },
+        data: { isDefault: false },
+      });
+    }
+
     const preference = await this.prisma.farmVeterinarianPreference.create({
       data: {
         ...dto,
@@ -83,7 +91,7 @@ export class FarmVeterinarianPreferencesService {
       },
     });
 
-    this.logger.audit('Farm veterinarian preference created', { preferenceId: preference.id, farmId });
+    this.logger.audit('Farm veterinarian preference created', { preferenceId: preference.id, farmId, isDefault: dto.isDefault });
     return preference;
   }
 
@@ -147,11 +155,20 @@ export class FarmVeterinarianPreferencesService {
       throw new ConflictException('Version conflict: the preference has been modified by another user');
     }
 
+    // Si isDefault=true, retirer le flag des autres préférences
+    if (dto.isDefault) {
+      await this.prisma.farmVeterinarianPreference.updateMany({
+        where: { farmId: existing.farmId, isDefault: true, deletedAt: null, id: { not: id } },
+        data: { isDefault: false },
+      });
+    }
+
     const updated = await this.prisma.farmVeterinarianPreference.update({
       where: { id },
       data: {
         displayOrder: dto.displayOrder ?? existing.displayOrder,
         isActive: dto.isActive ?? existing.isActive,
+        isDefault: dto.isDefault ?? existing.isDefault,
         version: existing.version + 1,
       },
       include: {
@@ -160,7 +177,7 @@ export class FarmVeterinarianPreferencesService {
       },
     });
 
-    this.logger.audit('Farm veterinarian preference updated', { preferenceId: id });
+    this.logger.audit('Farm veterinarian preference updated', { preferenceId: id, isDefault: updated.isDefault });
     return updated;
   }
 
@@ -284,5 +301,57 @@ export class FarmVeterinarianPreferencesService {
 
     this.logger.audit('Farm veterinarian preference restored', { preferenceId: id });
     return restored;
+  }
+
+  async findDefault(farmId: string): Promise<FarmVeterinarianPreferenceResponseDto | null> {
+    this.logger.debug(`Finding default veterinarian preference for farm ${farmId}`);
+
+    const preference = await this.prisma.farmVeterinarianPreference.findFirst({
+      where: {
+        farmId,
+        isDefault: true,
+        isActive: true,
+        deletedAt: null,
+      },
+      include: {
+        veterinarian: true,
+        farm: { select: { id: true, name: true } },
+      },
+    });
+
+    return preference;
+  }
+
+  async setDefault(farmId: string, id: string): Promise<FarmVeterinarianPreferenceResponseDto> {
+    this.logger.debug(`Setting preference ${id} as default for farm ${farmId}`);
+
+    const existing = await this.prisma.farmVeterinarianPreference.findFirst({
+      where: { id, farmId, deletedAt: null },
+    });
+
+    if (!existing) {
+      throw new NotFoundException(`Farm veterinarian preference with ID "${id}" not found for this farm`);
+    }
+
+    // Retirer le flag des autres préférences
+    await this.prisma.farmVeterinarianPreference.updateMany({
+      where: { farmId, isDefault: true, deletedAt: null, id: { not: id } },
+      data: { isDefault: false },
+    });
+
+    const updated = await this.prisma.farmVeterinarianPreference.update({
+      where: { id },
+      data: {
+        isDefault: true,
+        version: existing.version + 1,
+      },
+      include: {
+        veterinarian: true,
+        farm: { select: { id: true, name: true } },
+      },
+    });
+
+    this.logger.audit('Farm veterinarian preference set as default', { preferenceId: id, farmId });
+    return updated;
   }
 }

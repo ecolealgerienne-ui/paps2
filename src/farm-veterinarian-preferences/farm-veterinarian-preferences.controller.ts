@@ -53,6 +53,17 @@ export class FarmVeterinarianPreferencesController {
     return this.farmVeterinarianPreferencesService.findByFarm(farmId, includeInactive === true);
   }
 
+  @Get('default')
+  @ApiOperation({ summary: 'Get the default veterinarian preference for a farm' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiResponse({ status: 200, description: 'Default veterinarian preference', type: FarmVeterinarianPreferenceResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  findDefault(
+    @Param('farmId', ParseUUIDPipe) farmId: string,
+  ): Promise<FarmVeterinarianPreferenceResponseDto | null> {
+    return this.farmVeterinarianPreferencesService.findDefault(farmId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific farm veterinarian preference' })
   @ApiParam({ name: 'farmId', description: 'Farm UUID' })
@@ -127,5 +138,19 @@ export class FarmVeterinarianPreferencesController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<FarmVeterinarianPreferenceResponseDto> {
     return this.farmVeterinarianPreferencesService.restore(id);
+  }
+
+  @Post(':id/set-default')
+  @ApiOperation({ summary: 'Set a veterinarian preference as the default for the farm' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Preference UUID' })
+  @ApiResponse({ status: 200, description: 'Preference set as default successfully', type: FarmVeterinarianPreferenceResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
+  setDefault(
+    @Param('farmId', ParseUUIDPipe) farmId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<FarmVeterinarianPreferenceResponseDto> {
+    return this.farmVeterinarianPreferencesService.setDefault(farmId, id);
   }
 }
