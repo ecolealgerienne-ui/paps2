@@ -7,8 +7,8 @@ class LotSummaryDto {
   @ApiProperty({ description: 'Lot name' })
   name: string;
 
-  @ApiPropertyOptional({ description: 'Lot type' })
-  type?: string;
+  @ApiPropertyOptional({ description: 'Lot type', nullable: true })
+  type?: string | null;
 }
 
 export class PersonalCampaignResponseDto {
