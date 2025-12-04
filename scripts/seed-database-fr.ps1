@@ -117,7 +117,7 @@ $countries = @(
 )
 
 foreach ($country in $countries) {
-    Invoke-CurlApi -Method POST -Endpoint "/countries" -Body $country `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/countries" -Body $country `
         -Description "Pays: $($country.nameFr)"
 }
 
@@ -132,7 +132,7 @@ $routes = @(
 )
 
 foreach ($route in $routes) {
-    Invoke-CurlApi -Method POST -Endpoint "/administration-routes" -Body $route `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/administration-routes" -Body $route `
         -Description "Route: $($route.nameFr)"
 }
 
@@ -154,7 +154,7 @@ $products = @(
 )
 
 foreach ($product in $products) {
-    $productResponse = Invoke-CurlApi -Method POST -Endpoint "/global-medical-products" -Body $product `
+    $productResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/global-medical-products" -Body $product `
         -Description "Produit: $($product.nameFr)"
 
     $globalProductId = Get-IdFromResponse $productResponse
@@ -180,7 +180,7 @@ $vaccines = @(
 )
 
 foreach ($vaccine in $vaccines) {
-    $vaccineResponse = Invoke-CurlApi -Method POST -Endpoint "/vaccines-global" -Body $vaccine `
+    $vaccineResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/vaccines-global" -Body $vaccine `
         -Description "Vaccin: $($vaccine.nameFr)"
 
     $globalVaccineId = Get-IdFromResponse $vaccineResponse
@@ -209,7 +209,7 @@ $campaigns = @(
 )
 
 foreach ($campaign in $campaigns) {
-    $campaignResponse = Invoke-CurlApi -Method POST -Endpoint "/api/national-campaigns" -Body $campaign `
+    $campaignResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/national-campaigns" -Body $campaign `
         -Description "Campagne: $($campaign.nameFr)"
 
     $nationalCampaignId = Get-IdFromResponse $campaignResponse
@@ -237,7 +237,7 @@ $templates = @(
 )
 
 foreach ($template in $templates) {
-    Invoke-CurlApi -Method POST -Endpoint "/alert-templates" -Body $template `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/alert-templates" -Body $template `
         -Description "Alerte: $($template.nameFr)"
 }
 
@@ -347,7 +347,7 @@ if ($farmResponse) {
     )
 
     foreach ($vet in $vets) {
-        $vetResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarians" -Body $vet `
+        $vetResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/veterinarians" -Body $vet `
             -Description "Veterinaire: Dr. $($vet.lastName)"
 
         $vetId = Get-IdFromResponse $vetResponse
@@ -374,7 +374,7 @@ if ($farmResponse) {
     )
 
     foreach ($lot in $lots) {
-        $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots" -Body $lot `
+        $lotResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/lots" -Body $lot `
             -Description "Lot: $($lot.name)"
 
         $lotId = Get-IdFromResponse $lotResponse
@@ -411,7 +411,7 @@ if ($farmResponse -and $breedId) {
     }
 
     Write-Host "    Using breedId: $breedId" -ForegroundColor Cyan
-    $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/animals" -Body $animal `
+    $animalResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/animals" -Body $animal `
         -Description "Animal: $($animal.visualId) (EID: $($animal.currentEid))"
 } elseif (-not $breedId) {
     Write-Host ""
@@ -445,7 +445,7 @@ if ($farmResponse) {
         isActive = $true
     }
 
-    $medicalProductResponse = Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/medical-products" -Body $medicalProduct `
+    $medicalProductResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/medical-products" -Body $medicalProduct `
         -Description "Produit medical: $($medicalProduct.name)"
 
     $medicalProductId = Get-IdFromResponse $medicalProductResponse
@@ -469,7 +469,7 @@ if ($farmResponse) {
         dosage = "2ml par animal"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccines" -Body $customVaccine `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/vaccines" -Body $customVaccine `
         -Description "Vaccin personnalise: $($customVaccine.name)"
 }
 
@@ -484,7 +484,7 @@ if ($farmResponse -and $lotIds -and $lotIds.Count -gt 0 -and $animalId) {
         animalIds = @($animalId)
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/lots/$($lotIds[0])/animals" -Body $lotAnimalDto `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/lots/$($lotIds[0])/animals" -Body $lotAnimalDto `
         -Description "Ajout animal au lot"
 }
 
@@ -516,7 +516,7 @@ if ($farmResponse -and $animalResponse) {
         $vaccination.veterinarianName = "Dr. Martin"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccinations" -Body $vaccination `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/vaccinations" -Body $vaccination `
         -Description "Vaccination: $($vaccination.disease)"
 }
 
@@ -548,7 +548,7 @@ if ($farmResponse -and $animalResponse -and $medicalProductId) {
         $treatment.veterinarianName = "Dr. Martin"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/treatments" -Body $treatment `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/treatments" -Body $treatment `
         -Description "Traitement: $($treatment.diagnosis)"
 }
 
@@ -567,7 +567,7 @@ if ($farmResponse -and $animalResponse) {
         notes = "Animal ne sur place"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/movements" -Body $movement `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/movements" -Body $movement `
         -Description "Mouvement: $($movement.movementType)"
 }
 
@@ -586,7 +586,7 @@ if ($farmResponse -and $animalResponse) {
         notes = "Pesee de routine"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/weights" -Body $weight `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/weights" -Body $weight `
         -Description "Pesee: $($weight.weight) kg"
 }
 
@@ -613,7 +613,7 @@ if ($farmResponse -and $animalResponse) {
         $breeding.veterinarianName = "Dr. Martin"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breedings" -Body $breeding `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/breedings" -Body $breeding `
         -Description "Reproduction: IA"
 }
 
@@ -669,7 +669,7 @@ if ($farmResponse -and $animalResponse) {
         notes = "Certificat sanitaire valide pour mouvements"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/documents" -Body $document `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/documents" -Body $document `
         -Description "Document: $($document.title)"
 }
 
@@ -860,7 +860,7 @@ if ($farmResponse -and $globalVaccineId) {
         isActive = $true
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/vaccine-preferences" -Body $farmVaccinePref `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/vaccine-preferences" -Body $farmVaccinePref `
         -Description "Vaccin prefere: Enterotoxemie"
 }
 
