@@ -786,38 +786,38 @@ if ($nationalCampaignId) {
 }
 
 # =============================================================================
-# 27. PRODUCT COUNTRIES (Liaison Produit-Pays)
+# 27. PRODUCT COUNTRIES (Liaison Produit-Pays) - SKIPPED: Module not implemented
 # =============================================================================
-if ($globalProductId) {
-    Write-Host ""
-    Write-Host "27. Product Countries (Produits par pays)" -ForegroundColor Cyan
-
-    $productCountry = @{
-        productId = $globalProductId
-        countryCode = "FR"
-        isActive = $true
-    }
-
-    Invoke-CurlApi -Method POST -Endpoint "/api/v1/product-countries" -Body $productCountry `
-        -Description "Produit disponible en France"
-}
+# if ($globalProductId) {
+#     Write-Host ""
+#     Write-Host "27. Product Countries (Produits par pays)" -ForegroundColor Cyan
+#     $productCountry = @{
+#         productId = $globalProductId
+#         countryCode = "FR"
+#         isActive = $true
+#     }
+#     Invoke-CurlApi -Method POST -Endpoint "/api/v1/product-countries" -Body $productCountry `
+#         -Description "Produit disponible en France"
+# }
+Write-Host ""
+Write-Host "27. Product Countries - SKIPPED (module not implemented)" -ForegroundColor Yellow
 
 # =============================================================================
-# 28. VACCINE COUNTRIES (Liaison Vaccin-Pays)
+# 28. VACCINE COUNTRIES (Liaison Vaccin-Pays) - SKIPPED: Module not implemented
 # =============================================================================
-if ($globalVaccineId) {
-    Write-Host ""
-    Write-Host "28. Vaccine Countries (Vaccins par pays)" -ForegroundColor Cyan
-
-    $vaccineCountry = @{
-        vaccineId = $globalVaccineId
-        countryCode = "FR"
-        isActive = $true
-    }
-
-    Invoke-CurlApi -Method POST -Endpoint "/api/v1/vaccine-countries" -Body $vaccineCountry `
-        -Description "Vaccin disponible en France"
-}
+# if ($globalVaccineId) {
+#     Write-Host ""
+#     Write-Host "28. Vaccine Countries (Vaccins par pays)" -ForegroundColor Cyan
+#     $vaccineCountry = @{
+#         vaccineId = $globalVaccineId
+#         countryCode = "FR"
+#         isActive = $true
+#     }
+#     Invoke-CurlApi -Method POST -Endpoint "/api/v1/vaccine-countries" -Body $vaccineCountry `
+#         -Description "Vaccin disponible en France"
+# }
+Write-Host ""
+Write-Host "28. Vaccine Countries - SKIPPED (module not implemented)" -ForegroundColor Yellow
 
 # =============================================================================
 # 29. FARM BREED PREFERENCES (Races preferees de la ferme)
@@ -846,22 +846,22 @@ if ($farmResponse -and $nationalCampaignId) {
 }
 
 # =============================================================================
-# 31. FARM VACCINE PREFERENCES (Vaccins preferes de la ferme)
+# 31. FARM VACCINE PREFERENCES (Vaccins preferes de la ferme) - SKIPPED: Module not implemented
 # =============================================================================
-if ($farmResponse -and $globalVaccineId) {
-    Write-Host ""
-    Write-Host "31. Farm Vaccine Preferences (Vaccins preferes)" -ForegroundColor Cyan
-
-    $farmVaccinePref = @{
-        farmId = $farmId
-        globalVaccineId = $globalVaccineId
-        displayOrder = 1
-        isActive = $true
-    }
-
-    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/vaccine-preferences" -Body $farmVaccinePref `
-        -Description "Vaccin prefere: Enterotoxemie"
-}
+# if ($farmResponse -and $globalVaccineId) {
+#     Write-Host ""
+#     Write-Host "31. Farm Vaccine Preferences (Vaccins preferes)" -ForegroundColor Cyan
+#     $farmVaccinePref = @{
+#         farmId = $farmId
+#         globalVaccineId = $globalVaccineId
+#         displayOrder = 1
+#         isActive = $true
+#     }
+#     Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/vaccine-preferences" -Body $farmVaccinePref `
+#         -Description "Vaccin prefere: Enterotoxemie"
+# }
+Write-Host ""
+Write-Host "31. Farm Vaccine Preferences - SKIPPED (module not implemented)" -ForegroundColor Yellow
 
 # =============================================================================
 # RESUME
