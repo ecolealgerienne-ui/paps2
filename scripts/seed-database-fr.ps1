@@ -324,7 +324,7 @@ $farm = @{
     department = "63"
 }
 
-$farmResponse = Invoke-CurlApi -Method POST -Endpoint "/api/farms" -Body $farm `
+$farmResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms" -Body $farm `
     -Description "Ferme: $($farm.name)"
 
 # =============================================================================
@@ -643,7 +643,7 @@ if ($farmResponse -and $animalResponse -and $medicalProductId) {
         $personalCampaign.veterinarianName = "Dr. Martin"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/personal-campaigns" -Body $personalCampaign `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/personal-campaigns" -Body $personalCampaign `
         -Description "Campagne: $($personalCampaign.name)"
 }
 
@@ -689,7 +689,7 @@ if ($farmResponse) {
         healthCheckReminderDays = 30
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/alert-configuration" -Body $alertConfig `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/alert-configurations" -Body $alertConfig `
         -Description "Configuration des alertes"
 }
 
@@ -716,7 +716,7 @@ if ($farmResponse) {
     }
     $farmPreferences.defaultSpeciesId = "bovine"
 
-    Invoke-CurlApi -Method PUT -Endpoint "/farms/$farmId/preferences" -Body $farmPreferences `
+    Invoke-CurlApi -Method PUT -Endpoint "/api/v1/farms/$farmId/preferences" -Body $farmPreferences `
         -Description "Preferences: langue=$($farmPreferences.language), unite=$($farmPreferences.weightUnit)"
 }
 
@@ -733,7 +733,7 @@ if ($farmResponse -and $medicalProductId) {
         isActive = $true
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/product-preferences" -Body $productPreference `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/product-preferences" -Body $productPreference `
         -Description "Produit prefere: Ivomec 1% Local"
 }
 
@@ -750,7 +750,7 @@ if ($farmResponse -and $vetIds -and $vetIds.Count -gt 0) {
         isActive = $true
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/veterinarian-preferences" -Body $vetPreference `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/veterinarian-preferences" -Body $vetPreference `
         -Description "Veterinaire prefere: Dr. Martin"
 }
 
@@ -831,7 +831,7 @@ if ($farmResponse -and $breedId) {
         breedId = $breedId
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/breed-preferences" -Body $farmBreedPref `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/breed-preferences" -Body $farmBreedPref `
         -Description "Race preferee: Prim'Holstein"
 }
 
@@ -842,7 +842,7 @@ if ($farmResponse -and $nationalCampaignId) {
     Write-Host ""
     Write-Host "30. Farm National Campaign Preferences (Inscriptions campagnes)" -ForegroundColor Cyan
 
-    Invoke-CurlApi -Method POST -Endpoint "/farms/$farmId/campaign-preferences/$nationalCampaignId/enroll" -Body @{} `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/campaign-preferences/$nationalCampaignId/enroll" -Body @{} `
         -Description "Inscription a la campagne nationale"
 }
 
