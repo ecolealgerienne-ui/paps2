@@ -1287,13 +1287,13 @@ model FarmPreferences {
 
 // Préférences produits de la ferme (+ Configuration personnalisée éleveur)
 model FarmProductPreference {
-  id           String   @id @default(uuid())
-  farmId       String   @map("farm_id")
-  productId    String   @map("product_id")
+  id           String    @id @default(uuid())
+  farmId       String    @map("farm_id")
+  productId    String    @map("product_id")
 
   // Préférences de base
-  displayOrder Int      @default(0) @map("display_order")
-  isActive     Boolean  @default(true) @map("is_active")
+  displayOrder Int       @default(0) @map("display_order")
+  isActive     Boolean   @default(true) @map("is_active")
 
   // Configuration personnalisée éleveur (surcharge AMM/RCP)
   packagingId               String?       @map("packaging_id")
@@ -1302,8 +1302,10 @@ model FarmProductPreference {
   userDefinedMeatWithdrawal Int?          @map("user_defined_meat_withdrawal")  // Jours
   userDefinedMilkWithdrawal Int?          @map("user_defined_milk_withdrawal")  // Heures
 
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  version      Int       @default(1)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
 
   // Relations
   farm      Farm              @relation(fields: [farmId], references: [id], onDelete: Cascade)
@@ -1315,6 +1317,7 @@ model FarmProductPreference {
   @@index([farmId])
   @@index([productId])
   @@index([packagingId])
+  @@index([farmId, deletedAt])
   @@map("farm_product_preferences")
 }
 
