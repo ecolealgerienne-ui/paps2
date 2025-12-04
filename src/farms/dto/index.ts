@@ -1,6 +1,8 @@
 import { IsString, IsOptional, IsBoolean, IsNumber, Matches, MaxLength, IsNotEmpty } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+export { FarmResponseDto } from './farm-response.dto';
+
 /**
  * DTO for creating a Farm (PHASE_03)
  */
