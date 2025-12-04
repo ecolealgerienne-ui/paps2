@@ -22,7 +22,7 @@ import { CreateAnimalDto, QueryAnimalDto, UpdateAnimalDto } from './dto';
 
 @ApiTags('Animals')
 @ApiBearerAuth()
-@Controller('farms/:farmId/animals')
+@Controller('api/v1/farms/:farmId/animals')
 @UseGuards(AuthGuard, FarmGuard)
 export class AnimalsController {
   constructor(private readonly animalsService: AnimalsService) {}

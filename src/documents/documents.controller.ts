@@ -18,7 +18,7 @@ import { FarmGuard } from '../auth/guards/farm.guard';
 @ApiTags('documents')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, FarmGuard)
-@Controller('farms/:farmId/documents')
+@Controller('api/v1/farms/:farmId/documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 

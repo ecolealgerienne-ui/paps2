@@ -426,26 +426,17 @@ if ($farmResponse) {
     Write-Host "13. Medical Products (Produits medicaux de la ferme)" -ForegroundColor Cyan
 
     $medicalProduct = @{
-        name = "Ivomec 1% Local"
+        nameFr = "Ivomec 1% Local"
+        nameEn = "Ivomec 1% Local"
         commercialName = "Ivomec Injectable"
-        category = "antiparasitic"
-        activeIngredient = "Ivermectine"
+        description = "Antiparasitaire injectable pour bovins"
+        type = "antiparasitic"
         manufacturer = "Boehringer Ingelheim"
-        withdrawalPeriodMeat = 28
-        withdrawalPeriodMilk = 0
-        currentStock = 10
-        minStock = 5
-        stockUnit = "flacon"
-        unitPrice = 25.50
-        batchNumber = "BATCH2025-001"
-        expiryDate = "2026-12-31T23:59:59.999Z"
-        type = "treatment"
-        targetSpecies = "bovine"
         isActive = $true
     }
 
-    $medicalProductResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/medical-products" -Body $medicalProduct `
-        -Description "Produit medical: $($medicalProduct.name)"
+    $medicalProductResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/products" -Body $medicalProduct `
+        -Description "Produit medical: $($medicalProduct.nameFr)"
 
     $medicalProductId = Get-IdFromResponse $medicalProductResponse
     if ($medicalProductId) {
@@ -461,15 +452,15 @@ if ($farmResponse) {
     Write-Host "13b. Custom Vaccines (Vaccins personnalises)" -ForegroundColor Cyan
 
     $customVaccine = @{
-        name = "Vaccin Brucellose B19"
+        nameFr = "Vaccin Brucellose B19"
         description = "Vaccin contre la brucellose bovine - formule locale"
+        type = "vaccine"
         targetDisease = "Brucellose"
-        laboratoire = "Laboratoire Local"
-        dosage = "2ml par animal"
+        manufacturer = "Laboratoire Local"
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/vaccines" -Body $customVaccine `
-        -Description "Vaccin personnalise: $($customVaccine.name)"
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/products" -Body $customVaccine `
+        -Description "Vaccin personnalise: $($customVaccine.nameFr)"
 }
 
 # =============================================================================
@@ -688,7 +679,7 @@ if ($farmResponse) {
         healthCheckReminderDays = 30
     }
 
-    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/alert-configurations" -Body $alertConfig `
+    Invoke-CurlApi -Method POST -Endpoint "/api/v1/farms/$farmId/alert-configuration" -Body $alertConfig `
         -Description "Configuration des alertes"
 }
 

@@ -18,7 +18,7 @@ import { FarmGuard } from '../auth/guards/farm.guard';
 @ApiTags('lots')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, FarmGuard)
-@Controller('farms/:farmId/lots')
+@Controller('api/v1/farms/:farmId/lots')
 export class LotsController {
   constructor(private readonly lotsService: LotsService) {}
 
