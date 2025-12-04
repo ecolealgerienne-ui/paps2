@@ -1,6 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CampaignType } from '../types/campaign-type.enum';
-import { PersonalCampaignStatus } from '../types/personal-campaign-status.enum';
 
 class LotSummaryDto {
   @ApiProperty({ description: 'Lot ID' })
@@ -35,8 +33,8 @@ export class PersonalCampaignResponseDto {
   @ApiProperty({ description: 'Product name' })
   productName: string;
 
-  @ApiProperty({ description: 'Campaign type', enum: CampaignType })
-  type: CampaignType;
+  @ApiProperty({ description: 'Campaign type', enum: ['vaccination', 'deworming', 'screening', 'treatment', 'census', 'other'], example: 'vaccination' })
+  type: string;
 
   @ApiProperty({ description: 'Campaign date' })
   campaignDate: Date;
@@ -53,8 +51,8 @@ export class PersonalCampaignResponseDto {
   @ApiProperty({ description: 'Animal IDs as JSON string' })
   animalIdsJson: string;
 
-  @ApiProperty({ description: 'Campaign status', enum: PersonalCampaignStatus })
-  status: PersonalCampaignStatus;
+  @ApiProperty({ description: 'Campaign status', enum: ['planned', 'in_progress', 'completed', 'cancelled'], example: 'planned' })
+  status: string;
 
   @ApiPropertyOptional({ description: 'Start date', nullable: true })
   startDate: Date | null;

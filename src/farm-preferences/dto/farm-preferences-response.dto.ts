@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Language, WeightUnit, Currency } from './index';
 
 export class FarmPreferencesResponseDto {
   @ApiProperty({ description: 'Unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
@@ -17,14 +16,14 @@ export class FarmPreferencesResponseDto {
   @ApiPropertyOptional({ description: 'Default breed ID', nullable: true })
   defaultBreedId: string | null;
 
-  @ApiProperty({ description: 'Weight unit', enum: WeightUnit, example: 'kg' })
-  weightUnit: WeightUnit;
+  @ApiProperty({ description: 'Weight unit', enum: ['kg', 'lb'], example: 'kg' })
+  weightUnit: string;
 
-  @ApiProperty({ description: 'Currency', enum: Currency, example: 'DZD' })
-  currency: Currency;
+  @ApiProperty({ description: 'Currency', enum: ['DZD', 'EUR', 'USD', 'MAD'], example: 'DZD' })
+  currency: string;
 
-  @ApiProperty({ description: 'Language', enum: Language, example: 'fr' })
-  language: Language;
+  @ApiProperty({ description: 'Language', enum: ['fr', 'en', 'ar'], example: 'fr' })
+  language: string;
 
   @ApiProperty({ description: 'Date format', example: 'DD/MM/YYYY' })
   dateFormat: string;

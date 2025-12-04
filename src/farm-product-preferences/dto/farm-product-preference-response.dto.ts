@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Decimal } from '@prisma/client/runtime/library';
 
 export class FarmProductPreferenceResponseDto {
   @ApiProperty({ description: 'Unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
@@ -19,8 +20,8 @@ export class FarmProductPreferenceResponseDto {
   @ApiPropertyOptional({ description: 'Selected packaging ID', nullable: true })
   packagingId: string | null;
 
-  @ApiPropertyOptional({ description: 'User-defined dose (overrides AMM/RCP)', nullable: true })
-  userDefinedDose: number | null;
+  @ApiPropertyOptional({ description: 'User-defined dose (overrides AMM/RCP)', nullable: true, type: 'number' })
+  userDefinedDose: Decimal | null;
 
   @ApiPropertyOptional({ description: 'User-defined dose unit', nullable: true })
   userDefinedDoseUnit: string | null;
