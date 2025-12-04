@@ -128,7 +128,7 @@ Write-Host ""
 Write-Host "2. Administration Routes (Voies d'administration)" -ForegroundColor Cyan
 
 $routes = @(
-    @{ code = "IM"; nameFr = "Intramusculaire"; nameEn = "Intramuscular"; nameAr = "Intramuscular" }
+    @{ code = "intramuscular"; nameFr = "Intramusculaire"; nameEn = "Intramuscular"; nameAr = "Intramuscular" }
 )
 
 foreach ($route in $routes) {
@@ -144,17 +144,17 @@ Write-Host "3. Global Medical Products (Produits medicaux)" -ForegroundColor Cya
 
 $products = @(
     @{
-        code = "IVERM-FR-001"
+        code = "iverm_fr_001"
         nameFr = "Ivomec 1%"
         nameEn = "Ivomec 1%"; nameAr = "Ivomec 1%"
         type = "antiparasitic"
-        laboratoire = "Boehringer Ingelheim"
-        principeActif = "Ivermectine"
+        manufacturer = "Boehringer Ingelheim"
+        description = "Antiparasitaire a base d'Ivermectine"
     }
 )
 
 foreach ($product in $products) {
-    $productResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/global-medical-products" -Body $product `
+    $productResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/admin/products" -Body $product `
         -Description "Produit: $($product.nameFr)"
 
     $globalProductId = Get-IdFromResponse $productResponse
@@ -171,16 +171,17 @@ Write-Host "4. Global Vaccines (Vaccins)" -ForegroundColor Cyan
 
 $vaccines = @(
     @{
-        code = "ENTEROTOX-001"
+        code = "enterotox_001"
         nameFr = "Vaccin Enterotoxemie"
         nameEn = "Enterotoxemia Vaccine"; nameAr = "Enterotoxemia Vaccine"
+        type = "vaccine"
         targetDisease = "enterotoxemia"
-        laboratoire = "MSD Sante Animale"
+        manufacturer = "MSD Sante Animale"
     }
 )
 
 foreach ($vaccine in $vaccines) {
-    $vaccineResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/vaccines-global" -Body $vaccine `
+    $vaccineResponse = Invoke-CurlApi -Method POST -Endpoint "/api/v1/admin/products" -Body $vaccine `
         -Description "Vaccin: $($vaccine.nameFr)"
 
     $globalVaccineId = Get-IdFromResponse $vaccineResponse
@@ -226,7 +227,7 @@ Write-Host "6. Alert Templates (Modeles d'alertes)" -ForegroundColor Cyan
 
 $templates = @(
     @{
-        code = "vacc-reminder"
+        code = "vacc_reminder"
         nameFr = "Rappel de vaccination"
         nameEn = "Vaccination reminder"; nameAr = "Vaccination reminder"
         descriptionFr = "Rappel automatique pour les vaccinations a venir"
@@ -268,12 +269,9 @@ foreach ($specie in $species) {
 Write-Host ""
 Write-Host "8. Breeds (Races)" -ForegroundColor Cyan
 
-# Le DTO exige un ID (validation) mais le service l'ignore et génère le sien
-# On envoie un ID temporaire pour passer la validation
-$tempBreedId = [guid]::NewGuid().ToString()
+# Le DTO n'accepte pas le champ id - il est genere automatiquement
 $breed = @{
-    id = $tempBreedId
-    code = "prim-holstein"
+    code = "prim_holstein"
     speciesId = "bovine"
     nameFr = "Prim'Holstein"
     nameEn = "Holstein"
@@ -310,7 +308,8 @@ if ($breedResponse) {
 Write-Host ""
 Write-Host "9. Farm (Ferme)" -ForegroundColor Cyan
 
-$farmId = "550e8400-e29b-41d4-a716-446655440000"
+# Generer un nouvel ID a chaque execution pour eviter les conflits
+$farmId = [guid]::NewGuid().ToString()
 $farm = @{
     id = $farmId
     name = "EARL du Plateau"
