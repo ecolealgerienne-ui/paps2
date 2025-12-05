@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Patch,
   Delete,
   Body,
@@ -121,7 +122,7 @@ export class VeterinariansController {
     return this.veterinariansService.findOne(farmId, id);
   }
 
-  @Patch('farms/:farmId/veterinarians/:id')
+  @Put('farms/:farmId/veterinarians/:id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a local veterinarian (farm-scoped)' })
@@ -134,6 +135,26 @@ export class VeterinariansController {
   @ApiResponse({ status: 404, description: 'Veterinarian not found' })
   @ApiResponse({ status: 409, description: 'Conflict - Version mismatch' })
   update(
+    @Param('farmId', ParseUUIDPipe) farmId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateDto: UpdateVeterinarianDto,
+  ): Promise<VeterinarianResponseDto> {
+    return this.veterinariansService.update(farmId, id, updateDto);
+  }
+
+  @Patch('farms/:farmId/veterinarians/:id')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Partially update a local veterinarian (farm-scoped)' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'id', description: 'Veterinarian UUID' })
+  @ApiResponse({ status: 200, description: 'Veterinarian updated successfully', type: VeterinarianResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request - Invalid data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Cannot modify global veterinarians' })
+  @ApiResponse({ status: 404, description: 'Veterinarian not found' })
+  @ApiResponse({ status: 409, description: 'Conflict - Version mismatch' })
+  partialUpdate(
     @Param('farmId', ParseUUIDPipe) farmId: string,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDto: UpdateVeterinarianDto,
