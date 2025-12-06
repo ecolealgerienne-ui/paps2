@@ -24,6 +24,13 @@ const INPUT_DIR = path.join(__dirname, 'output_test', 'farm_data');
 // ============================================================================
 // CSV Parser
 // ============================================================================
+// Fields that should remain as strings even if they look like numbers
+const STRING_FIELDS = new Set([
+  'commune', 'postalCode', 'department', 'countryCode', 'country',
+  'phone', 'mobile', 'licenseNumber', 'documentNumber', 'gtinEan',
+  'currentEid', 'officialNumber', 'visualId', 'eidHistory',
+]);
+
 function parseCSV(content: string): Record<string, any>[] {
   const lines = content.split('\n').filter(line => line.trim());
   if (lines.length < 2) return [];
@@ -36,23 +43,27 @@ function parseCSV(content: string): Record<string, any>[] {
     const row: Record<string, any> = {};
 
     for (let j = 0; j < headers.length; j++) {
+      const header = headers[j];
       let value = values[j] || '';
 
       // Type conversion
       if (value === '' || value === 'null' || value === 'undefined') {
-        row[headers[j]] = null;
+        row[header] = null;
+      } else if (STRING_FIELDS.has(header)) {
+        // Keep as string for specific fields
+        row[header] = value;
       } else if (value === 'true') {
-        row[headers[j]] = true;
+        row[header] = true;
       } else if (value === 'false') {
-        row[headers[j]] = false;
+        row[header] = false;
       } else if (/^\d+$/.test(value)) {
-        row[headers[j]] = parseInt(value, 10);
+        row[header] = parseInt(value, 10);
       } else if (/^\d+\.\d+$/.test(value)) {
-        row[headers[j]] = parseFloat(value);
+        row[header] = parseFloat(value);
       } else if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
-        row[headers[j]] = new Date(value);
+        row[header] = new Date(value);
       } else {
-        row[headers[j]] = value;
+        row[header] = value;
       }
     }
 
