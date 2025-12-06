@@ -23,7 +23,7 @@ const { v4: uuidv4 } = require('uuid');
 // Configuration
 // ============================================================================
 const OUTPUT_DIR = path.join(__dirname, 'output_test', 'farm_data');
-const FARM_ID = uuidv4(); // Generate new farm ID each time
+const FARM_ID = 'd8f9288a-92a6-4bfa-8201-d7c61b5a4eaf'; // Fixed farm ID
 
 // Date range: 2023-2025
 const START_DATE = new Date('2023-01-01');
@@ -535,7 +535,25 @@ function generateFarmNationalCampaignPreferences(campaigns: Record<string, any>[
   return prefs;
 }
 
-// 20. Personal Campaigns (requires productName)
+// 20. Farm Alert Template Preferences
+function generateFarmAlertTemplatePreferences(alertTemplates: Record<string, any>[]): Record<string, any>[] {
+  const prefs: Record<string, any>[] = [];
+  // Select some alert templates as farm preferences
+  const count = Math.min(4, alertTemplates.length);
+  for (let i = 0; i < count; i++) {
+    prefs.push({
+      id: uuidv4(),
+      farmId: FARM_ID,
+      alertTemplateId: alertTemplates[i].id,
+      displayOrder: i,
+      isActive: true,
+      reminderDays: [7, 3, 14, 30][i % 4], // Custom reminder days
+    });
+  }
+  return prefs;
+}
+
+// 21. Personal Campaigns (requires productName)
 function generatePersonalCampaigns(animals: Record<string, any>[], vets: Record<string, any>[], productIds: string[], productNames: Map<string, string>): Record<string, any>[] {
   // Personal campaigns require a productId - skip if no products available
   if (productIds.length === 0) {
@@ -698,6 +716,9 @@ async function main() {
   const farmNationalCampaignPreferences = generateFarmNationalCampaignPreferences(nationalCampaigns);
   console.log(`  - Farm National Campaign Preferences: ${farmNationalCampaignPreferences.length}`);
 
+  const farmAlertTemplatePreferences = generateFarmAlertTemplatePreferences(alertTemplates);
+  console.log(`  - Farm Alert Template Preferences: ${farmAlertTemplatePreferences.length}`);
+
   const personalCampaigns = generatePersonalCampaigns(animals, veterinarians, productIds, productNames);
   console.log(`  - Personal Campaigns: ${personalCampaigns.length}`);
 
@@ -726,6 +747,7 @@ async function main() {
     { name: 'farm_veterinarian_preferences.csv', data: farmVeterinarianPreferences },
     { name: 'farm_breed_preferences.csv', data: farmBreedPreferences },
     { name: 'farm_national_campaign_preferences.csv', data: farmNationalCampaignPreferences },
+    { name: 'farm_alert_template_preferences.csv', data: farmAlertTemplatePreferences },
     { name: 'personal_campaigns.csv', data: personalCampaigns },
   ];
 
