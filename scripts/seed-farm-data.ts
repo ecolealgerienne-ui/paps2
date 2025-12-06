@@ -135,6 +135,7 @@ async function deleteAllFarmData() {
     { name: 'PersonalCampaign', fn: () => prisma.personalCampaign.deleteMany() },
 
     // Farm preferences
+    { name: 'FarmAlertTemplatePreference', fn: () => prisma.farmAlertTemplatePreference.deleteMany() },
     { name: 'FarmNationalCampaignPreference', fn: () => prisma.farmNationalCampaignPreference.deleteMany() },
     { name: 'FarmBreedPreference', fn: () => prisma.farmBreedPreference.deleteMany() },
     { name: 'FarmVeterinarianPreference', fn: () => prisma.farmVeterinarianPreference.deleteMany() },
@@ -589,6 +590,25 @@ async function seedFarmNationalCampaignPreferences() {
   }
 }
 
+async function seedFarmAlertTemplatePreferences() {
+  const data = loadCSVFile('farm_alert_template_preferences.csv');
+  if (data.length === 0) return;
+
+  console.log(`  [SEED] Farm Alert Template Preferences: ${data.length} records`);
+  for (const row of data) {
+    await prisma.farmAlertTemplatePreference.create({
+      data: {
+        id: row.id,
+        farmId: row.farmId,
+        alertTemplateId: row.alertTemplateId,
+        displayOrder: row.displayOrder,
+        isActive: row.isActive,
+        reminderDays: row.reminderDays,
+      },
+    });
+  }
+}
+
 async function seedPersonalCampaigns() {
   const data = loadCSVFile('personal_campaigns.csv');
   if (data.length === 0) return;
@@ -683,6 +703,7 @@ async function main() {
   await seedFarmVeterinarianPreferences();
   await seedFarmBreedPreferences();
   await seedFarmNationalCampaignPreferences();
+  await seedFarmAlertTemplatePreferences();
 
   // Phase 6: Personal campaigns
   await seedPersonalCampaigns();

@@ -17,6 +17,7 @@ import { BreedCountriesModule } from './breed-countries/breed-countries.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { CampaignCountriesModule } from './campaign-countries/campaign-countries.module';
 import { CountriesModule } from './countries/countries.module';
+import { FarmAlertTemplatePreferencesModule } from './farm-alert-template-preferences/farm-alert-template-preferences.module';
 import { FarmBreedPreferencesModule } from './farm-breed-preferences/farm-breed-preferences.module';
 import { FarmSpeciesPreferencesModule } from './farm-species-preferences/farm-species-preferences.module';
 import { DocumentsModule } from './documents/documents.module';
@@ -103,6 +104,7 @@ const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
     BreedsModule,
     BreedCountriesModule,
     CampaignCountriesModule,
+    FarmAlertTemplatePreferencesModule,
     FarmBreedPreferencesModule,
     FarmSpeciesPreferencesModule,
     CountriesModule,
