@@ -5,14 +5,10 @@
  * Usage: npx ts-node scripts/seed-reference-data.ts
  */
 
-import { PrismaClient } from '@prisma/client';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-// ESM-compatible __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { PrismaClient } = require('@prisma/client');
+const fs = require('fs');
+const path = require('path');
 
 const prisma = new PrismaClient();
 
