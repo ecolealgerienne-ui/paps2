@@ -127,7 +127,9 @@ function generateVeterinarians(): Record<string, any>[] {
   return vets.map((v, i) => ({
     id: uuidv4(),
     farmId: FARM_ID,
+    scope: 'local',
     isDefault: i === 0,
+    isActive: true,
     ...v,
   }));
 }
@@ -138,11 +140,12 @@ function generateCampaignCountries(campaigns: Record<string, any>[]): Record<str
     id: uuidv4(),
     campaignId: c.id,
     countryCode: 'FR',
+    isActive: true,
   }));
 }
 
-// 6. Farm Alert Configuration
-function generateFarmAlertConfiguration(): Record<string, any>[] {
+// 6. Alert Configuration
+function generateAlertConfiguration(): Record<string, any>[] {
   return [{
     id: uuidv4(),
     farmId: FARM_ID,
@@ -177,6 +180,7 @@ function generateLots(): Record<string, any>[] {
 }
 
 // 8. Animals (100 animals: 70% bovine, 30% ovine)
+// Note: Animal model doesn't have deathDate/slaughterDate/saleDate - uses status field
 function generateAnimals(bovineBreedIds: string[], ovineBreedIds: string[]): Record<string, any>[] {
   const animals: Record<string, any>[] = [];
   const statuses = [
@@ -218,23 +222,6 @@ function generateAnimals(bovineBreedIds: string[], ovineBreedIds: string[]): Rec
         notes: `Animal de test - Statut: ${statusGroup.status}`,
       };
 
-      // Add dates for specific statuses
-      const birthDateObj = new Date(birthDate);
-      if (statusGroup.status === 'dead') {
-        const deathDate = new Date(birthDateObj);
-        deathDate.setMonth(deathDate.getMonth() + 6);
-        animal.deathDate = getRandomDate(deathDate, END_DATE);
-        animal.deathReason = getRandomElement(['maladie', 'accident', 'vieillesse']);
-      } else if (statusGroup.status === 'slaughtered') {
-        const slaughterDate = new Date(birthDateObj);
-        slaughterDate.setFullYear(slaughterDate.getFullYear() + 1);
-        animal.slaughterDate = getRandomDate(slaughterDate, END_DATE);
-      } else if (statusGroup.status === 'sold') {
-        const saleDate = new Date(birthDateObj);
-        saleDate.setMonth(saleDate.getMonth() + 8);
-        animal.saleDate = getRandomDate(saleDate, END_DATE);
-      }
-
       animals.push(animal);
     }
   }
@@ -242,7 +229,7 @@ function generateAnimals(bovineBreedIds: string[], ovineBreedIds: string[]): Rec
   return animals;
 }
 
-// 9. Lot Animals
+// 9. Lot Animals (uses joinedAt, not addedAt)
 function generateLotAnimals(lots: Record<string, any>[], animals: Record<string, any>[]): Record<string, any>[] {
   const lotAnimals: Record<string, any>[] = [];
 
@@ -253,9 +240,10 @@ function generateLotAnimals(lots: Record<string, any>[], animals: Record<string,
     for (const lot of selectedLots) {
       lotAnimals.push({
         id: uuidv4(),
+        farmId: FARM_ID,
         lotId: lot.id,
         animalId: animal.id,
-        addedAt: getRandomDate(START_DATE, END_DATE),
+        joinedAt: getRandomDate(START_DATE, END_DATE),
       });
     }
   }
@@ -324,9 +312,10 @@ function generateTreatments(animals: Record<string, any>[], vets: Record<string,
   return treatments;
 }
 
-// 11. Movements
-function generateMovements(animals: Record<string, any>[]): Record<string, any>[] {
+// 11. Movements (without animalId - uses MovementAnimal join table)
+function generateMovements(animals: Record<string, any>[]): { movements: Record<string, any>[], movementAnimals: Record<string, any>[] } {
   const movements: Record<string, any>[] = [];
+  const movementAnimals: Record<string, any>[] = [];
   const reasons: Record<string, string[]> = {
     entry: ['Achat', 'Naissance', 'Retour'],
     exit: ['Vente', 'Reforme', 'Abattage'],
@@ -339,19 +328,28 @@ function generateMovements(animals: Record<string, any>[]): Record<string, any>[
     const numMovements = getRandomInt(1, 2);
     for (let i = 0; i < numMovements; i++) {
       const movementType = getRandomElement(['entry', 'exit', 'transfer', 'birth', 'purchase']);
+      const movementId = uuidv4();
+
       movements.push({
-        id: uuidv4(),
+        id: movementId,
         farmId: FARM_ID,
-        animalId: animal.id,
         movementType,
         movementDate: getRandomDate(START_DATE, END_DATE),
         reason: getRandomElement(reasons[movementType]),
+        status: 'ongoing',
         notes: `Mouvement type ${movementType}`,
+      });
+
+      // Create MovementAnimal link
+      movementAnimals.push({
+        id: uuidv4(),
+        movementId,
+        animalId: animal.id,
       });
     }
   }
 
-  return movements;
+  return { movements, movementAnimals };
 }
 
 // 12. Weights
@@ -455,7 +453,7 @@ function generateDocuments(animals: Record<string, any>[]): Record<string, any>[
   return documents;
 }
 
-// 15. Farm Preferences
+// 15. Farm Preferences (uses enums: kg, EUR, fr)
 function generateFarmPreferences(vets: Record<string, any>[], bovineBreedIds: string[]): Record<string, any>[] {
   return [{
     id: uuidv4(),
@@ -514,13 +512,14 @@ function generateFarmBreedPreferences(bovineBreedIds: string[]): Record<string, 
       farmId: FARM_ID,
       breedId: bovineBreedIds[i],
       displayOrder: i + 1,
+      isActive: true,
     });
   }
   return prefs;
 }
 
-// 19. Farm Campaign Preferences
-function generateFarmCampaignPreferences(campaigns: Record<string, any>[]): Record<string, any>[] {
+// 19. Farm National Campaign Preferences
+function generateFarmNationalCampaignPreferences(campaigns: Record<string, any>[]): Record<string, any>[] {
   const prefs: Record<string, any>[] = [];
   const count = Math.min(2, campaigns.length);
   for (let i = 0; i < count; i++) {
@@ -535,8 +534,8 @@ function generateFarmCampaignPreferences(campaigns: Record<string, any>[]): Reco
   return prefs;
 }
 
-// 20. Personal Campaigns
-function generatePersonalCampaigns(animals: Record<string, any>[], vets: Record<string, any>[], productIds: string[]): Record<string, any>[] {
+// 20. Personal Campaigns (requires productName)
+function generatePersonalCampaigns(animals: Record<string, any>[], vets: Record<string, any>[], productIds: string[], productNames: Map<string, string>): Record<string, any>[] {
   const campaignsData = [
     { name: 'Campagne Deparasitage Printemps 2024', type: 'deworming', campaignDate: '2024-03-15T00:00:00.000Z', withdrawalEndDate: '2024-04-15T00:00:00.000Z', targetCount: 80 },
     { name: 'Campagne Vaccination Automne 2024', type: 'vaccination', campaignDate: '2024-09-01T00:00:00.000Z', withdrawalEndDate: '2024-10-01T00:00:00.000Z', targetCount: 95 },
@@ -546,18 +545,22 @@ function generatePersonalCampaigns(animals: Record<string, any>[], vets: Record<
 
   return campaignsData.map(cd => {
     const targetAnimals = [...animals].sort(() => Math.random() - 0.5).slice(0, Math.min(cd.targetCount, animals.length));
+    const productId = productIds.length > 0 ? getRandomElement(productIds) : '';
+    const productName = productNames.get(productId) || 'Produit';
+
     return {
       id: uuidv4(),
       farmId: FARM_ID,
       name: cd.name,
       description: 'Campagne personnalisee de la ferme',
-      productId: productIds.length > 0 ? getRandomElement(productIds) : null,
+      productId: productId || null,
+      productName: productName,
       type: cd.type,
       campaignDate: cd.campaignDate,
       withdrawalEndDate: cd.withdrawalEndDate,
       animalIdsJson: JSON.stringify(targetAnimals.map(a => a.id)),
       targetCount: cd.targetCount,
-      status: getRandomElement(['scheduled', 'in_progress', 'completed']),
+      status: getRandomElement(['planned', 'in_progress', 'completed']),
       notes: 'Campagne de gestion sanitaire',
       veterinarianId: vets.length > 0 ? getRandomElement(vets).id : null,
     };
@@ -602,16 +605,25 @@ async function main() {
   }
   console.log(`Loaded ${bovineBreedIds.length} bovine breeds, ${ovineBreedIds.length} ovine breeds`);
 
-  // Load products
+  // Load products (with names for personal campaigns)
   let productIds: string[] = [];
+  const productNames = new Map<string, string>();
   const productsFile = path.join(referenceDir, 'products.csv');
   if (fs.existsSync(productsFile)) {
     const productsContent = fs.readFileSync(productsFile, 'utf-8');
-    const lines = productsContent.split('\n').slice(1); // Skip header
-    for (const line of lines) {
+    const lines = productsContent.split('\n');
+    const headers = lines[0].split(',');
+    const idIndex = headers.indexOf('id');
+    const nameIndex = headers.indexOf('nameFr');
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
       if (line.trim()) {
-        const id = line.split(',')[0];
+        const parts = line.split(',');
+        const id = parts[idIndex] || parts[0];
+        const name = parts[nameIndex] || parts[1] || 'Produit';
         productIds.push(id);
+        productNames.set(id, name);
       }
     }
   }
@@ -636,8 +648,8 @@ async function main() {
   const campaignCountries = generateCampaignCountries(nationalCampaigns);
   console.log(`  - Campaign Countries: ${campaignCountries.length}`);
 
-  const farmAlertConfiguration = generateFarmAlertConfiguration();
-  console.log(`  - Farm Alert Configuration: ${farmAlertConfiguration.length}`);
+  const alertConfiguration = generateAlertConfiguration();
+  console.log(`  - Alert Configuration: ${alertConfiguration.length}`);
 
   const lots = generateLots();
   console.log(`  - Lots: ${lots.length}`);
@@ -651,8 +663,9 @@ async function main() {
   const treatments = generateTreatments(animals, veterinarians, productIds);
   console.log(`  - Treatments: ${treatments.length}`);
 
-  const movements = generateMovements(animals);
+  const { movements, movementAnimals } = generateMovements(animals);
   console.log(`  - Movements: ${movements.length}`);
+  console.log(`  - Movement Animals: ${movementAnimals.length}`);
 
   const weights = generateWeights(animals);
   console.log(`  - Weights: ${weights.length}`);
@@ -675,10 +688,10 @@ async function main() {
   const farmBreedPreferences = generateFarmBreedPreferences(bovineBreedIds);
   console.log(`  - Farm Breed Preferences: ${farmBreedPreferences.length}`);
 
-  const farmCampaignPreferences = generateFarmCampaignPreferences(nationalCampaigns);
-  console.log(`  - Farm Campaign Preferences: ${farmCampaignPreferences.length}`);
+  const farmNationalCampaignPreferences = generateFarmNationalCampaignPreferences(nationalCampaigns);
+  console.log(`  - Farm National Campaign Preferences: ${farmNationalCampaignPreferences.length}`);
 
-  const personalCampaigns = generatePersonalCampaigns(animals, veterinarians, productIds);
+  const personalCampaigns = generatePersonalCampaigns(animals, veterinarians, productIds, productNames);
   console.log(`  - Personal Campaigns: ${personalCampaigns.length}`);
 
   // Write CSV files
@@ -691,12 +704,13 @@ async function main() {
     { name: 'alert_templates.csv', data: alertTemplates },
     { name: 'veterinarians.csv', data: veterinarians },
     { name: 'campaign_countries.csv', data: campaignCountries },
-    { name: 'farm_alert_configurations.csv', data: farmAlertConfiguration },
+    { name: 'alert_configurations.csv', data: alertConfiguration },
     { name: 'lots.csv', data: lots },
     { name: 'animals.csv', data: animals },
     { name: 'lot_animals.csv', data: lotAnimals },
     { name: 'treatments.csv', data: treatments },
     { name: 'movements.csv', data: movements },
+    { name: 'movement_animals.csv', data: movementAnimals },
     { name: 'weights.csv', data: weights },
     { name: 'breedings.csv', data: breedings },
     { name: 'documents.csv', data: documents },
@@ -704,7 +718,7 @@ async function main() {
     { name: 'farm_product_preferences.csv', data: farmProductPreferences },
     { name: 'farm_veterinarian_preferences.csv', data: farmVeterinarianPreferences },
     { name: 'farm_breed_preferences.csv', data: farmBreedPreferences },
-    { name: 'farm_campaign_preferences.csv', data: farmCampaignPreferences },
+    { name: 'farm_national_campaign_preferences.csv', data: farmNationalCampaignPreferences },
     { name: 'personal_campaigns.csv', data: personalCampaigns },
   ];
 
@@ -729,6 +743,7 @@ async function main() {
       lotAnimals: lotAnimals.length,
       treatments: treatments.length,
       movements: movements.length,
+      movementAnimals: movementAnimals.length,
       weights: weights.length,
       breedings: breedings.length,
       documents: documents.length,

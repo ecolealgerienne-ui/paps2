@@ -109,10 +109,10 @@ async function deleteAllFarmData() {
   // Delete in reverse order of dependencies
   const deletions = [
     // Transactional data first
-    { name: 'TreatmentAlert', fn: () => prisma.treatmentAlert.deleteMany() },
     { name: 'Document', fn: () => prisma.document.deleteMany() },
     { name: 'Breeding', fn: () => prisma.breeding.deleteMany() },
     { name: 'Weight', fn: () => prisma.weight.deleteMany() },
+    { name: 'MovementAnimal', fn: () => prisma.movementAnimal.deleteMany() },
     { name: 'Movement', fn: () => prisma.movement.deleteMany() },
     { name: 'Treatment', fn: () => prisma.treatment.deleteMany() },
     { name: 'LotAnimal', fn: () => prisma.lotAnimal.deleteMany() },
@@ -123,12 +123,12 @@ async function deleteAllFarmData() {
     { name: 'PersonalCampaign', fn: () => prisma.personalCampaign.deleteMany() },
 
     // Farm preferences
-    { name: 'FarmCampaignPreference', fn: () => prisma.farmCampaignPreference.deleteMany() },
+    { name: 'FarmNationalCampaignPreference', fn: () => prisma.farmNationalCampaignPreference.deleteMany() },
     { name: 'FarmBreedPreference', fn: () => prisma.farmBreedPreference.deleteMany() },
     { name: 'FarmVeterinarianPreference', fn: () => prisma.farmVeterinarianPreference.deleteMany() },
     { name: 'FarmProductPreference', fn: () => prisma.farmProductPreference.deleteMany() },
     { name: 'FarmPreferences', fn: () => prisma.farmPreferences.deleteMany() },
-    { name: 'FarmAlertConfiguration', fn: () => prisma.farmAlertConfiguration.deleteMany() },
+    { name: 'AlertConfiguration', fn: () => prisma.alertConfiguration.deleteMany() },
 
     // Veterinarians
     { name: 'Veterinarian', fn: () => prisma.veterinarian.deleteMany() },
@@ -234,6 +234,7 @@ async function seedVeterinarians() {
     await prisma.veterinarian.create({
       data: {
         id: row.id,
+        scope: row.scope || 'local',
         farmId: row.farmId,
         firstName: row.firstName,
         lastName: row.lastName,
@@ -242,6 +243,8 @@ async function seedVeterinarians() {
         email: row.email,
         licenseNumber: row.licenseNumber,
         specialties: row.specialties,
+        isActive: row.isActive ?? true,
+        isDefault: row.isDefault ?? false,
       },
     });
   }
@@ -258,18 +261,19 @@ async function seedCampaignCountries() {
         id: row.id,
         campaignId: row.campaignId,
         countryCode: row.countryCode,
+        isActive: row.isActive ?? true,
       },
     });
   }
 }
 
-async function seedFarmAlertConfigurations() {
-  const data = loadCSVFile('farm_alert_configurations.csv');
+async function seedAlertConfigurations() {
+  const data = loadCSVFile('alert_configurations.csv');
   if (data.length === 0) return;
 
-  console.log(`  [SEED] Farm Alert Configurations: ${data.length} records`);
+  console.log(`  [SEED] Alert Configurations: ${data.length} records`);
   for (const row of data) {
-    await prisma.farmAlertConfiguration.create({
+    await prisma.alertConfiguration.create({
       data: {
         id: row.id,
         farmId: row.farmId,
@@ -321,10 +325,6 @@ async function seedAnimals() {
         breedId: row.breedId,
         status: row.status,
         notes: row.notes,
-        deathDate: row.deathDate,
-        deathReason: row.deathReason,
-        slaughterDate: row.slaughterDate,
-        saleDate: row.saleDate,
       },
     });
   }
@@ -339,9 +339,10 @@ async function seedLotAnimals() {
     await prisma.lotAnimal.create({
       data: {
         id: row.id,
+        farmId: row.farmId,
         lotId: row.lotId,
         animalId: row.animalId,
-        addedAt: row.addedAt,
+        joinedAt: row.joinedAt,
       },
     });
   }
@@ -383,11 +384,27 @@ async function seedMovements() {
       data: {
         id: row.id,
         farmId: row.farmId,
-        animalId: row.animalId,
         movementType: row.movementType,
         movementDate: row.movementDate,
         reason: row.reason,
+        status: row.status || 'ongoing',
         notes: row.notes,
+      },
+    });
+  }
+}
+
+async function seedMovementAnimals() {
+  const data = loadCSVFile('movement_animals.csv');
+  if (data.length === 0) return;
+
+  console.log(`  [SEED] Movement Animals: ${data.length} records`);
+  for (const row of data) {
+    await prisma.movementAnimal.create({
+      data: {
+        id: row.id,
+        movementId: row.movementId,
+        animalId: row.animalId,
       },
     });
   }
@@ -536,18 +553,19 @@ async function seedFarmBreedPreferences() {
         farmId: row.farmId,
         breedId: row.breedId,
         displayOrder: row.displayOrder,
+        isActive: row.isActive ?? true,
       },
     });
   }
 }
 
-async function seedFarmCampaignPreferences() {
-  const data = loadCSVFile('farm_campaign_preferences.csv');
+async function seedFarmNationalCampaignPreferences() {
+  const data = loadCSVFile('farm_national_campaign_preferences.csv');
   if (data.length === 0) return;
 
-  console.log(`  [SEED] Farm Campaign Preferences: ${data.length} records`);
+  console.log(`  [SEED] Farm National Campaign Preferences: ${data.length} records`);
   for (const row of data) {
-    await prisma.farmCampaignPreference.create({
+    await prisma.farmNationalCampaignPreference.create({
       data: {
         id: row.id,
         farmId: row.farmId,
@@ -572,6 +590,7 @@ async function seedPersonalCampaigns() {
         name: row.name,
         description: row.description,
         productId: row.productId,
+        productName: row.productName,
         type: row.type,
         campaignDate: row.campaignDate,
         withdrawalEndDate: row.withdrawalEndDate,
@@ -625,7 +644,7 @@ async function main() {
   // Phase 2: Tables depending on phase 1
   await seedCampaignCountries();
   await seedVeterinarians();
-  await seedFarmAlertConfigurations();
+  await seedAlertConfigurations();
   await seedLots();
 
   // Phase 3: Animals (depends on farm, breeds)
@@ -635,6 +654,7 @@ async function main() {
   await seedLotAnimals();
   await seedTreatments();
   await seedMovements();
+  await seedMovementAnimals();
   await seedWeights();
   await seedBreedings();
   await seedDocuments();
@@ -644,7 +664,7 @@ async function main() {
   await seedFarmProductPreferences();
   await seedFarmVeterinarianPreferences();
   await seedFarmBreedPreferences();
-  await seedFarmCampaignPreferences();
+  await seedFarmNationalCampaignPreferences();
 
   // Phase 6: Personal campaigns
   await seedPersonalCampaigns();
