@@ -107,7 +107,11 @@ export class FarmVeterinarianPreferencesService {
       throw new NotFoundException(`Farm with ID "${farmId}" not found`);
     }
 
-    const where: any = { farmId, deletedAt: null };
+    const where: any = {
+      farmId,
+      deletedAt: null,
+      veterinarian: { deletedAt: null }, // Exclure les vétérinaires soft-deleted
+    };
     if (!includeInactive) {
       where.isActive = true;
     }
@@ -125,7 +129,11 @@ export class FarmVeterinarianPreferencesService {
 
   async findOne(id: string): Promise<FarmVeterinarianPreferenceResponseDto> {
     const preference = await this.prisma.farmVeterinarianPreference.findFirst({
-      where: { id, deletedAt: null },
+      where: {
+        id,
+        deletedAt: null,
+        veterinarian: { deletedAt: null }, // Exclure les vétérinaires soft-deleted
+      },
       include: {
         veterinarian: true,
         farm: { select: { id: true, name: true } },
@@ -312,6 +320,7 @@ export class FarmVeterinarianPreferencesService {
         isDefault: true,
         isActive: true,
         deletedAt: null,
+        veterinarian: { deletedAt: null }, // Exclure les vétérinaires soft-deleted
       },
       include: {
         veterinarian: true,
