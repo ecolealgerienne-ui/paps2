@@ -601,7 +601,6 @@ async function seedPersonalCampaigns() {
         farm: { connect: { id: row.farmId } },
         name: row.name,
         description: row.description,
-        product: row.productId ? { connect: { id: row.productId } } : undefined,
         productName: row.productName,
         type: row.type,
         campaignDate: row.campaignDate,
@@ -610,7 +609,8 @@ async function seedPersonalCampaigns() {
         targetCount: row.targetCount,
         status: row.status,
         notes: row.notes,
-        veterinarian: row.veterinarianId ? { connect: { id: row.veterinarianId } } : undefined,
+        ...(row.productId && { product: { connect: { id: row.productId } } }),
+        ...(row.veterinarianId && { veterinarian: { connect: { id: row.veterinarianId } } }),
       },
     });
   }
