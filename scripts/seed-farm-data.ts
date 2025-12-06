@@ -598,10 +598,10 @@ async function seedPersonalCampaigns() {
     await prisma.personalCampaign.create({
       data: {
         id: row.id,
-        farmId: row.farmId,
+        farm: { connect: { id: row.farmId } },
         name: row.name,
         description: row.description,
-        productId: row.productId,
+        product: row.productId ? { connect: { id: row.productId } } : undefined,
         productName: row.productName,
         type: row.type,
         campaignDate: row.campaignDate,
@@ -610,7 +610,7 @@ async function seedPersonalCampaigns() {
         targetCount: row.targetCount,
         status: row.status,
         notes: row.notes,
-        veterinarianId: row.veterinarianId,
+        veterinarian: row.veterinarianId ? { connect: { id: row.veterinarianId } } : undefined,
       },
     });
   }
