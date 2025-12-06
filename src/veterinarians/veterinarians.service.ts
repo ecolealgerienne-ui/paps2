@@ -42,48 +42,82 @@ export class VeterinariansService {
   /**
    * Create a local veterinarian for a farm
    * Local veterinarians have scope='local' and farmId set
+   * Also adds the veterinarian to farm preferences
    */
   async create(farmId: string, dto: CreateVeterinarianDto): Promise<VeterinarianResponseDto> {
     this.logger.debug(`Creating local veterinarian in farm ${farmId}`);
 
     try {
-      const vet = await this.prisma.veterinarian.create({
-        data: {
-          ...(dto.id && { id: dto.id }),
-          scope: DataScope.local,
-          farmId,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          title: dto.title || null,
-          licenseNumber: dto.licenseNumber || null,
-          specialties: dto.specialties || null,
-          clinic: dto.clinic || null,
-          phone: dto.phone || null,
-          mobile: dto.mobile || null,
-          email: dto.email || null,
-          address: dto.address || null,
-          city: dto.city || null,
-          postalCode: dto.postalCode || null,
-          country: dto.country || null,
-          department: dto.department || null,
-          commune: dto.commune || null,
-          isAvailable: dto.isAvailable ?? true,
-          emergencyService: dto.emergencyService ?? false,
-          workingHours: dto.workingHours || null,
-          consultationFee: dto.consultationFee || null,
-          emergencyFee: dto.emergencyFee || null,
-          currency: dto.currency || null,
-          notes: dto.notes || null,
-          isPreferred: dto.isPreferred ?? false,
-          isDefault: dto.isDefault ?? false,
-          isActive: dto.isActive ?? true,
-          ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
-          ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
-        },
+      // Utiliser une transaction pour créer le vétérinaire et la préférence
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Créer le vétérinaire
+        const vet = await tx.veterinarian.create({
+          data: {
+            ...(dto.id && { id: dto.id }),
+            scope: DataScope.local,
+            farmId,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            title: dto.title || null,
+            licenseNumber: dto.licenseNumber || null,
+            specialties: dto.specialties || null,
+            clinic: dto.clinic || null,
+            phone: dto.phone || null,
+            mobile: dto.mobile || null,
+            email: dto.email || null,
+            address: dto.address || null,
+            city: dto.city || null,
+            postalCode: dto.postalCode || null,
+            country: dto.country || null,
+            department: dto.department || null,
+            commune: dto.commune || null,
+            isAvailable: dto.isAvailable ?? true,
+            emergencyService: dto.emergencyService ?? false,
+            workingHours: dto.workingHours || null,
+            consultationFee: dto.consultationFee || null,
+            emergencyFee: dto.emergencyFee || null,
+            currency: dto.currency || null,
+            notes: dto.notes || null,
+            isPreferred: dto.isPreferred ?? false,
+            isDefault: dto.isDefault ?? false,
+            isActive: dto.isActive ?? true,
+            ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
+            ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
+          },
+        });
+
+        // Calculer le displayOrder pour la nouvelle préférence
+        const maxOrder = await tx.farmVeterinarianPreference.findFirst({
+          where: { farmId, deletedAt: null },
+          orderBy: { displayOrder: 'desc' },
+          select: { displayOrder: true },
+        });
+        const displayOrder = (maxOrder?.displayOrder ?? -1) + 1;
+
+        // Si isDefault=true, retirer le flag des autres préférences
+        if (dto.isDefault) {
+          await tx.farmVeterinarianPreference.updateMany({
+            where: { farmId, isDefault: true, deletedAt: null },
+            data: { isDefault: false },
+          });
+        }
+
+        // Ajouter automatiquement aux préférences de la ferme
+        await tx.farmVeterinarianPreference.create({
+          data: {
+            farmId,
+            veterinarianId: vet.id,
+            displayOrder,
+            isActive: true,
+            isDefault: dto.isDefault ?? false,
+          },
+        });
+
+        return vet;
       });
 
-      this.logger.audit('Veterinarian created', { veterinarianId: vet.id, farmId, scope: 'local' });
-      return vet;
+      this.logger.audit('Veterinarian created', { veterinarianId: result.id, farmId, scope: 'local' });
+      return result;
     } catch (error) {
       this.logger.error(`Failed to create veterinarian in farm ${farmId}`, error.stack);
       throw error;
