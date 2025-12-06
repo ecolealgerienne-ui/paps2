@@ -19,7 +19,7 @@ import {
 } from './dto';
 
 @ApiTags('treatment-alerts')
-@Controller('farms/:farmId/alerts')
+@Controller('api/v1/farms/:farmId/alerts')
 export class TreatmentAlertsController {
   constructor(private readonly service: TreatmentAlertsService) {}
 

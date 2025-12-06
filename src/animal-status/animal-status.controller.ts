@@ -24,7 +24,7 @@ import {
 } from './dto';
 
 @ApiTags('animal-status')
-@Controller('farms/:farmId/animals/:animalId/status-history')
+@Controller('api/v1/farms/:farmId/animals/:animalId/status-history')
 export class AnimalStatusController {
   constructor(private readonly service: AnimalStatusService) {}
 

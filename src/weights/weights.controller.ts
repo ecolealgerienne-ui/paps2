@@ -18,7 +18,7 @@ import { FarmGuard } from '../auth/guards/farm.guard';
 @ApiTags('weights')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, FarmGuard)
-@Controller('farms/:farmId/weights')
+@Controller('api/v1/farms/:farmId/weights')
 export class WeightsController {
   constructor(private readonly weightsService: WeightsService) {}
 

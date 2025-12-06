@@ -18,7 +18,7 @@ import { FarmGuard } from '../auth/guards/farm.guard';
 @ApiTags('treatments')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, FarmGuard)
-@Controller('farms/:farmId/treatments')
+@Controller('api/v1/farms/:farmId/treatments')
 export class TreatmentsController {
   constructor(private readonly treatmentsService: TreatmentsService) {}
 

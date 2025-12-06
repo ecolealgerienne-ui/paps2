@@ -23,7 +23,7 @@ import {
 } from './dto';
 
 @ApiTags('farmer-product-lots')
-@Controller('farms/:farmId/product-configs/:configId/lots')
+@Controller('api/v1/farms/:farmId/product-configs/:configId/lots')
 export class FarmerProductLotsController {
   constructor(private readonly service: FarmerProductLotsService) {}
 

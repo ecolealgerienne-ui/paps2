@@ -18,7 +18,7 @@ import { FarmGuard } from '../auth/guards/farm.guard';
 @ApiTags('movements')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, FarmGuard)
-@Controller('farms/:farmId/movements')
+@Controller('api/v1/farms/:farmId/movements')
 export class MovementsController {
   constructor(private readonly movementsService: MovementsService) {}
 
