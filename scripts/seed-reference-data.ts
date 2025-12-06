@@ -336,6 +336,258 @@ async function seedBreeds() {
 }
 
 // ============================================================================
+// 8. PRODUCTS (Médicaments)
+// ============================================================================
+// Cache pour stocker les mappings id_medicament -> productId
+const productIdMap = new Map<string, string>();
+
+async function seedProducts() {
+  console.log('\n📦 Chargement des médicaments...');
+  const rows = parseCSV(path.join(CSV_DIR, '09_medicaments_clinique.csv'));
+
+  let created = 0, updated = 0, skipped = 0;
+
+  for (const row of rows) {
+    const idMedicament = row.id_medicament;
+    if (!idMedicament || !row.nom_commercial) {
+      skipped++;
+      continue;
+    }
+
+    // Générer un code unique
+    const code = `med_${idMedicament}`;
+
+    // Mapper la catégorie
+    const categoryCode = row.code_categorie === 'CHIMIQUE' ? 'cat_1' :
+                         row.code_categorie === 'IMMUNOLOGIQUE' ? 'cat_2' : null;
+
+    let categoryId: string | null = null;
+    if (categoryCode) {
+      const category = await prisma.productCategory.findUnique({ where: { code: categoryCode } });
+      categoryId = category?.id || null;
+    }
+
+    const data = {
+      scope: 'global' as const,
+      farmId: null,
+      nameFr: row.nom_commercial,
+      nameEn: row.nom_commercial,
+      commercialName: row.nom_commercial,
+      atcVetCode: row.code_atcvet || null,
+      form: row.forme_pharmaceutique || null,
+      categoryId,
+    };
+
+    try {
+      const existing = await prisma.product.findUnique({ where: { code } });
+
+      const product = await prisma.product.upsert({
+        where: { code },
+        update: data,
+        create: { code, ...data },
+      });
+
+      // Sauvegarder le mapping pour les tables liées
+      productIdMap.set(idMedicament, product.id);
+
+      existing ? updated++ : created++;
+    } catch (error) {
+      skipped++;
+    }
+  }
+
+  console.log(`   ✅ Médicaments: ${created} créés, ${updated} mis à jour, ${skipped} ignorés`);
+}
+
+// ============================================================================
+// 9. THERAPEUTIC INDICATIONS (Posologies)
+// ============================================================================
+// Cache pour les routes d'administration
+const routeIdMap = new Map<string, string>();
+
+async function seedTherapeuticIndications() {
+  console.log('\n📦 Chargement des indications thérapeutiques...');
+
+  // Pré-charger les routes d'administration
+  const routes = await prisma.administrationRoute.findMany();
+  routes.forEach(r => routeIdMap.set(r.displayOrder.toString(), r.id));
+
+  const rows = parseCSV(path.join(CSV_DIR, '10_medicaments_especes_age_posologie.csv'));
+
+  let created = 0, updated = 0, skipped = 0;
+
+  for (const row of rows) {
+    const productId = productIdMap.get(row.id_medicament);
+    if (!productId) {
+      skipped++;
+      continue;
+    }
+
+    const speciesId = mapSpeciesCode(row.code_espece);
+    const species = await prisma.species.findUnique({ where: { id: speciesId } });
+    if (!species) {
+      skipped++;
+      continue;
+    }
+
+    // Trouver la route d'administration
+    const routeId = routeIdMap.get(row.voie_administration);
+    if (!routeId) {
+      skipped++;
+      continue;
+    }
+
+    // Trouver la catégorie d'âge
+    let ageCategoryId: string | null = null;
+    if (row.code_categorie_age) {
+      const ageCategory = await prisma.ageCategory.findFirst({
+        where: { speciesId, code: row.code_categorie_age.toLowerCase() },
+      });
+      ageCategoryId = ageCategory?.id || null;
+    }
+
+    const data = {
+      productId,
+      countryCode: 'FR',
+      speciesId,
+      ageCategoryId,
+      routeId,
+      doseMin: row.dose_min_mg_par_kg ? parseFloat(row.dose_min_mg_par_kg) : null,
+      doseMax: row.dose_max_mg_par_kg ? parseFloat(row.dose_max_mg_par_kg) : null,
+      doseOriginalText: row.dose_texte_original || null,
+      protocolDurationDays: row.protocole_duree_jours ? parseInt(row.protocole_duree_jours) : null,
+      withdrawalMeatDays: parseInt(row.temps_attente_viande_jours) || 0,
+      withdrawalMilkDays: row.temps_attente_lait_jours ? parseInt(row.temps_attente_lait_jours) : null,
+      isVerified: row.parsing_verified === '1',
+      validationNotes: row.notes_validation || null,
+    };
+
+    try {
+      // Chercher si existe déjà
+      const existing = await prisma.therapeuticIndication.findFirst({
+        where: {
+          productId,
+          countryCode: 'FR',
+          speciesId,
+          ageCategoryId,
+          routeId,
+        },
+      });
+
+      if (existing) {
+        await prisma.therapeuticIndication.update({
+          where: { id: existing.id },
+          data,
+        });
+        updated++;
+      } else {
+        await prisma.therapeuticIndication.create({ data });
+        created++;
+      }
+    } catch (error) {
+      skipped++;
+    }
+  }
+
+  console.log(`   ✅ Indications thérapeutiques: ${created} créées, ${updated} mises à jour, ${skipped} ignorées`);
+}
+
+// ============================================================================
+// 10. PRODUCT PACKAGINGS (Conditionnements)
+// ============================================================================
+async function seedProductPackagings() {
+  console.log('\n📦 Chargement des conditionnements...');
+
+  // S'assurer qu'on a une unité par défaut
+  let defaultUnitId: string;
+  const defaultUnit = await prisma.unit.findFirst({ where: { code: 'ml' } });
+  if (defaultUnit) {
+    defaultUnitId = defaultUnit.id;
+  } else {
+    const newUnit = await prisma.unit.create({
+      data: {
+        code: 'ml',
+        symbol: 'ml',
+        nameFr: 'millilitre',
+        nameEn: 'milliliter',
+        nameAr: 'milliliter',
+        unitType: 'volume',
+      },
+    });
+    defaultUnitId = newUnit.id;
+  }
+
+  // S'assurer que le pays FR existe
+  await prisma.country.upsert({
+    where: { code: 'FR' },
+    update: {},
+    create: {
+      code: 'FR',
+      nameFr: 'France',
+      nameEn: 'France',
+      nameAr: 'فرنسا',
+      region: 'Europe',
+    },
+  });
+
+  const rows = parseCSV(path.join(CSV_DIR, '11_conditionnements_nationaux.csv'));
+
+  let created = 0, updated = 0, skipped = 0;
+
+  for (const row of rows) {
+    const productId = productIdMap.get(row.id_medicament);
+    if (!productId) {
+      skipped++;
+      continue;
+    }
+
+    const gtinEan = row.gtin_ean || null;
+    const packagingLabel = row.description || row.nom_commercial_local || 'Conditionnement standard';
+
+    // Extraire le volume du label si possible (ex: "Flacon de 100 mL")
+    const volumeMatch = packagingLabel.match(/(\d+)\s*(ml|mL|ML)/i);
+    const volume = volumeMatch ? parseFloat(volumeMatch[1]) : 100;
+
+    const data = {
+      productId,
+      countryCode: 'FR',
+      concentration: 1, // Valeur par défaut
+      concentrationUnitId: defaultUnitId,
+      volume,
+      volumeUnitId: defaultUnitId,
+      packagingLabel,
+      gtinEan,
+    };
+
+    try {
+      // Chercher si existe déjà (par productId + countryCode + gtinEan)
+      const existing = await prisma.productPackaging.findFirst({
+        where: {
+          productId,
+          countryCode: 'FR',
+          gtinEan: gtinEan || undefined,
+        },
+      });
+
+      if (existing) {
+        await prisma.productPackaging.update({
+          where: { id: existing.id },
+          data,
+        });
+        updated++;
+      } else {
+        await prisma.productPackaging.create({ data });
+        created++;
+      }
+    } catch (error) {
+      skipped++;
+    }
+  }
+
+  console.log(`   ✅ Conditionnements: ${created} créés, ${updated} mis à jour, ${skipped} ignorés`);
+}
+
+// ============================================================================
 // MAIN
 // ============================================================================
 async function main() {
@@ -344,16 +596,31 @@ async function main() {
   console.log('╚════════════════════════════════════════════════════════════════╝');
 
   try {
-    // Ordre important pour respecter les foreign keys
+    // Phase 1: Tables de base (pas de dépendances)
+    console.log('\n🔷 Phase 1: Tables de base');
     await seedSpecies();
-    await seedAgeCategories();
     await seedProductCategories();
     await seedActiveSubstances();
     await seedAdministrationRoutes();
     await seedUnits();
-    await seedBreeds();
 
-    console.log('\n✅ Chargement des données de référence terminé avec succès!');
+    // Phase 2: Tables avec dépendances vers Phase 1
+    console.log('\n🔷 Phase 2: Tables dépendantes');
+    await seedAgeCategories();   // Dépend de Species
+    await seedBreeds();          // Dépend de Species
+
+    // Phase 3: Produits (dépend de categories, substances)
+    console.log('\n🔷 Phase 3: Médicaments');
+    await seedProducts();
+
+    // Phase 4: Tables liées aux produits
+    console.log('\n🔷 Phase 4: Données liées aux médicaments');
+    await seedTherapeuticIndications();  // Dépend de Products, Species, AgeCategories, Routes
+    await seedProductPackagings();       // Dépend de Products
+
+    console.log('\n╔════════════════════════════════════════════════════════════════╗');
+    console.log('║     ✅ Chargement terminé avec succès!                          ║');
+    console.log('╚════════════════════════════════════════════════════════════════╝');
   } catch (error) {
     console.error('\n❌ Erreur:', error);
     throw error;
