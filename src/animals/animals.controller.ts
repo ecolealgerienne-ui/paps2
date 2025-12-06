@@ -13,19 +13,26 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
+  ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FarmGuard } from '../auth/guards/farm.guard';
 import { AnimalsService } from './animals.service';
 import { CreateAnimalDto, QueryAnimalDto, UpdateAnimalDto } from './dto';
+import { TreatmentsService } from '../treatments/treatments.service';
+import { QueryTreatmentDto } from '../treatments/dto';
 
 @ApiTags('Animals')
 @ApiBearerAuth()
 @Controller('api/v1/farms/:farmId/animals')
 @UseGuards(AuthGuard, FarmGuard)
 export class AnimalsController {
-  constructor(private readonly animalsService: AnimalsService) {}
+  constructor(
+    private readonly animalsService: AnimalsService,
+    private readonly treatmentsService: TreatmentsService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer un animal' })
@@ -70,5 +77,22 @@ export class AnimalsController {
   @ApiParam({ name: 'id', description: "ID de l'animal" })
   remove(@Param('farmId') farmId: string, @Param('id') id: string) {
     return this.animalsService.remove(farmId, id);
+  }
+
+  @Get(':animalId/treatments')
+  @ApiOperation({ summary: "Liste des traitements d'un animal" })
+  @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
+  @ApiParam({ name: 'animalId', description: "ID de l'animal" })
+  @ApiQuery({ name: 'status', required: false, description: 'Filtrer par statut (scheduled, in_progress, completed, cancelled)' })
+  @ApiQuery({ name: 'fromDate', required: false, description: 'Date de début (ISO 8601)' })
+  @ApiQuery({ name: 'toDate', required: false, description: 'Date de fin (ISO 8601)' })
+  @ApiResponse({ status: 200, description: 'Liste des traitements de l\'animal' })
+  @ApiResponse({ status: 404, description: 'Animal non trouvé' })
+  findTreatments(
+    @Param('farmId') farmId: string,
+    @Param('animalId') animalId: string,
+    @Query() query: QueryTreatmentDto,
+  ) {
+    return this.treatmentsService.findByAnimalId(farmId, animalId, query);
   }
 }

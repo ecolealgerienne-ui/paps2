@@ -398,6 +398,61 @@ export class TreatmentsService {
     });
   }
 
+  /**
+   * Find all treatments for a specific animal
+   * Endpoint: GET /api/v1/farms/:farmId/animals/:animalId/treatments
+   */
+  async findByAnimalId(farmId: string, animalId: string, query: QueryTreatmentDto) {
+    // Verify animal exists and belongs to farm
+    const animal = await this.prisma.animal.findFirst({
+      where: { id: animalId, farmId, deletedAt: null },
+    });
+
+    if (!animal) {
+      this.logger.warn('Animal not found', { animalId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.ANIMAL_NOT_FOUND,
+        `Animal ${animalId} not found`,
+        { animalId, farmId },
+      );
+    }
+
+    const where: any = {
+      farmId,
+      animalId,
+      deletedAt: null,
+    };
+
+    if (query.status) where.status = query.status;
+    if (query.fromDate || query.toDate) {
+      where.treatmentDate = {};
+      if (query.fromDate) where.treatmentDate.gte = new Date(query.fromDate);
+      if (query.toDate) where.treatmentDate.lte = new Date(query.toDate);
+    }
+
+    const treatments = await this.prisma.treatment.findMany({
+      where,
+      include: {
+        product: { select: { id: true, nameFr: true, nameEn: true } },
+        veterinarian: { select: { id: true, firstName: true, lastName: true } },
+        route: { select: { id: true, nameFr: true, nameEn: true } },
+        indication: { select: { id: true, withdrawalMeatDays: true, withdrawalMilkDays: true } },
+        farmerLot: {
+          select: {
+            id: true,
+            nickname: true,
+            officialLotNumber: true,
+            expiryDate: true,
+          },
+        },
+      },
+      orderBy: { treatmentDate: 'desc' },
+    });
+
+    this.logger.debug(`Found ${treatments.length} treatments for animal ${animalId}`);
+    return treatments;
+  }
+
   async findOne(farmId: string, id: string) {
     const treatment = await this.prisma.treatment.findFirst({
       where: {
