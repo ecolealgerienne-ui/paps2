@@ -595,12 +595,19 @@ async function seedPersonalCampaigns() {
 
   console.log(`  [SEED] Personal Campaigns: ${data.length} records`);
   for (const row of data) {
+    // productId is required - skip if missing
+    if (!row.productId) {
+      console.log(`  [WARN] Skipping personal campaign ${row.id} - missing required productId`);
+      continue;
+    }
+
     await prisma.personalCampaign.create({
       data: {
         id: row.id,
         farm: { connect: { id: row.farmId } },
         name: row.name,
         description: row.description,
+        product: { connect: { id: row.productId } },
         productName: row.productName,
         type: row.type,
         campaignDate: row.campaignDate,
@@ -609,7 +616,6 @@ async function seedPersonalCampaigns() {
         targetCount: row.targetCount,
         status: row.status,
         notes: row.notes,
-        ...(row.productId && { product: { connect: { id: row.productId } } }),
         ...(row.veterinarianId && { veterinarian: { connect: { id: row.veterinarianId } } }),
       },
     });

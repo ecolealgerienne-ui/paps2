@@ -537,6 +537,12 @@ function generateFarmNationalCampaignPreferences(campaigns: Record<string, any>[
 
 // 20. Personal Campaigns (requires productName)
 function generatePersonalCampaigns(animals: Record<string, any>[], vets: Record<string, any>[], productIds: string[], productNames: Map<string, string>): Record<string, any>[] {
+  // Personal campaigns require a productId - skip if no products available
+  if (productIds.length === 0) {
+    console.log('  [WARN] No products loaded from reference data - skipping personal campaigns');
+    return [];
+  }
+
   const campaignsData = [
     { name: 'Campagne Deparasitage Printemps 2024', type: 'deworming', campaignDate: '2024-03-15T00:00:00.000Z', withdrawalEndDate: '2024-04-15T00:00:00.000Z', targetCount: 80 },
     { name: 'Campagne Vaccination Automne 2024', type: 'vaccination', campaignDate: '2024-09-01T00:00:00.000Z', withdrawalEndDate: '2024-10-01T00:00:00.000Z', targetCount: 95 },
@@ -546,7 +552,7 @@ function generatePersonalCampaigns(animals: Record<string, any>[], vets: Record<
 
   return campaignsData.map(cd => {
     const targetAnimals = [...animals].sort(() => Math.random() - 0.5).slice(0, Math.min(cd.targetCount, animals.length));
-    const productId = productIds.length > 0 ? getRandomElement(productIds) : '';
+    const productId = getRandomElement(productIds);
     const productName = productNames.get(productId) || 'Produit';
 
     return {
@@ -554,7 +560,7 @@ function generatePersonalCampaigns(animals: Record<string, any>[], vets: Record<
       farmId: FARM_ID,
       name: cd.name,
       description: 'Campagne personnalisee de la ferme',
-      productId: productId || null,
+      productId: productId,
       productName: productName,
       type: cd.type,
       campaignDate: cd.campaignDate,
