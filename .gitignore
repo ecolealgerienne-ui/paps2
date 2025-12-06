@@ -4,3 +4,6 @@ node_modules
 
 /generated/prisma
 /dist
+
+# Generated test data
+scripts/output_test/farm_data/
