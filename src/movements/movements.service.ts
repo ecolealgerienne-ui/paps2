@@ -109,9 +109,26 @@ export class MovementsService {
         return tx.movement.findUnique({
           where: { id: movement.id },
           include: {
+            lot: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                status: true,
+              },
+            },
             movementAnimals: {
               include: {
-                animal: true,
+                animal: {
+                  select: {
+                    id: true,
+                    visualId: true,
+                    currentEid: true,
+                    sex: true,
+                    birthDate: true,
+                    status: true,
+                  },
+                },
               },
             },
           },
@@ -170,6 +187,14 @@ export class MovementsService {
     return this.prisma.movement.findMany({
       where,
       include: {
+        lot: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            status: true,
+          },
+        },
         movementAnimals: {
           include: {
             animal: {
@@ -194,6 +219,14 @@ export class MovementsService {
     const movement = await this.prisma.movement.findFirst({
       where: { id, farmId, deletedAt: null },
       include: {
+        lot: {
+          select: {
+            id: true,
+            name: true,
+            type: true,
+            status: true,
+          },
+        },
         movementAnimals: {
           include: {
             animal: {
@@ -428,6 +461,14 @@ export class MovementsService {
         return tx.movement.findUnique({
           where: { id },
           include: {
+            lot: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                status: true,
+              },
+            },
             movementAnimals: {
               include: {
                 animal: {
