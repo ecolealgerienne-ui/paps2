@@ -207,6 +207,63 @@ export class MovementsService {
     return movement;
   }
 
+  /**
+   * Find all animals associated with a specific movement
+   * Endpoint: GET /api/v1/farms/:farmId/movements/:movementId/animals
+   */
+  async findAnimalsByMovementId(farmId: string, movementId: string) {
+    // Verify movement exists and belongs to farm
+    const movement = await this.prisma.movement.findFirst({
+      where: { id: movementId, farmId, deletedAt: null },
+    });
+
+    if (!movement) {
+      this.logger.warn('Movement not found', { movementId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.MOVEMENT_NOT_FOUND,
+        `Movement ${movementId} not found`,
+        { movementId, farmId },
+      );
+    }
+
+    const movementAnimals = await this.prisma.movementAnimal.findMany({
+      where: { movementId },
+      include: {
+        animal: {
+          select: {
+            id: true,
+            visualId: true,
+            currentEid: true,
+            officialNumber: true,
+            sex: true,
+            birthDate: true,
+            status: true,
+            breed: {
+              select: {
+                id: true,
+                nameFr: true,
+                nameEn: true,
+                species: {
+                  select: {
+                    id: true,
+                    nameFr: true,
+                    nameEn: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Extract animals from the junction table
+    const animals = movementAnimals.map((ma) => ma.animal);
+
+    this.logger.debug(`Found ${animals.length} animals for movement ${movementId}`);
+    return animals;
+  }
+
   async update(farmId: string, id: string, dto: UpdateMovementDto) {
     this.logger.debug(`Updating movement ${id} (version ${dto.version})`);
 

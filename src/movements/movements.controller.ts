@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { MovementsService } from './movements.service';
 import { CreateMovementDto, UpdateMovementDto, QueryMovementDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -45,6 +45,19 @@ export class MovementsController {
     @Query('toDate') toDate?: string,
   ) {
     return this.movementsService.getStatistics(farmId, fromDate, toDate);
+  }
+
+  @Get(':movementId/animals')
+  @ApiOperation({ summary: 'Get all animals in a movement' })
+  @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
+  @ApiParam({ name: 'movementId', description: 'ID du mouvement' })
+  @ApiResponse({ status: 200, description: 'Liste des animaux du mouvement' })
+  @ApiResponse({ status: 404, description: 'Mouvement non trouvé' })
+  findAnimals(
+    @Param('farmId') farmId: string,
+    @Param('movementId') movementId: string,
+  ) {
+    return this.movementsService.findAnimalsByMovementId(farmId, movementId);
   }
 
   @Get(':id')
