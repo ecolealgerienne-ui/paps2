@@ -291,18 +291,34 @@ export class LotsService {
           },
         });
 
-        // If animalIds provided, replace animals in lot
+        // If animalIds provided, sync animals in lot (add new, remove missing)
         if (animalIds !== undefined) {
-          // Mark existing animals as left
-          await tx.lotAnimal.updateMany({
+          // Get current animals in the lot
+          const currentLotAnimals = await tx.lotAnimal.findMany({
             where: { lotId: id, leftAt: null },
-            data: { leftAt: new Date() },
+            select: { animalId: true },
           });
+          const currentAnimalIds = new Set(currentLotAnimals.map(la => la.animalId));
+          const newAnimalIds = new Set(animalIds);
 
-          // Add new animals if any
-          if (animalIds.length > 0) {
+          // Animals to add: in newAnimalIds but not in currentAnimalIds
+          const toAdd = animalIds.filter(aid => !currentAnimalIds.has(aid));
+
+          // Animals to remove: in currentAnimalIds but not in newAnimalIds
+          const toRemove = [...currentAnimalIds].filter(aid => !newAnimalIds.has(aid));
+
+          // Remove animals (mark as left)
+          if (toRemove.length > 0) {
+            await tx.lotAnimal.updateMany({
+              where: { lotId: id, animalId: { in: toRemove }, leftAt: null },
+              data: { leftAt: new Date() },
+            });
+          }
+
+          // Add new animals
+          if (toAdd.length > 0) {
             await tx.lotAnimal.createMany({
-              data: animalIds.map(animalId => ({
+              data: toAdd.map(animalId => ({
                 lotId: id,
                 animalId,
                 farmId,
@@ -325,8 +341,7 @@ export class LotsService {
         lotId: id,
         farmId,
         version: `${existing.version} → ${updated?.version}`,
-        animalsUpdated: animalIds !== undefined,
-        animalCount: animalIds?.length || 0
+        animalsUpdated: animalIds !== undefined
       });
 
       return updated;
