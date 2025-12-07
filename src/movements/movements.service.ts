@@ -46,24 +46,40 @@ export class MovementsService {
     try {
       // Create movement with transaction
       const result = await this.prisma.$transaction(async (tx) => {
-        // Create the movement
+        // Create the movement with all fields from Prisma schema
         const movement = await tx.movement.create({
           data: {
             id: dto.id,
             farmId: dto.farmId || farmId,
+            lotId: dto.lotId,
             movementType: dto.movementType,
             movementDate: new Date(dto.movementDate),
             reason: dto.reason,
+            status: dto.status || 'ongoing',
+            // Sale fields
             buyerName: dto.buyerName,
             buyerType: dto.buyerType,
             buyerContact: dto.buyerContact,
+            buyerFarmId: dto.buyerFarmId,
+            buyerQrSignature: dto.buyerQrSignature,
             salePrice: dto.salePrice,
+            // Purchase fields
             sellerName: dto.sellerName,
             purchasePrice: dto.purchasePrice,
+            // Transfer fields
             destinationFarmId: dto.destinationFarmId,
             originFarmId: dto.originFarmId,
+            // Slaughter fields
+            slaughterhouseName: dto.slaughterhouseName,
+            slaughterhouseId: dto.slaughterhouseId,
+            // Temporary movement fields
+            isTemporary: dto.isTemporary || false,
             temporaryType: dto.temporaryType,
             expectedReturnDate: dto.expectedReturnDate ? new Date(dto.expectedReturnDate) : null,
+            returnDate: dto.returnDate ? new Date(dto.returnDate) : null,
+            returnNotes: dto.returnNotes,
+            relatedMovementId: dto.relatedMovementId,
+            // Other
             documentNumber: dto.documentNumber,
             notes: dto.notes,
             // CRITICAL: Use client timestamps if provided (offline-first)
@@ -299,44 +315,145 @@ export class MovementsService {
       );
     }
 
+    // If animalIds provided, verify all animals belong to farm
+    if (dto.animalIds && dto.animalIds.length > 0) {
+      const animals = await this.prisma.animal.findMany({
+        where: {
+          id: { in: dto.animalIds },
+          farmId,
+          deletedAt: null,
+        },
+      });
+
+      if (animals.length !== dto.animalIds.length) {
+        this.logger.warn('One or more animals not found for movement update', {
+          farmId,
+          expected: dto.animalIds.length,
+          found: animals.length,
+        });
+        throw new EntityNotFoundException(
+          ERROR_CODES.MOVEMENT_ANIMALS_NOT_FOUND,
+          'One or more animals not found',
+          { farmId, animalCount: dto.animalIds.length },
+        );
+      }
+    }
+
     try {
-      // Destructure to exclude BaseSyncEntityDto fields
-      const { farmId: dtoFarmId, created_at, updated_at, version, ...movementData } = dto;
+      // Use transaction to ensure atomicity when updating movement + animals
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Destructure to exclude BaseSyncEntityDto fields and animalIds
+        const { farmId: dtoFarmId, created_at, updated_at, version, animalIds, ...movementData } = dto;
 
-      const updateData: any = {
-        ...movementData,
-        version: existing.version + 1,
-      };
+        // Build update data with all fields
+        const updateData: any = {
+          version: existing.version + 1,
+        };
 
-      if (dto.movementDate) updateData.movementDate = new Date(dto.movementDate);
-      // CRITICAL: Use client timestamp if provided (offline-first)
-      if (updated_at) updateData.updatedAt = new Date(updated_at);
+        // Movement basic fields
+        if (movementData.movementType !== undefined) updateData.movementType = movementData.movementType;
+        if (movementData.movementDate) updateData.movementDate = new Date(movementData.movementDate);
+        if (movementData.lotId !== undefined) updateData.lotId = movementData.lotId;
+        if (movementData.reason !== undefined) updateData.reason = movementData.reason;
+        if (movementData.status !== undefined) updateData.status = movementData.status;
 
-      const updated = await this.prisma.movement.update({
-        where: { id },
-        data: updateData,
-        include: {
-          movementAnimals: {
-            include: {
-              animal: {
-                select: {
-                  id: true,
-                  visualId: true,
-                  currentEid: true,
+        // Sale fields
+        if (movementData.buyerName !== undefined) updateData.buyerName = movementData.buyerName;
+        if (movementData.buyerType !== undefined) updateData.buyerType = movementData.buyerType;
+        if (movementData.buyerContact !== undefined) updateData.buyerContact = movementData.buyerContact;
+        if (movementData.buyerFarmId !== undefined) updateData.buyerFarmId = movementData.buyerFarmId;
+        if (movementData.buyerQrSignature !== undefined) updateData.buyerQrSignature = movementData.buyerQrSignature;
+        if (movementData.salePrice !== undefined) updateData.salePrice = movementData.salePrice;
+
+        // Purchase fields
+        if (movementData.sellerName !== undefined) updateData.sellerName = movementData.sellerName;
+        if (movementData.purchasePrice !== undefined) updateData.purchasePrice = movementData.purchasePrice;
+
+        // Transfer fields
+        if (movementData.destinationFarmId !== undefined) updateData.destinationFarmId = movementData.destinationFarmId;
+        if (movementData.originFarmId !== undefined) updateData.originFarmId = movementData.originFarmId;
+
+        // Slaughter fields
+        if (movementData.slaughterhouseName !== undefined) updateData.slaughterhouseName = movementData.slaughterhouseName;
+        if (movementData.slaughterhouseId !== undefined) updateData.slaughterhouseId = movementData.slaughterhouseId;
+
+        // Temporary movement fields
+        if (movementData.isTemporary !== undefined) updateData.isTemporary = movementData.isTemporary;
+        if (movementData.temporaryType !== undefined) updateData.temporaryType = movementData.temporaryType;
+        if (movementData.expectedReturnDate !== undefined) {
+          updateData.expectedReturnDate = movementData.expectedReturnDate ? new Date(movementData.expectedReturnDate) : null;
+        }
+        if (movementData.returnDate !== undefined) {
+          updateData.returnDate = movementData.returnDate ? new Date(movementData.returnDate) : null;
+        }
+        if (movementData.returnNotes !== undefined) updateData.returnNotes = movementData.returnNotes;
+        if (movementData.relatedMovementId !== undefined) updateData.relatedMovementId = movementData.relatedMovementId;
+
+        // Other fields
+        if (movementData.documentNumber !== undefined) updateData.documentNumber = movementData.documentNumber;
+        if (movementData.notes !== undefined) updateData.notes = movementData.notes;
+
+        // CRITICAL: Use client timestamp if provided (offline-first)
+        if (updated_at) updateData.updatedAt = new Date(updated_at);
+
+        // Update the movement
+        await tx.movement.update({
+          where: { id },
+          data: updateData,
+        });
+
+        // If animalIds provided, update the animal list atomically
+        if (animalIds !== undefined) {
+          // Delete existing associations
+          await tx.movementAnimal.deleteMany({
+            where: { movementId: id },
+          });
+
+          // Create new associations
+          if (animalIds.length > 0) {
+            await tx.movementAnimal.createMany({
+              data: animalIds.map((animalId) => ({
+                movementId: id,
+                animalId,
+              })),
+            });
+          }
+
+          this.logger.debug(`Updated animal list for movement ${id}`, {
+            animalCount: animalIds.length,
+          });
+        }
+
+        // Return updated movement with relations
+        return tx.movement.findUnique({
+          where: { id },
+          include: {
+            movementAnimals: {
+              include: {
+                animal: {
+                  select: {
+                    id: true,
+                    visualId: true,
+                    currentEid: true,
+                    sex: true,
+                    birthDate: true,
+                    status: true,
+                  },
                 },
               },
             },
           },
-        },
+        });
       });
 
       this.logger.audit('Movement updated', {
         movementId: id,
         farmId,
-        version: `${existing.version} → ${updated.version}`,
+        version: `${existing.version} → ${result?.version}`,
+        animalsUpdated: dto.animalIds !== undefined,
       });
 
-      return updated;
+      return result;
     } catch (error) {
       this.logger.error(`Failed to update movement ${id}`, error.stack);
       throw error;

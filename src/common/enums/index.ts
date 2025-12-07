@@ -31,6 +31,13 @@ export enum MovementType {
   TEMPORARY_RETURN = 'temporary_return',
 }
 
+// ========== MOVEMENT STATUS ==========
+export enum MovementStatus {
+  ONGOING = 'ongoing',
+  CLOSED = 'closed',
+  ARCHIVED = 'archived',
+}
+
 // ========== TEMPORARY MOVEMENT TYPE ==========
 export enum TemporaryMovementType {
   VETERINARY = 'veterinary',
