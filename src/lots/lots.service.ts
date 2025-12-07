@@ -113,7 +113,7 @@ export class LotsService {
     return this.prisma.lot.findMany({
       where,
       include: {
-        _count: { select: { lotAnimals: true } },
+        _count: { select: { lotAnimals: { where: { leftAt: null } } } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -133,6 +133,7 @@ export class LotsService {
                 id: true,
                 visualId: true,
                 currentEid: true,
+                officialNumber: true,
                 sex: true,
                 status: true,
                 birthDate: true,
@@ -140,7 +141,7 @@ export class LotsService {
             },
           },
         },
-        _count: { select: { lotAnimals: true } },
+        _count: { select: { lotAnimals: { where: { leftAt: null } } } },
       },
     });
 
