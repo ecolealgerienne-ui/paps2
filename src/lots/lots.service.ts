@@ -156,6 +156,66 @@ export class LotsService {
     return lot;
   }
 
+  /**
+   * Find all animals in a specific lot
+   * Endpoint: GET /api/v1/farms/:farmId/lots/:lotId/animals
+   */
+  async findAnimalsByLotId(farmId: string, lotId: string) {
+    // Verify lot exists and belongs to farm
+    const lot = await this.prisma.lot.findFirst({
+      where: { id: lotId, farmId, deletedAt: null },
+    });
+
+    if (!lot) {
+      this.logger.warn('Lot not found', { lotId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${lotId} not found`,
+        { lotId, farmId },
+      );
+    }
+
+    const lotAnimals = await this.prisma.lotAnimal.findMany({
+      where: { lotId, leftAt: null },
+      include: {
+        animal: {
+          select: {
+            id: true,
+            visualId: true,
+            currentEid: true,
+            officialNumber: true,
+            sex: true,
+            birthDate: true,
+            status: true,
+            breed: {
+              select: {
+                id: true,
+                nameFr: true,
+                nameEn: true,
+                species: {
+                  select: {
+                    id: true,
+                    nameFr: true,
+                    nameEn: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Extract animals from the junction table
+    const animals = lotAnimals.map((la) => ({
+      ...la.animal,
+      joinedAt: la.joinedAt,
+    }));
+
+    this.logger.debug(`Found ${animals.length} animals for lot ${lotId}`);
+    return animals;
+  }
+
   async update(farmId: string, id: string, dto: UpdateLotDto) {
     this.logger.debug(`Updating lot ${id} (version ${dto.version})`);
 

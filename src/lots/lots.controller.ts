@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { LotsService } from './lots.service';
 import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -34,6 +34,19 @@ export class LotsController {
   @ApiResponse({ status: 200, description: 'List of lots' })
   findAll(@Param('farmId') farmId: string, @Query() query: QueryLotDto) {
     return this.lotsService.findAll(farmId, query);
+  }
+
+  @Get(':lotId/animals')
+  @ApiOperation({ summary: 'Get all animals in a lot' })
+  @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
+  @ApiParam({ name: 'lotId', description: 'ID du lot' })
+  @ApiResponse({ status: 200, description: 'Liste des animaux du lot' })
+  @ApiResponse({ status: 404, description: 'Lot non trouvé' })
+  findAnimals(
+    @Param('farmId') farmId: string,
+    @Param('lotId') lotId: string,
+  ) {
+    return this.lotsService.findAnimalsByLotId(farmId, lotId);
   }
 
   @Get(':id')
