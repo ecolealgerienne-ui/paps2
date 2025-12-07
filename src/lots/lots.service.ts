@@ -113,7 +113,7 @@ export class LotsService {
     return this.prisma.lot.findMany({
       where,
       include: {
-        _count: { select: { lotAnimals: true } },
+        _count: { select: { lotAnimals: { where: { leftAt: null } } } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -133,6 +133,7 @@ export class LotsService {
                 id: true,
                 visualId: true,
                 currentEid: true,
+                officialNumber: true,
                 sex: true,
                 status: true,
                 birthDate: true,
@@ -140,7 +141,7 @@ export class LotsService {
             },
           },
         },
-        _count: { select: { lotAnimals: true } },
+        _count: { select: { lotAnimals: { where: { leftAt: null } } } },
       },
     });
 
@@ -156,8 +157,70 @@ export class LotsService {
     return lot;
   }
 
+  /**
+   * Find all animals in a specific lot
+   * Endpoint: GET /api/v1/farms/:farmId/lots/:lotId/animals
+   */
+  async findAnimalsByLotId(farmId: string, lotId: string) {
+    // Verify lot exists and belongs to farm
+    const lot = await this.prisma.lot.findFirst({
+      where: { id: lotId, farmId, deletedAt: null },
+    });
+
+    if (!lot) {
+      this.logger.warn('Lot not found', { lotId, farmId });
+      throw new EntityNotFoundException(
+        ERROR_CODES.LOT_NOT_FOUND,
+        `Lot ${lotId} not found`,
+        { lotId, farmId },
+      );
+    }
+
+    const lotAnimals = await this.prisma.lotAnimal.findMany({
+      where: { lotId, leftAt: null },
+      include: {
+        animal: {
+          select: {
+            id: true,
+            visualId: true,
+            currentEid: true,
+            officialNumber: true,
+            sex: true,
+            birthDate: true,
+            status: true,
+            breed: {
+              select: {
+                id: true,
+                nameFr: true,
+                nameEn: true,
+                species: {
+                  select: {
+                    id: true,
+                    nameFr: true,
+                    nameEn: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Extract animals from the junction table
+    const animals = lotAnimals.map((la) => ({
+      ...la.animal,
+      joinedAt: la.joinedAt,
+    }));
+
+    this.logger.debug(`Found ${animals.length} animals for lot ${lotId}`);
+    return animals;
+  }
+
   async update(farmId: string, id: string, dto: UpdateLotDto) {
-    this.logger.debug(`Updating lot ${id} (version ${dto.version})`);
+    this.logger.debug(`Updating lot ${id} (version ${dto.version})`, {
+      withAnimals: !!dto.animalIds?.length
+    });
 
     const existing = await this.prisma.lot.findFirst({
       where: { id, farmId, deletedAt: null },
@@ -191,27 +254,95 @@ export class LotsService {
       );
     }
 
-    try {
-      // Destructure to exclude BaseSyncEntityDto fields
-      const { farmId: dtoFarmId, created_at, updated_at, version, ...lotData } = dto;
+    // Destructure to exclude BaseSyncEntityDto fields and animalIds
+    const { farmId: dtoFarmId, created_at, updated_at, version, animalIds, ...lotData } = dto;
 
-      const updated = await this.prisma.lot.update({
-        where: { id },
-        data: {
-          ...lotData,
-          version: existing.version + 1,
-          // CRITICAL: Use client timestamp if provided (offline-first)
-          ...(updated_at && { updatedAt: new Date(updated_at) }),
-        },
-        include: {
-          _count: { select: { lotAnimals: true } },
-        },
+    // If animalIds provided, verify all animals exist and belong to farm
+    if (animalIds && animalIds.length > 0) {
+      const animals = await this.prisma.animal.findMany({
+        where: { id: { in: animalIds }, farmId, deletedAt: null },
+      });
+
+      if (animals.length !== animalIds.length) {
+        this.logger.warn('One or more animals not found for lot update', {
+          farmId,
+          lotId: id,
+          expected: animalIds.length,
+          found: animals.length
+        });
+        throw new EntityNotFoundException(
+          ERROR_CODES.ANIMAL_NOT_FOUND,
+          `One or more animals not found (expected ${animalIds.length}, found ${animals.length})`,
+          { farmId, expectedCount: animalIds.length, foundCount: animals.length },
+        );
+      }
+    }
+
+    try {
+      // Use transaction for atomic lot + animals update
+      const updated = await this.prisma.$transaction(async (tx) => {
+        // Update the lot
+        const updatedLot = await tx.lot.update({
+          where: { id },
+          data: {
+            ...lotData,
+            version: existing.version + 1,
+            // CRITICAL: Use client timestamp if provided (offline-first)
+            ...(updated_at && { updatedAt: new Date(updated_at) }),
+          },
+        });
+
+        // If animalIds provided, sync animals in lot (add new, remove missing)
+        if (animalIds !== undefined) {
+          // Get current animals in the lot
+          const currentLotAnimals = await tx.lotAnimal.findMany({
+            where: { lotId: id, leftAt: null },
+            select: { animalId: true },
+          });
+          const currentAnimalIds = new Set(currentLotAnimals.map(la => la.animalId));
+          const newAnimalIds = new Set(animalIds);
+
+          // Animals to add: in newAnimalIds but not in currentAnimalIds
+          const toAdd = animalIds.filter(aid => !currentAnimalIds.has(aid));
+
+          // Animals to remove: in currentAnimalIds but not in newAnimalIds
+          const toRemove = [...currentAnimalIds].filter(aid => !newAnimalIds.has(aid));
+
+          // Remove animals (mark as left)
+          if (toRemove.length > 0) {
+            await tx.lotAnimal.updateMany({
+              where: { lotId: id, animalId: { in: toRemove }, leftAt: null },
+              data: { leftAt: new Date() },
+            });
+          }
+
+          // Add new animals
+          if (toAdd.length > 0) {
+            await tx.lotAnimal.createMany({
+              data: toAdd.map(animalId => ({
+                lotId: id,
+                animalId,
+                farmId,
+                joinedAt: new Date(),
+              })),
+            });
+          }
+        }
+
+        // Return lot with animal count
+        return tx.lot.findUnique({
+          where: { id },
+          include: {
+            _count: { select: { lotAnimals: { where: { leftAt: null } } } },
+          },
+        });
       });
 
       this.logger.audit('Lot updated', {
         lotId: id,
         farmId,
-        version: `${existing.version} → ${updated.version}`,
+        version: `${existing.version} → ${updated?.version}`,
+        animalsUpdated: animalIds !== undefined
       });
 
       return updated;

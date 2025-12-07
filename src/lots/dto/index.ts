@@ -103,12 +103,24 @@ export class CreateLotDto extends BaseSyncEntityDto {
 /**
  * DTO for updating a Lot
  * Extends BaseSyncEntityDto to support offline-first architecture
+ * Supports updating animals via animalIds array (replaces existing animals)
  */
 export class UpdateLotDto extends BaseSyncEntityDto {
   @ApiProperty({ description: 'Lot name', required: false })
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiProperty({
+    description: 'Animal IDs to set in lot (replaces existing animals)',
+    type: [String],
+    required: false,
+    example: ['animal-uuid-1', 'animal-uuid-2']
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  animalIds?: string[];
 
   @ApiProperty({ enum: LotType, description: 'Type of lot', required: false })
   @IsOptional()

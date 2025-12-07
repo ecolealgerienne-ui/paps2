@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { MovementType, TemporaryMovementType, BuyerType } from '../../common/enums';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, IsBoolean } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MovementType, TemporaryMovementType, BuyerType, MovementStatus } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
 /**
@@ -8,7 +8,7 @@ import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
  * Extends BaseSyncEntityDto to support offline-first architecture (farmId, created_at, updated_at)
  */
 export class CreateMovementDto extends BaseSyncEntityDto {
-  @ApiProperty({ description: 'Movement ID (UUID)', required: false })
+  @ApiPropertyOptional({ description: 'Movement ID (UUID)' })
   @IsOptional()
   @IsString()
   id?: string;
@@ -26,71 +26,122 @@ export class CreateMovementDto extends BaseSyncEntityDto {
   @IsString({ each: true })
   animalIds: string[];
 
-  @ApiProperty({ description: 'Reason for movement', required: false })
+  @ApiPropertyOptional({ description: 'Lot ID' })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+
+  @ApiPropertyOptional({ description: 'Reason for movement' })
   @IsOptional()
   @IsString()
   reason?: string;
 
+  @ApiPropertyOptional({ enum: MovementStatus, description: 'Movement status', default: 'ongoing' })
+  @IsOptional()
+  @IsEnum(MovementStatus)
+  status?: MovementStatus;
+
   // Sale fields
-  @ApiProperty({ description: 'Buyer name', required: false })
+  @ApiPropertyOptional({ description: 'Buyer name' })
   @IsOptional()
   @IsString()
   buyerName?: string;
 
-  @ApiProperty({ enum: BuyerType, required: false })
+  @ApiPropertyOptional({ enum: BuyerType })
   @IsOptional()
   @IsEnum(BuyerType)
   buyerType?: BuyerType;
 
-  @ApiProperty({ description: 'Buyer contact', required: false })
+  @ApiPropertyOptional({ description: 'Buyer contact' })
   @IsOptional()
   @IsString()
   buyerContact?: string;
 
-  @ApiProperty({ description: 'Sale price', required: false })
+  @ApiPropertyOptional({ description: 'Buyer farm ID' })
+  @IsOptional()
+  @IsString()
+  buyerFarmId?: string;
+
+  @ApiPropertyOptional({ description: 'Buyer QR signature' })
+  @IsOptional()
+  @IsString()
+  buyerQrSignature?: string;
+
+  @ApiPropertyOptional({ description: 'Sale price' })
   @IsOptional()
   @IsNumber()
   salePrice?: number;
 
   // Purchase fields
-  @ApiProperty({ description: 'Seller name', required: false })
+  @ApiPropertyOptional({ description: 'Seller name' })
   @IsOptional()
   @IsString()
   sellerName?: string;
 
-  @ApiProperty({ description: 'Purchase price', required: false })
+  @ApiPropertyOptional({ description: 'Purchase price' })
   @IsOptional()
   @IsNumber()
   purchasePrice?: number;
 
   // Transfer fields
-  @ApiProperty({ description: 'Destination farm ID', required: false })
+  @ApiPropertyOptional({ description: 'Destination farm ID' })
   @IsOptional()
   @IsString()
   destinationFarmId?: string;
 
-  @ApiProperty({ description: 'Origin farm ID', required: false })
+  @ApiPropertyOptional({ description: 'Origin farm ID' })
   @IsOptional()
   @IsString()
   originFarmId?: string;
 
+  // Slaughter fields
+  @ApiPropertyOptional({ description: 'Slaughterhouse name' })
+  @IsOptional()
+  @IsString()
+  slaughterhouseName?: string;
+
+  @ApiPropertyOptional({ description: 'Slaughterhouse ID' })
+  @IsOptional()
+  @IsString()
+  slaughterhouseId?: string;
+
   // Temporary movement fields
-  @ApiProperty({ enum: TemporaryMovementType, required: false })
+  @ApiPropertyOptional({ description: 'Is temporary movement', default: false })
+  @IsOptional()
+  @IsBoolean()
+  isTemporary?: boolean;
+
+  @ApiPropertyOptional({ enum: TemporaryMovementType })
   @IsOptional()
   @IsEnum(TemporaryMovementType)
   temporaryType?: TemporaryMovementType;
 
-  @ApiProperty({ description: 'Expected return date', required: false })
+  @ApiPropertyOptional({ description: 'Expected return date' })
   @IsOptional()
   @IsDateString()
   expectedReturnDate?: string;
 
-  @ApiProperty({ description: 'Document number', required: false })
+  @ApiPropertyOptional({ description: 'Return date' })
+  @IsOptional()
+  @IsDateString()
+  returnDate?: string;
+
+  @ApiPropertyOptional({ description: 'Return notes' })
+  @IsOptional()
+  @IsString()
+  returnNotes?: string;
+
+  @ApiPropertyOptional({ description: 'Related movement ID (for return movements)' })
+  @IsOptional()
+  @IsString()
+  relatedMovementId?: string;
+
+  @ApiPropertyOptional({ description: 'Document number' })
   @IsOptional()
   @IsString()
   documentNumber?: string;
 
-  @ApiProperty({ description: 'Notes', required: false })
+  @ApiPropertyOptional({ description: 'Notes' })
   @IsOptional()
   @IsString()
   notes?: string;
@@ -101,98 +152,180 @@ export class CreateMovementDto extends BaseSyncEntityDto {
  * Extends BaseSyncEntityDto to support offline-first architecture
  */
 export class UpdateMovementDto extends BaseSyncEntityDto {
-  @ApiProperty({ enum: MovementType, required: false })
+  @ApiPropertyOptional({ enum: MovementType })
   @IsOptional()
   @IsEnum(MovementType)
   movementType?: MovementType;
 
-  @ApiProperty({ description: 'Movement date', required: false })
+  @ApiPropertyOptional({ description: 'Movement date' })
   @IsOptional()
   @IsDateString()
   movementDate?: string;
 
-  @ApiProperty({ description: 'Reason', required: false })
+  @ApiPropertyOptional({ description: 'Animal IDs to update (replaces existing list)', type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  animalIds?: string[];
+
+  @ApiPropertyOptional({ description: 'Lot ID' })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+
+  @ApiPropertyOptional({ description: 'Reason' })
   @IsOptional()
   @IsString()
   reason?: string;
 
-  @ApiProperty({ description: 'Buyer name', required: false })
+  @ApiPropertyOptional({ enum: MovementStatus })
+  @IsOptional()
+  @IsEnum(MovementStatus)
+  status?: MovementStatus;
+
+  // Sale fields
+  @ApiPropertyOptional({ description: 'Buyer name' })
   @IsOptional()
   @IsString()
   buyerName?: string;
 
-  @ApiProperty({ enum: BuyerType, required: false })
+  @ApiPropertyOptional({ enum: BuyerType })
   @IsOptional()
   @IsEnum(BuyerType)
   buyerType?: BuyerType;
 
-  @ApiProperty({ description: 'Buyer contact', required: false })
+  @ApiPropertyOptional({ description: 'Buyer contact' })
   @IsOptional()
   @IsString()
   buyerContact?: string;
 
-  @ApiProperty({ description: 'Sale price', required: false })
+  @ApiPropertyOptional({ description: 'Buyer farm ID' })
+  @IsOptional()
+  @IsString()
+  buyerFarmId?: string;
+
+  @ApiPropertyOptional({ description: 'Buyer QR signature' })
+  @IsOptional()
+  @IsString()
+  buyerQrSignature?: string;
+
+  @ApiPropertyOptional({ description: 'Sale price' })
   @IsOptional()
   @IsNumber()
   salePrice?: number;
 
-  @ApiProperty({ description: 'Seller name', required: false })
+  // Purchase fields
+  @ApiPropertyOptional({ description: 'Seller name' })
   @IsOptional()
   @IsString()
   sellerName?: string;
 
-  @ApiProperty({ description: 'Purchase price', required: false })
+  @ApiPropertyOptional({ description: 'Purchase price' })
   @IsOptional()
   @IsNumber()
   purchasePrice?: number;
 
-  @ApiProperty({ description: 'Document number', required: false })
+  // Transfer fields
+  @ApiPropertyOptional({ description: 'Destination farm ID' })
+  @IsOptional()
+  @IsString()
+  destinationFarmId?: string;
+
+  @ApiPropertyOptional({ description: 'Origin farm ID' })
+  @IsOptional()
+  @IsString()
+  originFarmId?: string;
+
+  // Slaughter fields
+  @ApiPropertyOptional({ description: 'Slaughterhouse name' })
+  @IsOptional()
+  @IsString()
+  slaughterhouseName?: string;
+
+  @ApiPropertyOptional({ description: 'Slaughterhouse ID' })
+  @IsOptional()
+  @IsString()
+  slaughterhouseId?: string;
+
+  // Temporary movement fields
+  @ApiPropertyOptional({ description: 'Is temporary movement' })
+  @IsOptional()
+  @IsBoolean()
+  isTemporary?: boolean;
+
+  @ApiPropertyOptional({ enum: TemporaryMovementType })
+  @IsOptional()
+  @IsEnum(TemporaryMovementType)
+  temporaryType?: TemporaryMovementType;
+
+  @ApiPropertyOptional({ description: 'Expected return date' })
+  @IsOptional()
+  @IsDateString()
+  expectedReturnDate?: string;
+
+  @ApiPropertyOptional({ description: 'Return date' })
+  @IsOptional()
+  @IsDateString()
+  returnDate?: string;
+
+  @ApiPropertyOptional({ description: 'Return notes' })
+  @IsOptional()
+  @IsString()
+  returnNotes?: string;
+
+  @ApiPropertyOptional({ description: 'Related movement ID' })
+  @IsOptional()
+  @IsString()
+  relatedMovementId?: string;
+
+  @ApiPropertyOptional({ description: 'Document number' })
   @IsOptional()
   @IsString()
   documentNumber?: string;
 
-  @ApiProperty({ description: 'Notes', required: false })
+  @ApiPropertyOptional({ description: 'Notes' })
   @IsOptional()
   @IsString()
   notes?: string;
 
-  @ApiProperty({ description: 'Version for conflict detection', required: false })
+  @ApiPropertyOptional({ description: 'Version for conflict detection' })
   @IsOptional()
+  @IsNumber()
   version?: number;
 }
 
 export class QueryMovementDto {
-  @ApiProperty({ enum: MovementType, required: false })
+  @ApiPropertyOptional({ enum: MovementType })
   @IsOptional()
   @IsEnum(MovementType)
   movementType?: MovementType;
 
-  @ApiProperty({ description: 'Status (pending, completed, cancelled)', required: false })
+  @ApiPropertyOptional({ enum: MovementStatus, description: 'Status (ongoing, closed, archived)' })
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(MovementStatus)
+  status?: MovementStatus;
 
-  @ApiProperty({ description: 'From date', required: false })
+  @ApiPropertyOptional({ description: 'From date' })
   @IsOptional()
   @IsDateString()
   fromDate?: string;
 
-  @ApiProperty({ description: 'To date', required: false })
+  @ApiPropertyOptional({ description: 'To date' })
   @IsOptional()
   @IsDateString()
   toDate?: string;
 
-  @ApiProperty({ description: 'Filter by animal ID', required: false })
+  @ApiPropertyOptional({ description: 'Filter by animal ID' })
   @IsOptional()
   @IsString()
   animalId?: string;
 
-  @ApiProperty({ description: 'Page number', required: false })
+  @ApiPropertyOptional({ description: 'Page number', default: 1 })
   @IsOptional()
   @IsNumber()
   page?: number;
 
-  @ApiProperty({ description: 'Items per page', required: false })
+  @ApiPropertyOptional({ description: 'Items per page', default: 50 })
   @IsOptional()
   @IsNumber()
   limit?: number;

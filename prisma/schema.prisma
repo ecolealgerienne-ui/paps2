@@ -989,6 +989,7 @@ model Lot {
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id])
   lotAnimals LotAnimal[]
+  movements Movement[]
   personalCampaigns PersonalCampaign[]
 
   @@index([farmId])
@@ -1156,9 +1157,11 @@ model Movement {
   updatedAt           DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  lot Lot? @relation(fields: [lotId], references: [id])
   movementAnimals MovementAnimal[]
 
   @@index([farmId])
+  @@index([lotId])
   @@index([movementDate])
   @@index([movementType])
   @@index([status])
