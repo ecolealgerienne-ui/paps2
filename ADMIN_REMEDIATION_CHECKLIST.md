@@ -312,10 +312,23 @@ await prisma.[entity].update({
 - [ ] Défaut : `page=1, limit=20`
 - [ ] Validation : `page >= 1`, `limit <= 100`
 
-**Implémentation** :
+> **⚠️ IMPORTANT** : Les query params HTTP sont toujours des **strings**.
+> Prisma attend des **Int** pour `skip` et `take`. Utiliser `@Transform` pour convertir.
+
+**Implémentation DTO** :
 ```typescript
-@Query('page') page: number = 1,
-@Query('limit') limit: number = 20,
+import { Transform } from 'class-transformer';
+import { IsInt, IsOptional } from 'class-validator';
+
+@IsOptional()
+@Transform(({ value }) => parseInt(value, 10))
+@IsInt()
+page?: number;
+
+@IsOptional()
+@Transform(({ value }) => parseInt(value, 10))
+@IsInt()
+limit?: number;
 ```
 
 ---
