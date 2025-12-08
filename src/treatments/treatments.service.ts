@@ -211,10 +211,12 @@ export class TreatmentsService {
         id,
         autoCalculateWithdrawal,
         batchExpiryDate,
+        nextDueDate,
         ...treatmentData
       } = dto;
 
       const treatmentDate = new Date(dto.treatmentDate);
+      const finalNextDueDate = nextDueDate ? new Date(nextDueDate) : null;
 
       // Calculate withdrawal dates if requested and indication is available
       let withdrawalDates: WithdrawalDates | null = null;
@@ -256,13 +258,12 @@ export class TreatmentsService {
       const finalWithdrawalEndDate = withdrawalDates?.withdrawalEndDate
         ?? (dto.withdrawalEndDate ? new Date(dto.withdrawalEndDate) : treatmentDate);
 
-      // For batch treatments, use optimized createMany + findMany approach
-      // This is 10-15x faster than individual creates in a transaction
+      // For batch treatments, use transaction for atomicity
       if (isBatchTreatment) {
         const { randomUUID } = await import('crypto');
         const treatmentIds: string[] = [];
 
-        // 1. Fast bulk insert with createMany
+        // Prepare insert data
         const insertData = animalIds.map((animalId, index) => {
           const treatmentId = id ? `${id}-${index}` : randomUUID();
           treatmentIds.push(treatmentId);
@@ -277,37 +278,43 @@ export class TreatmentsService {
             computedWithdrawalMeatDate: withdrawalDates?.computedWithdrawalMeatDate,
             computedWithdrawalMilkDate: withdrawalDates?.computedWithdrawalMilkDate,
             ...(batchExpiryDate && { batchExpiryDate: new Date(batchExpiryDate) }),
+            ...(finalNextDueDate && { nextDueDate: finalNextDueDate }),
             // CRITICAL: Use client timestamps if provided (offline-first)
             ...(created_at && { createdAt: new Date(created_at) }),
             ...(updated_at && { updatedAt: new Date(updated_at) }),
           };
         });
 
-        await this.prisma.treatment.createMany({
-          data: insertData,
-          skipDuplicates: false,
-        });
+        // Transaction for atomic batch creation
+        const treatments = await this.prisma.$transaction(async (tx) => {
+          // 1. Bulk insert with createMany
+          await tx.treatment.createMany({
+            data: insertData,
+            skipDuplicates: false,
+          });
 
-        // 2. Fetch created treatments with relations (single query)
-        const treatments = await this.prisma.treatment.findMany({
-          where: {
-            id: { in: treatmentIds },
-          },
-          include: {
-            animal: { select: { id: true, visualId: true, currentEid: true } },
-            product: true,
-            veterinarian: true,
-            route: true,
-            indication: true,
-            farmerLot: {
-              select: {
-                id: true,
-                nickname: true,
-                officialLotNumber: true,
-                expiryDate: true,
-              },
+          // 2. Fetch created treatments with relations
+          return tx.treatment.findMany({
+            where: {
+              id: { in: treatmentIds },
             },
-          },
+            include: {
+              animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
+              product: true,
+              veterinarian: true,
+              route: true,
+              indication: true,
+              farmerLot: {
+                select: {
+                  id: true,
+                  nickname: true,
+                  officialLotNumber: true,
+                  expiryDate: true,
+                },
+              },
+              lot: { select: { id: true, name: true } },
+            },
+          });
         });
 
         this.logger.audit('Batch treatments created', {
@@ -331,12 +338,13 @@ export class TreatmentsService {
           computedWithdrawalMeatDate: withdrawalDates?.computedWithdrawalMeatDate,
           computedWithdrawalMilkDate: withdrawalDates?.computedWithdrawalMilkDate,
           ...(batchExpiryDate && { batchExpiryDate: new Date(batchExpiryDate) }),
+          ...(finalNextDueDate && { nextDueDate: finalNextDueDate }),
           // CRITICAL: Use client timestamps if provided (offline-first)
           ...(created_at && { createdAt: new Date(created_at) }),
           ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
         include: {
-          animal: { select: { id: true, visualId: true, currentEid: true } },
+          animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
           product: true,
           veterinarian: true,
           route: true,
@@ -349,6 +357,7 @@ export class TreatmentsService {
               expiryDate: true,
             },
           },
+          lot: { select: { id: true, name: true } },
         },
       });
 
@@ -372,6 +381,9 @@ export class TreatmentsService {
     };
 
     if (query.animalId) where.animalId = query.animalId;
+    if (query.type) where.type = query.type;
+    if (query.productId) where.productId = query.productId;
+    if (query.lotId) where.lotId = query.lotId;
     if (query.status) where.status = query.status;
     if (query.fromDate || query.toDate) {
       where.treatmentDate = {};
@@ -382,7 +394,7 @@ export class TreatmentsService {
     return this.prisma.treatment.findMany({
       where,
       include: {
-        animal: { select: { id: true, visualId: true, currentEid: true } },
+        animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
         product: { select: { id: true, nameFr: true } },
         veterinarian: { select: { id: true, firstName: true, lastName: true } },
         farmerLot: {
@@ -393,6 +405,7 @@ export class TreatmentsService {
             expiryDate: true,
           },
         },
+        lot: { select: { id: true, name: true } },
       },
       orderBy: { treatmentDate: 'desc' },
     });
@@ -445,6 +458,7 @@ export class TreatmentsService {
             expiryDate: true,
           },
         },
+        lot: { select: { id: true, name: true } },
       },
       orderBy: { treatmentDate: 'desc' },
     });
@@ -461,10 +475,11 @@ export class TreatmentsService {
         deletedAt: null,
       },
       include: {
-        animal: { select: { id: true, visualId: true, currentEid: true } },
+        animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
         product: true,
         veterinarian: true,
         route: true,
+        indication: true,
         farmerLot: {
           select: {
             id: true,
@@ -473,6 +488,7 @@ export class TreatmentsService {
             expiryDate: true,
           },
         },
+        lot: { select: { id: true, name: true } },
       },
     });
 
@@ -528,16 +544,19 @@ export class TreatmentsService {
     }
 
     try {
-      // Destructure to exclude BaseSyncEntityDto fields
-      const { farmId: dtoFarmId, created_at, updated_at, version, ...treatmentData } = dto;
+      // Destructure to exclude BaseSyncEntityDto fields and date fields that need conversion
+      const { farmId: dtoFarmId, created_at, updated_at, version, treatmentDate, withdrawalEndDate, nextDueDate, batchExpiryDate, ...treatmentData } = dto;
 
       const updateData: any = {
         ...treatmentData,
         version: existing.version + 1,
       };
 
-      if (dto.treatmentDate) updateData.treatmentDate = new Date(dto.treatmentDate);
-      if (dto.withdrawalEndDate) updateData.withdrawalEndDate = new Date(dto.withdrawalEndDate);
+      // Convert date strings to Date objects
+      if (treatmentDate) updateData.treatmentDate = new Date(treatmentDate);
+      if (withdrawalEndDate) updateData.withdrawalEndDate = new Date(withdrawalEndDate);
+      if (nextDueDate) updateData.nextDueDate = new Date(nextDueDate);
+      if (batchExpiryDate) updateData.batchExpiryDate = new Date(batchExpiryDate);
       // CRITICAL: Use client timestamp if provided (offline-first)
       if (updated_at) updateData.updatedAt = new Date(updated_at);
 
@@ -545,10 +564,11 @@ export class TreatmentsService {
         where: { id },
         data: updateData,
         include: {
-          animal: { select: { id: true, visualId: true, currentEid: true } },
+          animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
           product: true,
           veterinarian: true,
           route: true,
+          indication: true,
           farmerLot: {
             select: {
               id: true,
@@ -557,6 +577,7 @@ export class TreatmentsService {
               expiryDate: true,
             },
           },
+          lot: { select: { id: true, name: true } },
         },
       });
 

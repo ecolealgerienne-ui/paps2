@@ -20,6 +20,11 @@ export class QueryAnimalDto {
   @IsString()
   breedId?: string;
 
+  @ApiPropertyOptional({ enum: ['male', 'female'], description: 'Filter by sex' })
+  @IsOptional()
+  @IsEnum(['male', 'female'])
+  sex?: string;
+
   @ApiPropertyOptional({
     description: 'Recherche dans EID, numéro officiel, ID visuel',
   })

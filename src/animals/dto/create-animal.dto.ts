@@ -55,6 +55,11 @@ export class CreateAnimalDto extends BaseSyncEntityDto {
   @IsMotherMustBeFemale()
   motherId?: string;
 
+  @ApiPropertyOptional({ description: 'ID du père (father animal)' })
+  @IsOptional()
+  @IsUUID()
+  fatherId?: string;
+
   @ApiPropertyOptional({ description: "ID de l'espèce" })
   @IsOptional()
   @IsString()

@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { WeightSource } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
@@ -41,6 +42,11 @@ export class CreateWeightDto extends BaseSyncEntityDto {
  * Extends BaseSyncEntityDto to support offline-first architecture
  */
 export class UpdateWeightDto extends BaseSyncEntityDto {
+  @ApiProperty({ description: 'Animal ID (to reassign weight)', required: false })
+  @IsOptional()
+  @IsString()
+  animalId?: string;
+
   @ApiProperty({ description: 'Weight in kg', required: false })
   @IsOptional()
   @IsNumber()
@@ -83,6 +89,40 @@ export class QueryWeightDto {
   fromDate?: string;
 
   @ApiProperty({ description: 'To date', required: false })
+  @IsOptional()
+  @IsDateString()
+  toDate?: string;
+
+  @ApiProperty({ description: 'Page number', required: false, default: 1 })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  page?: number;
+
+  @ApiProperty({ description: 'Items per page', required: false, default: 50 })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  limit?: number;
+
+  @ApiProperty({ description: 'Sort field', required: false, default: 'weightDate' })
+  @IsOptional()
+  @IsString()
+  sort?: string;
+
+  @ApiProperty({ description: 'Sort order', required: false, default: 'desc', enum: ['asc', 'desc'] })
+  @IsOptional()
+  @IsString()
+  order?: 'asc' | 'desc';
+}
+
+export class StatsQueryDto {
+  @ApiProperty({ description: 'From date (ISO)', required: false })
+  @IsOptional()
+  @IsDateString()
+  fromDate?: string;
+
+  @ApiProperty({ description: 'To date (ISO)', required: false })
   @IsOptional()
   @IsDateString()
   toDate?: string;

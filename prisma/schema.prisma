@@ -991,6 +991,7 @@ model Lot {
   lotAnimals LotAnimal[]
   movements Movement[]
   personalCampaigns PersonalCampaign[]
+  treatments Treatment[]
 
   @@index([farmId])
   @@index([productId])
@@ -1070,6 +1071,7 @@ model Treatment {
   protocolStep                Int?             @map("protocol_step")     // 1, 2, 3...
 
   // Autres
+  lotId                       String?          @map("lot_id")  // Lot d'animaux au moment du traitement
   campaignId                  String?          @map("campaign_id")
   status                      String           @default("completed")
   cost                        Float?
@@ -1091,9 +1093,11 @@ model Treatment {
   quantityUnit                Unit?            @relation("QuantityUnit", fields: [quantityUnitId], references: [id])
   veterinarian                Veterinarian?    @relation(fields: [veterinarianId], references: [id])
   farmerLot                   FarmerProductLot? @relation(fields: [farmerLotId], references: [id])
+  lot                         Lot?             @relation(fields: [lotId], references: [id])
 
   // Indexes
   @@index([farmId])
+  @@index([lotId])
   @@index([animalId])
   @@index([packagingId])
   @@index([productId])

@@ -20,8 +20,8 @@ export class LotsService {
       withAnimals: !!dto.animalIds?.length
     });
 
-    // Destructure to exclude BaseSyncEntityDto fields and handle them explicitly
-    const { farmId: dtoFarmId, created_at, updated_at, animalIds, ...lotData } = dto;
+    // Destructure to exclude BaseSyncEntityDto fields and date fields that need conversion
+    const { farmId: dtoFarmId, created_at, updated_at, animalIds, treatmentDate, withdrawalEndDate, completedAt, ...lotData } = dto;
 
     // If animalIds provided, verify all animals exist and belong to farm
     if (animalIds && animalIds.length > 0) {
@@ -51,6 +51,10 @@ export class LotsService {
           data: {
             ...lotData,
             farmId: dtoFarmId || farmId,
+            // Convert date strings to Date objects
+            ...(treatmentDate && { treatmentDate: new Date(treatmentDate) }),
+            ...(withdrawalEndDate && { withdrawalEndDate: new Date(withdrawalEndDate) }),
+            ...(completedAt && { completedAt: new Date(completedAt) }),
             // CRITICAL: Use client timestamps if provided (offline-first)
             ...(created_at && { createdAt: new Date(created_at) }),
             ...(updated_at && { updatedAt: new Date(updated_at) }),
@@ -69,10 +73,11 @@ export class LotsService {
           });
         }
 
-        // Return lot with animal count
+        // Return lot with animal count and product relation
         return tx.lot.findUnique({
           where: { id: newLot.id },
           include: {
+            product: { select: { id: true, nameFr: true, nameEn: true } },
             _count: { select: { lotAnimals: true } },
           },
         });
@@ -113,6 +118,7 @@ export class LotsService {
     return this.prisma.lot.findMany({
       where,
       include: {
+        product: { select: { id: true, nameFr: true, nameEn: true } },
         _count: { select: { lotAnimals: { where: { leftAt: null } } } },
       },
       orderBy: { createdAt: 'desc' },
@@ -125,6 +131,7 @@ export class LotsService {
     const lot = await this.prisma.lot.findFirst({
       where: { id, farmId, deletedAt: null },
       include: {
+        product: { select: { id: true, nameFr: true, nameEn: true } },
         lotAnimals: {
           where: { leftAt: null },
           include: {
@@ -254,8 +261,8 @@ export class LotsService {
       );
     }
 
-    // Destructure to exclude BaseSyncEntityDto fields and animalIds
-    const { farmId: dtoFarmId, created_at, updated_at, version, animalIds, ...lotData } = dto;
+    // Destructure to exclude BaseSyncEntityDto fields, animalIds, and date fields that need conversion
+    const { farmId: dtoFarmId, created_at, updated_at, version, animalIds, treatmentDate, withdrawalEndDate, completedAt, ...lotData } = dto;
 
     // If animalIds provided, verify all animals exist and belong to farm
     if (animalIds && animalIds.length > 0) {
@@ -287,6 +294,10 @@ export class LotsService {
           data: {
             ...lotData,
             version: existing.version + 1,
+            // Convert date strings to Date objects
+            ...(treatmentDate && { treatmentDate: new Date(treatmentDate) }),
+            ...(withdrawalEndDate && { withdrawalEndDate: new Date(withdrawalEndDate) }),
+            ...(completedAt && { completedAt: new Date(completedAt) }),
             // CRITICAL: Use client timestamp if provided (offline-first)
             ...(updated_at && { updatedAt: new Date(updated_at) }),
           },
@@ -329,10 +340,11 @@ export class LotsService {
           }
         }
 
-        // Return lot with animal count
+        // Return lot with animal count and product relation
         return tx.lot.findUnique({
           where: { id },
           include: {
+            product: { select: { id: true, nameFr: true, nameEn: true } },
             _count: { select: { lotAnimals: { where: { leftAt: null } } } },
           },
         });

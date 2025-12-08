@@ -40,12 +40,28 @@ Nouveau : __________________
 
 #### 2. Structure Table ↔️ CRUD ↔️ Signature API
 
+> **⚠️ RÈGLE FONDAMENTALE** : Les endpoints doivent être alignés avec la structure de la table.
+> Chaque champ du schema Prisma doit avoir son équivalent dans les DTOs et être traité par le service.
+
 - [ ] **Audit Schema Prisma** : Tous les champs identifiés
 - [ ] **CreateDto** : Contient TOUS les champs créables
 - [ ] **UpdateDto** : Contient TOUS les champs modifiables (partial)
 - [ ] **ResponseDto** : Contient TOUS les champs + métadonnées
 - [ ] Aucun champ manquant entre DB et API
 - [ ] Types TypeScript correspondent aux types Prisma
+- [ ] **Service create()** : Traite tous les champs du CreateDto
+- [ ] **Service update()** : Traite tous les champs du UpdateDto
+- [ ] **Service findAll/findOne()** : Retourne tous les champs + relations pertinentes
+- [ ] Conversions de types appliquées (ex: `DateString` → `Date` pour Prisma)
+
+**Vérification alignement** :
+```
+1. Lister tous les champs du model Prisma
+2. Vérifier présence dans CreateDto (si créable)
+3. Vérifier présence dans UpdateDto (si modifiable)
+4. Vérifier que le service traite chaque champ
+5. Vérifier les conversions nécessaires (dates, enums, etc.)
+```
 
 **Champs manquants identifiés** :
 ```
@@ -296,10 +312,23 @@ await prisma.[entity].update({
 - [ ] Défaut : `page=1, limit=20`
 - [ ] Validation : `page >= 1`, `limit <= 100`
 
-**Implémentation** :
+> **⚠️ IMPORTANT** : Les query params HTTP sont toujours des **strings**.
+> Prisma attend des **Int** pour `skip` et `take`. Utiliser `@Transform` pour convertir.
+
+**Implémentation DTO** :
 ```typescript
-@Query('page') page: number = 1,
-@Query('limit') limit: number = 20,
+import { Transform } from 'class-transformer';
+import { IsInt, IsOptional } from 'class-validator';
+
+@IsOptional()
+@Transform(({ value }) => parseInt(value, 10))
+@IsInt()
+page?: number;
+
+@IsOptional()
+@Transform(({ value }) => parseInt(value, 10))
+@IsInt()
+limit?: number;
 ```
 
 ---

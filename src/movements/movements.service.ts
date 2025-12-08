@@ -124,6 +124,7 @@ export class MovementsService {
                     id: true,
                     visualId: true,
                     currentEid: true,
+                    officialNumber: true,
                     sex: true,
                     birthDate: true,
                     status: true,
@@ -170,6 +171,7 @@ export class MovementsService {
 
     if (query.movementType) where.movementType = query.movementType;
     if (query.status) where.status = query.status;
+    if (query.lotId) where.lotId = query.lotId;
     if (query.fromDate || query.toDate) {
       where.movementDate = {};
       if (query.fromDate) where.movementDate.gte = new Date(query.fromDate);
@@ -202,6 +204,7 @@ export class MovementsService {
                 id: true,
                 visualId: true,
                 currentEid: true,
+                officialNumber: true,
                 sex: true,
               },
             },
@@ -234,6 +237,7 @@ export class MovementsService {
                 id: true,
                 visualId: true,
                 currentEid: true,
+                officialNumber: true,
                 sex: true,
                 birthDate: true,
                 status: true,
@@ -476,6 +480,7 @@ export class MovementsService {
                     id: true,
                     visualId: true,
                     currentEid: true,
+                    officialNumber: true,
                     sex: true,
                     birthDate: true,
                     status: true,
