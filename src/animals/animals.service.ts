@@ -25,16 +25,22 @@ export class AnimalsService {
         data: {
           id: dto.id,
           farmId: dto.farmId || farmId,
+          currentLocationFarmId: dto.currentLocationFarmId,
           currentEid: dto.currentEid,
           officialNumber: dto.officialNumber,
           visualId: dto.visualId,
+          eidHistory: dto.eidHistory ? JSON.stringify(dto.eidHistory) : null,
           birthDate: new Date(dto.birthDate),
           sex: dto.sex,
           motherId: dto.motherId,
+          fatherId: dto.fatherId,
           speciesId: dto.speciesId,
           breedId: dto.breedId,
+          status: dto.status || 'alive',
+          validatedAt: dto.validatedAt ? new Date(dto.validatedAt) : null,
+          photoUrl: dto.photoUrl,
           notes: dto.notes,
-          status: 'alive',
+          days: dto.days,
           // CRITICAL: Use client timestamps if provided (offline-first)
           ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
           ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
@@ -64,7 +70,7 @@ export class AnimalsService {
   }
 
   async findAll(farmId: string, query: QueryAnimalDto) {
-    const { status, speciesId, breedId, search, page, limit, sort, order } =
+    const { status, speciesId, breedId, sex, search, page, limit, sort, order } =
       query;
 
     const where = {
@@ -73,6 +79,7 @@ export class AnimalsService {
       ...(status && { status }),
       ...(speciesId && { speciesId }),
       ...(breedId && { breedId }),
+      ...(sex && { sex }),
       ...(search && {
         OR: [
           { currentEid: { contains: search, mode: 'insensitive' as const } },
@@ -166,17 +173,22 @@ export class AnimalsService {
       const updated = await this.prisma.animal.update({
         where: { id },
         data: {
+          ...(dto.currentLocationFarmId !== undefined && { currentLocationFarmId: dto.currentLocationFarmId }),
           ...(dto.currentEid !== undefined && { currentEid: dto.currentEid }),
-          ...(dto.officialNumber !== undefined && {
-            officialNumber: dto.officialNumber,
-          }),
+          ...(dto.officialNumber !== undefined && { officialNumber: dto.officialNumber }),
           ...(dto.visualId !== undefined && { visualId: dto.visualId }),
+          ...(dto.eidHistory !== undefined && { eidHistory: dto.eidHistory ? JSON.stringify(dto.eidHistory) : null }),
           ...(dto.birthDate && { birthDate: new Date(dto.birthDate) }),
           ...(dto.sex && { sex: dto.sex }),
           ...(dto.motherId !== undefined && { motherId: dto.motherId }),
+          ...(dto.fatherId !== undefined && { fatherId: dto.fatherId }),
           ...(dto.speciesId !== undefined && { speciesId: dto.speciesId }),
           ...(dto.breedId !== undefined && { breedId: dto.breedId }),
+          ...(dto.status !== undefined && { status: dto.status }),
+          ...(dto.validatedAt !== undefined && { validatedAt: dto.validatedAt ? new Date(dto.validatedAt) : null }),
+          ...(dto.photoUrl !== undefined && { photoUrl: dto.photoUrl }),
           ...(dto.notes !== undefined && { notes: dto.notes }),
+          ...(dto.days !== undefined && { days: dto.days }),
           // CRITICAL: Use client timestamp if provided (offline-first)
           ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
           version: { increment: 1 },
