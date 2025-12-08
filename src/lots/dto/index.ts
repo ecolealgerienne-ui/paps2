@@ -249,3 +249,15 @@ export class AddAnimalsToLotDto {
   @IsString({ each: true })
   animalIds: string[];
 }
+
+export class LotStatsQueryDto {
+  @ApiProperty({ enum: LotType, description: 'Filter by lot type', required: false })
+  @IsOptional()
+  @IsEnum(LotType)
+  type?: LotType;
+
+  @ApiProperty({ description: 'Filter by active status (default: true)', required: false, default: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto } from './dto';
+import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto, LotStatsQueryDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import {
   EntityNotFoundException,
@@ -519,5 +519,176 @@ export class LotsService {
       this.logger.error(`Failed to finalize lot ${lotId}`, error.stack);
       throw error;
     }
+  }
+
+  /**
+   * Get performance statistics for lots
+   * Endpoint: GET /api/v1/farms/:farmId/lots/stats
+   */
+  async getStats(farmId: string, query: LotStatsQueryDto) {
+    this.logger.debug(`Getting lot stats for farm ${farmId}`, query);
+
+    const where: any = {
+      farmId,
+      deletedAt: null,
+      isActive: query.isActive ?? true,
+    };
+
+    if (query.type) where.type = query.type;
+
+    // Get lots with their animals
+    const lots = await this.prisma.lot.findMany({
+      where,
+      include: {
+        lotAnimals: {
+          where: { leftAt: null },
+          select: { animalId: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Get all animal IDs from all lots
+    const allAnimalIds = lots.flatMap(lot => lot.lotAnimals.map(la => la.animalId));
+
+    if (allAnimalIds.length === 0) {
+      return {
+        success: true,
+        data: lots.map(lot => ({
+          lotId: lot.id,
+          lotName: lot.name,
+          type: lot.type,
+          animalCount: 0,
+          weights: null,
+          growth: null,
+          prediction: null,
+          lastWeighingDate: null,
+        })),
+      };
+    }
+
+    // Get all weights for these animals (last 30 days for ADG)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const weights = await this.prisma.weight.findMany({
+      where: {
+        farmId,
+        deletedAt: null,
+        animalId: { in: allAnimalIds },
+      },
+      orderBy: { weightDate: 'asc' },
+    });
+
+    // Group weights by animal
+    const weightsByAnimal = new Map<string, { weight: number; date: Date }[]>();
+    weights.forEach(w => {
+      if (!weightsByAnimal.has(w.animalId)) {
+        weightsByAnimal.set(w.animalId, []);
+      }
+      weightsByAnimal.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate });
+    });
+
+    // Calculate stats for each lot
+    const lotStats = lots.map(lot => {
+      const animalIds = lot.lotAnimals.map(la => la.animalId);
+      const animalCount = animalIds.length;
+
+      if (animalCount === 0) {
+        return {
+          lotId: lot.id,
+          lotName: lot.name,
+          type: lot.type,
+          animalCount: 0,
+          weights: null,
+          growth: null,
+          prediction: null,
+          lastWeighingDate: null,
+        };
+      }
+
+      // Get weights for this lot's animals
+      const lotWeights: number[] = [];
+      const lotLatestWeights: number[] = [];
+      const dailyGains: number[] = [];
+      let lastWeighingDate: Date | null = null;
+
+      animalIds.forEach(animalId => {
+        const animalWeights = weightsByAnimal.get(animalId) || [];
+        if (animalWeights.length > 0) {
+          // Latest weight for this animal
+          const latest = animalWeights[animalWeights.length - 1];
+          lotLatestWeights.push(latest.weight);
+          lotWeights.push(...animalWeights.map(w => w.weight));
+
+          // Update last weighing date
+          if (!lastWeighingDate || latest.date > lastWeighingDate) {
+            lastWeighingDate = latest.date;
+          }
+
+          // Calculate ADG if 2+ weights
+          if (animalWeights.length >= 2) {
+            const first = animalWeights[0];
+            const last = animalWeights[animalWeights.length - 1];
+            const daysDiff = Math.ceil(
+              (last.date.getTime() - first.date.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            if (daysDiff > 0) {
+              const adg = (last.weight - first.weight) / daysDiff;
+              dailyGains.push(adg);
+            }
+          }
+        }
+      });
+
+      // Calculate weight stats
+      const weightsStats = lotLatestWeights.length > 0 ? {
+        avg: Math.round((lotLatestWeights.reduce((a, b) => a + b, 0) / lotLatestWeights.length) * 10) / 10,
+        min: Math.round(Math.min(...lotLatestWeights) * 10) / 10,
+        max: Math.round(Math.max(...lotLatestWeights) * 10) / 10,
+        targetWeight: null as number | null, // Could be set from lot metadata if available
+      } : null;
+
+      // Calculate growth stats
+      const growthStats = dailyGains.length > 0 ? {
+        avgDailyGain: Math.round((dailyGains.reduce((a, b) => a + b, 0) / dailyGains.length) * 1000) / 1000,
+        minDailyGain: Math.round(Math.min(...dailyGains) * 1000) / 1000,
+        maxDailyGain: Math.round(Math.max(...dailyGains) * 1000) / 1000,
+        animalsWithGain: dailyGains.length,
+      } : null;
+
+      // Calculate prediction (if we have avg weight and ADG)
+      let prediction = null;
+      const targetWeight = 500; // Default target weight in kg - could be configurable
+      if (weightsStats && growthStats && growthStats.avgDailyGain > 0) {
+        const currentAvg = weightsStats.avg;
+        if (currentAvg < targetWeight) {
+          const daysToTarget = Math.ceil((targetWeight - currentAvg) / growthStats.avgDailyGain);
+          const targetDate = new Date();
+          targetDate.setDate(targetDate.getDate() + daysToTarget);
+          prediction = {
+            targetWeight,
+            estimatedDaysToTarget: daysToTarget,
+            estimatedTargetDate: targetDate,
+          };
+        }
+      }
+
+      return {
+        lotId: lot.id,
+        lotName: lot.name,
+        type: lot.type,
+        animalCount,
+        weights: weightsStats,
+        growth: growthStats,
+        prediction,
+        lastWeighingDate,
+      };
+    });
+
+    return {
+      success: true,
+      data: lotStats,
+    };
   }
 }

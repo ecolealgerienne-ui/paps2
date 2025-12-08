@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateWeightDto, UpdateWeightDto, QueryWeightDto, StatsQueryDto } from './dto';
+import { CreateWeightDto, UpdateWeightDto, QueryWeightDto, StatsQueryDto, RankingsQueryDto, TrendsQueryDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import {
   EntityNotFoundException,
@@ -440,6 +440,292 @@ export class WeightsService {
         },
         growth,
         lastWeighingDate,
+      },
+    };
+  }
+
+  /**
+   * Get animal rankings by daily gain (ADG)
+   * Endpoint: GET /api/v1/farms/:farmId/weights/rankings
+   */
+  async getRankings(farmId: string, query: RankingsQueryDto) {
+    this.logger.debug(`Getting weight rankings for farm ${farmId}`, query);
+
+    const limit = query.limit || 5;
+    const periodDays = query.period === '7d' ? 7 : query.period === '90d' ? 90 : 30;
+
+    const periodStart = new Date();
+    periodStart.setDate(periodStart.getDate() - periodDays);
+
+    // Build where clause
+    const where: any = {
+      farmId,
+      deletedAt: null,
+      weightDate: { gte: periodStart },
+    };
+
+    // If lotId provided, get animals in that lot
+    let animalIdsInLot: string[] | null = null;
+    if (query.lotId) {
+      const lotAnimals = await this.prisma.lotAnimal.findMany({
+        where: { lotId: query.lotId, leftAt: null },
+        select: { animalId: true },
+      });
+      animalIdsInLot = lotAnimals.map(la => la.animalId);
+      where.animalId = { in: animalIdsInLot };
+    }
+
+    // Get all weights in the period
+    const weights = await this.prisma.weight.findMany({
+      where,
+      orderBy: { weightDate: 'asc' },
+      include: {
+        animal: {
+          select: {
+            id: true,
+            visualId: true,
+            currentEid: true,
+            officialNumber: true,
+            sex: true,
+            birthDate: true,
+          },
+        },
+      },
+    });
+
+    // Group by animal and calculate ADG
+    const animalData = new Map<string, {
+      animal: any;
+      weights: { weight: number; date: Date }[];
+      adg: number | null;
+      latestWeight: number;
+    }>();
+
+    weights.forEach(w => {
+      if (!animalData.has(w.animalId)) {
+        animalData.set(w.animalId, {
+          animal: w.animal,
+          weights: [],
+          adg: null,
+          latestWeight: 0,
+        });
+      }
+      animalData.get(w.animalId)!.weights.push({ weight: w.weight, date: w.weightDate });
+    });
+
+    // Calculate ADG for each animal
+    const rankings: {
+      animalId: string;
+      animal: any;
+      adg: number;
+      latestWeight: number;
+      weighingCount: number;
+      status: 'excellent' | 'good' | 'warning' | 'critical';
+    }[] = [];
+
+    animalData.forEach((data, animalId) => {
+      if (data.weights.length >= 2) {
+        const first = data.weights[0];
+        const last = data.weights[data.weights.length - 1];
+        const daysDiff = Math.ceil(
+          (last.date.getTime() - first.date.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        if (daysDiff > 0) {
+          const adg = Math.round(((last.weight - first.weight) / daysDiff) * 1000) / 1000;
+          data.adg = adg;
+          data.latestWeight = last.weight;
+
+          // Determine status based on thresholds
+          let status: 'excellent' | 'good' | 'warning' | 'critical';
+          if (adg >= 1.0) status = 'excellent';
+          else if (adg >= 0.8) status = 'good';
+          else if (adg >= 0.6) status = 'warning';
+          else status = 'critical';
+
+          rankings.push({
+            animalId,
+            animal: data.animal,
+            adg,
+            latestWeight: Math.round(data.latestWeight * 10) / 10,
+            weighingCount: data.weights.length,
+            status,
+          });
+        }
+      }
+    });
+
+    // Sort by ADG descending
+    rankings.sort((a, b) => b.adg - a.adg);
+
+    // Get top performers and underperformers
+    const topPerformers = rankings.slice(0, limit);
+    const underperformers = rankings
+      .filter(r => r.status === 'critical' || r.status === 'warning')
+      .slice(-limit)
+      .reverse();
+
+    // Thresholds for reference
+    const thresholds = {
+      excellent: 1.0,
+      good: 0.8,
+      warning: 0.6,
+      critical: 0.5,
+    };
+
+    return {
+      success: true,
+      data: {
+        period: query.period || '30d',
+        periodStart,
+        periodEnd: new Date(),
+        totalAnimalsWithData: rankings.length,
+        topPerformers,
+        underperformers,
+        thresholds,
+      },
+    };
+  }
+
+  /**
+   * Get historical ADG trends for charting
+   * Endpoint: GET /api/v1/farms/:farmId/weights/trends
+   */
+  async getTrends(farmId: string, query: TrendsQueryDto) {
+    this.logger.debug(`Getting weight trends for farm ${farmId}`, query);
+
+    // Calculate period start date
+    const periodMonths = query.period === '1month' ? 1 :
+                        query.period === '6months' ? 6 :
+                        query.period === '1year' ? 12 : 3;
+
+    const periodStart = new Date();
+    periodStart.setMonth(periodStart.getMonth() - periodMonths);
+
+    // Build where clause
+    const where: any = {
+      farmId,
+      deletedAt: null,
+      weightDate: { gte: periodStart },
+    };
+
+    // If lotId provided, get animals in that lot
+    if (query.lotId) {
+      const lotAnimals = await this.prisma.lotAnimal.findMany({
+        where: { lotId: query.lotId, leftAt: null },
+        select: { animalId: true },
+      });
+      where.animalId = { in: lotAnimals.map(la => la.animalId) };
+    }
+
+    // Get all weights in the period
+    const weights = await this.prisma.weight.findMany({
+      where,
+      orderBy: { weightDate: 'asc' },
+    });
+
+    if (weights.length === 0) {
+      return {
+        success: true,
+        data: {
+          period: query.period || '3months',
+          groupBy: query.groupBy || 'week',
+          dataPoints: [],
+          trend: null,
+          benchmarks: {
+            farmTarget: 0.9,
+            nationalAverage: 0.85,
+          },
+        },
+      };
+    }
+
+    // Group weights by animal for ADG calculation
+    const weightsByAnimal = new Map<string, { weight: number; date: Date }[]>();
+    weights.forEach(w => {
+      if (!weightsByAnimal.has(w.animalId)) {
+        weightsByAnimal.set(w.animalId, []);
+      }
+      weightsByAnimal.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate });
+    });
+
+    // Group by time period (day, week, month)
+    const groupBy = query.groupBy || 'week';
+    const dataPointsMap = new Map<string, {
+      date: Date;
+      weights: number[];
+      animalIds: Set<string>;
+      weighingCount: number;
+    }>();
+
+    weights.forEach(w => {
+      const date = new Date(w.weightDate);
+      let key: string;
+
+      if (groupBy === 'day') {
+        key = date.toISOString().split('T')[0];
+      } else if (groupBy === 'week') {
+        // Get start of week (Monday)
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        const weekStart = new Date(date.setDate(diff));
+        key = weekStart.toISOString().split('T')[0];
+      } else {
+        // Month
+        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+
+      if (!dataPointsMap.has(key)) {
+        dataPointsMap.set(key, {
+          date: new Date(key),
+          weights: [],
+          animalIds: new Set(),
+          weighingCount: 0,
+        });
+      }
+
+      const point = dataPointsMap.get(key)!;
+      point.weights.push(w.weight);
+      point.animalIds.add(w.animalId);
+      point.weighingCount++;
+    });
+
+    // Calculate average for each period
+    const dataPoints = Array.from(dataPointsMap.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([key, data]) => ({
+        date: key,
+        avgWeight: Math.round((data.weights.reduce((a, b) => a + b, 0) / data.weights.length) * 10) / 10,
+        animalCount: data.animalIds.size,
+        weighingCount: data.weighingCount,
+      }));
+
+    // Calculate trend (compare first and last periods)
+    let trend = null;
+    if (dataPoints.length >= 2) {
+      const firstAvg = dataPoints[0].avgWeight;
+      const lastAvg = dataPoints[dataPoints.length - 1].avgWeight;
+      const change = lastAvg - firstAvg;
+      const percentChange = Math.round((change / firstAvg) * 100 * 10) / 10;
+
+      trend = {
+        direction: change > 0 ? 'up' : change < 0 ? 'down' : 'stable',
+        percentChange,
+        absoluteChange: Math.round(change * 10) / 10,
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        period: query.period || '3months',
+        groupBy,
+        dataPoints,
+        trend,
+        benchmarks: {
+          farmTarget: 0.9, // kg/day - could be configurable
+          nationalAverage: 0.85, // kg/day
+        },
       },
     };
   }

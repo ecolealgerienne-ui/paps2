@@ -47,6 +47,7 @@ import { AgeCategoriesModule } from './age-categories/age-categories.module';
 import { AnimalStatusModule } from './animal-status/animal-status.module';
 import { FarmerProductLotsModule } from './farmer-product-lots/farmer-product-lots.module';
 import { TreatmentAlertsModule } from './treatment-alerts/treatment-alerts.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 // Get rate limiting configuration
 const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
@@ -122,6 +123,8 @@ const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
     FarmerProductLotsModule,
     // Treatment alerts (contraindication, withdrawal, expiry)
     TreatmentAlertsModule,
+    // Dashboard (unified stats and actions)
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

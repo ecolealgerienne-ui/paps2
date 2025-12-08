@@ -127,3 +127,38 @@ export class StatsQueryDto {
   @IsDateString()
   toDate?: string;
 }
+
+export class RankingsQueryDto {
+  @ApiProperty({ description: 'Number of animals per category', required: false, default: 5 })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
+  limit?: number;
+
+  @ApiProperty({ description: 'Analysis period (7d, 30d, 90d)', required: false, default: '30d', enum: ['7d', '30d', '90d'] })
+  @IsOptional()
+  @IsString()
+  period?: '7d' | '30d' | '90d';
+
+  @ApiProperty({ description: 'Filter by lot ID', required: false })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+}
+
+export class TrendsQueryDto {
+  @ApiProperty({ description: 'Period (1month, 3months, 6months, 1year)', required: false, default: '3months', enum: ['1month', '3months', '6months', '1year'] })
+  @IsOptional()
+  @IsString()
+  period?: '1month' | '3months' | '6months' | '1year';
+
+  @ApiProperty({ description: 'Group by (day, week, month)', required: false, default: 'week', enum: ['day', 'week', 'month'] })
+  @IsOptional()
+  @IsString()
+  groupBy?: 'day' | 'week' | 'month';
+
+  @ApiProperty({ description: 'Filter by lot ID', required: false })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+}
