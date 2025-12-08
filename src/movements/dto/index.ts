@@ -305,6 +305,11 @@ export class QueryMovementDto {
   @IsEnum(MovementStatus)
   status?: MovementStatus;
 
+  @ApiPropertyOptional({ description: 'Filter by lot ID' })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+
   @ApiPropertyOptional({ description: 'From date' })
   @IsOptional()
   @IsDateString()
