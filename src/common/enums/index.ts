@@ -48,10 +48,11 @@ export enum TemporaryMovementType {
 }
 
 // ========== VACCINATION TYPE ==========
+// Matches Prisma enum VaccinationType
 export enum VaccinationType {
-  PREVENTIVE = 'preventive',
-  CURATIVE = 'curative',
-  BOOSTER = 'booster',
+  MANDATORY = 'mandatory',
+  RECOMMENDED = 'recommended',
+  OPTIONAL = 'optional',
 }
 
 // ========== WEIGHT SOURCE ==========

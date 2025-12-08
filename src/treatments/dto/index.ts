@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf, IsBoolean, IsInt } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TreatmentStatus, TreatmentType } from '../../common/enums';
+import { TreatmentStatus, TreatmentType, VaccinationType } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 import { IsXorField, IsDateAfterOrEqual } from '../../common/validators';
 
@@ -142,6 +142,30 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsNumber()
   duration?: number;
 
+  // ========== Vaccination-specific fields (type = vaccination) ==========
+
+  @ApiPropertyOptional({ description: 'Target disease for vaccination' })
+  @IsOptional()
+  @IsString()
+  targetDisease?: string;
+
+  @ApiPropertyOptional({ description: 'Next vaccination due date (reminder)' })
+  @IsOptional()
+  @IsDateString()
+  nextDueDate?: string;
+
+  @ApiPropertyOptional({ enum: VaccinationType, description: 'Vaccination type (mandatory, recommended, optional)' })
+  @IsOptional()
+  @IsEnum(VaccinationType)
+  vaccinationType?: VaccinationType;
+
+  @ApiPropertyOptional({ description: 'Protocol step number (1, 2, 3...)' })
+  @IsOptional()
+  @IsInt()
+  protocolStep?: number;
+
+  // ========== End vaccination-specific fields ==========
+
   @ApiProperty({ enum: TreatmentStatus, default: 'completed', required: false })
   @IsOptional()
   @IsEnum(TreatmentStatus)
@@ -178,6 +202,21 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
  * Extends BaseSyncEntityDto to support offline-first architecture
  */
 export class UpdateTreatmentDto extends BaseSyncEntityDto {
+  @ApiPropertyOptional({ enum: TreatmentType, description: 'Treatment type (treatment or vaccination)' })
+  @IsOptional()
+  @IsEnum(TreatmentType)
+  type?: TreatmentType;
+
+  @ApiPropertyOptional({ description: 'Animal weight at treatment time (kg)' })
+  @IsOptional()
+  @IsNumber()
+  animalWeightKg?: number;
+
+  @ApiPropertyOptional({ description: 'Product packaging ID' })
+  @IsOptional()
+  @IsString()
+  packagingId?: string;
+
   @ApiProperty({ description: 'Medical product ID', required: false })
   @IsOptional()
   @IsString()
@@ -187,6 +226,11 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsString()
   productName?: string;
+
+  @ApiPropertyOptional({ description: 'Therapeutic indication ID' })
+  @IsOptional()
+  @IsString()
+  indicationId?: string;
 
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
@@ -241,10 +285,44 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   farmerLotId?: string;
 
+  @ApiPropertyOptional({ description: 'Quantity administered' })
+  @IsOptional()
+  @IsNumber()
+  quantityAdministered?: number;
+
+  @ApiPropertyOptional({ description: 'Quantity unit ID' })
+  @IsOptional()
+  @IsString()
+  quantityUnitId?: string;
+
   @ApiProperty({ description: 'Duration in days', required: false })
   @IsOptional()
   @IsNumber()
   duration?: number;
+
+  // ========== Vaccination-specific fields (type = vaccination) ==========
+
+  @ApiPropertyOptional({ description: 'Target disease for vaccination' })
+  @IsOptional()
+  @IsString()
+  targetDisease?: string;
+
+  @ApiPropertyOptional({ description: 'Next vaccination due date (reminder)' })
+  @IsOptional()
+  @IsDateString()
+  nextDueDate?: string;
+
+  @ApiPropertyOptional({ enum: VaccinationType, description: 'Vaccination type (mandatory, recommended, optional)' })
+  @IsOptional()
+  @IsEnum(VaccinationType)
+  vaccinationType?: VaccinationType;
+
+  @ApiPropertyOptional({ description: 'Protocol step number (1, 2, 3...)' })
+  @IsOptional()
+  @IsInt()
+  protocolStep?: number;
+
+  // ========== End vaccination-specific fields ==========
 
   @ApiProperty({ enum: TreatmentStatus, required: false })
   @IsOptional()
