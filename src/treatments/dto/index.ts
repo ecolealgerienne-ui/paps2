@@ -365,6 +365,21 @@ export class QueryTreatmentDto {
   @IsString()
   animalId?: string;
 
+  @ApiPropertyOptional({ enum: TreatmentType, description: 'Filter by treatment type (treatment or vaccination)' })
+  @IsOptional()
+  @IsEnum(TreatmentType)
+  type?: TreatmentType;
+
+  @ApiPropertyOptional({ description: 'Filter by product ID' })
+  @IsOptional()
+  @IsString()
+  productId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by lot ID (animal lot)' })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+
   @ApiProperty({ enum: TreatmentStatus, required: false })
   @IsOptional()
   @IsEnum(TreatmentStatus)

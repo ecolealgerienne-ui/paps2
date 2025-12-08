@@ -381,6 +381,9 @@ export class TreatmentsService {
     };
 
     if (query.animalId) where.animalId = query.animalId;
+    if (query.type) where.type = query.type;
+    if (query.productId) where.productId = query.productId;
+    if (query.lotId) where.lotId = query.lotId;
     if (query.status) where.status = query.status;
     if (query.fromDate || query.toDate) {
       where.treatmentDate = {};
