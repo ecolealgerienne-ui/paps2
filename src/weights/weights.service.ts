@@ -452,7 +452,17 @@ export class WeightsService {
     this.logger.debug(`Getting weight rankings for farm ${farmId}`, query);
 
     const limit = query.limit || 5;
-    const periodDays = query.period === '7d' ? 7 : query.period === '90d' ? 90 : 30;
+
+    // Map period string to days
+    const periodDaysMap: Record<string, number> = {
+      '7d': 7,
+      '30d': 30,
+      '90d': 90,
+      '180d': 180,
+      '365d': 365,
+      '730d': 730,
+    };
+    const periodDays = periodDaysMap[query.period || '30d'] || 30;
 
     const periodStart = new Date();
     periodStart.setDate(periodStart.getDate() - periodDays);
@@ -619,9 +629,12 @@ export class WeightsService {
     } else if (period === '3months') {
       periodStart = new Date(now);
       periodStart.setMonth(periodStart.getMonth() - 3);
-    } else if (period === '1year') {
+    } else if (period === '12months') {
       periodStart = new Date(now);
       periodStart.setFullYear(periodStart.getFullYear() - 1);
+    } else if (period === '24months') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 2);
     } else {
       // 6months default
       periodStart = new Date(now);

@@ -264,4 +264,9 @@ export class LotStatsQueryDto {
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ description: 'Analysis period for ADG calculation', required: false, default: '6months', enum: ['30d', '3months', '6months', '12months', '24months'] })
+  @IsOptional()
+  @IsString()
+  period?: '30d' | '3months' | '6months' | '12months' | '24months';
 }

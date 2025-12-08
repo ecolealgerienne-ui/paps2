@@ -208,8 +208,28 @@ export class DashboardService {
     this.logger.debug(`Getting dashboard stats for farm ${farmId}`);
 
     const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Calculate period start date based on period parameter
+    const period = query.period || '6months';
+    let periodStart: Date;
+
+    if (period === '30d') {
+      periodStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (period === '3months') {
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 3);
+    } else if (period === '12months') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 1);
+    } else if (period === '24months') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 2);
+    } else {
+      // 6months default
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 6);
+    }
 
     // 1. HERD STATS
     const herdStats = await this.prisma.animal.groupBy({
@@ -292,12 +312,12 @@ export class DashboardService {
       }
     });
 
-    // 3. WEIGHTS STATS
+    // 3. WEIGHTS STATS - use period for filtering
     const weightStats = await this.prisma.weight.aggregate({
       where: {
         farmId,
         deletedAt: null,
-        weightDate: { gte: thirtyDaysAgo },
+        weightDate: { gte: periodStart },
       },
       _avg: { weight: true },
       _count: true,
@@ -305,11 +325,12 @@ export class DashboardService {
 
     this.logger.debug(`Weight stats raw: ${JSON.stringify(weightStats)}`);
 
-    // Calculate average ADG for the farm
+    // Calculate average ADG for the farm - use period for filtering
     const weights = await this.prisma.weight.findMany({
       where: {
         farmId,
         deletedAt: null,
+        weightDate: { gte: periodStart },
       },
       orderBy: { weightDate: 'asc' },
     });
@@ -417,8 +438,9 @@ export class DashboardService {
         weights: {
           avgWeight: Math.round((weightStats._avg.weight || 0) * 10) / 10,
           avgDailyGain,
-          weighingsLast30Days: weightStats._count,
+          weighingsInPeriod: weightStats._count,
           totalWeights: weights.length,
+          period,
         },
         health: {
           vaccinationCoverage,

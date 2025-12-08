@@ -536,6 +536,28 @@ export class LotsService {
 
     if (query.type) where.type = query.type;
 
+    // Calculate period start date based on period parameter
+    const now = new Date();
+    let periodStart: Date;
+    const period = query.period || '6months';
+
+    if (period === '30d') {
+      periodStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (period === '3months') {
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 3);
+    } else if (period === '12months') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 1);
+    } else if (period === '24months') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 2);
+    } else {
+      // 6months default
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 6);
+    }
+
     // Get lots with their animals
     const lots = await this.prisma.lot.findMany({
       where,
@@ -571,17 +593,19 @@ export class LotsService {
             totalLots: lots.length,
             totalAnimals: 0,
             overallAvgDailyGain: 0,
+            period,
           },
         },
       };
     }
 
-    // Get all weights for these animals
+    // Get weights for these animals within the period
     const weights = await this.prisma.weight.findMany({
       where: {
         farmId,
         deletedAt: null,
         animalId: { in: allAnimalIds },
+        weightDate: { gte: periodStart },
       },
       orderBy: { weightDate: 'asc' },
     });
@@ -732,6 +756,7 @@ export class LotsService {
           totalLots: lots.length,
           totalAnimals,
           overallAvgDailyGain,
+          period,
         },
       },
     };

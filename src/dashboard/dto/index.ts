@@ -18,4 +18,9 @@ export class DashboardStatsQueryDto {
   @IsOptional()
   @IsDateString()
   toDate?: string;
+
+  @ApiProperty({ description: 'Analysis period', required: false, default: '6months', enum: ['30d', '3months', '6months', '12months', '24months'] })
+  @IsOptional()
+  @IsString()
+  period?: '30d' | '3months' | '6months' | '12months' | '24months';
 }
