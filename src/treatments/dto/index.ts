@@ -315,6 +315,14 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsNumber()
   duration?: number;
 
+  @ApiPropertyOptional({
+    description: 'Batch expiry date (DEPRECATED - use farmerLotId instead)',
+    deprecated: true,
+  })
+  @IsOptional()
+  @IsDateString()
+  batchExpiryDate?: string;
+
   // ========== Vaccination-specific fields (type = vaccination) ==========
 
   @ApiPropertyOptional({ description: 'Target disease for vaccination' })

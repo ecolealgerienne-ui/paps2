@@ -479,6 +479,7 @@ export class TreatmentsService {
         product: true,
         veterinarian: true,
         route: true,
+        indication: true,
         farmerLot: {
           select: {
             id: true,
@@ -544,7 +545,7 @@ export class TreatmentsService {
 
     try {
       // Destructure to exclude BaseSyncEntityDto fields and date fields that need conversion
-      const { farmId: dtoFarmId, created_at, updated_at, version, treatmentDate, withdrawalEndDate, nextDueDate, ...treatmentData } = dto;
+      const { farmId: dtoFarmId, created_at, updated_at, version, treatmentDate, withdrawalEndDate, nextDueDate, batchExpiryDate, ...treatmentData } = dto;
 
       const updateData: any = {
         ...treatmentData,
@@ -555,6 +556,7 @@ export class TreatmentsService {
       if (treatmentDate) updateData.treatmentDate = new Date(treatmentDate);
       if (withdrawalEndDate) updateData.withdrawalEndDate = new Date(withdrawalEndDate);
       if (nextDueDate) updateData.nextDueDate = new Date(nextDueDate);
+      if (batchExpiryDate) updateData.batchExpiryDate = new Date(batchExpiryDate);
       // CRITICAL: Use client timestamp if provided (offline-first)
       if (updated_at) updateData.updatedAt = new Date(updated_at);
 
@@ -566,6 +568,7 @@ export class TreatmentsService {
           product: true,
           veterinarian: true,
           route: true,
+          indication: true,
           farmerLot: {
             select: {
               id: true,
