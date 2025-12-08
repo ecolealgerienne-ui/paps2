@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString, IsNumber, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { LotType } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
@@ -230,11 +231,13 @@ export class QueryLotDto {
 
   @ApiProperty({ description: 'Filter by completed', required: false })
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   completed?: boolean;
 
   @ApiProperty({ description: 'Filter by active status', required: false })
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isActive?: boolean;
 
@@ -258,6 +261,7 @@ export class LotStatsQueryDto {
 
   @ApiProperty({ description: 'Filter by active status (default: true)', required: false, default: true })
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isActive?: boolean;
 }
