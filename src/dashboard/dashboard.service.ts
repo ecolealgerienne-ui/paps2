@@ -218,6 +218,8 @@ export class DashboardService {
       _count: true,
     });
 
+    this.logger.debug(`Herd stats raw: ${JSON.stringify(herdStats)}`);
+
     const totalAnimals = herdStats.reduce((sum, s) => sum + s._count, 0);
     const statusBreakdown: Record<string, number> = {};
     herdStats.forEach(s => {
@@ -229,6 +231,8 @@ export class DashboardService {
       where: { farmId, deletedAt: null, status: 'alive' },
       _count: true,
     });
+
+    this.logger.debug(`Gender stats raw: ${JSON.stringify(genderStats)}`);
 
     const genderBreakdown: Record<string, number> = {};
     genderStats.forEach(s => {
@@ -244,7 +248,7 @@ export class DashboardService {
       },
     });
 
-    // 2. MOVEMENTS STATS
+    // 2. MOVEMENTS STATS - Get ALL movement types, not just predefined ones
     const movementsThisMonth = await this.prisma.movement.groupBy({
       by: ['movementType'],
       where: {
@@ -255,15 +259,36 @@ export class DashboardService {
       _count: true,
     });
 
-    const movements: Record<string, number> = {
-      birth: 0,
-      death: 0,
-      sale: 0,
-      purchase: 0,
-    };
+    this.logger.debug(`Movements this month raw: ${JSON.stringify(movementsThisMonth)}`);
+
+    // Build movements breakdown from actual data
+    const movementsBreakdown: Record<string, number> = {};
+    let totalMovementsThisMonth = 0;
     movementsThisMonth.forEach(m => {
-      if (m.movementType && movements[m.movementType] !== undefined) {
-        movements[m.movementType] = m._count;
+      if (m.movementType) {
+        movementsBreakdown[m.movementType] = m._count;
+        totalMovementsThisMonth += m._count;
+      }
+    });
+
+    // Also get all-time movement totals for reference
+    const allMovements = await this.prisma.movement.groupBy({
+      by: ['movementType'],
+      where: {
+        farmId,
+        deletedAt: null,
+      },
+      _count: true,
+    });
+
+    this.logger.debug(`All movements raw: ${JSON.stringify(allMovements)}`);
+
+    const allMovementsBreakdown: Record<string, number> = {};
+    let totalAllMovements = 0;
+    allMovements.forEach(m => {
+      if (m.movementType) {
+        allMovementsBreakdown[m.movementType] = m._count;
+        totalAllMovements += m._count;
       }
     });
 
@@ -277,6 +302,8 @@ export class DashboardService {
       _avg: { weight: true },
       _count: true,
     });
+
+    this.logger.debug(`Weight stats raw: ${JSON.stringify(weightStats)}`);
 
     // Calculate average ADG for the farm
     const weights = await this.prisma.weight.findMany({
@@ -331,6 +358,8 @@ export class DashboardService {
       },
     });
 
+    this.logger.debug(`Treatments this month: ${treatmentsThisMonth}`);
+
     // Vaccination coverage (animals with at least one vaccination)
     const vaccinatedAnimals = await this.prisma.treatment.findMany({
       where: {
@@ -349,7 +378,9 @@ export class DashboardService {
     // 5. MORTALITY RATE
     const aliveCount = statusBreakdown['alive'] || 0;
     const deadCount = statusBreakdown['dead'] || 0;
-    const totalEver = aliveCount + deadCount + (statusBreakdown['sold'] || 0);
+    const soldCount = statusBreakdown['sold'] || 0;
+    const slaughteredCount = statusBreakdown['slaughtered'] || 0;
+    const totalEver = aliveCount + deadCount + soldCount + slaughteredCount;
     const mortalityRate = totalEver > 0
       ? Math.round((deadCount / totalEver) * 100 * 10) / 10
       : 0;
@@ -378,16 +409,20 @@ export class DashboardService {
           monthlyChange: newAnimalsThisMonth,
         },
         movements: {
-          thisMonth: movements,
-          total: Object.values(movements).reduce((a, b) => a + b, 0),
+          thisMonth: movementsBreakdown,
+          thisMonthTotal: totalMovementsThisMonth,
+          allTime: allMovementsBreakdown,
+          allTimeTotal: totalAllMovements,
         },
         weights: {
           avgWeight: Math.round((weightStats._avg.weight || 0) * 10) / 10,
           avgDailyGain,
           weighingsLast30Days: weightStats._count,
+          totalWeights: weights.length,
         },
         health: {
           vaccinationCoverage,
+          vaccinatedAnimals: vaccinatedAnimals.length,
           activeWithdrawals,
           treatmentsThisMonth,
         },
