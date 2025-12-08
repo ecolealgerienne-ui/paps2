@@ -1,3 +1,4 @@
+// Animals service - aligned with Prisma schema
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAnimalDto, QueryAnimalDto, UpdateAnimalDto } from './dto';
