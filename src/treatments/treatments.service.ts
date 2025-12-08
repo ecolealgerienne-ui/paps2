@@ -543,16 +543,18 @@ export class TreatmentsService {
     }
 
     try {
-      // Destructure to exclude BaseSyncEntityDto fields
-      const { farmId: dtoFarmId, created_at, updated_at, version, ...treatmentData } = dto;
+      // Destructure to exclude BaseSyncEntityDto fields and date fields that need conversion
+      const { farmId: dtoFarmId, created_at, updated_at, version, treatmentDate, withdrawalEndDate, nextDueDate, ...treatmentData } = dto;
 
       const updateData: any = {
         ...treatmentData,
         version: existing.version + 1,
       };
 
-      if (dto.treatmentDate) updateData.treatmentDate = new Date(dto.treatmentDate);
-      if (dto.withdrawalEndDate) updateData.withdrawalEndDate = new Date(dto.withdrawalEndDate);
+      // Convert date strings to Date objects
+      if (treatmentDate) updateData.treatmentDate = new Date(treatmentDate);
+      if (withdrawalEndDate) updateData.withdrawalEndDate = new Date(withdrawalEndDate);
+      if (nextDueDate) updateData.nextDueDate = new Date(nextDueDate);
       // CRITICAL: Use client timestamp if provided (offline-first)
       if (updated_at) updateData.updatedAt = new Date(updated_at);
 
