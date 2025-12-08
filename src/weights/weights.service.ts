@@ -493,12 +493,30 @@ export class WeightsService {
       },
     });
 
+    // Get lot info for all animals
+    const animalIds = [...new Set(weights.map(w => w.animalId))];
+    const lotAnimals = await this.prisma.lotAnimal.findMany({
+      where: {
+        animalId: { in: animalIds },
+        leftAt: null,
+      },
+      include: {
+        lot: { select: { id: true, name: true } },
+      },
+    });
+
+    const animalLotMap = new Map<string, string>();
+    lotAnimals.forEach(la => {
+      animalLotMap.set(la.animalId, la.lot.name);
+    });
+
     // Group by animal and calculate ADG
     const animalData = new Map<string, {
       animal: any;
       weights: { weight: number; date: Date }[];
       adg: number | null;
       latestWeight: number;
+      firstWeight: number;
     }>();
 
     weights.forEach(w => {
@@ -508,6 +526,7 @@ export class WeightsService {
           weights: [],
           adg: null,
           latestWeight: 0,
+          firstWeight: 0,
         });
       }
       animalData.get(w.animalId)!.weights.push({ weight: w.weight, date: w.weightDate });
@@ -516,11 +535,13 @@ export class WeightsService {
     // Calculate ADG for each animal
     const rankings: {
       animalId: string;
-      animal: any;
-      adg: number;
-      latestWeight: number;
-      weighingCount: number;
-      status: 'excellent' | 'good' | 'warning' | 'critical';
+      visualId: string;
+      officialNumber: string | null;
+      avgDailyGain: number;
+      weightGain: number;
+      weighingsCount: number;
+      currentWeight: number;
+      lotName: string | null;
     }[] = [];
 
     animalData.forEach((data, animalId) => {
@@ -533,37 +554,32 @@ export class WeightsService {
 
         if (daysDiff > 0) {
           const adg = Math.round(((last.weight - first.weight) / daysDiff) * 1000) / 1000;
-          data.adg = adg;
-          data.latestWeight = last.weight;
-
-          // Determine status based on thresholds
-          let status: 'excellent' | 'good' | 'warning' | 'critical';
-          if (adg >= 1.0) status = 'excellent';
-          else if (adg >= 0.8) status = 'good';
-          else if (adg >= 0.6) status = 'warning';
-          else status = 'critical';
+          const weightGain = Math.round((last.weight - first.weight) * 10) / 10;
 
           rankings.push({
             animalId,
-            animal: data.animal,
-            adg,
-            latestWeight: Math.round(data.latestWeight * 10) / 10,
-            weighingCount: data.weights.length,
-            status,
+            visualId: data.animal.visualId || '',
+            officialNumber: data.animal.officialNumber,
+            avgDailyGain: adg,
+            weightGain,
+            weighingsCount: data.weights.length,
+            currentWeight: Math.round(last.weight * 10) / 10,
+            lotName: animalLotMap.get(animalId) || null,
           });
         }
       }
     });
 
-    // Sort by ADG descending
-    rankings.sort((a, b) => b.adg - a.adg);
+    // Sort by ADG descending for top
+    rankings.sort((a, b) => b.avgDailyGain - a.avgDailyGain);
 
-    // Get top performers and underperformers
-    const topPerformers = rankings.slice(0, limit);
-    const underperformers = rankings
-      .filter(r => r.status === 'critical' || r.status === 'warning')
-      .slice(-limit)
-      .reverse();
+    // Get top performers
+    const top = rankings.slice(0, limit);
+
+    // Get bottom performers (sorted by ADG ascending)
+    const bottom = [...rankings]
+      .sort((a, b) => a.avgDailyGain - b.avgDailyGain)
+      .slice(0, limit);
 
     // Thresholds for reference
     const thresholds = {
@@ -577,11 +593,9 @@ export class WeightsService {
       success: true,
       data: {
         period: query.period || '30d',
-        periodStart,
-        periodEnd: new Date(),
-        totalAnimalsWithData: rankings.length,
-        topPerformers,
-        underperformers,
+        calculatedAt: new Date().toISOString(),
+        top,
+        bottom,
         thresholds,
       },
     };

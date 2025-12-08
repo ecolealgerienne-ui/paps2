@@ -552,25 +552,31 @@ export class LotsService {
     const allAnimalIds = lots.flatMap(lot => lot.lotAnimals.map(la => la.animalId));
 
     if (allAnimalIds.length === 0) {
+      const emptyLots = lots.map(lot => ({
+        lotId: lot.id,
+        name: lot.name,
+        type: lot.type,
+        animalCount: 0,
+        weights: null,
+        growth: null,
+        predictions: null,
+        lastWeighingDate: null,
+      }));
+
       return {
         success: true,
-        data: lots.map(lot => ({
-          lotId: lot.id,
-          lotName: lot.name,
-          type: lot.type,
-          animalCount: 0,
-          weights: null,
-          growth: null,
-          prediction: null,
-          lastWeighingDate: null,
-        })),
+        data: {
+          lots: emptyLots,
+          summary: {
+            totalLots: lots.length,
+            totalAnimals: 0,
+            overallAvgDailyGain: 0,
+          },
+        },
       };
     }
 
-    // Get all weights for these animals (last 30 days for ADG)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
+    // Get all weights for these animals
     const weights = await this.prisma.weight.findMany({
       where: {
         farmId,
@@ -590,25 +596,28 @@ export class LotsService {
     });
 
     // Calculate stats for each lot
+    const allDailyGains: number[] = [];
+    let totalAnimals = 0;
+
     const lotStats = lots.map(lot => {
       const animalIds = lot.lotAnimals.map(la => la.animalId);
       const animalCount = animalIds.length;
+      totalAnimals += animalCount;
 
       if (animalCount === 0) {
         return {
           lotId: lot.id,
-          lotName: lot.name,
+          name: lot.name,
           type: lot.type,
           animalCount: 0,
           weights: null,
           growth: null,
-          prediction: null,
+          predictions: null,
           lastWeighingDate: null,
         };
       }
 
       // Get weights for this lot's animals
-      const lotWeights: number[] = [];
       const lotLatestWeights: number[] = [];
       const dailyGains: number[] = [];
       let lastWeighingDate: Date | null = null;
@@ -619,7 +628,6 @@ export class LotsService {
           // Latest weight for this animal
           const latest = animalWeights[animalWeights.length - 1];
           lotLatestWeights.push(latest.weight);
-          lotWeights.push(...animalWeights.map(w => w.weight));
 
           // Update last weighing date
           if (!lastWeighingDate || latest.date > lastWeighingDate) {
@@ -636,63 +644,96 @@ export class LotsService {
             if (daysDiff > 0) {
               const adg = (last.weight - first.weight) / daysDiff;
               dailyGains.push(adg);
+              allDailyGains.push(adg);
             }
           }
         }
       });
 
       // Calculate weight stats
+      const targetWeight = 500; // Default target weight in kg
       const weightsStats = lotLatestWeights.length > 0 ? {
-        avg: Math.round((lotLatestWeights.reduce((a, b) => a + b, 0) / lotLatestWeights.length) * 10) / 10,
-        min: Math.round(Math.min(...lotLatestWeights) * 10) / 10,
-        max: Math.round(Math.max(...lotLatestWeights) * 10) / 10,
-        targetWeight: null as number | null, // Could be set from lot metadata if available
+        avgWeight: Math.round((lotLatestWeights.reduce((a, b) => a + b, 0) / lotLatestWeights.length) * 10) / 10,
+        minWeight: Math.round(Math.min(...lotLatestWeights) * 10) / 10,
+        maxWeight: Math.round(Math.max(...lotLatestWeights) * 10) / 10,
+        targetWeight,
       } : null;
 
-      // Calculate growth stats
-      const growthStats = dailyGains.length > 0 ? {
-        avgDailyGain: Math.round((dailyGains.reduce((a, b) => a + b, 0) / dailyGains.length) * 1000) / 1000,
-        minDailyGain: Math.round(Math.min(...dailyGains) * 1000) / 1000,
-        maxDailyGain: Math.round(Math.max(...dailyGains) * 1000) / 1000,
-        animalsWithGain: dailyGains.length,
-      } : null;
-
-      // Calculate prediction (if we have avg weight and ADG)
-      let prediction: {
-        targetWeight: number;
-        estimatedDaysToTarget: number;
-        estimatedTargetDate: Date;
+      // Calculate growth stats with status
+      let growthStats: {
+        avgDailyGain: number;
+        minDailyGain: number;
+        maxDailyGain: number;
+        status: 'excellent' | 'good' | 'warning' | 'critical';
       } | null = null;
-      const targetWeight = 500; // Default target weight in kg - could be configurable
+
+      if (dailyGains.length > 0) {
+        const avgAdg = Math.round((dailyGains.reduce((a, b) => a + b, 0) / dailyGains.length) * 1000) / 1000;
+        let status: 'excellent' | 'good' | 'warning' | 'critical';
+        if (avgAdg >= 1.0) status = 'excellent';
+        else if (avgAdg >= 0.8) status = 'good';
+        else if (avgAdg >= 0.6) status = 'warning';
+        else status = 'critical';
+
+        growthStats = {
+          avgDailyGain: avgAdg,
+          minDailyGain: Math.round(Math.min(...dailyGains) * 1000) / 1000,
+          maxDailyGain: Math.round(Math.max(...dailyGains) * 1000) / 1000,
+          status,
+        };
+      }
+
+      // Calculate predictions (if we have avg weight and ADG)
+      let predictions: {
+        estimatedDaysToTarget: number;
+        estimatedTargetDate: string;
+      } | null = null;
+
       if (weightsStats && growthStats && growthStats.avgDailyGain > 0) {
-        const currentAvg = weightsStats.avg;
+        const currentAvg = weightsStats.avgWeight;
         if (currentAvg < targetWeight) {
           const daysToTarget = Math.ceil((targetWeight - currentAvg) / growthStats.avgDailyGain);
           const targetDate = new Date();
           targetDate.setDate(targetDate.getDate() + daysToTarget);
-          prediction = {
-            targetWeight,
+          predictions = {
             estimatedDaysToTarget: daysToTarget,
-            estimatedTargetDate: targetDate,
+            estimatedTargetDate: targetDate.toISOString().split('T')[0],
           };
         }
       }
 
+      // Format lastWeighingDate as string
+      const formattedLastWeighingDate = lastWeighingDate
+        ? (lastWeighingDate as Date).toISOString().split('T')[0]
+        : null;
+
       return {
         lotId: lot.id,
-        lotName: lot.name,
+        name: lot.name,
         type: lot.type,
         animalCount,
         weights: weightsStats,
         growth: growthStats,
-        prediction,
-        lastWeighingDate,
+        predictions,
+        lastWeighingDate: formattedLastWeighingDate,
       };
     });
 
+    // Calculate overall summary
+    const overallAvgDailyGain = allDailyGains.length > 0
+      ? Math.round((allDailyGains.reduce((a, b) => a + b, 0) / allDailyGains.length) * 1000) / 1000
+      : 0;
+
     return {
       success: true,
-      data: lotStats,
+      data: {
+        lots: lotStats,
+        summary: {
+          totalLots: lots.length,
+          totalAnimals,
+          overallAvgDailyGain,
+        },
+      },
     };
   }
 }
