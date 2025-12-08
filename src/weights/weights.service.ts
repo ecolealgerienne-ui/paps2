@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateWeightDto, UpdateWeightDto, QueryWeightDto } from './dto';
+import { CreateWeightDto, UpdateWeightDto, QueryWeightDto, StatsQueryDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import {
   EntityNotFoundException,
@@ -274,5 +274,131 @@ export class WeightsService {
     });
 
     return history;
+  }
+
+  // Get statistics for weights
+  async getStats(farmId: string, query: StatsQueryDto) {
+    this.logger.debug(`Getting weight stats for farm ${farmId}`);
+
+    const baseWhere = { farmId, deletedAt: null };
+
+    // Period for periodWeighings: use query dates or default to last 30 days
+    const now = new Date();
+    const periodStart = query.fromDate
+      ? new Date(query.fromDate)
+      : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const periodEnd = query.toDate ? new Date(query.toDate) : now;
+
+    // Fetch all weights for calculations
+    const allWeights = await this.prisma.weight.findMany({
+      where: baseWhere,
+      orderBy: { weightDate: 'asc' },
+    });
+
+    // Basic counts
+    const totalWeighings = allWeights.length;
+    const uniqueAnimals = new Set(allWeights.map(w => w.animalId)).size;
+
+    // Period weighings
+    const periodWeighings = allWeights.filter(
+      w => w.weightDate >= periodStart && w.weightDate <= periodEnd
+    ).length;
+
+    // By source - ensure all sources are represented
+    const sourceMap: Record<string, number> = {
+      manual: 0,
+      scale: 0,
+      estimated: 0,
+      automatic: 0,
+      weighbridge: 0,
+    };
+    allWeights.forEach(w => {
+      if (sourceMap[w.source] !== undefined) {
+        sourceMap[w.source]++;
+      } else {
+        sourceMap[w.source] = 1;
+      }
+    });
+
+    // Weight aggregations
+    let weightAvg = 0;
+    let weightMin = 0;
+    let weightMax = 0;
+    let latestAvg = 0;
+
+    if (totalWeighings > 0) {
+      const weightValues = allWeights.map(w => w.weight);
+      weightAvg = weightValues.reduce((a, b) => a + b, 0) / weightValues.length;
+      weightMin = Math.min(...weightValues);
+      weightMax = Math.max(...weightValues);
+
+      // Latest average: group by animal, take last weight per animal, then average
+      const latestByAnimal = new Map<string, number>();
+      allWeights.forEach(w => {
+        latestByAnimal.set(w.animalId, w.weight); // Last one wins (ordered by weightDate asc)
+      });
+      const latestWeights = Array.from(latestByAnimal.values());
+      latestAvg = latestWeights.reduce((a, b) => a + b, 0) / latestWeights.length;
+    }
+
+    // Growth calculations: for animals with >= 2 weighings
+    const animalWeights = new Map<string, { weight: number; date: Date }[]>();
+    allWeights.forEach(w => {
+      if (!animalWeights.has(w.animalId)) {
+        animalWeights.set(w.animalId, []);
+      }
+      animalWeights.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate });
+    });
+
+    const dailyGains: number[] = [];
+    animalWeights.forEach((weights) => {
+      if (weights.length >= 2) {
+        const first = weights[0];
+        const last = weights[weights.length - 1];
+        const daysDiff = Math.ceil(
+          (last.date.getTime() - first.date.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (daysDiff > 0) {
+          const dailyGain = (last.weight - first.weight) / daysDiff;
+          dailyGains.push(dailyGain);
+        }
+      }
+    });
+
+    const growth = {
+      avgDailyGain: dailyGains.length > 0
+        ? Math.round((dailyGains.reduce((a, b) => a + b, 0) / dailyGains.length) * 1000) / 1000
+        : 0,
+      animalsWithGain: dailyGains.length,
+      minDailyGain: dailyGains.length > 0
+        ? Math.round(Math.min(...dailyGains) * 1000) / 1000
+        : 0,
+      maxDailyGain: dailyGains.length > 0
+        ? Math.round(Math.max(...dailyGains) * 1000) / 1000
+        : 0,
+    };
+
+    // Last weighing date
+    const lastWeighingDate = allWeights.length > 0
+      ? allWeights[allWeights.length - 1].weightDate
+      : null;
+
+    return {
+      success: true,
+      data: {
+        totalWeighings,
+        uniqueAnimals,
+        periodWeighings,
+        bySource: sourceMap,
+        weights: {
+          avg: Math.round(weightAvg * 10) / 10,
+          min: Math.round(weightMin * 10) / 10,
+          max: Math.round(weightMax * 10) / 10,
+          latestAvg: Math.round(latestAvg * 10) / 10,
+        },
+        growth,
+        lastWeighingDate,
+      },
+    };
   }
 }

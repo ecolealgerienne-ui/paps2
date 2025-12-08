@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { WeightsService } from './weights.service';
-import { CreateWeightDto, UpdateWeightDto, QueryWeightDto } from './dto';
+import { CreateWeightDto, UpdateWeightDto, QueryWeightDto, StatsQueryDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FarmGuard } from '../auth/guards/farm.guard';
 
@@ -44,6 +44,13 @@ export class WeightsController {
     @Param('animalId') animalId: string,
   ) {
     return this.weightsService.getAnimalWeightHistory(farmId, animalId);
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Get weight statistics for the farm' })
+  @ApiResponse({ status: 200, description: 'Weight statistics' })
+  getStats(@Param('farmId') farmId: string, @Query() query: StatsQueryDto) {
+    return this.weightsService.getStats(farmId, query);
   }
 
   @Get(':id')

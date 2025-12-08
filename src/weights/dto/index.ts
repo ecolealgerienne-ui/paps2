@@ -110,3 +110,15 @@ export class QueryWeightDto {
   @IsString()
   order?: 'asc' | 'desc';
 }
+
+export class StatsQueryDto {
+  @ApiProperty({ description: 'From date (ISO)', required: false })
+  @IsOptional()
+  @IsDateString()
+  fromDate?: string;
+
+  @ApiProperty({ description: 'To date (ISO)', required: false })
+  @IsOptional()
+  @IsDateString()
+  toDate?: string;
+}
