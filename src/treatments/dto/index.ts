@@ -70,6 +70,11 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   campaignId?: string;
 
+  @ApiPropertyOptional({ description: 'Lot ID (animal lot at treatment time)' })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+
   @ApiProperty({ description: 'Administration route ID', required: false })
   @IsOptional()
   @IsString()
@@ -246,6 +251,11 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsString()
   campaignId?: string;
+
+  @ApiPropertyOptional({ description: 'Lot ID (animal lot at treatment time)' })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
 
   @ApiProperty({ description: 'Administration route ID', required: false })
   @IsOptional()

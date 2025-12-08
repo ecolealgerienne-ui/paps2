@@ -312,6 +312,7 @@ export class TreatmentsService {
                   expiryDate: true,
                 },
               },
+              lot: { select: { id: true, name: true } },
             },
           });
         });
@@ -356,6 +357,7 @@ export class TreatmentsService {
               expiryDate: true,
             },
           },
+          lot: { select: { id: true, name: true } },
         },
       });
 
@@ -400,6 +402,7 @@ export class TreatmentsService {
             expiryDate: true,
           },
         },
+        lot: { select: { id: true, name: true } },
       },
       orderBy: { treatmentDate: 'desc' },
     });
@@ -452,6 +455,7 @@ export class TreatmentsService {
             expiryDate: true,
           },
         },
+        lot: { select: { id: true, name: true } },
       },
       orderBy: { treatmentDate: 'desc' },
     });
@@ -480,6 +484,7 @@ export class TreatmentsService {
             expiryDate: true,
           },
         },
+        lot: { select: { id: true, name: true } },
       },
     });
 
@@ -564,6 +569,7 @@ export class TreatmentsService {
               expiryDate: true,
             },
           },
+          lot: { select: { id: true, name: true } },
         },
       });
 
