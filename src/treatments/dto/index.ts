@@ -207,6 +207,11 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
  * Extends BaseSyncEntityDto to support offline-first architecture
  */
 export class UpdateTreatmentDto extends BaseSyncEntityDto {
+  @ApiPropertyOptional({ description: 'Animal ID (to reassign treatment)' })
+  @IsOptional()
+  @IsString()
+  animalId?: string;
+
   @ApiPropertyOptional({ enum: TreatmentType, description: 'Treatment type (treatment or vaccination)' })
   @IsOptional()
   @IsEnum(TreatmentType)
