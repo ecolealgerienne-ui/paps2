@@ -246,7 +246,7 @@ export class DashboardService {
 
     // 2. MOVEMENTS STATS
     const movementsThisMonth = await this.prisma.movement.groupBy({
-      by: ['type'],
+      by: ['movementType'],
       where: {
         farmId,
         deletedAt: null,
@@ -256,14 +256,14 @@ export class DashboardService {
     });
 
     const movements: Record<string, number> = {
-      births: 0,
-      deaths: 0,
-      sales: 0,
-      purchases: 0,
+      birth: 0,
+      death: 0,
+      sale: 0,
+      purchase: 0,
     };
     movementsThisMonth.forEach(m => {
-      if (movements[m.type] !== undefined) {
-        movements[m.type] = m._count;
+      if (m.movementType && movements[m.movementType] !== undefined) {
+        movements[m.movementType] = m._count;
       }
     });
 

@@ -310,14 +310,14 @@ export class LotsService {
             where: { lotId: id, leftAt: null },
             select: { animalId: true },
           });
-          const currentAnimalIds = new Set(currentLotAnimals.map(la => la.animalId));
-          const newAnimalIds = new Set(animalIds);
+          const currentAnimalIds = new Set<string>(currentLotAnimals.map(la => la.animalId));
+          const newAnimalIds = new Set<string>(animalIds);
 
           // Animals to add: in newAnimalIds but not in currentAnimalIds
           const toAdd = animalIds.filter(aid => !currentAnimalIds.has(aid));
 
           // Animals to remove: in currentAnimalIds but not in newAnimalIds
-          const toRemove = [...currentAnimalIds].filter(aid => !newAnimalIds.has(aid));
+          const toRemove = Array.from(currentAnimalIds).filter(aid => !newAnimalIds.has(aid));
 
           // Remove animals (mark as left)
           if (toRemove.length > 0) {
@@ -658,7 +658,11 @@ export class LotsService {
       } : null;
 
       // Calculate prediction (if we have avg weight and ADG)
-      let prediction = null;
+      let prediction: {
+        targetWeight: number;
+        estimatedDaysToTarget: number;
+        estimatedTargetDate: Date;
+      } | null = null;
       const targetWeight = 500; // Default target weight in kg - could be configurable
       if (weightsStats && growthStats && growthStats.avgDailyGain > 0) {
         const currentAvg = weightsStats.avg;

@@ -701,7 +701,11 @@ export class WeightsService {
       }));
 
     // Calculate trend (compare first and last periods)
-    let trend = null;
+    let trend: {
+      direction: 'up' | 'down' | 'stable';
+      percentChange: number;
+      absoluteChange: number;
+    } | null = null;
     if (dataPoints.length >= 2) {
       const firstAvg = dataPoints[0].avgWeight;
       const lastAvg = dataPoints[dataPoints.length - 1].avgWeight;
