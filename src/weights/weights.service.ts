@@ -45,7 +45,7 @@ export class WeightsService {
           ...(updated_at && { updatedAt: new Date(updated_at) }),
         },
         include: {
-          animal: { select: { id: true, visualId: true, currentEid: true } },
+          animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
         },
       });
 
@@ -58,26 +58,43 @@ export class WeightsService {
   }
 
   async findAll(farmId: string, query: QueryWeightDto) {
+    const { animalId, source, fromDate, toDate, page, limit, sort, order } = query;
+
     const where: any = {
       farmId,
       deletedAt: null,
+      ...(animalId && { animalId }),
+      ...(source && { source }),
     };
 
-    if (query.animalId) where.animalId = query.animalId;
-    if (query.source) where.source = query.source;
-    if (query.fromDate || query.toDate) {
+    if (fromDate || toDate) {
       where.weightDate = {};
-      if (query.fromDate) where.weightDate.gte = new Date(query.fromDate);
-      if (query.toDate) where.weightDate.lte = new Date(query.toDate);
+      if (fromDate) where.weightDate.gte = new Date(fromDate);
+      if (toDate) where.weightDate.lte = new Date(toDate);
     }
 
-    return this.prisma.weight.findMany({
-      where,
-      include: {
-        animal: { select: { id: true, visualId: true, currentEid: true } },
+    const [weights, total] = await Promise.all([
+      this.prisma.weight.findMany({
+        where,
+        include: {
+          animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
+        },
+        orderBy: { [sort || 'weightDate']: order || 'desc' },
+        skip: ((page || 1) - 1) * (limit || 50),
+        take: limit || 50,
+      }),
+      this.prisma.weight.count({ where }),
+    ]);
+
+    return {
+      data: weights,
+      meta: {
+        page: page || 1,
+        limit: limit || 50,
+        total,
+        totalPages: Math.ceil(total / (limit || 50)),
       },
-      orderBy: { weightDate: 'desc' },
-    });
+    };
   }
 
   async findOne(farmId: string, id: string) {
@@ -88,7 +105,7 @@ export class WeightsService {
         deletedAt: null,
       },
       include: {
-        animal: { select: { id: true, visualId: true, currentEid: true } },
+        animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
       },
     });
 
@@ -143,24 +160,35 @@ export class WeightsService {
       );
     }
 
+    // If reassigning to different animal, verify it belongs to farm
+    if (dto.animalId && dto.animalId !== existing.animalId) {
+      const animal = await this.prisma.animal.findFirst({
+        where: { id: dto.animalId, farmId, deletedAt: null },
+      });
+      if (!animal) {
+        throw new EntityNotFoundException(
+          ERROR_CODES.WEIGHT_ANIMAL_NOT_FOUND,
+          `Animal ${dto.animalId} not found`,
+          { animalId: dto.animalId, farmId },
+        );
+      }
+    }
+
     try {
-      // Destructure to exclude BaseSyncEntityDto fields
-      const { farmId: dtoFarmId, created_at, updated_at, version, ...weightData } = dto;
-
-      const updateData: any = {
-        ...weightData,
-        version: existing.version + 1,
-      };
-
-      if (dto.weightDate) updateData.weightDate = new Date(dto.weightDate);
-      // CRITICAL: Use client timestamp if provided (offline-first)
-      if (updated_at) updateData.updatedAt = new Date(updated_at);
+      // Destructure to exclude BaseSyncEntityDto fields and date fields for conversion
+      const { farmId: dtoFarmId, created_at, updated_at, version, weightDate, ...weightData } = dto;
 
       const updated = await this.prisma.weight.update({
         where: { id },
-        data: updateData,
+        data: {
+          ...weightData,
+          ...(weightDate && { weightDate: new Date(weightDate) }),
+          // CRITICAL: Use client timestamp if provided (offline-first)
+          ...(updated_at && { updatedAt: new Date(updated_at) }),
+          version: { increment: 1 },
+        },
         include: {
-          animal: { select: { id: true, visualId: true, currentEid: true } },
+          animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
         },
       });
 
@@ -202,7 +230,7 @@ export class WeightsService {
         where: { id },
         data: {
           deletedAt: new Date(),
-          version: existing.version + 1,
+          version: { increment: 1 },
         },
       });
 

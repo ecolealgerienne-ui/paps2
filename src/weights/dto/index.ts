@@ -41,6 +41,11 @@ export class CreateWeightDto extends BaseSyncEntityDto {
  * Extends BaseSyncEntityDto to support offline-first architecture
  */
 export class UpdateWeightDto extends BaseSyncEntityDto {
+  @ApiProperty({ description: 'Animal ID (to reassign weight)', required: false })
+  @IsOptional()
+  @IsString()
+  animalId?: string;
+
   @ApiProperty({ description: 'Weight in kg', required: false })
   @IsOptional()
   @IsNumber()
@@ -86,4 +91,22 @@ export class QueryWeightDto {
   @IsOptional()
   @IsDateString()
   toDate?: string;
+
+  @ApiProperty({ description: 'Page number', required: false, default: 1 })
+  @IsOptional()
+  page?: number;
+
+  @ApiProperty({ description: 'Items per page', required: false, default: 50 })
+  @IsOptional()
+  limit?: number;
+
+  @ApiProperty({ description: 'Sort field', required: false, default: 'weightDate' })
+  @IsOptional()
+  @IsString()
+  sort?: string;
+
+  @ApiProperty({ description: 'Sort order', required: false, default: 'desc', enum: ['asc', 'desc'] })
+  @IsOptional()
+  @IsString()
+  order?: 'asc' | 'desc';
 }
