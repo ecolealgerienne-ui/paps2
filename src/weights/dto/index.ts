@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsInt } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { WeightSource } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
@@ -94,10 +95,14 @@ export class QueryWeightDto {
 
   @ApiProperty({ description: 'Page number', required: false, default: 1 })
   @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
   page?: number;
 
   @ApiProperty({ description: 'Items per page', required: false, default: 50 })
   @IsOptional()
+  @Transform(({ value }) => parseInt(value, 10))
+  @IsInt()
   limit?: number;
 
   @ApiProperty({ description: 'Sort field', required: false, default: 'weightDate' })
