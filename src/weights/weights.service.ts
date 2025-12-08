@@ -674,7 +674,7 @@ export class WeightsService {
       };
     }
 
-    // Group weights by animal and calculate ADG for each weight
+    // Group weights by animal
     const weightsByAnimal = new Map<string, { weight: number; date: Date; adg: number | null }[]>();
     allWeights.forEach(w => {
       if (!weightsByAnimal.has(w.animalId)) {
@@ -683,7 +683,17 @@ export class WeightsService {
       weightsByAnimal.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate, adg: null });
     });
 
+    // IMPORTANT: Sort each animal's weights by date to ensure correct order
+    weightsByAnimal.forEach(animalWeights => {
+      animalWeights.sort((a, b) => a.date.getTime() - b.date.getTime());
+    });
+
     // Calculate ADG for each weight (compared to previous weight of same animal)
+    // Only consider consecutive weighings within a reasonable timeframe (max 90 days)
+    const MAX_DAYS_FOR_ADG = 90;
+    const MIN_REALISTIC_ADG = -1.5; // kg/day - can't lose more than 1.5kg/day
+    const MAX_REALISTIC_ADG = 3.0;  // kg/day - can't gain more than 3kg/day
+
     weightsByAnimal.forEach(animalWeights => {
       for (let i = 1; i < animalWeights.length; i++) {
         const prev = animalWeights[i - 1];
@@ -691,8 +701,14 @@ export class WeightsService {
         const daysDiff = Math.ceil(
           (curr.date.getTime() - prev.date.getTime()) / (1000 * 60 * 60 * 24)
         );
-        if (daysDiff > 0) {
-          curr.adg = (curr.weight - prev.weight) / daysDiff;
+
+        // Only calculate ADG for reasonable time periods
+        if (daysDiff > 0 && daysDiff <= MAX_DAYS_FOR_ADG) {
+          const adg = (curr.weight - prev.weight) / daysDiff;
+          // Only keep realistic ADG values
+          if (adg >= MIN_REALISTIC_ADG && adg <= MAX_REALISTIC_ADG) {
+            curr.adg = adg;
+          }
         }
       }
     });
@@ -760,8 +776,8 @@ export class WeightsService {
         avgWeight: Math.round((data.weights.reduce((a, b) => a + b, 0) / data.weights.length) * 10) / 10,
       }));
 
-    // Calculate summary
-    const allAdgs = dataPoints.map(dp => dp.avgDailyGain).filter(adg => adg > 0);
+    // Calculate summary - include all non-zero ADG values (even negative ones are valid)
+    const allAdgs = dataPoints.map(dp => dp.avgDailyGain).filter(adg => adg !== 0);
     const overallAvgDailyGain = allAdgs.length > 0
       ? Math.round((allAdgs.reduce((a, b) => a + b, 0) / allAdgs.length) * 1000) / 1000
       : 0;
@@ -770,18 +786,21 @@ export class WeightsService {
     let trend: 'increasing' | 'decreasing' | 'stable' = 'stable';
     let trendPercentage = 0;
 
-    const validDataPoints = dataPoints.filter(dp => dp.avgDailyGain > 0);
+    const validDataPoints = dataPoints.filter(dp => dp.avgDailyGain !== 0);
     if (validDataPoints.length >= 2) {
       const firstAdg = validDataPoints[0].avgDailyGain;
       const lastAdg = validDataPoints[validDataPoints.length - 1].avgDailyGain;
       const change = lastAdg - firstAdg;
-      trendPercentage = firstAdg > 0
-        ? Math.round((change / firstAdg) * 100 * 10) / 10
-        : 0;
 
-      if (trendPercentage > 5) {
+      // Calculate percentage change (handle negative base values)
+      if (Math.abs(firstAdg) > 0.001) {
+        trendPercentage = Math.round((change / Math.abs(firstAdg)) * 100 * 10) / 10;
+      }
+
+      // Determine trend based on absolute change and percentage
+      if (change > 0.05 && trendPercentage > 5) {
         trend = 'increasing';
-      } else if (trendPercentage < -5) {
+      } else if (change < -0.05 && trendPercentage < -5) {
         trend = 'decreasing';
       } else {
         trend = 'stable';
