@@ -594,141 +594,202 @@ export class WeightsService {
   async getTrends(farmId: string, query: TrendsQueryDto) {
     this.logger.debug(`Getting weight trends for farm ${farmId}`, query);
 
+    const now = new Date();
+    const period = query.period || '6months';
+    const groupBy = query.groupBy || 'month';
+
     // Calculate period start date
-    const periodMonths = query.period === '1month' ? 1 :
-                        query.period === '6months' ? 6 :
-                        query.period === '1year' ? 12 : 3;
+    let periodStart: Date;
+    if (period === '30d') {
+      periodStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (period === '3months') {
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 3);
+    } else if (period === '1year') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 1);
+    } else {
+      // 6months default
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 6);
+    }
 
-    const periodStart = new Date();
-    periodStart.setMonth(periodStart.getMonth() - periodMonths);
-
-    // Build where clause
-    const where: any = {
-      farmId,
-      deletedAt: null,
-      weightDate: { gte: periodStart },
-    };
-
-    // If lotId provided, get animals in that lot
+    // Build where clause for animals filter
+    let animalIdsFilter: string[] | null = null;
     if (query.lotId) {
       const lotAnimals = await this.prisma.lotAnimal.findMany({
         where: { lotId: query.lotId, leftAt: null },
         select: { animalId: true },
       });
-      where.animalId = { in: lotAnimals.map(la => la.animalId) };
+      animalIdsFilter = lotAnimals.map(la => la.animalId);
     }
 
-    // Get all weights in the period
-    const weights = await this.prisma.weight.findMany({
-      where,
+    // Get ALL weights for these animals (need history for ADG calculation)
+    const allWeightsWhere: any = {
+      farmId,
+      deletedAt: null,
+    };
+    if (animalIdsFilter) {
+      allWeightsWhere.animalId = { in: animalIdsFilter };
+    }
+
+    const allWeights = await this.prisma.weight.findMany({
+      where: allWeightsWhere,
       orderBy: { weightDate: 'asc' },
     });
 
-    if (weights.length === 0) {
+    if (allWeights.length === 0) {
       return {
         success: true,
         data: {
-          period: query.period || '3months',
-          groupBy: query.groupBy || 'week',
+          period,
+          groupBy,
+          startDate: periodStart.toISOString().split('T')[0],
+          endDate: now.toISOString().split('T')[0],
           dataPoints: [],
-          trend: null,
+          summary: {
+            overallAvgDailyGain: 0,
+            trend: 'stable' as const,
+            trendPercentage: 0,
+          },
           benchmarks: {
-            farmTarget: 0.9,
-            nationalAverage: 0.85,
+            farmTarget: 0.8,
+            nationalAverage: 0.75,
           },
         },
       };
     }
 
-    // Group weights by animal for ADG calculation
-    const weightsByAnimal = new Map<string, { weight: number; date: Date }[]>();
-    weights.forEach(w => {
+    // Group weights by animal and calculate ADG for each weight
+    const weightsByAnimal = new Map<string, { weight: number; date: Date; adg: number | null }[]>();
+    allWeights.forEach(w => {
       if (!weightsByAnimal.has(w.animalId)) {
         weightsByAnimal.set(w.animalId, []);
       }
-      weightsByAnimal.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate });
+      weightsByAnimal.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate, adg: null });
     });
 
-    // Group by time period (day, week, month)
-    const groupBy = query.groupBy || 'week';
+    // Calculate ADG for each weight (compared to previous weight of same animal)
+    weightsByAnimal.forEach(animalWeights => {
+      for (let i = 1; i < animalWeights.length; i++) {
+        const prev = animalWeights[i - 1];
+        const curr = animalWeights[i];
+        const daysDiff = Math.ceil(
+          (curr.date.getTime() - prev.date.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (daysDiff > 0) {
+          curr.adg = (curr.weight - prev.weight) / daysDiff;
+        }
+      }
+    });
+
+    // Helper to get period key
+    const getPeriodKey = (date: Date): string => {
+      if (groupBy === 'day') {
+        return date.toISOString().split('T')[0];
+      } else if (groupBy === 'week') {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+        d.setDate(diff);
+        return d.toISOString().split('T')[0];
+      } else {
+        // month
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+    };
+
+    // Group weights within the period by time period
     const dataPointsMap = new Map<string, {
-      date: Date;
       weights: number[];
+      adgs: number[];
       animalIds: Set<string>;
-      weighingCount: number;
+      weighingsCount: number;
     }>();
 
-    weights.forEach(w => {
-      const date = new Date(w.weightDate);
-      let key: string;
+    weightsByAnimal.forEach((animalWeights, animalId) => {
+      animalWeights.forEach(w => {
+        // Only include weights within the requested period
+        if (w.date < periodStart) return;
 
-      if (groupBy === 'day') {
-        key = date.toISOString().split('T')[0];
-      } else if (groupBy === 'week') {
-        // Get start of week (Monday)
-        const day = date.getDay();
-        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-        const weekStart = new Date(date.setDate(diff));
-        key = weekStart.toISOString().split('T')[0];
-      } else {
-        // Month
-        key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      }
+        const key = getPeriodKey(w.date);
 
-      if (!dataPointsMap.has(key)) {
-        dataPointsMap.set(key, {
-          date: new Date(key),
-          weights: [],
-          animalIds: new Set(),
-          weighingCount: 0,
-        });
-      }
+        if (!dataPointsMap.has(key)) {
+          dataPointsMap.set(key, {
+            weights: [],
+            adgs: [],
+            animalIds: new Set(),
+            weighingsCount: 0,
+          });
+        }
 
-      const point = dataPointsMap.get(key)!;
-      point.weights.push(w.weight);
-      point.animalIds.add(w.animalId);
-      point.weighingCount++;
+        const point = dataPointsMap.get(key)!;
+        point.weights.push(w.weight);
+        if (w.adg !== null) {
+          point.adgs.push(w.adg);
+        }
+        point.animalIds.add(animalId);
+        point.weighingsCount++;
+      });
     });
 
-    // Calculate average for each period
+    // Calculate averages for each period
     const dataPoints = Array.from(dataPointsMap.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([key, data]) => ({
         date: key,
-        avgWeight: Math.round((data.weights.reduce((a, b) => a + b, 0) / data.weights.length) * 10) / 10,
+        avgDailyGain: data.adgs.length > 0
+          ? Math.round((data.adgs.reduce((a, b) => a + b, 0) / data.adgs.length) * 1000) / 1000
+          : 0,
         animalCount: data.animalIds.size,
-        weighingCount: data.weighingCount,
+        weighingsCount: data.weighingsCount,
+        avgWeight: Math.round((data.weights.reduce((a, b) => a + b, 0) / data.weights.length) * 10) / 10,
       }));
 
-    // Calculate trend (compare first and last periods)
-    let trend: {
-      direction: 'up' | 'down' | 'stable';
-      percentChange: number;
-      absoluteChange: number;
-    } | null = null;
-    if (dataPoints.length >= 2) {
-      const firstAvg = dataPoints[0].avgWeight;
-      const lastAvg = dataPoints[dataPoints.length - 1].avgWeight;
-      const change = lastAvg - firstAvg;
-      const percentChange = Math.round((change / firstAvg) * 100 * 10) / 10;
+    // Calculate summary
+    const allAdgs = dataPoints.map(dp => dp.avgDailyGain).filter(adg => adg > 0);
+    const overallAvgDailyGain = allAdgs.length > 0
+      ? Math.round((allAdgs.reduce((a, b) => a + b, 0) / allAdgs.length) * 1000) / 1000
+      : 0;
 
-      trend = {
-        direction: change > 0 ? 'up' : change < 0 ? 'down' : 'stable',
-        percentChange,
-        absoluteChange: Math.round(change * 10) / 10,
-      };
+    // Calculate trend (compare first and last periods with ADG data)
+    let trend: 'increasing' | 'decreasing' | 'stable' = 'stable';
+    let trendPercentage = 0;
+
+    const validDataPoints = dataPoints.filter(dp => dp.avgDailyGain > 0);
+    if (validDataPoints.length >= 2) {
+      const firstAdg = validDataPoints[0].avgDailyGain;
+      const lastAdg = validDataPoints[validDataPoints.length - 1].avgDailyGain;
+      const change = lastAdg - firstAdg;
+      trendPercentage = firstAdg > 0
+        ? Math.round((change / firstAdg) * 100 * 10) / 10
+        : 0;
+
+      if (trendPercentage > 5) {
+        trend = 'increasing';
+      } else if (trendPercentage < -5) {
+        trend = 'decreasing';
+      } else {
+        trend = 'stable';
+      }
     }
 
     return {
       success: true,
       data: {
-        period: query.period || '3months',
+        period,
         groupBy,
+        startDate: periodStart.toISOString().split('T')[0],
+        endDate: now.toISOString().split('T')[0],
         dataPoints,
-        trend,
+        summary: {
+          overallAvgDailyGain,
+          trend,
+          trendPercentage,
+        },
         benchmarks: {
-          farmTarget: 0.9, // kg/day - could be configurable
-          nationalAverage: 0.85, // kg/day
+          farmTarget: 0.8,
+          nationalAverage: 0.75,
         },
       },
     };

@@ -147,12 +147,12 @@ export class RankingsQueryDto {
 }
 
 export class TrendsQueryDto {
-  @ApiProperty({ description: 'Period (1month, 3months, 6months, 1year)', required: false, default: '3months', enum: ['1month', '3months', '6months', '1year'] })
+  @ApiProperty({ description: 'Period (30d, 3months, 6months, 1year)', required: false, default: '6months', enum: ['30d', '3months', '6months', '1year'] })
   @IsOptional()
   @IsString()
-  period?: '1month' | '3months' | '6months' | '1year';
+  period?: '30d' | '3months' | '6months' | '1year';
 
-  @ApiProperty({ description: 'Group by (day, week, month)', required: false, default: 'week', enum: ['day', 'week', 'month'] })
+  @ApiProperty({ description: 'Group by (day, week, month)', required: false, default: 'month', enum: ['day', 'week', 'month'] })
   @IsOptional()
   @IsString()
   groupBy?: 'day' | 'week' | 'month';
