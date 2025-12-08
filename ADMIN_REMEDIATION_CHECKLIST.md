@@ -347,6 +347,20 @@ limit?: number;
 ?type=VACCINATION
 ```
 
+> **⚠️ IMPORTANT** : Les query params HTTP sont toujours des **strings**.
+> Pour les booléens, utiliser `@Transform` pour convertir `"true"` en `true`.
+
+**Implémentation DTO pour booléens** :
+```typescript
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsOptional } from 'class-validator';
+
+@IsOptional()
+@Transform(({ value }) => value === 'true' || value === true)
+@IsBoolean()
+isActive?: boolean;
+```
+
 ---
 
 #### 15. Tri (Sorting)

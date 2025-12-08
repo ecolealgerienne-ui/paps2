@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { LotsService } from './lots.service';
-import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto } from './dto';
+import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto, LotStatsQueryDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FarmGuard } from '../auth/guards/farm.guard';
 
@@ -34,6 +34,13 @@ export class LotsController {
   @ApiResponse({ status: 200, description: 'List of lots' })
   findAll(@Param('farmId') farmId: string, @Query() query: QueryLotDto) {
     return this.lotsService.findAll(farmId, query);
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Get performance statistics for lots' })
+  @ApiResponse({ status: 200, description: 'Lot statistics with weights, growth and predictions' })
+  getStats(@Param('farmId') farmId: string, @Query() query: LotStatsQueryDto) {
+    return this.lotsService.getStats(farmId, query);
   }
 
   @Get(':lotId/animals')

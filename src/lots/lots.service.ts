@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto } from './dto';
+import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto, LotStatsQueryDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import {
   EntityNotFoundException,
@@ -310,14 +310,14 @@ export class LotsService {
             where: { lotId: id, leftAt: null },
             select: { animalId: true },
           });
-          const currentAnimalIds = new Set(currentLotAnimals.map(la => la.animalId));
-          const newAnimalIds = new Set(animalIds);
+          const currentAnimalIds = new Set<string>(currentLotAnimals.map(la => la.animalId));
+          const newAnimalIds = new Set<string>(animalIds);
 
           // Animals to add: in newAnimalIds but not in currentAnimalIds
           const toAdd = animalIds.filter(aid => !currentAnimalIds.has(aid));
 
           // Animals to remove: in currentAnimalIds but not in newAnimalIds
-          const toRemove = [...currentAnimalIds].filter(aid => !newAnimalIds.has(aid));
+          const toRemove = Array.from(currentAnimalIds).filter(aid => !newAnimalIds.has(aid));
 
           // Remove animals (mark as left)
           if (toRemove.length > 0) {
@@ -519,5 +519,246 @@ export class LotsService {
       this.logger.error(`Failed to finalize lot ${lotId}`, error.stack);
       throw error;
     }
+  }
+
+  /**
+   * Get performance statistics for lots
+   * Endpoint: GET /api/v1/farms/:farmId/lots/stats
+   */
+  async getStats(farmId: string, query: LotStatsQueryDto) {
+    this.logger.debug(`Getting lot stats for farm ${farmId}`, query);
+
+    const where: any = {
+      farmId,
+      deletedAt: null,
+      isActive: query.isActive ?? true,
+    };
+
+    if (query.type) where.type = query.type;
+
+    // Calculate period start date based on period parameter
+    const now = new Date();
+    let periodStart: Date;
+    const period = query.period || '6months';
+
+    if (period === '30d') {
+      periodStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    } else if (period === '3months') {
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 3);
+    } else if (period === '12months') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 1);
+    } else if (period === '24months') {
+      periodStart = new Date(now);
+      periodStart.setFullYear(periodStart.getFullYear() - 2);
+    } else {
+      // 6months default
+      periodStart = new Date(now);
+      periodStart.setMonth(periodStart.getMonth() - 6);
+    }
+
+    // Get lots with their animals
+    const lots = await this.prisma.lot.findMany({
+      where,
+      include: {
+        lotAnimals: {
+          where: { leftAt: null },
+          select: { animalId: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Get all animal IDs from all lots
+    const allAnimalIds = lots.flatMap(lot => lot.lotAnimals.map(la => la.animalId));
+
+    if (allAnimalIds.length === 0) {
+      const emptyLots = lots.map(lot => ({
+        lotId: lot.id,
+        name: lot.name,
+        type: lot.type,
+        animalCount: 0,
+        weights: null,
+        growth: null,
+        predictions: null,
+        lastWeighingDate: null,
+      }));
+
+      return {
+        success: true,
+        data: {
+          lots: emptyLots,
+          summary: {
+            totalLots: lots.length,
+            totalAnimals: 0,
+            overallAvgDailyGain: 0,
+            period,
+          },
+        },
+      };
+    }
+
+    // Get weights for these animals within the period
+    const weights = await this.prisma.weight.findMany({
+      where: {
+        farmId,
+        deletedAt: null,
+        animalId: { in: allAnimalIds },
+        weightDate: { gte: periodStart },
+      },
+      orderBy: { weightDate: 'asc' },
+    });
+
+    // Group weights by animal
+    const weightsByAnimal = new Map<string, { weight: number; date: Date }[]>();
+    weights.forEach(w => {
+      if (!weightsByAnimal.has(w.animalId)) {
+        weightsByAnimal.set(w.animalId, []);
+      }
+      weightsByAnimal.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate });
+    });
+
+    // Calculate stats for each lot
+    const allDailyGains: number[] = [];
+    let totalAnimals = 0;
+
+    const lotStats = lots.map(lot => {
+      const animalIds = lot.lotAnimals.map(la => la.animalId);
+      const animalCount = animalIds.length;
+      totalAnimals += animalCount;
+
+      if (animalCount === 0) {
+        return {
+          lotId: lot.id,
+          name: lot.name,
+          type: lot.type,
+          animalCount: 0,
+          weights: null,
+          growth: null,
+          predictions: null,
+          lastWeighingDate: null,
+        };
+      }
+
+      // Get weights for this lot's animals
+      const lotLatestWeights: number[] = [];
+      const dailyGains: number[] = [];
+      let lastWeighingDate: Date | null = null;
+
+      animalIds.forEach(animalId => {
+        const animalWeights = weightsByAnimal.get(animalId) || [];
+        if (animalWeights.length > 0) {
+          // Latest weight for this animal
+          const latest = animalWeights[animalWeights.length - 1];
+          lotLatestWeights.push(latest.weight);
+
+          // Update last weighing date
+          if (!lastWeighingDate || latest.date > lastWeighingDate) {
+            lastWeighingDate = latest.date;
+          }
+
+          // Calculate ADG if 2+ weights
+          if (animalWeights.length >= 2) {
+            const first = animalWeights[0];
+            const last = animalWeights[animalWeights.length - 1];
+            const daysDiff = Math.ceil(
+              (last.date.getTime() - first.date.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            if (daysDiff > 0) {
+              const adg = (last.weight - first.weight) / daysDiff;
+              dailyGains.push(adg);
+              allDailyGains.push(adg);
+            }
+          }
+        }
+      });
+
+      // Calculate weight stats
+      const targetWeight = 500; // Default target weight in kg
+      const weightsStats = lotLatestWeights.length > 0 ? {
+        avgWeight: Math.round((lotLatestWeights.reduce((a, b) => a + b, 0) / lotLatestWeights.length) * 10) / 10,
+        minWeight: Math.round(Math.min(...lotLatestWeights) * 10) / 10,
+        maxWeight: Math.round(Math.max(...lotLatestWeights) * 10) / 10,
+        targetWeight,
+      } : null;
+
+      // Calculate growth stats with status
+      let growthStats: {
+        avgDailyGain: number;
+        minDailyGain: number;
+        maxDailyGain: number;
+        status: 'excellent' | 'good' | 'warning' | 'critical';
+      } | null = null;
+
+      if (dailyGains.length > 0) {
+        const avgAdg = Math.round((dailyGains.reduce((a, b) => a + b, 0) / dailyGains.length) * 1000) / 1000;
+        let status: 'excellent' | 'good' | 'warning' | 'critical';
+        if (avgAdg >= 1.0) status = 'excellent';
+        else if (avgAdg >= 0.8) status = 'good';
+        else if (avgAdg >= 0.6) status = 'warning';
+        else status = 'critical';
+
+        growthStats = {
+          avgDailyGain: avgAdg,
+          minDailyGain: Math.round(Math.min(...dailyGains) * 1000) / 1000,
+          maxDailyGain: Math.round(Math.max(...dailyGains) * 1000) / 1000,
+          status,
+        };
+      }
+
+      // Calculate predictions (if we have avg weight and ADG)
+      let predictions: {
+        estimatedDaysToTarget: number;
+        estimatedTargetDate: string;
+      } | null = null;
+
+      if (weightsStats && growthStats && growthStats.avgDailyGain > 0) {
+        const currentAvg = weightsStats.avgWeight;
+        if (currentAvg < targetWeight) {
+          const daysToTarget = Math.ceil((targetWeight - currentAvg) / growthStats.avgDailyGain);
+          const targetDate = new Date();
+          targetDate.setDate(targetDate.getDate() + daysToTarget);
+          predictions = {
+            estimatedDaysToTarget: daysToTarget,
+            estimatedTargetDate: targetDate.toISOString().split('T')[0],
+          };
+        }
+      }
+
+      // Format lastWeighingDate as string
+      const formattedLastWeighingDate = lastWeighingDate
+        ? (lastWeighingDate as Date).toISOString().split('T')[0]
+        : null;
+
+      return {
+        lotId: lot.id,
+        name: lot.name,
+        type: lot.type,
+        animalCount,
+        weights: weightsStats,
+        growth: growthStats,
+        predictions,
+        lastWeighingDate: formattedLastWeighingDate,
+      };
+    });
+
+    // Calculate overall summary
+    const overallAvgDailyGain = allDailyGains.length > 0
+      ? Math.round((allDailyGains.reduce((a, b) => a + b, 0) / allDailyGains.length) * 1000) / 1000
+      : 0;
+
+    return {
+      success: true,
+      data: {
+        lots: lotStats,
+        summary: {
+          totalLots: lots.length,
+          totalAnimals,
+          overallAvgDailyGain,
+          period,
+        },
+      },
+    };
   }
 }

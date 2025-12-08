@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { WeightsService } from './weights.service';
-import { CreateWeightDto, UpdateWeightDto, QueryWeightDto, StatsQueryDto } from './dto';
+import { CreateWeightDto, UpdateWeightDto, QueryWeightDto, StatsQueryDto, RankingsQueryDto, TrendsQueryDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FarmGuard } from '../auth/guards/farm.guard';
 
@@ -51,6 +51,20 @@ export class WeightsController {
   @ApiResponse({ status: 200, description: 'Weight statistics' })
   getStats(@Param('farmId') farmId: string, @Query() query: StatsQueryDto) {
     return this.weightsService.getStats(farmId, query);
+  }
+
+  @Get('rankings')
+  @ApiOperation({ summary: 'Get animal rankings by daily gain (ADG)' })
+  @ApiResponse({ status: 200, description: 'Top and bottom performers by ADG' })
+  getRankings(@Param('farmId') farmId: string, @Query() query: RankingsQueryDto) {
+    return this.weightsService.getRankings(farmId, query);
+  }
+
+  @Get('trends')
+  @ApiOperation({ summary: 'Get historical ADG trends for charting' })
+  @ApiResponse({ status: 200, description: 'Weight trends over time' })
+  getTrends(@Param('farmId') farmId: string, @Query() query: TrendsQueryDto) {
+    return this.weightsService.getTrends(farmId, query);
   }
 
   @Get(':id')

@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString, IsNumber, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { LotType } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
@@ -230,11 +231,13 @@ export class QueryLotDto {
 
   @ApiProperty({ description: 'Filter by completed', required: false })
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   completed?: boolean;
 
   @ApiProperty({ description: 'Filter by active status', required: false })
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isActive?: boolean;
 
@@ -248,4 +251,22 @@ export class AddAnimalsToLotDto {
   @ApiProperty({ description: 'Array of animal IDs to add', type: [String] })
   @IsString({ each: true })
   animalIds: string[];
+}
+
+export class LotStatsQueryDto {
+  @ApiProperty({ enum: LotType, description: 'Filter by lot type', required: false })
+  @IsOptional()
+  @IsEnum(LotType)
+  type?: LotType;
+
+  @ApiProperty({ description: 'Filter by active status (default: true)', required: false, default: true })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isActive?: boolean;
+
+  @ApiProperty({ description: 'Analysis period for ADG calculation', required: false, default: '6months', enum: ['30d', '3months', '6months', '12months', '24months'] })
+  @IsOptional()
+  @IsString()
+  period?: '30d' | '3months' | '6months' | '12months' | '24months';
 }
