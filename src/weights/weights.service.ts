@@ -86,8 +86,50 @@ export class WeightsService {
       this.prisma.weight.count({ where }),
     ]);
 
+    // Calculate dailyGain for each weight
+    const animalIds = [...new Set(weights.map(w => w.animalId))];
+
+    // Fetch all weights for these animals to calculate gains
+    const allAnimalWeights = await this.prisma.weight.findMany({
+      where: {
+        farmId,
+        deletedAt: null,
+        animalId: { in: animalIds },
+      },
+      orderBy: { weightDate: 'asc' },
+      select: { id: true, animalId: true, weight: true, weightDate: true },
+    });
+
+    // Build a map of previous weights by animal
+    const weightsByAnimal = new Map<string, { id: string; weight: number; date: Date }[]>();
+    allAnimalWeights.forEach(w => {
+      if (!weightsByAnimal.has(w.animalId)) {
+        weightsByAnimal.set(w.animalId, []);
+      }
+      weightsByAnimal.get(w.animalId)!.push({ id: w.id, weight: w.weight, date: w.weightDate });
+    });
+
+    // Add dailyGain to each weight
+    const weightsWithGain = weights.map(w => {
+      const animalHistory = weightsByAnimal.get(w.animalId) || [];
+      const currentIndex = animalHistory.findIndex(h => h.id === w.id);
+
+      let dailyGain: number | null = null;
+      if (currentIndex > 0) {
+        const prev = animalHistory[currentIndex - 1];
+        const daysDiff = Math.ceil(
+          (w.weightDate.getTime() - prev.date.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (daysDiff > 0) {
+          dailyGain = Math.round(((w.weight - prev.weight) / daysDiff) * 1000) / 1000;
+        }
+      }
+
+      return { ...w, dailyGain };
+    });
+
     return {
-      data: weights,
+      data: weightsWithGain,
       meta: {
         page: page || 1,
         limit: limit || 50,
