@@ -98,6 +98,16 @@ export class CreateLotDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiProperty({ description: 'Is completed', default: false, required: false })
+  @IsOptional()
+  @IsBoolean()
+  completed?: boolean;
+
+  @ApiProperty({ description: 'Completed at date', required: false })
+  @IsOptional()
+  @IsDateString()
+  completedAt?: string;
 }
 
 /**
@@ -196,6 +206,11 @@ export class UpdateLotDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsBoolean()
   completed?: boolean;
+
+  @ApiProperty({ description: 'Completed at date', required: false })
+  @IsOptional()
+  @IsDateString()
+  completedAt?: string;
 
   @ApiProperty({ description: 'Version for conflict detection', required: false })
   @IsOptional()
