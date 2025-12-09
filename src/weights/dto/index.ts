@@ -1,7 +1,7 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsInt } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsInt, IsIn } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { WeightSource } from '../../common/enums';
+import { WeightSource, AnimalStatus } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
 /**
@@ -78,6 +78,15 @@ export class QueryWeightDto {
   @IsString()
   animalId?: string;
 
+  @ApiPropertyOptional({
+    description: 'Filter by animal status (all = no filter)',
+    enum: ['all', ...Object.values(AnimalStatus)],
+    default: 'all',
+  })
+  @IsOptional()
+  @IsIn(['all', ...Object.values(AnimalStatus)])
+  animalStatus?: 'all' | AnimalStatus;
+
   @ApiProperty({ enum: WeightSource, required: false })
   @IsOptional()
   @IsEnum(WeightSource)
@@ -126,6 +135,15 @@ export class StatsQueryDto {
   @IsOptional()
   @IsDateString()
   toDate?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter by animal status (all = no filter)',
+    enum: ['all', ...Object.values(AnimalStatus)],
+    default: 'all',
+  })
+  @IsOptional()
+  @IsIn(['all', ...Object.values(AnimalStatus)])
+  animalStatus?: 'all' | AnimalStatus;
 }
 
 export class RankingsQueryDto {
