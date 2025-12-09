@@ -48,6 +48,7 @@ import { AnimalStatusModule } from './animal-status/animal-status.module';
 import { FarmerProductLotsModule } from './farmer-product-lots/farmer-product-lots.module';
 import { TreatmentAlertsModule } from './treatment-alerts/treatment-alerts.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ReportsModule } from './reports/reports.module';
 
 // Get rate limiting configuration
 const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
@@ -125,6 +126,8 @@ const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
     TreatmentAlertsModule,
     // Dashboard (unified stats and actions)
     DashboardModule,
+    // Reports (bulk data export for PDF/Excel generation)
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [
