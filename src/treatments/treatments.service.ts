@@ -391,24 +391,42 @@ export class TreatmentsService {
       if (query.toDate) where.treatmentDate.lte = new Date(query.toDate);
     }
 
-    return this.prisma.treatment.findMany({
-      where,
-      include: {
-        animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
-        product: { select: { id: true, nameFr: true } },
-        veterinarian: { select: { id: true, firstName: true, lastName: true } },
-        farmerLot: {
-          select: {
-            id: true,
-            nickname: true,
-            officialLotNumber: true,
-            expiryDate: true,
+    const page = query.page || 1;
+    const limit = query.limit || 50;
+
+    const [total, data] = await Promise.all([
+      this.prisma.treatment.count({ where }),
+      this.prisma.treatment.findMany({
+        where,
+        include: {
+          animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
+          product: { select: { id: true, nameFr: true } },
+          veterinarian: { select: { id: true, firstName: true, lastName: true } },
+          farmerLot: {
+            select: {
+              id: true,
+              nickname: true,
+              officialLotNumber: true,
+              expiryDate: true,
+            },
           },
+          lot: { select: { id: true, name: true } },
         },
-        lot: { select: { id: true, name: true } },
+        orderBy: { treatmentDate: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { treatmentDate: 'desc' },
-    });
+    };
   }
 
   /**

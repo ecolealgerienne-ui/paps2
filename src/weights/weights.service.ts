@@ -58,7 +58,7 @@ export class WeightsService {
   }
 
   async findAll(farmId: string, query: QueryWeightDto) {
-    const { animalId, source, fromDate, toDate, page, limit, sort, order } = query;
+    const { animalId, animalStatus, source, fromDate, toDate, page, limit, sort, order } = query;
 
     const where: any = {
       farmId,
@@ -66,6 +66,11 @@ export class WeightsService {
       ...(animalId && { animalId }),
       ...(source && { source }),
     };
+
+    // Filter by animal status (if not 'all' or undefined)
+    if (animalStatus && animalStatus !== 'all') {
+      where.animal = { status: animalStatus };
+    }
 
     if (fromDate || toDate) {
       where.weightDate = {};
@@ -322,7 +327,12 @@ export class WeightsService {
   async getStats(farmId: string, query: StatsQueryDto) {
     this.logger.debug(`Getting weight stats for farm ${farmId}`);
 
-    const baseWhere = { farmId, deletedAt: null };
+    const baseWhere: any = { farmId, deletedAt: null };
+
+    // Filter by animal status (if not 'all' or undefined)
+    if (query.animalStatus && query.animalStatus !== 'all') {
+      baseWhere.animal = { status: query.animalStatus };
+    }
 
     // Period for periodWeighings: use query dates or default to last 30 days
     const now = new Date();

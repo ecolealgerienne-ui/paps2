@@ -115,13 +115,152 @@ export class LotsService {
       where.name = { contains: query.search, mode: 'insensitive' };
     }
 
-    return this.prisma.lot.findMany({
-      where,
-      include: {
-        product: { select: { id: true, nameFr: true, nameEn: true } },
-        _count: { select: { lotAnimals: { where: { leftAt: null } } } },
+    const page = query.page || 1;
+    const limit = query.limit || 25;
+
+    // Execute count and findMany in parallel for better performance
+    const [total, lots] = await Promise.all([
+      this.prisma.lot.count({ where }),
+      this.prisma.lot.findMany({
+        where,
+        include: {
+          product: { select: { id: true, nameFr: true, nameEn: true } },
+          _count: { select: { lotAnimals: { where: { leftAt: null } } } },
+          ...(query.includeStats && {
+            lotAnimals: {
+              where: { leftAt: null },
+              select: { animalId: true },
+            },
+          }),
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+
+    // If includeStats is true, calculate stats for each lot
+    let data = lots;
+    if (query.includeStats && lots.length > 0) {
+      data = await this.enrichLotsWithStats(farmId, lots);
+    }
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { createdAt: 'desc' },
+    };
+  }
+
+  /**
+   * Enrich lots with performance statistics
+   * @private
+   */
+  private async enrichLotsWithStats(farmId: string, lots: any[]) {
+    // Get all animal IDs from all lots
+    const allAnimalIds = lots.flatMap(lot =>
+      (lot.lotAnimals || []).map((la: any) => la.animalId)
+    );
+
+    if (allAnimalIds.length === 0) {
+      return lots.map(lot => {
+        const { lotAnimals, ...lotData } = lot;
+        return { ...lotData, stats: null };
+      });
+    }
+
+    // Get latest weight for each animal (last 6 months for ADG calculation)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const weights = await this.prisma.weight.findMany({
+      where: {
+        farmId,
+        deletedAt: null,
+        animalId: { in: allAnimalIds },
+        weightDate: { gte: sixMonthsAgo },
+      },
+      orderBy: { weightDate: 'asc' },
+    });
+
+    // Group weights by animal
+    const weightsByAnimal = new Map<string, { weight: number; date: Date }[]>();
+    weights.forEach(w => {
+      if (!weightsByAnimal.has(w.animalId)) {
+        weightsByAnimal.set(w.animalId, []);
+      }
+      weightsByAnimal.get(w.animalId)!.push({ weight: w.weight, date: w.weightDate });
+    });
+
+    // Calculate stats for each lot
+    return lots.map(lot => {
+      const animalIds = (lot.lotAnimals || []).map((la: any) => la.animalId);
+      const { lotAnimals, ...lotData } = lot;
+
+      if (animalIds.length === 0) {
+        return { ...lotData, stats: null };
+      }
+
+      const lotLatestWeights: number[] = [];
+      const dailyGains: number[] = [];
+
+      animalIds.forEach((animalId: string) => {
+        const animalWeights = weightsByAnimal.get(animalId) || [];
+        if (animalWeights.length > 0) {
+          // Latest weight
+          const latest = animalWeights[animalWeights.length - 1];
+          lotLatestWeights.push(latest.weight);
+
+          // Calculate ADG if 2+ weights
+          if (animalWeights.length >= 2) {
+            const first = animalWeights[0];
+            const last = animalWeights[animalWeights.length - 1];
+            const daysDiff = Math.ceil(
+              (last.date.getTime() - first.date.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            if (daysDiff > 0) {
+              dailyGains.push((last.weight - first.weight) / daysDiff);
+            }
+          }
+        }
+      });
+
+      // No weight data available
+      if (lotLatestWeights.length === 0) {
+        return { ...lotData, stats: null };
+      }
+
+      const avgWeight = Math.round((lotLatestWeights.reduce((a, b) => a + b, 0) / lotLatestWeights.length) * 10) / 10;
+      const minWeight = Math.round(Math.min(...lotLatestWeights) * 10) / 10;
+      const maxWeight = Math.round(Math.max(...lotLatestWeights) * 10) / 10;
+      const targetWeight = lot.targetWeight || 500;
+      const progress = Math.round((avgWeight / targetWeight) * 1000) / 10;
+
+      let avgDailyGain = 0;
+      let estimatedDaysToTarget: number | null = null;
+
+      if (dailyGains.length > 0) {
+        avgDailyGain = Math.round((dailyGains.reduce((a, b) => a + b, 0) / dailyGains.length) * 1000) / 1000;
+        if (avgDailyGain > 0 && avgWeight < targetWeight) {
+          estimatedDaysToTarget = Math.ceil((targetWeight - avgWeight) / avgDailyGain);
+        }
+      }
+
+      return {
+        ...lotData,
+        stats: {
+          avgWeight,
+          avgDailyGain,
+          minWeight,
+          maxWeight,
+          progress,
+          estimatedDaysToTarget,
+        },
+      };
     });
   }
 

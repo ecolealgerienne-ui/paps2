@@ -186,36 +186,50 @@ export class MovementsService {
     const page = query.page || 1;
     const limit = query.limit || 50;
 
-    return this.prisma.movement.findMany({
-      where,
-      include: {
-        lot: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            status: true,
+    // Execute count and findMany in parallel for better performance
+    const [total, data] = await Promise.all([
+      this.prisma.movement.count({ where }),
+      this.prisma.movement.findMany({
+        where,
+        include: {
+          lot: {
+            select: {
+              id: true,
+              name: true,
+              type: true,
+              status: true,
+            },
           },
-        },
-        movementAnimals: {
-          include: {
-            animal: {
-              select: {
-                id: true,
-                visualId: true,
-                currentEid: true,
-                officialNumber: true,
-                sex: true,
+          movementAnimals: {
+            include: {
+              animal: {
+                select: {
+                  id: true,
+                  visualId: true,
+                  currentEid: true,
+                  officialNumber: true,
+                  sex: true,
+                },
               },
             },
           },
+          _count: { select: { movementAnimals: true } },
         },
-        _count: { select: { movementAnimals: true } },
+        orderBy: { movementDate: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { movementDate: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    };
   }
 
   async findOne(farmId: string, id: string) {
