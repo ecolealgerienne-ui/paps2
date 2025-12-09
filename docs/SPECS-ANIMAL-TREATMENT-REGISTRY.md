@@ -185,6 +185,48 @@ export class CreateEntityDto {
 }
 ```
 
+#### 2.2.7 Query DTOs - Conversion des Types
+
+**⚠️ IMPORTANT:** Les query parameters arrivent toujours comme des **strings** depuis l'URL.
+Pour les champs numériques (page, limit, etc.), il faut utiliser `@Type(() => Number)` de `class-transformer`.
+
+```typescript
+import { IsOptional, IsNumber, IsInt, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+
+export class QueryEntityDto {
+  // ❌ INCORRECT - Va échouer avec "page must be a number"
+  // @IsOptional()
+  // @IsNumber()
+  // page?: number;
+
+  // ✅ CORRECT - Convertit la string en nombre avant validation
+  @ApiPropertyOptional({ description: 'Page number', default: 1 })
+  @IsOptional()
+  @Type(() => Number)  // ← OBLIGATOIRE pour les query params numériques
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page', default: 50 })
+  @IsOptional()
+  @Type(() => Number)  // ← OBLIGATOIRE
+  @IsInt()
+  @Min(1)
+  limit?: number;
+
+  // Pour les booléens aussi :
+  @ApiPropertyOptional({ description: 'Include deleted' })
+  @IsOptional()
+  @Type(() => Boolean)  // ← Convertit "true"/"false" en boolean
+  @IsBoolean()
+  includeDeleted?: boolean;
+}
+```
+
+**Règle:** Toujours ajouter `@Type(() => Number)` ou `@Type(() => Boolean)` **avant** les validateurs `@IsNumber()`, `@IsInt()`, `@IsBoolean()` dans les Query DTOs.
+
 ---
 
 ## 3. MODÈLE DE DONNÉES
