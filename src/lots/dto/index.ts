@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString, IsNumber, IsArray } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsDateString, IsNumber, IsArray, Min, Max } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import { LotType } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
@@ -219,32 +219,53 @@ export class UpdateLotDto extends BaseSyncEntityDto {
 }
 
 export class QueryLotDto {
-  @ApiProperty({ enum: LotType, description: 'Filter by type', required: false })
+  @ApiPropertyOptional({ description: 'Page number', default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page (max 100)', default: 25 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({ enum: LotType, description: 'Filter by type' })
   @IsOptional()
   @IsEnum(LotType)
   type?: LotType;
 
-  @ApiProperty({ description: 'Filter by status (open, closed, archived)', required: false })
+  @ApiPropertyOptional({ description: 'Filter by status (open, closed, archived)' })
   @IsOptional()
   @IsString()
   status?: string;
 
-  @ApiProperty({ description: 'Filter by completed', required: false })
+  @ApiPropertyOptional({ description: 'Filter by completed' })
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   completed?: boolean;
 
-  @ApiProperty({ description: 'Filter by active status', required: false })
+  @ApiPropertyOptional({ description: 'Filter by active status' })
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiProperty({ description: 'Search by name', required: false })
+  @ApiPropertyOptional({ description: 'Search by name' })
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({ description: 'Include performance stats (avgWeight, avgDailyGain, etc.)', default: false })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  includeStats?: boolean;
 }
 
 export class AddAnimalsToLotDto {
