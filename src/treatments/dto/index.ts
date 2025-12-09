@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf, IsBoolean, IsInt } from 'class-validator';
+import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, ValidateIf, IsBoolean, IsInt, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { TreatmentStatus, TreatmentType, VaccinationType } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 import { IsXorField, IsDateAfterOrEqual } from '../../common/validators';
@@ -373,6 +374,21 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
 }
 
 export class QueryTreatmentDto {
+  @ApiPropertyOptional({ description: 'Page number', default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page (max 100)', default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
   @ApiProperty({ description: 'Filter by animal ID', required: false })
   @IsOptional()
   @IsString()
