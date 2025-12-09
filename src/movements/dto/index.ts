@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsDateString, IsNumber, IsEnum, IsArray, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { MovementType, TemporaryMovementType, BuyerType, MovementStatus } from '../../common/enums';
 import { BaseSyncEntityDto } from '../../common/dto/base-sync-entity.dto';
 
@@ -327,11 +328,13 @@ export class QueryMovementDto {
 
   @ApiPropertyOptional({ description: 'Page number', default: 1 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   page?: number;
 
   @ApiPropertyOptional({ description: 'Items per page', default: 50 })
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   limit?: number;
 }
