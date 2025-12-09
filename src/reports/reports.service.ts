@@ -481,9 +481,13 @@ export class ReportsService {
       if (query.toDate) where.movementDate.lte = new Date(query.toDate);
     }
 
-    // Filter by animal status
+    // Filter by animal status (through movementAnimals relation)
     if (query.animalStatus && query.animalStatus !== 'all') {
-      where.animal = { status: query.animalStatus };
+      where.movementAnimals = {
+        some: {
+          animal: { status: query.animalStatus },
+        },
+      };
     }
 
     const [movements, total] = await Promise.all([
@@ -491,10 +495,12 @@ export class ReportsService {
         where,
         take: EXPORT_LIMIT,
         include: {
-          animal: { select: { id: true, visualId: true, officialNumber: true } },
-          fromFarm: { select: { id: true, name: true } },
-          toFarm: { select: { id: true, name: true } },
-          buyer: { select: { id: true, name: true } },
+          lot: { select: { id: true, name: true } },
+          movementAnimals: {
+            include: {
+              animal: { select: { id: true, visualId: true, officialNumber: true } },
+            },
+          },
         },
         orderBy: { movementDate: 'desc' },
       }),
@@ -504,7 +510,7 @@ export class ReportsService {
     // Summary by type
     const byType: Record<string, number> = {};
     movements.forEach(m => {
-      byType[m.type] = (byType[m.type] || 0) + 1;
+      byType[m.movementType] = (byType[m.movementType] || 0) + 1;
     });
 
     const summary = {
@@ -512,19 +518,25 @@ export class ReportsService {
       byType: Object.entries(byType).map(([type, count]) => ({ type, count })),
     };
 
-    // Format details
-    const details = movements.map(m => ({
-      date: m.movementDate.toISOString().split('T')[0],
-      type: m.type,
-      animalId: m.animalId,
-      visualId: m.animal?.visualId || '',
-      officialNumber: m.animal?.officialNumber || null,
-      fromFarm: m.fromFarm?.name || null,
-      toFarm: m.toFarm?.name || null,
-      buyer: m.buyer?.name || null,
-      reason: m.reason,
-      notes: m.notes,
-    }));
+    // Format details - flatten movementAnimals
+    const details: any[] = [];
+    movements.forEach(m => {
+      m.movementAnimals.forEach(ma => {
+        details.push({
+          date: m.movementDate.toISOString().split('T')[0],
+          movementType: m.movementType,
+          animalId: ma.animal?.id || ma.animalId,
+          visualId: ma.animal?.visualId || '',
+          officialNumber: ma.animal?.officialNumber || null,
+          lotName: m.lot?.name || null,
+          buyerName: m.buyerName || null,
+          sellerName: m.sellerName || null,
+          destinationFarmId: m.destinationFarmId || null,
+          reason: m.reason,
+          notes: m.notes,
+        });
+      });
+    });
 
     return {
       success: true,
