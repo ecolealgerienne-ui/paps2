@@ -122,26 +122,27 @@ async function seedFarmPreferences(farmId: string) {
     where: { isActive: true, deletedAt: null },
   });
 
-  let created = 0;
+  let count = 0;
   for (const template of templates) {
-    const existing = await prisma.farmAlertTemplatePreference.findFirst({
-      where: { farmId, alertTemplateId: template.id, deletedAt: null },
+    await prisma.farmAlertTemplatePreference.upsert({
+      where: {
+        farmId_alertTemplateId: { farmId, alertTemplateId: template.id },
+      },
+      update: {
+        isActive: true,
+        deletedAt: null,
+      },
+      create: {
+        farmId,
+        alertTemplateId: template.id,
+        reminderDays: template.priority === AlertPriority.high ? 7 : 3,
+        isActive: true,
+      },
     });
-
-    if (!existing) {
-      await prisma.farmAlertTemplatePreference.create({
-        data: {
-          farmId,
-          alertTemplateId: template.id,
-          reminderDays: template.priority === AlertPriority.high ? 7 : 3,
-          isActive: true,
-        },
-      });
-      created++;
-    }
+    count++;
   }
 
-  console.log(`✅ ${created} préférences créées`);
+  console.log(`✅ ${count} préférences créées/mises à jour`);
 }
 
 async function seedTestAlerts(farmId: string) {
