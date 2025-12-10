@@ -88,10 +88,23 @@ export class AnimalsService {
   }
 
   async findAll(farmId: string, query: QueryAnimalDto) {
-    const { status, speciesId, breedId, sex, search, page, limit, sort, order } =
-      query;
+    const {
+      status,
+      speciesId,
+      breedId,
+      sex,
+      search,
+      notWeighedDays,
+      minWeight,
+      maxWeight,
+      page,
+      limit,
+      sort,
+      order,
+    } = query;
 
-    const where = {
+    // Filtres de base
+    const where: any = {
       farmId,
       deletedAt: null,
       ...(status && { status }),
@@ -108,6 +121,34 @@ export class AnimalsService {
         ],
       }),
     };
+
+    // Filtres basés sur les poids (nécessitent des sous-requêtes)
+    const hasWeightFilters = notWeighedDays || minWeight !== undefined || maxWeight !== undefined;
+
+    if (hasWeightFilters) {
+      // Récupérer les IDs des animaux qui correspondent aux critères de poids
+      const animalIdsFromWeightFilters = await this.getAnimalIdsByWeightCriteria(
+        farmId,
+        notWeighedDays,
+        minWeight,
+        maxWeight,
+      );
+
+      if (animalIdsFromWeightFilters.length === 0) {
+        // Aucun animal ne correspond aux critères de poids
+        return {
+          data: [],
+          meta: {
+            page: page || 1,
+            limit: limit || 50,
+            total: 0,
+            totalPages: 0,
+          },
+        };
+      }
+
+      where.id = { in: animalIdsFromWeightFilters };
+    }
 
     const [animals, total] = await Promise.all([
       this.prisma.animal.findMany({
@@ -132,6 +173,84 @@ export class AnimalsService {
         totalPages: Math.ceil(total / (limit || 50)),
       },
     };
+  }
+
+  /**
+   * Récupère les IDs des animaux selon les critères de poids
+   */
+  private async getAnimalIdsByWeightCriteria(
+    farmId: string,
+    notWeighedDays?: number,
+    minWeight?: number,
+    maxWeight?: number,
+  ): Promise<string[]> {
+    const now = new Date();
+
+    if (notWeighedDays) {
+      // Animaux non pesés depuis X jours
+      const cutoffDate = new Date(now.getTime() - notWeighedDays * 24 * 60 * 60 * 1000);
+
+      // Trouver les animaux dont le dernier poids est avant cutoffDate OU qui n'ont jamais été pesés
+      const animalsWithRecentWeight = await this.prisma.weight.findMany({
+        where: {
+          farmId,
+          deletedAt: null,
+          weightDate: { gte: cutoffDate },
+        },
+        select: { animalId: true },
+        distinct: ['animalId'],
+      });
+
+      const recentlyWeighedIds = animalsWithRecentWeight.map((w) => w.animalId);
+
+      // Tous les animaux sauf ceux pesés récemment
+      const allAnimals = await this.prisma.animal.findMany({
+        where: { farmId, deletedAt: null },
+        select: { id: true },
+      });
+
+      return allAnimals
+        .map((a) => a.id)
+        .filter((id) => !recentlyWeighedIds.includes(id));
+    }
+
+    if (minWeight !== undefined || maxWeight !== undefined) {
+      // Filtrer sur le dernier poids de chaque animal
+      // Utiliser une requête raw pour la performance
+      const weightConditions: string[] = [];
+      const params: (string | number)[] = [farmId];
+
+      if (minWeight !== undefined) {
+        params.push(minWeight);
+        weightConditions.push(`lw.weight >= $${params.length}`);
+      }
+
+      if (maxWeight !== undefined) {
+        params.push(maxWeight);
+        weightConditions.push(`lw.weight <= $${params.length}`);
+      }
+
+      const whereClause = weightConditions.length > 0 ? `AND ${weightConditions.join(' AND ')}` : '';
+
+      const result = await this.prisma.$queryRawUnsafe<{ animal_id: string }[]>(`
+        WITH latest_weights AS (
+          SELECT DISTINCT ON (animal_id)
+            animal_id,
+            weight,
+            weight_date
+          FROM weights
+          WHERE farm_id = $1 AND deleted_at IS NULL
+          ORDER BY animal_id, weight_date DESC
+        )
+        SELECT lw.animal_id
+        FROM latest_weights lw
+        WHERE 1=1 ${whereClause}
+      `, ...params);
+
+      return result.map((r) => r.animal_id);
+    }
+
+    return [];
   }
 
   async findOne(farmId: string, id: string) {
