@@ -20,6 +20,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { FarmAlertsService } from './farm-alerts.service';
+import { AlertEngineService } from './alert-engine/alert-engine.service';
 import {
   QueryFarmAlertDto,
   UpdateFarmAlertStatusDto,
@@ -30,13 +31,17 @@ import {
   BulkUpdateFarmAlertsDto,
   MarkAllAsReadDto,
   BulkUpdateResultDto,
+  GenerateAlertsResultDto,
 } from './dto';
 
 @ApiTags('Farm Alerts')
 @ApiBearerAuth()
 @Controller('api/v1/farms/:farmId/alerts')
 export class FarmAlertsController {
-  constructor(private readonly farmAlertsService: FarmAlertsService) {}
+  constructor(
+    private readonly farmAlertsService: FarmAlertsService,
+    private readonly alertEngineService: AlertEngineService,
+  ) {}
 
   /**
    * Liste paginée des alertes avec filtres
@@ -247,5 +252,26 @@ export class FarmAlertsController {
     @Param('alertId') alertId: string,
   ): Promise<void> {
     return this.farmAlertsService.remove(farmId, alertId);
+  }
+
+  /**
+   * Forcer la génération des alertes
+   */
+  @Post('generate')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Generate alerts for a farm',
+    description: 'Forces regeneration of all alerts based on current farm data',
+  })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Generation result',
+    type: GenerateAlertsResultDto,
+  })
+  async generate(
+    @Param('farmId') farmId: string,
+  ): Promise<GenerateAlertsResultDto> {
+    return this.alertEngineService.generateForFarm(farmId);
   }
 }
