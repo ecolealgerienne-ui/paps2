@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class QueryAnimalDto {
   @ApiPropertyOptional({
@@ -31,6 +31,36 @@ export class QueryAnimalDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @ApiPropertyOptional({
+    description: 'Animaux non pesés depuis X jours',
+    example: 30,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  notWeighedDays?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids minimum (kg) - filtre sur le dernier poids',
+    example: 500,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minWeight?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids maximum (kg) - filtre sur le dernier poids',
+    example: 800,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  maxWeight?: number;
 
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()

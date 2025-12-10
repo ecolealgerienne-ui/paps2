@@ -247,6 +247,6 @@ export class PaginatedFarmAlertsResponseDto {
     total: number;
     page: number;
     limit: number;
-    pages: number;
+    totalPages: number;
   };
 }

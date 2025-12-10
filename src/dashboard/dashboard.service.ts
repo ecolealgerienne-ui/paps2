@@ -151,6 +151,7 @@ export class DashboardService {
     const animalsAtTarget = await this.prisma.$queryRaw<{ count: bigint }[]>`
       SELECT COUNT(DISTINCT w.animal_id) as count
       FROM weights w
+      INNER JOIN animals a ON w.animal_id = a.id
       INNER JOIN (
         SELECT animal_id, MAX(weight_date) as max_date
         FROM weights
@@ -160,6 +161,8 @@ export class DashboardService {
       WHERE w.farm_id = ${farmId}
         AND w.deleted_at IS NULL
         AND w.weight >= ${targetWeight}
+        AND a.status = 'alive'
+        AND a.deleted_at IS NULL
     `;
 
     const readyForSaleCount = Number(animalsAtTarget[0]?.count || 0);
@@ -172,7 +175,7 @@ export class DashboardService {
         title: `Animaux prêts pour la vente`,
         description: `${readyForSaleCount} animal(aux) ont atteint le poids cible (${targetWeight}kg)`,
         affectedCount: readyForSaleCount,
-        url: '/animals?minWeight=500',
+        url: '/animals?status=alive&minWeight=500',
       });
     }
 
