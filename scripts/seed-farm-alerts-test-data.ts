@@ -3,91 +3,98 @@
  * Usage: npx ts-node scripts/seed-farm-alerts-test-data.ts <farmId>
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, AlertCategory, AlertPriority } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 // Codes d'alertes supportés
-const ALERT_TEMPLATES = [
+const ALERT_TEMPLATES: Array<{
+  code: string;
+  nameFr: string;
+  nameEn: string;
+  nameAr: string;
+  category: AlertCategory;
+  priority: AlertPriority;
+}> = [
   {
     code: 'vaccination_due',
     nameFr: 'Vaccination à planifier',
     nameEn: 'Vaccination Due',
     nameAr: 'التطعيم المستحق',
-    category: 'vaccination',
-    priority: 'high',
+    category: AlertCategory.vaccination,
+    priority: AlertPriority.high,
   },
   {
     code: 'campaign_vaccination_due',
     nameFr: 'Campagne de vaccination',
     nameEn: 'Campaign Vaccination Due',
     nameAr: 'حملة التطعيم',
-    category: 'vaccination',
-    priority: 'high',
+    category: AlertCategory.vaccination,
+    priority: AlertPriority.high,
   },
   {
     code: 'treatment_due',
     nameFr: 'Traitement à administrer',
     nameEn: 'Treatment Due',
     nameAr: 'العلاج المستحق',
-    category: 'treatment',
-    priority: 'high',
+    category: AlertCategory.treatment,
+    priority: AlertPriority.high,
   },
   {
     code: 'withdrawal_ending',
     nameFr: 'Fin de délai d\'attente',
     nameEn: 'Withdrawal Period Ending',
     nameAr: 'انتهاء فترة الانتظار',
-    category: 'treatment',
-    priority: 'medium',
+    category: AlertCategory.treatment,
+    priority: AlertPriority.medium,
   },
   {
     code: 'weight_stagnation',
     nameFr: 'Stagnation de poids',
     nameEn: 'Weight Stagnation',
     nameAr: 'ركود الوزن',
-    category: 'nutrition',
-    priority: 'medium',
+    category: AlertCategory.nutrition,
+    priority: AlertPriority.medium,
   },
   {
     code: 'birth_imminent',
     nameFr: 'Mise-bas imminente',
     nameEn: 'Birth Imminent',
     nameAr: 'الولادة وشيكة',
-    category: 'reproduction',
-    priority: 'critical',
+    category: AlertCategory.reproduction,
+    priority: AlertPriority.high,
   },
   {
     code: 'heat_expected',
     nameFr: 'Chaleurs attendues',
     nameEn: 'Heat Expected',
     nameAr: 'الحرارة المتوقعة',
-    category: 'reproduction',
-    priority: 'medium',
+    category: AlertCategory.reproduction,
+    priority: AlertPriority.medium,
   },
   {
     code: 'health_check_due',
     nameFr: 'Contrôle sanitaire à faire',
     nameEn: 'Health Check Due',
     nameAr: 'الفحص الصحي المستحق',
-    category: 'health',
-    priority: 'medium',
+    category: AlertCategory.health,
+    priority: AlertPriority.medium,
   },
   {
     code: 'identification_missing',
     nameFr: 'Identification manquante',
     nameEn: 'Identification Missing',
     nameAr: 'التعريف مفقود',
-    category: 'administrative',
-    priority: 'high',
+    category: AlertCategory.administrative,
+    priority: AlertPriority.high,
   },
   {
     code: 'document_expired',
     nameFr: 'Document expiré',
     nameEn: 'Document Expired',
     nameAr: 'وثيقة منتهية الصلاحية',
-    category: 'administrative',
-    priority: 'medium',
+    category: AlertCategory.administrative,
+    priority: AlertPriority.medium,
   },
 ];
 
@@ -126,7 +133,7 @@ async function seedFarmPreferences(farmId: string) {
         data: {
           farmId,
           alertTemplateId: template.id,
-          reminderDays: template.priority === 'critical' ? 14 : template.priority === 'high' ? 7 : 3,
+          reminderDays: template.priority === AlertPriority.high ? 7 : 3,
           isActive: true,
         },
       });
