@@ -221,7 +221,7 @@ export class AlertEngineService {
               documentId: alert.documentId,
               dueDate: alert.dueDate,
               expiresAt: alert.expiresAt,
-              metadata: alert.metadata,
+              metadata: alert.metadata as object,
               status: FarmAlertStatus.PENDING,
             },
           });

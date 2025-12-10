@@ -1,7 +1,8 @@
 // src/farm-alerts/dto/farm-alert-response.dto.ts
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { FarmAlertStatus, ReadPlatform, FarmAlertMetadata } from '../types';
+import { FarmAlertStatus, ReadPlatform } from '../types';
+import type { FarmAlertMetadata } from '../types';
 
 /**
  * Référence minimale vers un animal
