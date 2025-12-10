@@ -136,6 +136,20 @@ enum DoseUnitType {
   G_PER_HEAD    // g/tête
 }
 
+// ENUM pour statut des alertes générées (farm_alerts)
+enum FarmAlertStatus {
+  pending     // Non lue, en attente d'action
+  read        // Lue par l'utilisateur
+  dismissed   // Ignorée volontairement
+  resolved    // Résolue automatiquement (condition plus valide)
+}
+
+// ENUM pour plateforme de lecture
+enum ReadPlatform {
+  mobile
+  web
+}
+
 // ============================================================
 // TABLES DE RÉFÉRENCE (Backend)
 // ============================================================
@@ -741,6 +755,7 @@ model AlertTemplate {
 
   // Relations
   farmAlertTemplatePreferences FarmAlertTemplatePreference[]
+  farmAlerts                   FarmAlert[]
 
   @@index([code])
   @@index([category])
@@ -797,6 +812,7 @@ model FarmAlertTemplatePreference {
   // Relations
   farm          Farm          @relation(fields: [farmId], references: [id], onDelete: Cascade)
   alertTemplate AlertTemplate @relation(fields: [alertTemplateId], references: [id], onDelete: Cascade)
+  farmAlerts    FarmAlert[]
 
   @@unique([farmId, alertTemplateId])
   @@index([farmId])
@@ -804,6 +820,72 @@ model FarmAlertTemplatePreference {
   @@index([displayOrder])
   @@index([farmId, deletedAt])
   @@map("farm_alert_template_preferences")
+}
+
+// Alertes générées dynamiquement pour une ferme
+model FarmAlert {
+  id                  String          @id @default(uuid())
+  farmId              String          @map("farm_id")
+
+  // Références vers le template et la préférence
+  alertTemplateId     String          @map("alert_template_id")
+  alertPreferenceId   String?         @map("alert_preference_id")
+
+  // Références optionnelles vers les entités concernées
+  animalId            String?         @map("animal_id")
+  lotId               String?         @map("lot_id")
+  treatmentId         String?         @map("treatment_id")
+  breedingId          String?         @map("breeding_id")
+  documentId          String?         @map("document_id")
+
+  // Dates de l'alerte
+  triggeredAt         DateTime        @default(now()) @map("triggered_at")
+  dueDate             DateTime?       @map("due_date")
+  expiresAt           DateTime?       @map("expires_at")
+
+  // Statut et lecture
+  status              FarmAlertStatus @default(pending)
+  readAt              DateTime?       @map("read_at")
+  readOn              ReadPlatform?   @map("read_on")
+  resolvedAt          DateTime?       @map("resolved_at")
+  dismissedAt         DateTime?       @map("dismissed_at")
+
+  // Données contextuelles (JSON flexible)
+  metadata            Json            @default("{}")
+
+  // Standards
+  version             Int             @default(1)
+  deletedAt           DateTime?       @map("deleted_at")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  farm                Farm            @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  alertTemplate       AlertTemplate   @relation(fields: [alertTemplateId], references: [id], onDelete: Cascade)
+  alertPreference     FarmAlertTemplatePreference? @relation(fields: [alertPreferenceId], references: [id], onDelete: SetNull)
+  animal              Animal?         @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  lot                 Lot?            @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  treatment           Treatment?      @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+  breeding            Breeding?       @relation(fields: [breedingId], references: [id], onDelete: Cascade)
+  document            Document?       @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  // Index de performance
+  @@index([farmId])
+  @@index([farmId, status])
+  @@index([farmId, status, deletedAt])
+  @@index([alertTemplateId])
+  @@index([alertPreferenceId])
+  @@index([animalId])
+  @@index([lotId])
+  @@index([treatmentId])
+  @@index([breedingId])
+  @@index([documentId])
+  @@index([dueDate])
+  @@index([expiresAt])
+  @@index([status])
+  @@index([deletedAt])
+
+  @@map("farm_alerts")
 }
 
 // ============================================================
@@ -864,6 +946,7 @@ model Farm {
   productPreferences FarmProductPreference[]
   speciesPreferences FarmSpeciesPreference[]
   alertTemplatePreferences FarmAlertTemplatePreference[]
+  farmAlerts FarmAlert[]
 
   // Indexes
   @@index([ownerId])
@@ -920,6 +1003,7 @@ model Animal {
   breedingsAsFather Breeding[] @relation("BreedingFather")
   movementAnimals MovementAnimal[]
   statusHistory AnimalStatusHistory[]
+  farmAlerts FarmAlert[]
 
   @@unique([farmId, currentEid])
   @@unique([farmId, officialNumber])
@@ -992,6 +1076,7 @@ model Lot {
   movements Movement[]
   personalCampaigns PersonalCampaign[]
   treatments Treatment[]
+  farmAlerts FarmAlert[]
 
   @@index([farmId])
   @@index([productId])
@@ -1094,6 +1179,7 @@ model Treatment {
   veterinarian                Veterinarian?    @relation(fields: [veterinarianId], references: [id])
   farmerLot                   FarmerProductLot? @relation(fields: [farmerLotId], references: [id])
   lot                         Lot?             @relation(fields: [lotId], references: [id])
+  farmAlerts                  FarmAlert[]
 
   // Indexes
   @@index([farmId])
@@ -1235,6 +1321,7 @@ model Breeding {
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
   mother Animal @relation("BreedingMother", fields: [motherId], references: [id], onDelete: Cascade)
   father Animal? @relation("BreedingFather", fields: [fatherId], references: [id])
+  farmAlerts FarmAlert[]
 
   @@index([farmId])
   @@index([motherId])
@@ -1305,6 +1392,7 @@ model Document {
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
   farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  farmAlerts FarmAlert[]
 
   @@index([farmId])
   @@index([animalId])
