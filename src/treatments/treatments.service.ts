@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTreatmentDto, UpdateTreatmentDto, QueryTreatmentDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
@@ -7,6 +7,7 @@ import {
   EntityConflictException,
 } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { AlertEngineService } from '../farm-alerts/alert-engine/alert-engine.service';
 
 interface WithdrawalDates {
   computedWithdrawalMeatDate: Date | null;
@@ -18,7 +19,20 @@ interface WithdrawalDates {
 export class TreatmentsService {
   private readonly logger = new AppLogger(TreatmentsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => AlertEngineService))
+    private alertEngineService: AlertEngineService,
+  ) {}
+
+  /**
+   * Trigger alert regeneration after treatment changes (non-blocking)
+   */
+  private triggerAlertRegeneration(farmId: string): void {
+    this.alertEngineService.invalidateAndRegenerate(farmId).catch((err) => {
+      this.logger.error(`Alert regeneration failed for farm ${farmId}`, err.stack);
+    });
+  }
 
   /**
    * Find the best therapeutic indication for a treatment context
@@ -323,6 +337,10 @@ export class TreatmentsService {
           animalIds,
           autoCalculated: !!withdrawalDates,
         });
+
+        // Trigger alert regeneration
+        this.triggerAlertRegeneration(farmId);
+
         return treatments;
       }
 
@@ -367,6 +385,10 @@ export class TreatmentsService {
         farmId,
         autoCalculated: !!withdrawalDates,
       });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return treatment;
     } catch (error) {
       this.logger.error(`Failed to create treatment${isBatchTreatment ? 's' : ''} in farm ${farmId}`, error.stack);
@@ -605,6 +627,9 @@ export class TreatmentsService {
         version: `${existing.version} → ${updated.version}`,
       });
 
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return updated;
     } catch (error) {
       this.logger.error(`Failed to update treatment ${id}`, error.stack);
@@ -642,6 +667,10 @@ export class TreatmentsService {
       });
 
       this.logger.audit('Treatment soft deleted', { treatmentId: id, farmId });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return deleted;
     } catch (error) {
       this.logger.error(`Failed to delete treatment ${id}`, error.stack);

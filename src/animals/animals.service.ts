@@ -1,5 +1,5 @@
 // Animals service - aligned with Prisma schema
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAnimalDto, QueryAnimalDto, UpdateAnimalDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
@@ -8,12 +8,26 @@ import {
   EntityConflictException,
 } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { AlertEngineService } from '../farm-alerts/alert-engine/alert-engine.service';
 
 @Injectable()
 export class AnimalsService {
   private readonly logger = new AppLogger(AnimalsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => AlertEngineService))
+    private alertEngineService: AlertEngineService,
+  ) {}
+
+  /**
+   * Trigger alert regeneration after animal changes (non-blocking)
+   */
+  private triggerAlertRegeneration(farmId: string): void {
+    this.alertEngineService.invalidateAndRegenerate(farmId).catch((err) => {
+      this.logger.error(`Alert regeneration failed for farm ${farmId}`, err.stack);
+    });
+  }
 
   async create(farmId: string, dto: CreateAnimalDto) {
     this.logger.debug(`Creating animal in farm ${farmId}`, {
@@ -59,6 +73,9 @@ export class AnimalsService {
         species: dto.speciesId,
         eid: dto.currentEid,
       });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
 
       return animal;
     } catch (error) {
@@ -207,6 +224,9 @@ export class AnimalsService {
         version: `${existing.version} → ${updated.version}`,
       });
 
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return updated;
     } catch (error) {
       this.logger.error(`Failed to update animal ${id}`, error.stack);
@@ -231,6 +251,9 @@ export class AnimalsService {
         animalId: id,
         farmId,
       });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
 
       return deleted;
     } catch (error) {

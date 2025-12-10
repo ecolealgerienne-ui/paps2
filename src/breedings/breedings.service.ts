@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBreedingDto, UpdateBreedingDto, QueryBreedingDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
@@ -8,12 +8,26 @@ import {
   BusinessRuleException,
 } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { AlertEngineService } from '../farm-alerts/alert-engine/alert-engine.service';
 
 @Injectable()
 export class BreedingsService {
   private readonly logger = new AppLogger(BreedingsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => AlertEngineService))
+    private alertEngineService: AlertEngineService,
+  ) {}
+
+  /**
+   * Trigger alert regeneration after breeding changes (non-blocking)
+   */
+  private triggerAlertRegeneration(farmId: string): void {
+    this.alertEngineService.invalidateAndRegenerate(farmId).catch((err) => {
+      this.logger.error(`Alert regeneration failed for farm ${farmId}`, err.stack);
+    });
+  }
 
   async create(farmId: string, dto: CreateBreedingDto) {
     this.logger.debug(`Creating breeding in farm ${farmId}`, {
@@ -95,6 +109,10 @@ export class BreedingsService {
         fatherId: dto.fatherId,
         farmId
       });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return breeding;
     } catch (error) {
       this.logger.error(`Failed to create breeding in farm ${farmId}`, error.stack);
@@ -221,6 +239,9 @@ export class BreedingsService {
         version: `${existing.version} → ${updated.version}`,
       });
 
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return updated;
     } catch (error) {
       this.logger.error(`Failed to update breeding ${id}`, error.stack);
@@ -258,6 +279,10 @@ export class BreedingsService {
       });
 
       this.logger.audit('Breeding soft deleted', { breedingId: id, farmId });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return deleted;
     } catch (error) {
       this.logger.error(`Failed to delete breeding ${id}`, error.stack);

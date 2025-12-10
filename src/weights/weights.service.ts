@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWeightDto, UpdateWeightDto, QueryWeightDto, StatsQueryDto, RankingsQueryDto, TrendsQueryDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
@@ -7,12 +7,26 @@ import {
   EntityConflictException,
 } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { AlertEngineService } from '../farm-alerts/alert-engine/alert-engine.service';
 
 @Injectable()
 export class WeightsService {
   private readonly logger = new AppLogger(WeightsService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => AlertEngineService))
+    private alertEngineService: AlertEngineService,
+  ) {}
+
+  /**
+   * Trigger alert regeneration after weight changes (non-blocking)
+   */
+  private triggerAlertRegeneration(farmId: string): void {
+    this.alertEngineService.invalidateAndRegenerate(farmId).catch((err) => {
+      this.logger.error(`Alert regeneration failed for farm ${farmId}`, err.stack);
+    });
+  }
 
   async create(farmId: string, dto: CreateWeightDto) {
     this.logger.debug(`Creating weight for animal ${dto.animalId} in farm ${farmId}`);
@@ -50,6 +64,10 @@ export class WeightsService {
       });
 
       this.logger.audit('Weight created', { weightId: weight.id, animalId: dto.animalId, farmId });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return weight;
     } catch (error) {
       this.logger.error(`Failed to create weight for animal ${dto.animalId}`, error.stack);
@@ -245,6 +263,9 @@ export class WeightsService {
         version: `${existing.version} → ${updated.version}`,
       });
 
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return updated;
     } catch (error) {
       this.logger.error(`Failed to update weight ${id}`, error.stack);
@@ -282,6 +303,10 @@ export class WeightsService {
       });
 
       this.logger.audit('Weight soft deleted', { weightId: id, farmId });
+
+      // Trigger alert regeneration
+      this.triggerAlertRegeneration(farmId);
+
       return deleted;
     } catch (error) {
       this.logger.error(`Failed to delete weight ${id}`, error.stack);
