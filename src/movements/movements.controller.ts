@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { MovementsService } from './movements.service';
 import { CreateMovementDto, UpdateMovementDto, QueryMovementDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -38,6 +38,8 @@ export class MovementsController {
 
   @Get('statistics')
   @ApiOperation({ summary: 'Get movement statistics' })
+  @ApiQuery({ name: 'fromDate', required: false, description: 'Date de début (ISO 8601)', example: '2025-01-01' })
+  @ApiQuery({ name: 'toDate', required: false, description: 'Date de fin (ISO 8601)', example: '2025-12-31' })
   @ApiResponse({ status: 200, description: 'Movement statistics' })
   getStatistics(
     @Param('farmId') farmId: string,
