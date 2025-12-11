@@ -72,7 +72,7 @@ export class UnitsController {
             total: { type: 'number' },
             page: { type: 'number' },
             limit: { type: 'number' },
-            pages: { type: 'number' },
+            totalPages: { type: 'number' },
           },
         },
       },

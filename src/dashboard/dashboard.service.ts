@@ -271,13 +271,13 @@ export class DashboardService {
       },
     });
 
-    // 2. MOVEMENTS STATS - Get ALL movement types, not just predefined ones
+    // 2. MOVEMENTS STATS - Use periodStart for consistency with period parameter
     const movementsThisMonth = await this.prisma.movement.groupBy({
       by: ['movementType'],
       where: {
         farmId,
         deletedAt: null,
-        movementDate: { gte: startOfMonth },
+        movementDate: { gte: periodStart },
       },
       _count: true,
     });
@@ -433,8 +433,8 @@ export class DashboardService {
           monthlyChange: newAnimalsThisMonth,
         },
         movements: {
-          thisMonth: movementsBreakdown,
-          thisMonthTotal: totalMovementsThisMonth,
+          inPeriod: movementsBreakdown,
+          inPeriodTotal: totalMovementsThisMonth,
           allTime: allMovementsBreakdown,
           allTimeTotal: totalAllMovements,
         },

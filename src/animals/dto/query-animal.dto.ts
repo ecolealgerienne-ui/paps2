@@ -87,3 +87,70 @@ export class QueryAnimalDto {
   @IsEnum(['asc', 'desc'])
   order?: 'asc' | 'desc' = 'desc';
 }
+
+/**
+ * DTO pour les statistiques d'animaux avec filtres
+ * Permet de calculer les stats sur un sous-ensemble filtré
+ */
+export class QueryAnimalStatsDto {
+  @ApiPropertyOptional({
+    enum: ['alive', 'sold', 'dead', 'slaughtered', 'draft'],
+    description: 'Filtrer par statut',
+  })
+  @IsOptional()
+  @IsEnum(['alive', 'sold', 'dead', 'slaughtered', 'draft'])
+  status?: string;
+
+  @ApiPropertyOptional({ description: 'Filtrer par espèce' })
+  @IsOptional()
+  @IsString()
+  speciesId?: string;
+
+  @ApiPropertyOptional({ description: 'Filtrer par race' })
+  @IsOptional()
+  @IsString()
+  breedId?: string;
+
+  @ApiPropertyOptional({ enum: ['male', 'female'], description: 'Filtrer par sexe' })
+  @IsOptional()
+  @IsEnum(['male', 'female'])
+  sex?: string;
+
+  @ApiPropertyOptional({
+    description: 'Recherche dans EID, numéro officiel, ID visuel',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nombre de jours pour considérer un animal comme non pesé (défaut: 30)',
+    example: 30,
+    default: 30,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  notWeighedDays?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids minimum (kg) - filtre sur le dernier poids',
+    example: 500,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  minWeight?: number;
+
+  @ApiPropertyOptional({
+    description: 'Poids maximum (kg) - filtre sur le dernier poids',
+    example: 800,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  maxWeight?: number;
+}

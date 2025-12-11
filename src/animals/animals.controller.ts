@@ -20,7 +20,7 @@ import {
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FarmGuard } from '../auth/guards/farm.guard';
 import { AnimalsService } from './animals.service';
-import { CreateAnimalDto, QueryAnimalDto, UpdateAnimalDto } from './dto';
+import { CreateAnimalDto, QueryAnimalDto, QueryAnimalStatsDto, UpdateAnimalDto } from './dto';
 import { TreatmentsService } from '../treatments/treatments.service';
 import { QueryTreatmentDto } from '../treatments/dto';
 
@@ -49,6 +49,49 @@ export class AnimalsController {
   @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
   findAll(@Param('farmId') farmId: string, @Query() query: QueryAnimalDto) {
     return this.animalsService.findAll(farmId, query);
+  }
+
+  @Get('stats')
+  @ApiOperation({
+    summary: 'Statistiques des animaux (KPIs)',
+    description: 'Retourne les KPIs des animaux. Supporte les mêmes filtres que GET /animals pour calculer les stats sur un sous-ensemble.',
+  })
+  @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistiques des animaux (filtrées si paramètres fournis)',
+    schema: {
+      type: 'object',
+      properties: {
+        total: { type: 'number', description: 'Nombre total d\'animaux (filtré)' },
+        byStatus: {
+          type: 'object',
+          properties: {
+            draft: { type: 'number' },
+            alive: { type: 'number' },
+            sold: { type: 'number' },
+            dead: { type: 'number' },
+            slaughtered: { type: 'number' },
+            onTemporaryMovement: { type: 'number' },
+          },
+        },
+        bySex: {
+          type: 'object',
+          properties: {
+            male: { type: 'number' },
+            female: { type: 'number' },
+          },
+        },
+        notWeighedCount: { type: 'number', description: 'Animaux vivants non pesés depuis X jours (filtré)' },
+        notWeighedDays: { type: 'number', description: 'Nombre de jours utilisé pour le calcul' },
+      },
+    },
+  })
+  getStats(
+    @Param('farmId') farmId: string,
+    @Query() query: QueryAnimalStatsDto,
+  ) {
+    return this.animalsService.getStats(farmId, query);
   }
 
   @Get(':id')

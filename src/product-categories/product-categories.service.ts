@@ -20,7 +20,7 @@ export interface PaginatedResponse {
     total: number;
     page: number;
     limit: number;
-    pages: number;
+    totalPages: number;
   };
 }
 
@@ -122,7 +122,7 @@ export class ProductCategoriesService {
 
     return {
       data,
-      meta: { total, page, limit, pages: Math.ceil(total / limit) },
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
 
