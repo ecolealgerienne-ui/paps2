@@ -199,24 +199,27 @@ export class AnimalsService {
       return new Map();
     }
 
-    // Utiliser une requête raw pour la performance (DISTINCT ON)
-    const result = await this.prisma.$queryRawUnsafe<
-      { animal_id: string; weight: number; weight_date: Date }[]
-    >(`
-      SELECT DISTINCT ON (animal_id)
-        animal_id,
-        weight,
-        weight_date
-      FROM weights
-      WHERE farm_id = $1
-        AND animal_id = ANY($2::uuid[])
-        AND deleted_at IS NULL
-      ORDER BY animal_id, weight_date DESC
-    `, farmId, animalIds);
+    // Récupérer tous les poids des animaux, triés par date décroissante
+    const weights = await this.prisma.weight.findMany({
+      where: {
+        farmId,
+        animalId: { in: animalIds },
+        deletedAt: null,
+      },
+      orderBy: { weightDate: 'desc' },
+      select: {
+        animalId: true,
+        weight: true,
+        weightDate: true,
+      },
+    });
 
+    // Garder uniquement le dernier poids par animal
     const map = new Map<string, { weight: number; weightDate: Date }>();
-    result.forEach((r) => {
-      map.set(r.animal_id, { weight: r.weight, weightDate: r.weight_date });
+    weights.forEach((w) => {
+      if (!map.has(w.animalId)) {
+        map.set(w.animalId, { weight: w.weight, weightDate: w.weightDate });
+      }
     });
 
     return map;
