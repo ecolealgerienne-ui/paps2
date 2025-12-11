@@ -25,7 +25,7 @@ export interface PaginatedResponse {
     total: number;
     page: number;
     limit: number;
-    pages: number;
+    totalPages: number;
   };
 }
 
@@ -134,7 +134,7 @@ export class AdministrationRoutesService {
         total,
         page,
         limit,
-        pages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / limit),
       },
     };
   }
