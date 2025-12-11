@@ -164,8 +164,21 @@ export class AnimalsService {
       this.prisma.animal.count({ where }),
     ]);
 
+    // Enrichir avec currentWeight et lastWeighDate
+    const animalIds = animals.map((a) => a.id);
+    const latestWeights = await this.getLatestWeightsForAnimals(farmId, animalIds);
+
+    const enrichedAnimals = animals.map((animal) => {
+      const weightInfo = latestWeights.get(animal.id);
+      return {
+        ...animal,
+        currentWeight: weightInfo?.weight ?? null,
+        lastWeighDate: weightInfo?.weightDate ?? null,
+      };
+    });
+
     return {
-      data: animals,
+      data: enrichedAnimals,
       meta: {
         page: page || 1,
         limit: limit || 50,
@@ -173,6 +186,40 @@ export class AnimalsService {
         totalPages: Math.ceil(total / (limit || 50)),
       },
     };
+  }
+
+  /**
+   * Récupère le dernier poids pour une liste d'animaux
+   */
+  private async getLatestWeightsForAnimals(
+    farmId: string,
+    animalIds: string[],
+  ): Promise<Map<string, { weight: number; weightDate: Date }>> {
+    if (animalIds.length === 0) {
+      return new Map();
+    }
+
+    // Utiliser une requête raw pour la performance (DISTINCT ON)
+    const result = await this.prisma.$queryRawUnsafe<
+      { animal_id: string; weight: number; weight_date: Date }[]
+    >(`
+      SELECT DISTINCT ON (animal_id)
+        animal_id,
+        weight,
+        weight_date
+      FROM weights
+      WHERE farm_id = $1
+        AND animal_id = ANY($2::uuid[])
+        AND deleted_at IS NULL
+      ORDER BY animal_id, weight_date DESC
+    `, farmId, animalIds);
+
+    const map = new Map<string, { weight: number; weightDate: Date }>();
+    result.forEach((r) => {
+      map.set(r.animal_id, { weight: r.weight, weightDate: r.weight_date });
+    });
+
+    return map;
   }
 
   /**
@@ -379,5 +426,87 @@ export class AnimalsService {
       this.logger.error(`Failed to delete animal ${id}`, error.stack);
       throw error;
     }
+  }
+
+  /**
+   * Get animal statistics for the farm
+   * Endpoint: GET /api/v1/farms/:farmId/animals/stats
+   */
+  async getStats(farmId: string, notWeighedDays = 30) {
+    this.logger.debug(`Getting animal stats for farm ${farmId}`);
+
+    // Compter par statut
+    const byStatus = await this.prisma.animal.groupBy({
+      by: ['status'],
+      where: { farmId, deletedAt: null },
+      _count: { id: true },
+    });
+
+    // Compter par sexe
+    const bySex = await this.prisma.animal.groupBy({
+      by: ['sex'],
+      where: { farmId, deletedAt: null },
+      _count: { id: true },
+    });
+
+    // Total
+    const total = await this.prisma.animal.count({
+      where: { farmId, deletedAt: null },
+    });
+
+    // Animaux vivants non pesés depuis X jours
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - notWeighedDays);
+
+    // Animaux vivants avec pesée récente
+    const animalsWithRecentWeight = await this.prisma.weight.findMany({
+      where: {
+        farmId,
+        deletedAt: null,
+        weightDate: { gte: cutoffDate },
+        animal: { status: 'alive', deletedAt: null },
+      },
+      select: { animalId: true },
+      distinct: ['animalId'],
+    });
+
+    const recentlyWeighedIds = animalsWithRecentWeight.map((w) => w.animalId);
+
+    // Compter les animaux vivants
+    const aliveCount = await this.prisma.animal.count({
+      where: { farmId, deletedAt: null, status: 'alive' },
+    });
+
+    // Animaux vivants non pesés = alive - ceux avec pesée récente
+    const notWeighedCount = aliveCount - recentlyWeighedIds.length;
+
+    // Formater les résultats
+    const statusMap: Record<string, number> = {
+      draft: 0,
+      alive: 0,
+      sold: 0,
+      dead: 0,
+      slaughtered: 0,
+      onTemporaryMovement: 0,
+    };
+    byStatus.forEach((s) => {
+      statusMap[s.status] = s._count.id;
+    });
+
+    const sexMap: Record<string, number> = {
+      male: 0,
+      female: 0,
+    };
+    bySex.forEach((s) => {
+      sexMap[s.sex] = s._count.id;
+    });
+
+    return {
+      total,
+      byStatus: statusMap,
+      bySex: sexMap,
+      notWeighedCount,
+      notWeighedDays,
+    };
   }
 }

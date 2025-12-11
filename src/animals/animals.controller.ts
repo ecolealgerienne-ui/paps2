@@ -51,6 +51,52 @@ export class AnimalsController {
     return this.animalsService.findAll(farmId, query);
   }
 
+  @Get('stats')
+  @ApiOperation({ summary: 'Statistiques des animaux (KPIs)' })
+  @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
+  @ApiQuery({
+    name: 'notWeighedDays',
+    required: false,
+    type: Number,
+    description: 'Nombre de jours pour considérer un animal comme non pesé (défaut: 30)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Statistiques des animaux',
+    schema: {
+      type: 'object',
+      properties: {
+        total: { type: 'number', description: 'Nombre total d\'animaux' },
+        byStatus: {
+          type: 'object',
+          properties: {
+            draft: { type: 'number' },
+            alive: { type: 'number' },
+            sold: { type: 'number' },
+            dead: { type: 'number' },
+            slaughtered: { type: 'number' },
+            onTemporaryMovement: { type: 'number' },
+          },
+        },
+        bySex: {
+          type: 'object',
+          properties: {
+            male: { type: 'number' },
+            female: { type: 'number' },
+          },
+        },
+        notWeighedCount: { type: 'number', description: 'Animaux vivants non pesés depuis X jours' },
+        notWeighedDays: { type: 'number', description: 'Nombre de jours utilisé pour le calcul' },
+      },
+    },
+  })
+  getStats(
+    @Param('farmId') farmId: string,
+    @Query('notWeighedDays') notWeighedDays?: number,
+  ) {
+    return this.animalsService.getStats(farmId, notWeighedDays ? Number(notWeighedDays) : 30);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: "Détail d'un animal" })
   @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
