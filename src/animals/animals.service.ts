@@ -557,20 +557,24 @@ export class AnimalsService {
       where: baseWhere,
     });
 
-    // Animaux vivants non pesés depuis X jours
+    // Animaux non pesés depuis X jours
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - notWeighedDays);
 
-    // Pour notWeighedCount, on filtre sur les animaux vivants dans le set filtré
-    const aliveWhere = { ...baseWhere, status: 'alive' };
+    // Pour notWeighedCount: utiliser le filtre existant, ou 'alive' par défaut
+    // Si un status est spécifié, on compte les non pesés dans CE status
+    // Sinon, on compte les non pesés parmi les vivants (cas par défaut)
+    const notWeighedWhere = filters.status
+      ? baseWhere  // Utiliser le filtre existant (inclut déjà le status)
+      : { ...baseWhere, status: 'alive' };  // Par défaut, seulement les vivants
 
-    // Animaux vivants avec pesée récente
+    // Animaux avec pesée récente dans le set filtré
     const animalsWithRecentWeight = await this.prisma.weight.findMany({
       where: {
         farmId,
         deletedAt: null,
         weightDate: { gte: cutoffDate },
-        animal: aliveWhere,
+        animal: notWeighedWhere,
       },
       select: { animalId: true },
       distinct: ['animalId'],
@@ -578,13 +582,13 @@ export class AnimalsService {
 
     const recentlyWeighedIds = animalsWithRecentWeight.map((w) => w.animalId);
 
-    // Compter les animaux vivants dans le set filtré
-    const aliveCount = await this.prisma.animal.count({
-      where: aliveWhere,
+    // Compter les animaux dans le set filtré
+    const countForNotWeighed = await this.prisma.animal.count({
+      where: notWeighedWhere,
     });
 
-    // Animaux vivants non pesés = alive filtré - ceux avec pesée récente
-    const notWeighedCount = Math.max(0, aliveCount - recentlyWeighedIds.length);
+    // Animaux non pesés = total filtré - ceux avec pesée récente
+    const notWeighedCount = Math.max(0, countForNotWeighed - recentlyWeighedIds.length);
 
     // Formater les résultats
     const statusMap: Record<string, number> = {
