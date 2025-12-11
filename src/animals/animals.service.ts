@@ -172,8 +172,11 @@ export class AnimalsService {
       const weightInfo = latestWeights.get(animal.id);
       return {
         ...animal,
-        currentWeight: weightInfo?.weight ?? null,
-        lastWeighDate: weightInfo?.weightDate ?? null,
+        currentWeight: weightInfo?.currentWeight ?? null,
+        lastWeighDate: weightInfo?.lastWeighDate ?? null,
+        previousWeight: weightInfo?.previousWeight ?? null,
+        weightTrend: weightInfo?.weightTrend ?? null,
+        weightDelta: weightInfo?.weightDelta ?? null,
       };
     });
 
@@ -189,12 +192,18 @@ export class AnimalsService {
   }
 
   /**
-   * Récupère le dernier poids pour une liste d'animaux
+   * Récupère les 2 derniers poids pour une liste d'animaux et calcule la tendance
    */
   private async getLatestWeightsForAnimals(
     farmId: string,
     animalIds: string[],
-  ): Promise<Map<string, { weight: number; weightDate: Date }>> {
+  ): Promise<Map<string, {
+    currentWeight: number;
+    lastWeighDate: Date;
+    previousWeight: number | null;
+    weightTrend: 'up' | 'down' | 'stable' | null;
+    weightDelta: number | null;
+  }>> {
     if (animalIds.length === 0) {
       return new Map();
     }
@@ -214,15 +223,54 @@ export class AnimalsService {
       },
     });
 
-    // Garder uniquement le dernier poids par animal
-    const map = new Map<string, { weight: number; weightDate: Date }>();
+    // Garder les 2 derniers poids par animal
+    const weightsByAnimal = new Map<string, { weight: number; date: Date }[]>();
     weights.forEach((w) => {
-      if (!map.has(w.animalId)) {
-        map.set(w.animalId, { weight: w.weight, weightDate: w.weightDate });
+      const existing = weightsByAnimal.get(w.animalId) || [];
+      if (existing.length < 2) {
+        existing.push({ weight: w.weight, date: w.weightDate });
+        weightsByAnimal.set(w.animalId, existing);
       }
     });
 
-    return map;
+    // Calculer tendance et delta
+    const result = new Map<string, {
+      currentWeight: number;
+      lastWeighDate: Date;
+      previousWeight: number | null;
+      weightTrend: 'up' | 'down' | 'stable' | null;
+      weightDelta: number | null;
+    }>();
+
+    weightsByAnimal.forEach((animalWeights, animalId) => {
+      const current = animalWeights[0];
+      const previous = animalWeights[1] || null;
+
+      let weightTrend: 'up' | 'down' | 'stable' | null = null;
+      let weightDelta: number | null = null;
+
+      if (previous) {
+        weightDelta = Math.round((current.weight - previous.weight) * 10) / 10;
+        // Seuil de 0.5 kg pour considérer "stable"
+        if (weightDelta > 0.5) {
+          weightTrend = 'up';
+        } else if (weightDelta < -0.5) {
+          weightTrend = 'down';
+        } else {
+          weightTrend = 'stable';
+        }
+      }
+
+      result.set(animalId, {
+        currentWeight: current.weight,
+        lastWeighDate: current.date,
+        previousWeight: previous?.weight ?? null,
+        weightTrend,
+        weightDelta,
+      });
+    });
+
+    return result;
   }
 
   /**
@@ -432,34 +480,89 @@ export class AnimalsService {
   }
 
   /**
-   * Get animal statistics for the farm
+   * Get animal statistics for the farm with optional filters
    * Endpoint: GET /api/v1/farms/:farmId/animals/stats
    */
-  async getStats(farmId: string, notWeighedDays = 30) {
-    this.logger.debug(`Getting animal stats for farm ${farmId}`);
+  async getStats(
+    farmId: string,
+    filters: {
+      status?: string;
+      speciesId?: string;
+      breedId?: string;
+      sex?: string;
+      search?: string;
+      notWeighedDays?: number;
+      minWeight?: number;
+      maxWeight?: number;
+    } = {},
+  ) {
+    const notWeighedDays = filters.notWeighedDays || 30;
+    this.logger.debug(`Getting animal stats for farm ${farmId}`, filters);
+
+    // Construire le filtre de base
+    const baseWhere: any = {
+      farmId,
+      deletedAt: null,
+      ...(filters.status && { status: filters.status }),
+      ...(filters.speciesId && { speciesId: filters.speciesId }),
+      ...(filters.breedId && { breedId: filters.breedId }),
+      ...(filters.sex && { sex: filters.sex }),
+      ...(filters.search && {
+        OR: [
+          { currentEid: { contains: filters.search, mode: 'insensitive' as const } },
+          { officialNumber: { contains: filters.search, mode: 'insensitive' as const } },
+          { visualId: { contains: filters.search, mode: 'insensitive' as const } },
+        ],
+      }),
+    };
+
+    // Si filtres de poids, récupérer les IDs correspondants
+    let weightFilteredIds: string[] | null = null;
+    if (filters.minWeight !== undefined || filters.maxWeight !== undefined) {
+      weightFilteredIds = await this.getAnimalIdsByWeightCriteria(
+        farmId,
+        undefined,
+        filters.minWeight,
+        filters.maxWeight,
+      );
+      if (weightFilteredIds.length === 0) {
+        // Aucun animal ne correspond aux critères de poids
+        return {
+          total: 0,
+          byStatus: { draft: 0, alive: 0, sold: 0, dead: 0, slaughtered: 0, onTemporaryMovement: 0 },
+          bySex: { male: 0, female: 0 },
+          notWeighedCount: 0,
+          notWeighedDays,
+        };
+      }
+      baseWhere.id = { in: weightFilteredIds };
+    }
 
     // Compter par statut
     const byStatus = await this.prisma.animal.groupBy({
       by: ['status'],
-      where: { farmId, deletedAt: null },
+      where: baseWhere,
       _count: { id: true },
     });
 
     // Compter par sexe
     const bySex = await this.prisma.animal.groupBy({
       by: ['sex'],
-      where: { farmId, deletedAt: null },
+      where: baseWhere,
       _count: { id: true },
     });
 
     // Total
     const total = await this.prisma.animal.count({
-      where: { farmId, deletedAt: null },
+      where: baseWhere,
     });
 
     // Animaux vivants non pesés depuis X jours
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - notWeighedDays);
+
+    // Pour notWeighedCount, on filtre sur les animaux vivants dans le set filtré
+    const aliveWhere = { ...baseWhere, status: 'alive' };
 
     // Animaux vivants avec pesée récente
     const animalsWithRecentWeight = await this.prisma.weight.findMany({
@@ -467,7 +570,7 @@ export class AnimalsService {
         farmId,
         deletedAt: null,
         weightDate: { gte: cutoffDate },
-        animal: { status: 'alive', deletedAt: null },
+        animal: aliveWhere,
       },
       select: { animalId: true },
       distinct: ['animalId'],
@@ -475,13 +578,13 @@ export class AnimalsService {
 
     const recentlyWeighedIds = animalsWithRecentWeight.map((w) => w.animalId);
 
-    // Compter les animaux vivants
+    // Compter les animaux vivants dans le set filtré
     const aliveCount = await this.prisma.animal.count({
-      where: { farmId, deletedAt: null, status: 'alive' },
+      where: aliveWhere,
     });
 
-    // Animaux vivants non pesés = alive - ceux avec pesée récente
-    const notWeighedCount = aliveCount - recentlyWeighedIds.length;
+    // Animaux vivants non pesés = alive filtré - ceux avec pesée récente
+    const notWeighedCount = Math.max(0, aliveCount - recentlyWeighedIds.length);
 
     // Formater les résultats
     const statusMap: Record<string, number> = {
