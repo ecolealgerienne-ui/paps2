@@ -390,7 +390,7 @@ export class WeightsService {
 
   // Get statistics for weights
   async getStats(farmId: string, query: StatsQueryDto) {
-    this.logger.debug(`Getting weight stats for farm ${farmId}`);
+    this.logger.debug(`Getting weight stats for farm ${farmId}`, query);
 
     const baseWhere: any = { farmId, deletedAt: null };
 
@@ -399,27 +399,35 @@ export class WeightsService {
       baseWhere.animal = { status: query.animalStatus };
     }
 
-    // Period for periodWeighings: use query dates or default to last 30 days
+    // Apply date filters to the query if provided
     const now = new Date();
-    const periodStart = query.fromDate
-      ? new Date(query.fromDate)
-      : new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const periodEnd = query.toDate ? new Date(query.toDate) : now;
+    const hasDateFilter = query.fromDate || query.toDate;
 
-    // Fetch all weights for calculations
-    const allWeights = await this.prisma.weight.findMany({
+    if (hasDateFilter) {
+      baseWhere.weightDate = {};
+      if (query.fromDate) {
+        baseWhere.weightDate.gte = new Date(query.fromDate);
+      }
+      if (query.toDate) {
+        // Add 1 day to include the end date fully
+        const endDate = new Date(query.toDate);
+        endDate.setDate(endDate.getDate() + 1);
+        baseWhere.weightDate.lt = endDate;
+      }
+    }
+
+    // Fetch weights with date filter applied
+    const filteredWeights = await this.prisma.weight.findMany({
       where: baseWhere,
       orderBy: { weightDate: 'asc' },
     });
 
-    // Basic counts
-    const totalWeighings = allWeights.length;
-    const uniqueAnimals = new Set(allWeights.map(w => w.animalId)).size;
+    // Basic counts (now based on filtered data)
+    const totalWeighings = filteredWeights.length;
+    const uniqueAnimals = new Set(filteredWeights.map(w => w.animalId)).size;
 
-    // Period weighings
-    const periodWeighings = allWeights.filter(
-      w => w.weightDate >= periodStart && w.weightDate <= periodEnd
-    ).length;
+    // periodWeighings is now same as totalWeighings when date filter is applied
+    const periodWeighings = totalWeighings;
 
     // By source - ensure all sources are represented
     const sourceMap: Record<string, number> = {
@@ -429,7 +437,7 @@ export class WeightsService {
       automatic: 0,
       weighbridge: 0,
     };
-    allWeights.forEach(w => {
+    filteredWeights.forEach(w => {
       if (sourceMap[w.source] !== undefined) {
         sourceMap[w.source]++;
       } else {
@@ -444,23 +452,23 @@ export class WeightsService {
     let latestAvg = 0;
 
     if (totalWeighings > 0) {
-      const weightValues = allWeights.map(w => w.weight);
+      const weightValues = filteredWeights.map(w => w.weight);
       weightAvg = weightValues.reduce((a, b) => a + b, 0) / weightValues.length;
       weightMin = Math.min(...weightValues);
       weightMax = Math.max(...weightValues);
 
       // Latest average: group by animal, take last weight per animal, then average
       const latestByAnimal = new Map<string, number>();
-      allWeights.forEach(w => {
+      filteredWeights.forEach(w => {
         latestByAnimal.set(w.animalId, w.weight); // Last one wins (ordered by weightDate asc)
       });
       const latestWeights = Array.from(latestByAnimal.values());
       latestAvg = latestWeights.reduce((a, b) => a + b, 0) / latestWeights.length;
     }
 
-    // Growth calculations: for animals with >= 2 weighings
+    // Growth calculations: for animals with >= 2 weighings within the period
     const animalWeights = new Map<string, { weight: number; date: Date }[]>();
-    allWeights.forEach(w => {
+    filteredWeights.forEach(w => {
       if (!animalWeights.has(w.animalId)) {
         animalWeights.set(w.animalId, []);
       }
@@ -495,9 +503,9 @@ export class WeightsService {
         : 0,
     };
 
-    // Last weighing date
-    const lastWeighingDate = allWeights.length > 0
-      ? allWeights[allWeights.length - 1].weightDate
+    // Last weighing date within the filtered period
+    const lastWeighingDate = filteredWeights.length > 0
+      ? filteredWeights[filteredWeights.length - 1].weightDate
       : null;
 
     return {
