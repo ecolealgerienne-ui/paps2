@@ -47,6 +47,20 @@ Les développements doivent respecter :
 
 ---
 
+## Procédures de Session
+
+### Démarrage de session
+1. Vérifier que `main` est à jour (`git fetch origin`)
+2. Créer/utiliser la branche de session `claude/*`
+3. Lire ce fichier CLAUDE.md pour le contexte
+
+### Récupération des modifications des sessions précédentes
+1. Lister les branches `claude/*` distantes : `git branch -r | grep claude/`
+2. Identifier celles avec des commits non mergés dans main
+3. Les merger dans la nouvelle branche si pertinent
+
+---
+
 ## Sessions Précédentes
 
 ### Session 2024-12-12
