@@ -1078,13 +1078,14 @@ export class LotsService {
 
     // Calculate aggregates
     const targetWeight = 500; // Default target
+    const formattedLastWeighingDate = lastWeighingDate ? lastWeighingDate.toISOString().split('T')[0] : null;
     const weightsStats = latestWeights.length > 0 ? {
       avgWeight: Math.round((latestWeights.reduce((a, b) => a + b, 0) / latestWeights.length) * 10) / 10,
       minWeight: Math.round(Math.min(...latestWeights) * 10) / 10,
       maxWeight: Math.round(Math.max(...latestWeights) * 10) / 10,
       totalWeightGain: 0, // Would need entry weights to calculate
       targetWeight,
-      lastWeighingDate: lastWeighingDate?.toISOString().split('T')[0] ?? null,
+      lastWeighingDate: formattedLastWeighingDate,
     } : null;
 
     // Growth stats
