@@ -275,19 +275,119 @@ export class AddAnimalsToLotDto {
 }
 
 export class LotStatsQueryDto {
-  @ApiProperty({ enum: LotType, description: 'Filter by lot type', required: false })
+  @ApiPropertyOptional({ description: 'Page number', default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page (max 50)', default: 20 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description: 'Sort by field',
+    enum: ['name', 'animalCount', 'avgDailyGain', 'createdAt'],
+    default: 'createdAt',
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: 'name' | 'animalCount' | 'avgDailyGain' | 'createdAt';
+
+  @ApiPropertyOptional({ description: 'Sort order', enum: ['asc', 'desc'], default: 'desc' })
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'asc' | 'desc';
+
+  @ApiPropertyOptional({ enum: LotType, description: 'Filter by lot type' })
   @IsOptional()
   @IsEnum(LotType)
   type?: LotType;
 
-  @ApiProperty({ description: 'Filter by active status (default: true)', required: false, default: true })
+  @ApiPropertyOptional({ description: 'Filter by active status (default: true)', default: true })
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiProperty({ description: 'Analysis period for ADG calculation', required: false, default: '6months', enum: ['30d', '3months', '6months', '12months', '24months'] })
+  @ApiPropertyOptional({
+    description: 'Analysis period for ADG calculation',
+    default: '6months',
+    enum: ['30d', '3months', '6months', '12months', '24months'],
+  })
   @IsOptional()
   @IsString()
   period?: '30d' | '3months' | '6months' | '12months' | '24months';
+}
+
+/**
+ * P2.1: DTO for detailed stats of a single lot
+ */
+export class LotDetailStatsQueryDto {
+  @ApiPropertyOptional({
+    description: 'Analysis period for ADG calculation',
+    default: '6months',
+    enum: ['30d', '3months', '6months', '12months', '24months'],
+  })
+  @IsOptional()
+  @IsString()
+  period?: '30d' | '3months' | '6months' | '12months' | '24months';
+}
+
+/**
+ * P2.2: DTO for lot events query
+ */
+export class LotEventsQueryDto {
+  @ApiPropertyOptional({ description: 'Page number', default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page (max 100)', default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filter by event types',
+    type: [String],
+    example: ['weighing', 'treatment', 'animal_joined'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  types?: string[];
+}
+
+/**
+ * P3: DTO for transferring animals between lots
+ */
+export class TransferAnimalsDto {
+  @ApiProperty({ description: 'Source lot ID' })
+  @IsString()
+  fromLotId: string;
+
+  @ApiProperty({ description: 'Destination lot ID' })
+  @IsString()
+  toLotId: string;
+
+  @ApiProperty({ description: 'Animal IDs to transfer', type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  animalIds: string[];
+
+  @ApiPropertyOptional({ description: 'Reason for transfer' })
+  @IsOptional()
+  @IsString()
+  reason?: string;
 }

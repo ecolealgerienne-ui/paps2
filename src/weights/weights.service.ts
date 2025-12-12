@@ -76,7 +76,7 @@ export class WeightsService {
   }
 
   async findAll(farmId: string, query: QueryWeightDto) {
-    const { animalId, animalStatus, source, fromDate, toDate, page, limit, sort, order } = query;
+    const { animalId, lotId, animalStatus, source, fromDate, toDate, page, limit, sort, order } = query;
 
     const where: any = {
       farmId,
@@ -84,6 +84,46 @@ export class WeightsService {
       ...(animalId && { animalId }),
       ...(source && { source }),
     };
+
+    // P1.2: Filter by lot ID - get animals currently in the lot
+    if (lotId) {
+      const lotAnimals = await this.prisma.lotAnimal.findMany({
+        where: { lotId, leftAt: null },
+        select: { animalId: true },
+      });
+      const animalIdsInLot = lotAnimals.map(la => la.animalId);
+
+      if (animalIdsInLot.length === 0) {
+        // No animals in this lot, return empty result
+        return {
+          data: [],
+          meta: {
+            page: page || 1,
+            limit: limit || 50,
+            total: 0,
+            totalPages: 0,
+          },
+        };
+      }
+
+      // If animalId is also specified, intersect with lotId filter
+      if (animalId) {
+        if (!animalIdsInLot.includes(animalId)) {
+          return {
+            data: [],
+            meta: {
+              page: page || 1,
+              limit: limit || 50,
+              total: 0,
+              totalPages: 0,
+            },
+          };
+        }
+        // animalId is already in where, keep it
+      } else {
+        where.animalId = { in: animalIdsInLot };
+      }
+    }
 
     // Filter by animal status (if not 'all' or undefined)
     if (animalStatus && animalStatus !== 'all') {

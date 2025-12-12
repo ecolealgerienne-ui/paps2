@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { LotsService } from './lots.service';
-import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto, LotStatsQueryDto } from './dto';
+import { CreateLotDto, UpdateLotDto, QueryLotDto, AddAnimalsToLotDto, LotStatsQueryDto, LotDetailStatsQueryDto, LotEventsQueryDto, TransferAnimalsDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FarmGuard } from '../auth/guards/farm.guard';
 
@@ -43,6 +43,19 @@ export class LotsController {
     return this.lotsService.getStats(farmId, query);
   }
 
+  @Post('transfer')
+  @ApiOperation({ summary: 'Transfer animals between lots' })
+  @ApiParam({ name: 'farmId', description: 'Farm ID' })
+  @ApiResponse({ status: 200, description: 'Animals transferred successfully' })
+  @ApiResponse({ status: 404, description: 'Lot or animals not found' })
+  @ApiResponse({ status: 409, description: 'Invalid transfer (same lot or animals not in source)' })
+  transferAnimals(
+    @Param('farmId') farmId: string,
+    @Body() dto: TransferAnimalsDto,
+  ) {
+    return this.lotsService.transferAnimals(farmId, dto);
+  }
+
   @Get(':lotId/animals')
   @ApiOperation({ summary: 'Get all animals in a lot' })
   @ApiParam({ name: 'farmId', description: 'ID de la ferme' })
@@ -54,6 +67,34 @@ export class LotsController {
     @Param('lotId') lotId: string,
   ) {
     return this.lotsService.findAnimalsByLotId(farmId, lotId);
+  }
+
+  @Get(':lotId/stats')
+  @ApiOperation({ summary: 'Get detailed statistics for a single lot' })
+  @ApiParam({ name: 'farmId', description: 'Farm ID' })
+  @ApiParam({ name: 'lotId', description: 'Lot ID' })
+  @ApiResponse({ status: 200, description: 'Detailed lot statistics' })
+  @ApiResponse({ status: 404, description: 'Lot not found' })
+  getLotStats(
+    @Param('farmId') farmId: string,
+    @Param('lotId') lotId: string,
+    @Query() query: LotDetailStatsQueryDto,
+  ) {
+    return this.lotsService.getLotStats(farmId, lotId, query);
+  }
+
+  @Get(':lotId/events')
+  @ApiOperation({ summary: 'Get timeline events for a lot' })
+  @ApiParam({ name: 'farmId', description: 'Farm ID' })
+  @ApiParam({ name: 'lotId', description: 'Lot ID' })
+  @ApiResponse({ status: 200, description: 'Lot events timeline' })
+  @ApiResponse({ status: 404, description: 'Lot not found' })
+  getLotEvents(
+    @Param('farmId') farmId: string,
+    @Param('lotId') lotId: string,
+    @Query() query: LotEventsQueryDto,
+  ) {
+    return this.lotsService.getLotEvents(farmId, lotId, query);
   }
 
   @Get(':id')

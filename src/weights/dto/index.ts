@@ -78,6 +78,11 @@ export class QueryWeightDto {
   @IsString()
   animalId?: string;
 
+  @ApiPropertyOptional({ description: 'Filter by lot ID (animals currently in this lot)', required: false })
+  @IsOptional()
+  @IsString()
+  lotId?: string;
+
   @ApiPropertyOptional({
     description: 'Filter by animal status (all = no filter)',
     enum: ['all', ...Object.values(AnimalStatus)],
