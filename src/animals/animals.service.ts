@@ -156,6 +156,17 @@ export class AnimalsService {
         include: {
           species: true,
           breed: true,
+          // P1.1: Include current lot (most recent active lot membership)
+          lotAnimals: {
+            where: { leftAt: null },
+            take: 1,
+            orderBy: { joinedAt: 'desc' },
+            include: {
+              lot: {
+                select: { id: true, name: true, type: true, status: true },
+              },
+            },
+          },
         },
         orderBy: { [sort || 'createdAt']: order || 'desc' },
         skip: ((page || 1) - 1) * (limit || 50),
@@ -170,13 +181,18 @@ export class AnimalsService {
 
     const enrichedAnimals = animals.map((animal) => {
       const weightInfo = latestWeights.get(animal.id);
+      // P1.1: Extract currentLot from lotAnimals and remove lotAnimals from response
+      const { lotAnimals, ...animalData } = animal;
+      const currentLot = lotAnimals?.[0]?.lot ?? null;
+
       return {
-        ...animal,
+        ...animalData,
         currentWeight: weightInfo?.currentWeight ?? null,
         lastWeighDate: weightInfo?.lastWeighDate ?? null,
         previousWeight: weightInfo?.previousWeight ?? null,
         weightTrend: weightInfo?.weightTrend ?? null,
         weightDelta: weightInfo?.weightDelta ?? null,
+        currentLot,
       };
     });
 
@@ -365,6 +381,17 @@ export class AnimalsService {
         breed: true,
         mother: true,
         children: true,
+        // P1.1: Include current lot
+        lotAnimals: {
+          where: { leftAt: null },
+          take: 1,
+          orderBy: { joinedAt: 'desc' },
+          include: {
+            lot: {
+              select: { id: true, name: true, type: true, status: true },
+            },
+          },
+        },
       },
     });
 
@@ -377,7 +404,14 @@ export class AnimalsService {
       );
     }
 
-    return animal;
+    // P1.1: Transform response to include currentLot
+    const { lotAnimals, ...animalData } = animal;
+    const currentLot = lotAnimals?.[0]?.lot ?? null;
+
+    return {
+      ...animalData,
+      currentLot,
+    };
   }
 
   async update(farmId: string, id: string, dto: UpdateAnimalDto) {

@@ -947,6 +947,7 @@ model Farm {
   speciesPreferences FarmSpeciesPreference[]
   alertTemplatePreferences FarmAlertTemplatePreference[]
   farmAlerts FarmAlert[]
+  lotHistory LotHistory[]  // P2.2: History events
 
   // Indexes
   @@index([ownerId])
@@ -1077,6 +1078,7 @@ model Lot {
   personalCampaigns PersonalCampaign[]
   treatments Treatment[]
   farmAlerts FarmAlert[]
+  lotHistory LotHistory[]  // P2.2: History events
 
   @@index([farmId])
   @@index([productId])
@@ -1103,6 +1105,27 @@ model LotAnimal {
   @@index([lotId])
   @@index([animalId])
   @@map("lot_animals")
+}
+
+// P2.2: Historique des événements d'un lot (status_change, notes)
+model LotHistory {
+  id        String   @id @default(uuid())
+  farmId    String   @map("farm_id")
+  lotId     String   @map("lot_id")
+  type      String   // status_change, note
+  fromValue String?  @map("from_value")
+  toValue   String?  @map("to_value")
+  reason    String?
+  createdBy String?  @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  farm Farm @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  lot  Lot  @relation(fields: [lotId], references: [id], onDelete: Cascade)
+
+  @@index([farmId])
+  @@index([lotId])
+  @@index([createdAt])
+  @@map("lot_history")
 }
 
 // Traitement unifié (traitement + vaccination)
