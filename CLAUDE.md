@@ -61,7 +61,43 @@ Les développements doivent respecter :
 
 ---
 
+## Setup Instructions
+
+### After Pulling New Schema Changes
+
+When new Prisma schema changes are pulled, run the following commands:
+
+```bash
+# 1. Generate Prisma client
+npx prisma generate
+
+# 2. Apply database migrations
+npx prisma migrate dev --name <migration_name>
+
+# 3. (Optional) Run data migration if provided
+# Check prisma/migrations/manual/ for SQL scripts
+```
+
+### Known Issues
+
+- **Prisma binary download blocked**: In some environments, Prisma engine downloads may be blocked (403 Forbidden). Ensure network access to `binaries.prisma.sh` or configure a proxy.
+
+---
+
 ## Sessions Précédentes
+
+### Session 2025-12-13
+- **Pharmacy Module (P1-P2)**: Added pharmacy stats and alerts endpoints
+  - GET /api/v1/farms/:farmId/pharmacy/stats
+  - GET /api/v1/farms/:farmId/pharmacy/alerts
+- **Stock Management (P3)**: Added to FarmerProductLot
+  - Fields: initialQuantity, currentStock, stockUnit, purchaseDate, purchasePrice, supplier
+  - Endpoint: PUT /api/v1/farms/:farmId/product-configs/:configId/lots/:id/adjust-stock
+- **Schema Simplification (P0)**: Added denormalized fields to replace FK references
+  - Product: categoryCode, composition, therapeuticForm, dosage, administrationRoute, targetSpecies, withdrawalMeatDays, withdrawalMilkHours, prescriptionRequired
+  - Treatment: administrationRoute
+- **Pending**: Database migration needs to be applied (`npx prisma migrate dev`)
+- **Pending**: Data migration script at `prisma/migrations/manual/migrate_simplified_fields.sql`
 
 ### Session 2024-12-12
 - Analyse des specs évolutions Page Lots
