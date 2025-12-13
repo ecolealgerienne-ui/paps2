@@ -1,6 +1,19 @@
 /**
  * Script de chargement des données de référence depuis les fichiers CSV
- * Utilise Prisma upsert : insert si n'existe pas, update sinon
+ * Adapté à la nouvelle structure simplifiée (Phase 0)
+ *
+ * Tables principales chargées:
+ * - Species (espèces)
+ * - AgeCategory (catégories d'âge)
+ * - Breed (races)
+ * - Unit (unités)
+ * - Product (médicaments) avec champs simplifiés (categoryCode, composition, etc.)
+ * - ProductPackaging (conditionnements)
+ *
+ * Tables de référence optionnelles (pour rétrocompatibilité):
+ * - ProductCategory
+ * - ActiveSubstance
+ * - AdministrationRoute
  *
  * Usage: npx ts-node scripts/seed-reference-data.ts
  */
@@ -15,26 +28,47 @@ const prisma = new PrismaClient();
 // Chemin vers les fichiers CSV
 const CSV_DIR = path.join(__dirname, 'output_test', 'csv');
 
-// Helper pour parser un fichier CSV
+// Helper pour parser un fichier CSV (supporte les guillemets)
 function parseCSV(filePath: string): Record<string, string>[] {
   const content = fs.readFileSync(filePath, 'utf-8');
-  const lines = content.split('\n').filter(line => line.trim());
+  const lines = content.split('\n').filter((line: string) => line.trim());
 
   if (lines.length === 0) return [];
 
-  const headers = lines[0].split(',').map(h => h.trim());
+  const headers = parseCSVLine(lines[0]);
   const rows: Record<string, string>[] = [];
 
   for (let i = 1; i < lines.length; i++) {
-    const values = lines[i].split(',').map(v => v.trim());
+    const values = parseCSVLine(lines[i]);
     const row: Record<string, string> = {};
-    headers.forEach((header, index) => {
+    headers.forEach((header: string, index: number) => {
       row[header] = values[index] || '';
     });
     rows.push(row);
   }
 
   return rows;
+}
+
+// Parse une ligne CSV en gérant les guillemets
+function parseCSVLine(line: string): string[] {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
 }
 
 // Mapping code_espece CSV -> species.id Prisma
@@ -47,8 +81,17 @@ function mapSpeciesCode(codeEspece: string): string {
   return mapping[codeEspece] || codeEspece.toLowerCase();
 }
 
+// Mapping code_categorie -> categoryCode simplifié
+function mapCategoryCode(codeCategorie: string): string {
+  const mapping: Record<string, string> = {
+    'CHIMIQUE': 'chemical',
+    'IMMUNOLOGIQUE': 'immunological',
+  };
+  return mapping[codeCategorie] || codeCategorie.toLowerCase();
+}
+
 // ============================================================================
-// 1. SPECIES (Espèces)
+// 1. SPECIES (Espèces) - ESSENTIEL
 // ============================================================================
 async function seedSpecies() {
   console.log('\n📦 Chargement des espèces...');
@@ -60,9 +103,9 @@ async function seedSpecies() {
     const id = mapSpeciesCode(row.code_espece);
     const data = {
       nameFr: row.nom,
-      nameEn: row.nom, // Utiliser le nom français par défaut
+      nameEn: row.nom,
       nameAr: row.nom,
-      icon: id, // Utiliser l'ID comme icône
+      icon: id,
       scientificName: row.nom_scientifique || null,
     };
 
@@ -81,7 +124,7 @@ async function seedSpecies() {
 }
 
 // ============================================================================
-// 2. AGE CATEGORIES (Catégories d'âge)
+// 2. AGE CATEGORIES (Catégories d'âge) - ESSENTIEL
 // ============================================================================
 async function seedAgeCategories() {
   console.log('\n📦 Chargement des catégories d\'âge...');
@@ -93,7 +136,6 @@ async function seedAgeCategories() {
     const speciesId = mapSpeciesCode(row.code_espece);
     const code = row.code_categorie.toLowerCase();
 
-    // Vérifier que l'espèce existe
     const species = await prisma.species.findUnique({ where: { id: speciesId } });
     if (!species) {
       console.log(`   ⚠️ Espèce ${speciesId} non trouvée, skip catégorie ${code}`);
@@ -134,110 +176,7 @@ async function seedAgeCategories() {
 }
 
 // ============================================================================
-// 3. PRODUCT CATEGORIES (Catégories de produits)
-// ============================================================================
-async function seedProductCategories() {
-  console.log('\n📦 Chargement des catégories de produits...');
-  const rows = parseCSV(path.join(CSV_DIR, '03_categories_produit.csv'));
-
-  let created = 0, updated = 0;
-
-  for (const row of rows) {
-    const code = `cat_${row.code_categorie}`;
-    const data = {
-      nameFr: row.libelle,
-      nameEn: row.libelle,
-      nameAr: row.libelle,
-      displayOrder: parseInt(row.code_categorie) || 0,
-    };
-
-    const existing = await prisma.productCategory.findUnique({ where: { code } });
-
-    await prisma.productCategory.upsert({
-      where: { code },
-      update: data,
-      create: { code, ...data },
-    });
-
-    existing ? updated++ : created++;
-  }
-
-  console.log(`   ✅ Catégories produits: ${created} créées, ${updated} mises à jour`);
-}
-
-// ============================================================================
-// 4. ACTIVE SUBSTANCES (Substances actives)
-// ============================================================================
-async function seedActiveSubstances() {
-  console.log('\n📦 Chargement des substances actives...');
-  const rows = parseCSV(path.join(CSV_DIR, '04_substances_actives.csv'));
-
-  let created = 0, updated = 0;
-
-  for (const row of rows) {
-    const code = `sub_${row.code_substance}`;
-    const data = {
-      name: row.libelle,
-      nameFr: row.libelle,
-      nameEn: row.libelle,
-      nameAr: row.libelle,
-    };
-
-    const existing = await prisma.activeSubstance.findUnique({ where: { code } });
-
-    await prisma.activeSubstance.upsert({
-      where: { code },
-      update: data,
-      create: { code, ...data },
-    });
-
-    existing ? updated++ : created++;
-  }
-
-  console.log(`   ✅ Substances actives: ${created} créées, ${updated} mises à jour`);
-}
-
-// ============================================================================
-// 5. ADMINISTRATION ROUTES (Voies d'administration)
-// ============================================================================
-async function seedAdministrationRoutes() {
-  console.log('\n📦 Chargement des voies d\'administration...');
-  const rows = parseCSV(path.join(CSV_DIR, '05_voies_administration.csv'));
-
-  let created = 0, updated = 0;
-
-  for (const row of rows) {
-    // Normaliser le code (lowercase, underscores)
-    const code = row.libelle
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Retirer accents
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_|_$/g, '');
-
-    const data = {
-      nameFr: row.libelle,
-      nameEn: row.libelle,
-      nameAr: row.libelle,
-      displayOrder: parseInt(row.code_voie) || 0,
-    };
-
-    const existing = await prisma.administrationRoute.findUnique({ where: { code } });
-
-    await prisma.administrationRoute.upsert({
-      where: { code },
-      update: data,
-      create: { code, ...data },
-    });
-
-    existing ? updated++ : created++;
-  }
-
-  console.log(`   ✅ Voies d'administration: ${created} créées, ${updated} mises à jour`);
-}
-
-// ============================================================================
-// 6. UNITS (Unités)
+// 3. UNITS (Unités) - ESSENTIEL
 // ============================================================================
 async function seedUnits() {
   console.log('\n📦 Chargement des unités...');
@@ -246,7 +185,6 @@ async function seedUnits() {
   let created = 0, updated = 0;
 
   for (const row of rows) {
-    // Normaliser le code
     const code = row.libelle
       .toLowerCase()
       .replace(/[^a-z0-9%µ]+/g, '_')
@@ -270,7 +208,7 @@ async function seedUnits() {
       });
 
       existing ? updated++ : created++;
-    } catch (error) {
+    } catch {
       // Skip duplicates
     }
   }
@@ -279,7 +217,7 @@ async function seedUnits() {
 }
 
 // ============================================================================
-// 7. BREEDS (Races)
+// 4. BREEDS (Races) - ESSENTIEL
 // ============================================================================
 async function seedBreeds() {
   console.log('\n📦 Chargement des races...');
@@ -290,14 +228,12 @@ async function seedBreeds() {
   for (const row of rows) {
     const speciesId = mapSpeciesCode(row.code_espece);
 
-    // Vérifier que l'espèce existe
     const species = await prisma.species.findUnique({ where: { id: speciesId } });
     if (!species) {
       skipped++;
       continue;
     }
 
-    // Normaliser le code
     const code = row.nom_local
       .toLowerCase()
       .normalize('NFD')
@@ -328,7 +264,7 @@ async function seedBreeds() {
       });
 
       existing ? updated++ : created++;
-    } catch (error) {
+    } catch {
       skipped++;
     }
   }
@@ -337,13 +273,12 @@ async function seedBreeds() {
 }
 
 // ============================================================================
-// 8. PRODUCTS (Médicaments)
+// 5. PRODUCTS (Médicaments) - ESSENTIEL avec champs simplifiés
 // ============================================================================
-// Cache pour stocker les mappings id_medicament -> productId
 const productIdMap = new Map<string, string>();
 
 async function seedProducts() {
-  console.log('\n📦 Chargement des médicaments...');
+  console.log('\n📦 Chargement des médicaments (structure simplifiée)...');
   const rows = parseCSV(path.join(CSV_DIR, '09_medicaments_clinique.csv'));
 
   let created = 0, updated = 0, skipped = 0;
@@ -355,18 +290,12 @@ async function seedProducts() {
       continue;
     }
 
-    // Générer un code unique
     const code = `med_${idMedicament}`;
 
-    // Mapper la catégorie
-    const categoryCode = row.code_categorie === 'CHIMIQUE' ? 'cat_1' :
-                         row.code_categorie === 'IMMUNOLOGIQUE' ? 'cat_2' : null;
-
-    let categoryId: string | null = null;
-    if (categoryCode) {
-      const category = await prisma.productCategory.findUnique({ where: { code: categoryCode } });
-      categoryId = category?.id || null;
-    }
+    // Champs simplifiés (Phase 0)
+    const categoryCode = mapCategoryCode(row.code_categorie);
+    const composition = row.substance_active || null;
+    const therapeuticForm = row.forme_pharmaceutique || null;
 
     const data = {
       scope: 'global' as const,
@@ -375,8 +304,11 @@ async function seedProducts() {
       nameEn: row.nom_commercial,
       commercialName: row.nom_commercial,
       atcVetCode: row.code_atcvet || null,
-      form: row.forme_pharmaceutique || null,
-      categoryId,
+      // Champs simplifiés (nouvelle structure)
+      categoryCode,
+      composition,
+      therapeuticForm,
+      form: therapeuticForm, // Legacy field
     };
 
     try {
@@ -388,11 +320,9 @@ async function seedProducts() {
         create: { code, ...data },
       });
 
-      // Sauvegarder le mapping pour les tables liées
       productIdMap.set(idMedicament, product.id);
-
       existing ? updated++ : created++;
-    } catch (error) {
+    } catch {
       skipped++;
     }
   }
@@ -401,100 +331,7 @@ async function seedProducts() {
 }
 
 // ============================================================================
-// 9. THERAPEUTIC INDICATIONS (Posologies)
-// ============================================================================
-// Cache pour les routes d'administration
-const routeIdMap = new Map<string, string>();
-
-async function seedTherapeuticIndications() {
-  console.log('\n📦 Chargement des indications thérapeutiques...');
-
-  // Pré-charger les routes d'administration
-  const routes = await prisma.administrationRoute.findMany();
-  routes.forEach(r => routeIdMap.set(r.displayOrder.toString(), r.id));
-
-  const rows = parseCSV(path.join(CSV_DIR, '10_medicaments_especes_age_posologie.csv'));
-
-  let created = 0, updated = 0, skipped = 0;
-
-  for (const row of rows) {
-    const productId = productIdMap.get(row.id_medicament);
-    if (!productId) {
-      skipped++;
-      continue;
-    }
-
-    const speciesId = mapSpeciesCode(row.code_espece);
-    const species = await prisma.species.findUnique({ where: { id: speciesId } });
-    if (!species) {
-      skipped++;
-      continue;
-    }
-
-    // Trouver la route d'administration
-    const routeId = routeIdMap.get(row.voie_administration);
-    if (!routeId) {
-      skipped++;
-      continue;
-    }
-
-    // Trouver la catégorie d'âge
-    let ageCategoryId: string | null = null;
-    if (row.code_categorie_age) {
-      const ageCategory = await prisma.ageCategory.findFirst({
-        where: { speciesId, code: row.code_categorie_age.toLowerCase() },
-      });
-      ageCategoryId = ageCategory?.id || null;
-    }
-
-    const data = {
-      productId,
-      countryCode: 'FR',
-      speciesId,
-      ageCategoryId,
-      routeId,
-      doseMin: row.dose_min_mg_par_kg ? parseFloat(row.dose_min_mg_par_kg) : null,
-      doseMax: row.dose_max_mg_par_kg ? parseFloat(row.dose_max_mg_par_kg) : null,
-      doseOriginalText: row.dose_texte_original || null,
-      protocolDurationDays: row.protocole_duree_jours ? parseInt(row.protocole_duree_jours) : null,
-      withdrawalMeatDays: parseInt(row.temps_attente_viande_jours) || 0,
-      withdrawalMilkDays: row.temps_attente_lait_jours ? parseInt(row.temps_attente_lait_jours) : null,
-      isVerified: row.parsing_verified === '1',
-      validationNotes: row.notes_validation || null,
-    };
-
-    try {
-      // Chercher si existe déjà
-      const existing = await prisma.therapeuticIndication.findFirst({
-        where: {
-          productId,
-          countryCode: 'FR',
-          speciesId,
-          ageCategoryId,
-          routeId,
-        },
-      });
-
-      if (existing) {
-        await prisma.therapeuticIndication.update({
-          where: { id: existing.id },
-          data,
-        });
-        updated++;
-      } else {
-        await prisma.therapeuticIndication.create({ data });
-        created++;
-      }
-    } catch (error) {
-      skipped++;
-    }
-  }
-
-  console.log(`   ✅ Indications thérapeutiques: ${created} créées, ${updated} mises à jour, ${skipped} ignorées`);
-}
-
-// ============================================================================
-// 10. PRODUCT PACKAGINGS (Conditionnements)
+// 6. PRODUCT PACKAGINGS (Conditionnements) - ESSENTIEL
 // ============================================================================
 async function seedProductPackagings() {
   console.log('\n📦 Chargement des conditionnements...');
@@ -545,14 +382,13 @@ async function seedProductPackagings() {
     const gtinEan = row.gtin_ean || null;
     const packagingLabel = row.description || row.nom_commercial_local || 'Conditionnement standard';
 
-    // Extraire le volume du label si possible (ex: "Flacon de 100 mL")
     const volumeMatch = packagingLabel.match(/(\d+)\s*(ml|mL|ML)/i);
     const volume = volumeMatch ? parseFloat(volumeMatch[1]) : 100;
 
     const data = {
       productId,
       countryCode: 'FR',
-      concentration: 1, // Valeur par défaut
+      concentration: 1,
       concentrationUnitId: defaultUnitId,
       volume,
       volumeUnitId: defaultUnitId,
@@ -561,7 +397,6 @@ async function seedProductPackagings() {
     };
 
     try {
-      // Chercher si existe déjà (par productId + countryCode + gtinEan)
       const existing = await prisma.productPackaging.findFirst({
         where: {
           productId,
@@ -580,7 +415,7 @@ async function seedProductPackagings() {
         await prisma.productPackaging.create({ data });
         created++;
       }
-    } catch (error) {
+    } catch {
       skipped++;
     }
   }
@@ -589,39 +424,152 @@ async function seedProductPackagings() {
 }
 
 // ============================================================================
+// TABLES OPTIONNELLES (pour rétrocompatibilité)
+// ============================================================================
+
+async function seedProductCategories() {
+  console.log('\n📦 [Optionnel] Chargement des catégories de produits...');
+  const rows = parseCSV(path.join(CSV_DIR, '03_categories_produit.csv'));
+
+  let created = 0, updated = 0;
+
+  for (const row of rows) {
+    const code = `cat_${row.code_categorie}`;
+    const data = {
+      nameFr: row.libelle,
+      nameEn: row.libelle,
+      nameAr: row.libelle,
+      displayOrder: parseInt(row.code_categorie) || 0,
+    };
+
+    const existing = await prisma.productCategory.findUnique({ where: { code } });
+
+    await prisma.productCategory.upsert({
+      where: { code },
+      update: data,
+      create: { code, ...data },
+    });
+
+    existing ? updated++ : created++;
+  }
+
+  console.log(`   ✅ Catégories produits: ${created} créées, ${updated} mises à jour`);
+}
+
+async function seedActiveSubstances() {
+  console.log('\n📦 [Optionnel] Chargement des substances actives...');
+  const rows = parseCSV(path.join(CSV_DIR, '04_substances_actives.csv'));
+
+  let created = 0, updated = 0;
+
+  for (const row of rows) {
+    const code = `sub_${row.code_substance}`;
+    const data = {
+      name: row.libelle,
+      nameFr: row.libelle,
+      nameEn: row.libelle,
+      nameAr: row.libelle,
+    };
+
+    const existing = await prisma.activeSubstance.findUnique({ where: { code } });
+
+    await prisma.activeSubstance.upsert({
+      where: { code },
+      update: data,
+      create: { code, ...data },
+    });
+
+    existing ? updated++ : created++;
+  }
+
+  console.log(`   ✅ Substances actives: ${created} créées, ${updated} mises à jour`);
+}
+
+async function seedAdministrationRoutes() {
+  console.log('\n📦 [Optionnel] Chargement des voies d\'administration...');
+  const rows = parseCSV(path.join(CSV_DIR, '05_voies_administration.csv'));
+
+  let created = 0, updated = 0;
+
+  for (const row of rows) {
+    const code = row.libelle
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_|_$/g, '');
+
+    const data = {
+      nameFr: row.libelle,
+      nameEn: row.libelle,
+      nameAr: row.libelle,
+      displayOrder: parseInt(row.code_voie) || 0,
+    };
+
+    const existing = await prisma.administrationRoute.findUnique({ where: { code } });
+
+    await prisma.administrationRoute.upsert({
+      where: { code },
+      update: data,
+      create: { code, ...data },
+    });
+
+    existing ? updated++ : created++;
+  }
+
+  console.log(`   ✅ Voies d'administration: ${created} créées, ${updated} mises à jour`);
+}
+
+// ============================================================================
 // MAIN
 // ============================================================================
 async function main() {
   console.log('╔════════════════════════════════════════════════════════════════╗');
-  console.log('║     SEED REFERENCE DATA - Chargement des tables de référence   ║');
+  console.log('║  SEED REFERENCE DATA - Structure simplifiée (Phase 0)          ║');
   console.log('╚════════════════════════════════════════════════════════════════╝');
 
   try {
-    // Phase 1: Tables de base (pas de dépendances)
-    console.log('\n🔷 Phase 1: Tables de base');
+    // Phase 1: Tables essentielles (pas de dépendances)
+    console.log('\n🔷 Phase 1: Tables essentielles');
     await seedSpecies();
-    await seedProductCategories();
-    await seedActiveSubstances();
-    await seedAdministrationRoutes();
     await seedUnits();
 
     // Phase 2: Tables avec dépendances vers Phase 1
-    console.log('\n🔷 Phase 2: Tables dépendantes');
-    await seedAgeCategories();   // Dépend de Species
-    await seedBreeds();          // Dépend de Species
+    console.log('\n🔷 Phase 2: Tables dépendantes (espèces)');
+    await seedAgeCategories();
+    await seedBreeds();
 
-    // Phase 3: Produits (dépend de categories, substances)
-    console.log('\n🔷 Phase 3: Médicaments');
+    // Phase 3: Médicaments avec champs simplifiés
+    console.log('\n🔷 Phase 3: Médicaments (structure simplifiée)');
     await seedProducts();
 
-    // Phase 4: Tables liées aux produits
-    console.log('\n🔷 Phase 4: Données liées aux médicaments');
-    await seedTherapeuticIndications();  // Dépend de Products, Species, AgeCategories, Routes
-    await seedProductPackagings();       // Dépend de Products
+    // Phase 4: Conditionnements
+    console.log('\n🔷 Phase 4: Conditionnements');
+    await seedProductPackagings();
+
+    // Phase 5: Tables optionnelles (rétrocompatibilité)
+    console.log('\n🔷 Phase 5: Tables optionnelles (rétrocompatibilité)');
+    await seedProductCategories();
+    await seedActiveSubstances();
+    await seedAdministrationRoutes();
 
     console.log('\n╔════════════════════════════════════════════════════════════════╗');
     console.log('║     ✅ Chargement terminé avec succès!                          ║');
     console.log('╚════════════════════════════════════════════════════════════════╝');
+
+    console.log('\n📋 Résumé des tables chargées:');
+    console.log('   - Species (espèces) ✓');
+    console.log('   - AgeCategory (catégories d\'âge) ✓');
+    console.log('   - Unit (unités) ✓');
+    console.log('   - Breed (races) ✓');
+    console.log('   - Product (médicaments + champs simplifiés) ✓');
+    console.log('   - ProductPackaging (conditionnements) ✓');
+    console.log('   - [Optionnel] ProductCategory ✓');
+    console.log('   - [Optionnel] ActiveSubstance ✓');
+    console.log('   - [Optionnel] AdministrationRoute ✓');
+    console.log('\n💡 CSV supprimé: 06_denrees.csv (non utilisé)');
+    console.log('💡 CSV non chargé: 10_medicaments_especes_age_posologie.csv (TherapeuticIndication optionnel)');
+
   } catch (error) {
     console.error('\n❌ Erreur:', error);
     throw error;
