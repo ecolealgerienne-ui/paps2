@@ -50,6 +50,7 @@ import { TreatmentAlertsModule } from './treatment-alerts/treatment-alerts.modul
 import { FarmAlertsModule } from './farm-alerts/farm-alerts.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportsModule } from './reports/reports.module';
+import { PharmacyModule } from './pharmacy/pharmacy.module';
 
 // Get rate limiting configuration
 const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
@@ -131,6 +132,8 @@ const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
     DashboardModule,
     // Reports (bulk data export for PDF/Excel generation)
     ReportsModule,
+    // Pharmacy (stats and alerts for medication management)
+    PharmacyModule,
   ],
   controllers: [AppController],
   providers: [
