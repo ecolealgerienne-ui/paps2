@@ -497,9 +497,20 @@ model Product {
   substanceId               String?             @map("substance_id")
   atcVetCode                String?             @map("atc_vet_code")  // Code ATCvet (ex: QJ01MA90)
 
+  // Simplified fields (Phase 0 - replaces FK references)
+  category                  String?             // "antibiotics", "vaccines", etc. (replaces categoryId)
+  composition               String?             // Active substance text (replaces substanceId relation)
+  therapeuticForm           String?             @map("therapeutic_form")  // "comprimé", "injectable", "poudre"
+  dosage                    String?             // "100 mg/ml", "250 mg"
+  administrationRoute       String?             @map("administration_route")  // "oral", "injectable", "topique"
+  targetSpecies             String[]            @default([]) @map("target_species")  // ["cattle", "sheep", "goats"]
+  withdrawalMeatDays        Int?                @map("withdrawal_meat_days")  // Default withdrawal period (meat)
+  withdrawalMilkHours       Int?                @map("withdrawal_milk_hours") // Default withdrawal period (milk)
+  prescriptionRequired      Boolean             @default(false) @map("prescription_required")
+
   // Fabrication
   manufacturer              String?
-  form                      String?             // injectable, oral, topical, powder, tablet
+  form                      String?             // injectable, oral, topical, powder, tablet (legacy, use therapeuticForm)
 
   // Spécifique vaccins (type = vaccine)
   targetDisease             String?             @map("target_disease")  // Maladie ciblée
@@ -1144,6 +1155,9 @@ model Treatment {
   indicationId                String?          @map("indication_id")   // Règle utilisée
   routeId                     String?          @map("route_id")
 
+  // Simplified fields (Phase 0 - replaces FK references)
+  administrationRoute         String?          @map("administration_route")  // "oral", "injectable", etc. (replaces routeId)
+
   // Traçabilité lot médicament (via FarmerProductLot)
   farmerLotId                 String?          @map("farmer_lot_id")
 
@@ -1510,6 +1524,15 @@ model FarmerProductLot {
   officialLotNumber String   @map("official_lot_number") // "C4567-9A"
   expiryDate        DateTime @map("expiry_date")
   isActive          Boolean  @default(true) @map("is_active")
+
+  // Stock management (optional)
+  initialQuantity   Float?   @map("initial_quantity")   // Quantité initiale
+  currentStock      Float?   @map("current_stock")      // Stock actuel
+  stockUnit         String?  @map("stock_unit")         // "ml", "doses", "comprimés"
+  purchaseDate      DateTime? @map("purchase_date")     // Date d'achat
+  purchasePrice     Float?   @map("purchase_price")     // Prix d'achat
+  supplier          String?                             // Fournisseur
+
   version           Int      @default(1)
   deletedAt         DateTime? @map("deleted_at")
   createdAt         DateTime @default(now()) @map("created_at")

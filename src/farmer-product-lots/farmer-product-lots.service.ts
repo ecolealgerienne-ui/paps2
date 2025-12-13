@@ -4,15 +4,20 @@ import {
   CreateFarmerProductLotDto,
   UpdateFarmerProductLotDto,
   QueryFarmerProductLotDto,
+  AdjustStockDto,
+  StockAdjustmentType,
 } from './dto';
 import {
   EntityNotFoundException,
   EntityConflictException,
 } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
+import { AppLogger } from '../common/utils/logger.service';
 
 @Injectable()
 export class FarmerProductLotsService {
+  private readonly logger = new AppLogger(FarmerProductLotsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -77,13 +82,23 @@ export class FarmerProductLotsService {
       );
     }
 
-    return this.prisma.farmerProductLot.create({
+    // Set currentStock to initialQuantity if provided
+    const currentStock = dto.initialQuantity ?? null;
+
+    const lot = await this.prisma.farmerProductLot.create({
       data: {
         configId,
         nickname: dto.nickname,
         officialLotNumber: dto.officialLotNumber,
         expiryDate: expiryDate,
         isActive: dto.isActive ?? true,
+        // Stock management fields
+        initialQuantity: dto.initialQuantity ?? null,
+        currentStock,
+        stockUnit: dto.stockUnit ?? null,
+        purchaseDate: dto.purchaseDate ? new Date(dto.purchaseDate) : null,
+        purchasePrice: dto.purchasePrice ?? null,
+        supplier: dto.supplier ?? null,
       },
       include: {
         config: {
@@ -95,6 +110,16 @@ export class FarmerProductLotsService {
         },
       },
     });
+
+    this.logger.audit('Farmer product lot created', {
+      lotId: lot.id,
+      configId,
+      farmId,
+      officialLotNumber: dto.officialLotNumber,
+      hasStockManagement: !!dto.initialQuantity,
+    });
+
+    return lot;
   }
 
   /**
@@ -230,13 +255,19 @@ export class FarmerProductLotsService {
       }
     }
 
-    return this.prisma.farmerProductLot.update({
+    const updated = await this.prisma.farmerProductLot.update({
       where: { id },
       data: {
         ...(dto.nickname !== undefined && { nickname: dto.nickname }),
         ...(dto.officialLotNumber !== undefined && { officialLotNumber: dto.officialLotNumber }),
         ...(dto.expiryDate !== undefined && { expiryDate: new Date(dto.expiryDate) }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+        // Stock management fields
+        ...(dto.initialQuantity !== undefined && { initialQuantity: dto.initialQuantity }),
+        ...(dto.stockUnit !== undefined && { stockUnit: dto.stockUnit }),
+        ...(dto.purchaseDate !== undefined && { purchaseDate: dto.purchaseDate ? new Date(dto.purchaseDate) : null }),
+        ...(dto.purchasePrice !== undefined && { purchasePrice: dto.purchasePrice }),
+        ...(dto.supplier !== undefined && { supplier: dto.supplier }),
       },
       include: {
         config: {
@@ -248,6 +279,9 @@ export class FarmerProductLotsService {
         },
       },
     });
+
+    this.logger.audit('Farmer product lot updated', { lotId: id, farmId, configId });
+    return updated;
   }
 
   /**
@@ -354,5 +388,129 @@ export class FarmerProductLotsService {
       },
       orderBy: { expiryDate: 'desc' },
     });
+  }
+
+  /**
+   * Ajuster le stock d'un lot (correction manuelle)
+   * PUT /api/v1/farms/:farmId/product-configs/:configId/lots/:id/adjust-stock
+   */
+  async adjustStock(farmId: string, configId: string, id: string, dto: AdjustStockDto) {
+    this.logger.debug(`Adjusting stock for lot ${id}`, dto);
+
+    // Vérifier que le lot existe
+    const lot = await this.findOne(farmId, configId, id);
+
+    // Vérifier que le lot a un stock initialisé
+    if (lot.currentStock === null && dto.type !== StockAdjustmentType.CORRECTION) {
+      throw new BadRequestException(
+        'Cannot adjust stock on a lot without stock management. Use "correction" type to initialize stock.',
+      );
+    }
+
+    let newStock: number;
+    const previousStock = lot.currentStock ?? 0;
+
+    switch (dto.type) {
+      case StockAdjustmentType.ADD:
+        newStock = previousStock + dto.quantity;
+        break;
+      case StockAdjustmentType.REMOVE:
+        newStock = previousStock - dto.quantity;
+        if (newStock < 0) {
+          throw new BadRequestException(
+            `Cannot remove ${dto.quantity} from stock. Current stock is ${previousStock}.`,
+          );
+        }
+        break;
+      case StockAdjustmentType.CORRECTION:
+        newStock = dto.quantity;
+        break;
+      default:
+        throw new BadRequestException(`Invalid adjustment type: ${dto.type}`);
+    }
+
+    const updated = await this.prisma.farmerProductLot.update({
+      where: { id },
+      data: {
+        currentStock: newStock,
+        // If this is first stock initialization, also set initialQuantity
+        ...(lot.initialQuantity === null && { initialQuantity: newStock }),
+        version: lot.version + 1,
+      },
+      include: {
+        config: {
+          include: {
+            product: {
+              select: { id: true, nameFr: true, commercialName: true },
+            },
+          },
+        },
+      },
+    });
+
+    this.logger.audit('Stock adjusted', {
+      lotId: id,
+      farmId,
+      configId,
+      type: dto.type,
+      quantity: dto.quantity,
+      previousStock,
+      newStock,
+      reason: dto.reason,
+    });
+
+    return {
+      success: true,
+      data: {
+        lot: updated,
+        adjustment: {
+          type: dto.type,
+          quantity: dto.quantity,
+          previousStock,
+          newStock,
+          reason: dto.reason,
+        },
+      },
+    };
+  }
+
+  /**
+   * Décrémenter le stock automatiquement (appelé lors de la création d'un traitement)
+   * @internal
+   */
+  async decrementStock(lotId: string, quantity: number, treatmentId: string) {
+    const lot = await this.prisma.farmerProductLot.findUnique({
+      where: { id: lotId },
+    });
+
+    if (!lot || lot.currentStock === null) {
+      // Stock management not enabled for this lot, skip
+      return null;
+    }
+
+    const newStock = lot.currentStock - quantity;
+
+    if (newStock < 0) {
+      this.logger.debug(`Stock would go negative for lot ${lotId}, skipping decrement`);
+      return null;
+    }
+
+    const updated = await this.prisma.farmerProductLot.update({
+      where: { id: lotId },
+      data: {
+        currentStock: newStock,
+        version: lot.version + 1,
+      },
+    });
+
+    this.logger.audit('Stock auto-decremented', {
+      lotId,
+      treatmentId,
+      quantity,
+      previousStock: lot.currentStock,
+      newStock,
+    });
+
+    return updated;
   }
 }

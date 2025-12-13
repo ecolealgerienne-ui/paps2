@@ -3,9 +3,11 @@ import {
   IsBoolean,
   IsDateString,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 export class CreateFarmerProductLotDto {
@@ -44,4 +46,53 @@ export class CreateFarmerProductLotDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  // Stock management fields (optional)
+  @ApiPropertyOptional({
+    description: 'Quantité initiale du lot',
+    example: 100,
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  initialQuantity?: number;
+
+  @ApiPropertyOptional({
+    description: 'Unité de stock',
+    example: 'ml',
+    enum: ['ml', 'doses', 'comprimés', 'sachets', 'flacons'],
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  stockUnit?: string;
+
+  @ApiPropertyOptional({
+    description: "Date d'achat du lot",
+    example: '2025-01-15',
+  })
+  @IsOptional()
+  @IsDateString()
+  purchaseDate?: string;
+
+  @ApiPropertyOptional({
+    description: "Prix d'achat (en euros)",
+    example: 45.50,
+    minimum: 0,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  purchasePrice?: number;
+
+  @ApiPropertyOptional({
+    description: 'Nom du fournisseur',
+    example: 'Vétoquinol',
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  supplier?: string;
 }

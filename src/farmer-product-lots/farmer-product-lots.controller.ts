@@ -20,6 +20,7 @@ import {
   CreateFarmerProductLotDto,
   UpdateFarmerProductLotDto,
   QueryFarmerProductLotDto,
+  AdjustStockDto,
 } from './dto';
 
 @ApiTags('farmer-product-lots')
@@ -130,6 +131,44 @@ export class FarmerProductLotsController {
     @Param('id') id: string,
   ) {
     return this.service.deactivate(farmId, configId, id);
+  }
+
+  @Put(':id/adjust-stock')
+  @ApiOperation({
+    summary: 'Ajuster le stock d\'un lot',
+    description: 'Permet d\'ajouter, retirer ou corriger le stock d\'un lot de médicament',
+  })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiParam({ name: 'configId', description: 'FarmProductPreference UUID' })
+  @ApiParam({ name: 'id', description: 'Lot UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Stock adjusted',
+    schema: {
+      example: {
+        success: true,
+        data: {
+          lot: { id: 'uuid', currentStock: 90, stockUnit: 'ml' },
+          adjustment: {
+            type: 'remove',
+            quantity: 10,
+            previousStock: 100,
+            newStock: 90,
+            reason: 'Utilisation traitement',
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Invalid adjustment (negative stock, no stock management)' })
+  @ApiResponse({ status: 404, description: 'Lot not found' })
+  adjustStock(
+    @Param('farmId') farmId: string,
+    @Param('configId') configId: string,
+    @Param('id') id: string,
+    @Body() dto: AdjustStockDto,
+  ) {
+    return this.service.adjustStock(farmId, configId, id, dto);
   }
 
   @Delete(':id')
