@@ -498,7 +498,7 @@ model Product {
   atcVetCode                String?             @map("atc_vet_code")  // Code ATCvet (ex: QJ01MA90)
 
   // Simplified fields (Phase 0 - replaces FK references)
-  category                  String?             // "antibiotics", "vaccines", etc. (replaces categoryId)
+  categoryCode              String?             @map("category_code")  // "antibiotics", "vaccines", etc. (replaces categoryId)
   composition               String?             // Active substance text (replaces substanceId relation)
   therapeuticForm           String?             @map("therapeutic_form")  // "comprimé", "injectable", "poudre"
   dosage                    String?             // "100 mg/ml", "250 mg"

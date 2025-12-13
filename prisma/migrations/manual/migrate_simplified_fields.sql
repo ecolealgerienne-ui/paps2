@@ -6,12 +6,12 @@
 -- STEP 1: Migrate Product fields
 -- ============================================================
 
--- Migrate category from ProductCategory
+-- Migrate categoryCode from ProductCategory
 UPDATE "products" p
-SET "category" = pc.code
+SET "category_code" = pc.code
 FROM "product_categories" pc
 WHERE p."category_id" = pc.id
-  AND p."category" IS NULL;
+  AND p."category_code" IS NULL;
 
 -- Migrate composition from ActiveSubstance
 UPDATE "products" p
@@ -72,7 +72,7 @@ WHERE p.id = pw."product_id"
 -- Check Product migration
 -- SELECT
 --   COUNT(*) as total,
---   COUNT(category) as with_category,
+--   COUNT(category_code) as with_category,
 --   COUNT(composition) as with_composition,
 --   COUNT(therapeutic_form) as with_form,
 --   COUNT(withdrawal_meat_days) as with_withdrawal
@@ -89,5 +89,5 @@ WHERE p.id = pw."product_id"
 -- ============================================================
 
 -- To rollback, simply set the new fields to NULL:
--- UPDATE products SET category = NULL, composition = NULL, therapeutic_form = NULL;
+-- UPDATE products SET category_code = NULL, composition = NULL, therapeutic_form = NULL;
 -- UPDATE treatments SET administration_route = NULL;
