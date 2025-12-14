@@ -3,8 +3,9 @@
 ## Contexte Projet
 
 **Projet** : AniTra Backend - Application de gestion d'élevage
-**Stack** : NestJS v10 + TypeScript v5 + Prisma v5 + PostgreSQL 16
+**Stack** : NestJS v10 + TypeScript v5 + Prisma v6 + PostgreSQL 16
 **Architecture** : Multi-tenancy avec isolation par `farmId`
+**Environnement Dev** : Windows + PowerShell
 
 ---
 
@@ -78,13 +79,45 @@ npx prisma migrate dev --name <migration_name>
 # Check prisma/migrations/manual/ for SQL scripts
 ```
 
+### MVP Mode - Reset Database (PowerShell)
+
+When making major schema changes during MVP, use `db push` instead of migrations:
+
+```powershell
+# Delete existing migrations (if corrupted)
+Remove-Item -Recurse -Force prisma/migrations
+
+# Reset database and sync schema
+npx prisma db push --force-reset
+
+# Regenerate Prisma client
+npx prisma generate
+
+# Load seed data
+npx ts-node scripts/seed-reference-data.ts
+```
+
 ### Known Issues
 
 - **Prisma binary download blocked**: In some environments, Prisma engine downloads may be blocked (403 Forbidden). Ensure network access to `binaries.prisma.sh` or configure a proxy.
+- **Prisma migration error P3015**: If you get "Could not find the migration file", delete the `prisma/migrations` folder and use `db push --force-reset` instead.
 
 ---
 
 ## Sessions Précédentes
+
+### Session 2025-12-14
+- **MVP Schema Cleanup**: Suppression des tables/ENUMs non utilisées
+  - Tables supprimées: `ActiveSubstance`, `ProductCategory`, `AdministrationRoute`, `TherapeuticIndication`, `ProductPackaging`
+  - ENUMs supprimés: `VaccineTargetDisease`, `MedicalProductType`
+  - FK supprimées: `categoryId`, `substanceId` de Product; `packagingId`, `indicationId`, `routeId` de Treatment
+- **Modules NestJS supprimés** (5 modules):
+  - `active-substances/`, `product-categories/`, `administration-routes/`, `therapeutic-indications/`, `product-packagings/`
+- **Services simplifiés**:
+  - `products.service.ts`: Suppression des includes category/substance
+  - `treatments.service.ts`: Utilise directement Product.withdrawalMeatDays/withdrawalMilkHours
+- **Données dénormalisées dans Product**: categoryCode, composition, therapeuticForm, dosage, administrationRoute, targetSpecies, withdrawalMeatDays, withdrawalMilkHours, prescriptionRequired
+- **Action requise**: Exécuter `npx prisma db push --force-reset` puis `npx ts-node scripts/seed-reference-data.ts`
 
 ### Session 2025-12-13
 - **Pharmacy Module (P1-P2)**: Added pharmacy stats and alerts endpoints
@@ -96,8 +129,7 @@ npx prisma migrate dev --name <migration_name>
 - **Schema Simplification (P0)**: Added denormalized fields to replace FK references
   - Product: categoryCode, composition, therapeuticForm, dosage, administrationRoute, targetSpecies, withdrawalMeatDays, withdrawalMilkHours, prescriptionRequired
   - Treatment: administrationRoute
-- **Pending**: Database migration needs to be applied (`npx prisma migrate dev`)
-- **Pending**: Data migration script at `prisma/migrations/manual/migrate_simplified_fields.sql`
+- **Complété en session 2025-12-14**: Schema simplifié, tables supprimées
 
 ### Session 2024-12-12
 - Analyse des specs évolutions Page Lots
