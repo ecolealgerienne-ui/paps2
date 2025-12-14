@@ -2,7 +2,7 @@ export interface AuthUser {
   userId: string;
   email: string;
   farmIds: string[];
-  defaultFarmId: string;
+  defaultFarmId: string | null;
   roles: string[];
 }
 
