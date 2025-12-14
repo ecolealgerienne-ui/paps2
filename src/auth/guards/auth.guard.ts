@@ -19,11 +19,15 @@ export class AuthGuard implements CanActivate {
     if (SecurityConfigService.isMvpMode()) {
       this.logger.debug('MVP Mode: Using fake dev user');
 
+      // Extract farmId from URL if present (e.g., /api/v1/farms/:farmId/...)
+      const farmIdFromUrl = request.params?.farmId;
+
       const devUser: AuthUser = {
         userId: 'dev-user-001',
-        email: 'dev@anitra.dz',
-        farmIds: ['550e8400-e29b-41d4-a716-446655440000'], // UUID
-        defaultFarmId: '550e8400-e29b-41d4-a716-446655440000', // UUID
+        email: 'dev@anitra.fr',
+        // MVP: Accept any farmId from frontend
+        farmIds: farmIdFromUrl ? [farmIdFromUrl] : [],
+        defaultFarmId: farmIdFromUrl || null,
         roles: ['farm_owner'],
       };
 
