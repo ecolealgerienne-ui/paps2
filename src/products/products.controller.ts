@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { ProductType } from '@prisma/client';
 import { ProductsService, PaginatedResponse } from './products.service';
-import { CreateProductDto, CreateGlobalProductDto, UpdateProductDto, QueryProductDto, ProductResponseDto } from './dto';
+import { CreateProductDto, CreateGlobalProductDto, UpdateProductDto, QueryProductDto, CatalogQueryDto, ProductResponseDto } from './dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 
@@ -99,6 +99,25 @@ export class ProductsController {
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     return this.productsService.search(farmId, term, limit);
+  }
+
+  @Get('farms/:farmId/products/catalog')
+  @ApiOperation({ summary: 'Get product catalog with advanced filters' })
+  @ApiParam({ name: 'farmId', description: 'Farm UUID' })
+  @ApiQuery({ name: 'search', required: false, description: 'Search in name, code, manufacturer, composition' })
+  @ApiQuery({ name: 'species', required: false, enum: ['bovine', 'ovine', 'caprine', 'porcine', 'poultry', 'all'], description: 'Filter by target species' })
+  @ApiQuery({ name: 'type', required: false, enum: ['antibiotic', 'vaccine', 'antiparasitic', 'anti_inflammatory', 'vitamin', 'other', 'all'], description: 'Filter by product type' })
+  @ApiQuery({ name: 'therapeuticForm', required: false, enum: ['injectable', 'oral', 'topical', 'intramammary', 'pour-on', 'bolus', 'powder', 'suspension', 'tablet', 'all'], description: 'Filter by therapeutic form' })
+  @ApiQuery({ name: 'prescription', required: false, enum: ['required', 'notRequired', 'all'], description: 'Filter by prescription requirement' })
+  @ApiQuery({ name: 'withdrawal', required: false, enum: ['noMilk', 'shortMeat', 'none', 'all'], description: 'Filter by withdrawal period' })
+  @ApiQuery({ name: 'page', required: false, description: 'Page number (default: 1)' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Items per page (default: 50, max: 100)' })
+  @ApiResponse({ status: 200, description: 'Product catalog with pagination metadata' })
+  async findCatalog(
+    @Param('farmId') farmId: string,
+    @Query() query: CatalogQueryDto,
+  ): Promise<PaginatedResponse> {
+    return this.productsService.findCatalog(farmId, query);
   }
 
   @Get('farms/:farmId/products/type/:type')

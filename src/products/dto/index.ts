@@ -271,5 +271,74 @@ export class QueryProductDto {
   order?: 'asc' | 'desc';
 }
 
+// =============================================================================
+// CATALOG QUERY DTO - Advanced filtering for product catalog
+// =============================================================================
+export class CatalogQueryDto {
+  @ApiPropertyOptional({ description: 'Search in name, code, manufacturer, composition' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({
+    description: 'Filter by target species',
+    enum: ['bovine', 'ovine', 'caprine', 'porcine', 'poultry', 'all'],
+    default: 'all',
+  })
+  @IsOptional()
+  @IsString()
+  species?: 'bovine' | 'ovine' | 'caprine' | 'porcine' | 'poultry' | 'all';
+
+  @ApiPropertyOptional({
+    description: 'Filter by product type',
+    enum: ['antibiotic', 'vaccine', 'antiparasitic', 'anti_inflammatory', 'vitamin', 'other', 'all'],
+    default: 'all',
+  })
+  @IsOptional()
+  @IsString()
+  type?: 'antibiotic' | 'vaccine' | 'antiparasitic' | 'anti_inflammatory' | 'vitamin' | 'other' | 'all';
+
+  @ApiPropertyOptional({
+    description: 'Filter by therapeutic form',
+    enum: ['injectable', 'oral', 'topical', 'intramammary', 'pour-on', 'bolus', 'powder', 'suspension', 'tablet', 'all'],
+    default: 'all',
+  })
+  @IsOptional()
+  @IsString()
+  therapeuticForm?: 'injectable' | 'oral' | 'topical' | 'intramammary' | 'pour-on' | 'bolus' | 'powder' | 'suspension' | 'tablet' | 'all';
+
+  @ApiPropertyOptional({
+    description: 'Filter by prescription requirement',
+    enum: ['required', 'notRequired', 'all'],
+    default: 'all',
+  })
+  @IsOptional()
+  @IsString()
+  prescription?: 'required' | 'notRequired' | 'all';
+
+  @ApiPropertyOptional({
+    description: 'Filter by withdrawal period (noMilk: no milk withdrawal, shortMeat: meat < 7 days, none: no withdrawal)',
+    enum: ['noMilk', 'shortMeat', 'none', 'all'],
+    default: 'all',
+  })
+  @IsOptional()
+  @IsString()
+  withdrawal?: 'noMilk' | 'shortMeat' | 'none' | 'all';
+
+  @ApiPropertyOptional({ description: 'Page number', default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page (max: 100)', default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number;
+}
+
 // Export response DTO
 export * from './product-response.dto';

@@ -1,7 +1,7 @@
 import { Injectable, ForbiddenException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, DataScope, ProductType } from '@prisma/client';
-import { CreateProductDto, CreateGlobalProductDto, UpdateProductDto, QueryProductDto, ProductResponseDto } from './dto';
+import { CreateProductDto, CreateGlobalProductDto, UpdateProductDto, QueryProductDto, CatalogQueryDto, ProductResponseDto } from './dto';
 import { AppLogger } from '../common/utils/logger.service';
 import { EntityNotFoundException } from '../common/exceptions';
 import { ERROR_CODES } from '../common/constants/error-codes';
@@ -665,5 +665,156 @@ export class ProductsService {
 
     this.logger.audit('Global product restored', { productId: id, code: product.code });
     return restored;
+  }
+
+  // =============================================================================
+  // Catalog endpoint - Advanced filtering
+  // =============================================================================
+
+  /**
+   * Find products in catalog with advanced filters
+   * Supports filtering by species, type, therapeutic form, prescription, withdrawal
+   */
+  async findCatalog(farmId: string, query: CatalogQueryDto): Promise<PaginatedResponse> {
+    const {
+      search,
+      species = 'all',
+      type = 'all',
+      therapeuticForm = 'all',
+      prescription = 'all',
+      withdrawal = 'all',
+      page = 1,
+      limit = 50,
+    } = query;
+
+    // Cap limit at 100
+    const safeLimit = Math.min(limit, 100);
+
+    // Build where clause
+    const where: Prisma.ProductWhereInput = {
+      deletedAt: null,
+      isActive: true,
+      // Include global products + farm's local products
+      OR: [
+        { scope: DataScope.global },
+        { scope: DataScope.local, farmId },
+      ],
+    };
+
+    // Search filter (name, code, manufacturer, composition)
+    if (search) {
+      where.AND = [
+        {
+          OR: [
+            { nameFr: { contains: search, mode: 'insensitive' } },
+            { nameEn: { contains: search, mode: 'insensitive' } },
+            { commercialName: { contains: search, mode: 'insensitive' } },
+            { code: { contains: search, mode: 'insensitive' } },
+            { manufacturer: { contains: search, mode: 'insensitive' } },
+            { composition: { contains: search, mode: 'insensitive' } },
+          ],
+        },
+      ];
+    }
+
+    // Species filter (search in targetSpecies array)
+    if (species !== 'all') {
+      const speciesMapping: Record<string, string[]> = {
+        bovine: ['Bovins', 'Bovine', 'bovine', 'Cattle', 'Vaches', 'Veaux'],
+        ovine: ['Ovins', 'Ovine', 'ovine', 'Sheep', 'Moutons', 'Brebis'],
+        caprine: ['Caprins', 'Caprine', 'caprine', 'Goats', 'Chèvres'],
+        porcine: ['Porcins', 'Porcine', 'porcine', 'Pigs', 'Porcs'],
+        poultry: ['Volailles', 'Poultry', 'poultry', 'Poulets', 'Poules'],
+      };
+      const speciesTerms = speciesMapping[species] || [species];
+      where.targetSpecies = { hasSome: speciesTerms };
+    }
+
+    // Type filter
+    if (type !== 'all') {
+      where.type = type as ProductType;
+    }
+
+    // Therapeutic form filter
+    if (therapeuticForm !== 'all') {
+      where.therapeuticForm = { contains: therapeuticForm, mode: 'insensitive' };
+    }
+
+    // Prescription filter
+    if (prescription === 'required') {
+      where.prescriptionRequired = true;
+    } else if (prescription === 'notRequired') {
+      where.prescriptionRequired = false;
+    }
+
+    // Withdrawal filter
+    if (withdrawal === 'noMilk') {
+      // No milk withdrawal: withdrawalMilkHours = 0 OR NULL
+      where.OR = [
+        ...(where.OR || []),
+        { withdrawalMilkHours: 0 },
+        { withdrawalMilkHours: null },
+      ];
+    } else if (withdrawal === 'shortMeat') {
+      // Short meat withdrawal: < 7 days
+      where.withdrawalMeatDays = { lt: 7 };
+    } else if (withdrawal === 'none') {
+      // No withdrawal at all
+      where.AND = [
+        ...(Array.isArray(where.AND) ? where.AND : []),
+        {
+          OR: [
+            { withdrawalMilkHours: 0 },
+            { withdrawalMilkHours: null },
+          ],
+        },
+        {
+          OR: [
+            { withdrawalMeatDays: 0 },
+            { withdrawalMeatDays: null },
+          ],
+        },
+      ];
+    }
+
+    // Execute query with pagination
+    const skip = (page - 1) * safeLimit;
+    const [data, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        orderBy: { nameFr: 'asc' },
+        skip,
+        take: safeLimit,
+        select: {
+          id: true,
+          code: true,
+          nameFr: true,
+          commercialName: true,
+          type: true,
+          therapeuticForm: true,
+          manufacturer: true,
+          composition: true,
+          dosage: true,
+          administrationRoute: true,
+          targetSpecies: true,
+          prescriptionRequired: true,
+          withdrawalMeatDays: true,
+          withdrawalMilkHours: true,
+        },
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    this.logger.debug(`Catalog search: found ${total} products (page ${page}/${Math.ceil(total / safeLimit)})`);
+
+    return {
+      data: data as unknown as ProductResponseDto[],
+      meta: {
+        total,
+        page,
+        limit: safeLimit,
+        totalPages: Math.ceil(total / safeLimit),
+      },
+    };
   }
 }
