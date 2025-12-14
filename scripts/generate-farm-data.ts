@@ -23,7 +23,7 @@ const { v4: uuidv4 } = require('uuid');
 // Configuration
 // ============================================================================
 const OUTPUT_DIR = path.join(__dirname, 'output_test', 'farm_data');
-const FARM_ID = 'd8f9288a-92a6-4bfa-8201-d7c61b5a4eaf'; // Fixed farm ID
+const FARM_ID = '550e8400-e29b-41d4-a716-446655440000'; // Fixed farm ID (matches MVP dev user)
 
 // Date range: 2023-2025
 const START_DATE = new Date('2023-01-01');
