@@ -1,8 +1,8 @@
 /**
  * Script de chargement des données de référence depuis les fichiers CSV
- * Adapté à la nouvelle structure simplifiée (Phase 0) + données AMM enrichies
+ * Adapté à la nouvelle structure simplifiée MVP (Phase 0)
  *
- * Tables principales chargées:
+ * Tables chargées:
  * - Species (espèces)
  * - AgeCategory (catégories d'âge)
  * - Breed (races)
@@ -13,12 +13,6 @@
  *   - Délais d'attente (viande/lait)
  *   - Ordonnance obligatoire
  *   - Lien RCP ANMV
- * - ProductPackaging (conditionnements)
- *
- * Tables de référence optionnelles (pour rétrocompatibilité):
- * - ProductCategory
- * - ActiveSubstance
- * - AdministrationRoute
  *
  * Source des données produits: products-amm.csv (généré depuis XML ANMV)
  * Fallback: 09_medicaments_clinique.csv (ancien format)
@@ -283,8 +277,6 @@ async function seedBreeds() {
 // ============================================================================
 // 5. PRODUCTS (Médicaments) - ESSENTIEL avec champs simplifiés AMM
 // ============================================================================
-const productIdMap = new Map<string, string>();
-
 async function seedProducts() {
   console.log('\n📦 Chargement des médicaments (données AMM enrichies)...');
 
@@ -342,13 +334,12 @@ async function seedProducts() {
     try {
       const existing = await prisma.product.findUnique({ where: { code } });
 
-      const product = await prisma.product.upsert({
+      await prisma.product.upsert({
         where: { code },
         update: data,
         create: { code, ...data },
       });
 
-      productIdMap.set(row.srcId, product.id);
       existing ? updated++ : created++;
     } catch (error) {
       skipped++;
@@ -396,13 +387,12 @@ async function seedProductsLegacy() {
     try {
       const existing = await prisma.product.findUnique({ where: { code } });
 
-      const product = await prisma.product.upsert({
+      await prisma.product.upsert({
         where: { code },
         update: data,
         create: { code, ...data },
       });
 
-      productIdMap.set(idMedicament, product.id);
       existing ? updated++ : created++;
     } catch {
       skipped++;
@@ -413,31 +403,11 @@ async function seedProductsLegacy() {
 }
 
 // ============================================================================
-// 6. PRODUCT PACKAGINGS (Conditionnements) - ESSENTIEL
+// 6. COUNTRY (Pays) - Pour référence
 // ============================================================================
-async function seedProductPackagings() {
-  console.log('\n📦 Chargement des conditionnements...');
+async function seedCountry() {
+  console.log('\n📦 Création du pays France...');
 
-  // S'assurer qu'on a une unité par défaut
-  let defaultUnitId: string;
-  const defaultUnit = await prisma.unit.findFirst({ where: { code: 'ml' } });
-  if (defaultUnit) {
-    defaultUnitId = defaultUnit.id;
-  } else {
-    const newUnit = await prisma.unit.create({
-      data: {
-        code: 'ml',
-        symbol: 'ml',
-        nameFr: 'millilitre',
-        nameEn: 'milliliter',
-        nameAr: 'milliliter',
-        unitType: 'volume',
-      },
-    });
-    defaultUnitId = newUnit.id;
-  }
-
-  // S'assurer que le pays FR existe
   await prisma.country.upsert({
     where: { code: 'FR' },
     update: {},
@@ -450,156 +420,7 @@ async function seedProductPackagings() {
     },
   });
 
-  const rows = parseCSV(path.join(CSV_DIR, '11_conditionnements_nationaux.csv'));
-
-  let created = 0, updated = 0, skipped = 0;
-
-  for (const row of rows) {
-    const productId = productIdMap.get(row.id_medicament);
-    if (!productId) {
-      skipped++;
-      continue;
-    }
-
-    const gtinEan = row.gtin_ean || null;
-    const packagingLabel = row.description || row.nom_commercial_local || 'Conditionnement standard';
-
-    const volumeMatch = packagingLabel.match(/(\d+)\s*(ml|mL|ML)/i);
-    const volume = volumeMatch ? parseFloat(volumeMatch[1]) : 100;
-
-    const data = {
-      productId,
-      countryCode: 'FR',
-      concentration: 1,
-      concentrationUnitId: defaultUnitId,
-      volume,
-      volumeUnitId: defaultUnitId,
-      packagingLabel,
-      gtinEan,
-    };
-
-    try {
-      const existing = await prisma.productPackaging.findFirst({
-        where: {
-          productId,
-          countryCode: 'FR',
-          gtinEan: gtinEan || undefined,
-        },
-      });
-
-      if (existing) {
-        await prisma.productPackaging.update({
-          where: { id: existing.id },
-          data,
-        });
-        updated++;
-      } else {
-        await prisma.productPackaging.create({ data });
-        created++;
-      }
-    } catch {
-      skipped++;
-    }
-  }
-
-  console.log(`   ✅ Conditionnements: ${created} créés, ${updated} mis à jour, ${skipped} ignorés`);
-}
-
-// ============================================================================
-// TABLES OPTIONNELLES (pour rétrocompatibilité)
-// ============================================================================
-
-async function seedProductCategories() {
-  console.log('\n📦 [Optionnel] Chargement des catégories de produits...');
-  const rows = parseCSV(path.join(CSV_DIR, '03_categories_produit.csv'));
-
-  let created = 0, updated = 0;
-
-  for (const row of rows) {
-    const code = `cat_${row.code_categorie}`;
-    const data = {
-      nameFr: row.libelle,
-      nameEn: row.libelle,
-      nameAr: row.libelle,
-      displayOrder: parseInt(row.code_categorie) || 0,
-    };
-
-    const existing = await prisma.productCategory.findUnique({ where: { code } });
-
-    await prisma.productCategory.upsert({
-      where: { code },
-      update: data,
-      create: { code, ...data },
-    });
-
-    existing ? updated++ : created++;
-  }
-
-  console.log(`   ✅ Catégories produits: ${created} créées, ${updated} mises à jour`);
-}
-
-async function seedActiveSubstances() {
-  console.log('\n📦 [Optionnel] Chargement des substances actives...');
-  const rows = parseCSV(path.join(CSV_DIR, '04_substances_actives.csv'));
-
-  let created = 0, updated = 0;
-
-  for (const row of rows) {
-    const code = `sub_${row.code_substance}`;
-    const data = {
-      name: row.libelle,
-      nameFr: row.libelle,
-      nameEn: row.libelle,
-      nameAr: row.libelle,
-    };
-
-    const existing = await prisma.activeSubstance.findUnique({ where: { code } });
-
-    await prisma.activeSubstance.upsert({
-      where: { code },
-      update: data,
-      create: { code, ...data },
-    });
-
-    existing ? updated++ : created++;
-  }
-
-  console.log(`   ✅ Substances actives: ${created} créées, ${updated} mises à jour`);
-}
-
-async function seedAdministrationRoutes() {
-  console.log('\n📦 [Optionnel] Chargement des voies d\'administration...');
-  const rows = parseCSV(path.join(CSV_DIR, '05_voies_administration.csv'));
-
-  let created = 0, updated = 0;
-
-  for (const row of rows) {
-    const code = row.libelle
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_|_$/g, '');
-
-    const data = {
-      nameFr: row.libelle,
-      nameEn: row.libelle,
-      nameAr: row.libelle,
-      displayOrder: parseInt(row.code_voie) || 0,
-    };
-
-    const existing = await prisma.administrationRoute.findUnique({ where: { code } });
-
-    await prisma.administrationRoute.upsert({
-      where: { code },
-      update: data,
-      create: { code, ...data },
-    });
-
-    existing ? updated++ : created++;
-  }
-
-  console.log(`   ✅ Voies d'administration: ${created} créées, ${updated} mises à jour`);
+  console.log('   ✅ Pays France créé');
 }
 
 // ============================================================================
@@ -607,7 +428,7 @@ async function seedAdministrationRoutes() {
 // ============================================================================
 async function main() {
   console.log('╔════════════════════════════════════════════════════════════════╗');
-  console.log('║  SEED REFERENCE DATA - Structure simplifiée (Phase 0)          ║');
+  console.log('║  SEED REFERENCE DATA - MVP (Structure simplifiée)              ║');
   console.log('╚════════════════════════════════════════════════════════════════╝');
 
   try {
@@ -615,25 +436,16 @@ async function main() {
     console.log('\n🔷 Phase 1: Tables essentielles');
     await seedSpecies();
     await seedUnits();
+    await seedCountry();
 
     // Phase 2: Tables avec dépendances vers Phase 1
     console.log('\n🔷 Phase 2: Tables dépendantes (espèces)');
     await seedAgeCategories();
     await seedBreeds();
 
-    // Phase 3: Médicaments avec champs simplifiés
-    console.log('\n🔷 Phase 3: Médicaments (structure simplifiée)');
+    // Phase 3: Médicaments avec champs simplifiés (données dénormalisées)
+    console.log('\n🔷 Phase 3: Médicaments (données AMM dénormalisées)');
     await seedProducts();
-
-    // Phase 4: Conditionnements
-    console.log('\n🔷 Phase 4: Conditionnements');
-    await seedProductPackagings();
-
-    // Phase 5: Tables optionnelles (rétrocompatibilité)
-    console.log('\n🔷 Phase 5: Tables optionnelles (rétrocompatibilité)');
-    await seedProductCategories();
-    await seedActiveSubstances();
-    await seedAdministrationRoutes();
 
     console.log('\n╔════════════════════════════════════════════════════════════════╗');
     console.log('║     ✅ Chargement terminé avec succès!                          ║');
@@ -644,15 +456,12 @@ async function main() {
     console.log('   - AgeCategory (catégories d\'âge) ✓');
     console.log('   - Unit (unités) ✓');
     console.log('   - Breed (races) ✓');
+    console.log('   - Country (pays) ✓');
     console.log('   - Product (médicaments AMM enrichis) ✓');
     console.log('     • Nom, fabricant, forme thérapeutique');
     console.log('     • Espèces cibles, voie d\'administration');
     console.log('     • Délais d\'attente viande/lait');
     console.log('     • Ordonnance obligatoire, lien RCP');
-    console.log('   - ProductPackaging (conditionnements) ✓');
-    console.log('   - [Optionnel] ProductCategory ✓');
-    console.log('   - [Optionnel] ActiveSubstance ✓');
-    console.log('   - [Optionnel] AdministrationRoute ✓');
     console.log('\n💡 Source: products-amm.csv (3191 médicaments ANMV France)');
 
   } catch (error) {
