@@ -165,7 +165,6 @@ export class ProductsService {
       search,
       scope = 'all',
       type,
-      categoryId,
       isActive,
       vaccinesOnly,
       page = 1,
@@ -258,10 +257,6 @@ export class ProductsService {
           { scope: DataScope.global },
           { scope: DataScope.local, farmId },
         ],
-      },
-      include: {
-        category: true,
-        substance: true,
       },
     });
 
@@ -446,10 +441,6 @@ export class ProductsService {
         deletedAt: null,
         version: product.version + 1,
       },
-      include: {
-        category: true,
-        substance: true,
-      },
     });
 
     this.logger.audit('Product restored', { productId: id, farmId });
@@ -479,10 +470,6 @@ export class ProductsService {
           { scope: DataScope.global },
           { scope: DataScope.local, farmId },
         ],
-      },
-      include: {
-        category: true,
-        substance: true,
       },
       orderBy: { nameFr: 'asc' },
     });
@@ -535,7 +522,6 @@ export class ProductsService {
     const {
       search,
       type,
-      categoryId,
       isActive,
       vaccinesOnly,
       page = 1,
@@ -601,10 +587,6 @@ export class ProductsService {
         id,
         scope: DataScope.global,
         deletedAt: null,
-      },
-      include: {
-        category: true,
-        substance: true,
       },
     });
 
@@ -678,10 +660,6 @@ export class ProductsService {
       data: {
         deletedAt: null,
         version: product.version + 1,
-      },
-      include: {
-        category: true,
-        substance: true,
       },
     });
 
