@@ -129,10 +129,6 @@ export class TreatmentsService {
         autoCalculateWithdrawal,
         batchExpiryDate,
         nextDueDate,
-        // Remove deprecated fields
-        packagingId: _packagingId,
-        indicationId: _indicationId,
-        routeId: _routeId,
         ...treatmentData
       } = dto;
 
@@ -474,10 +470,6 @@ export class TreatmentsService {
         withdrawalEndDate,
         nextDueDate,
         batchExpiryDate,
-        // Remove deprecated fields
-        packagingId: _packagingId,
-        indicationId: _indicationId,
-        routeId: _routeId,
         ...treatmentData
       } = dto;
 

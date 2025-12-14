@@ -188,11 +188,6 @@ export class CountriesService {
   private async checkUsage(code: string): Promise<number> {
     const upperCode = code.toUpperCase();
 
-    // Count usage in ProductPackaging
-    const packagings = await this.prisma.productPackaging.count({
-      where: { countryCode: upperCode }
-    });
-
     // Count usage in BreedCountry
     const breedCountries = await this.prisma.breedCountry.count({
       where: { countryCode: upperCode }
@@ -203,12 +198,8 @@ export class CountriesService {
       where: { countryCode: upperCode }
     });
 
-    // Count usage in TherapeuticIndication
-    const therapeuticIndications = await this.prisma.therapeuticIndication.count({
-      where: { countryCode: upperCode }
-    });
-
-    return packagings + breedCountries + campaignCountries + therapeuticIndications;
+    // MVP: productPackaging and therapeuticIndication tables removed
+    return breedCountries + campaignCountries;
   }
 
   /**

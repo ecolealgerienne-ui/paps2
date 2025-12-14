@@ -294,19 +294,7 @@ export class AgeCategoriesService {
       throw new NotFoundException(`Age category with ID "${id}" not found`);
     }
 
-    // Check dependencies
-    const therapeuticIndicationsCount = await this.prisma.therapeuticIndication.count({
-      where: { ageCategoryId: id, deletedAt: null },
-    });
-
-    if (therapeuticIndicationsCount > 0) {
-      this.logger.warn(`Cannot delete age category ${id}: has dependencies`, {
-        therapeuticIndicationsCount,
-      });
-      throw new ConflictException(
-        `Cannot delete age category "${existing.code}": used in ${therapeuticIndicationsCount} therapeutic indication(s)`,
-      );
-    }
+    // No dependency checks needed for MVP (therapeuticIndication table removed)
 
     try {
       await this.prisma.ageCategory.update({
