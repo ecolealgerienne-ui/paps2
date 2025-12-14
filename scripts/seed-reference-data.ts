@@ -1,19 +1,27 @@
 /**
  * Script de chargement des données de référence depuis les fichiers CSV
- * Adapté à la nouvelle structure simplifiée (Phase 0)
+ * Adapté à la nouvelle structure simplifiée (Phase 0) + données AMM enrichies
  *
  * Tables principales chargées:
  * - Species (espèces)
  * - AgeCategory (catégories d'âge)
  * - Breed (races)
  * - Unit (unités)
- * - Product (médicaments) avec champs simplifiés (categoryCode, composition, etc.)
+ * - Product (médicaments) avec données AMM enrichies:
+ *   - Nom, fabricant, forme thérapeutique
+ *   - Espèces cibles, voie d'administration
+ *   - Délais d'attente (viande/lait)
+ *   - Ordonnance obligatoire
+ *   - Lien RCP ANMV
  * - ProductPackaging (conditionnements)
  *
  * Tables de référence optionnelles (pour rétrocompatibilité):
  * - ProductCategory
  * - ActiveSubstance
  * - AdministrationRoute
+ *
+ * Source des données produits: products-amm.csv (généré depuis XML ANMV)
+ * Fallback: 09_medicaments_clinique.csv (ancien format)
  *
  * Usage: npx ts-node scripts/seed-reference-data.ts
  */
@@ -273,12 +281,86 @@ async function seedBreeds() {
 }
 
 // ============================================================================
-// 5. PRODUCTS (Médicaments) - ESSENTIEL avec champs simplifiés
+// 5. PRODUCTS (Médicaments) - ESSENTIEL avec champs simplifiés AMM
 // ============================================================================
 const productIdMap = new Map<string, string>();
 
 async function seedProducts() {
-  console.log('\n📦 Chargement des médicaments (structure simplifiée)...');
+  console.log('\n📦 Chargement des médicaments (données AMM enrichies)...');
+
+  // Utiliser le nouveau fichier AMM enrichi
+  const csvPath = path.join(CSV_DIR, 'products-amm.csv');
+  if (!fs.existsSync(csvPath)) {
+    console.log('   ⚠️ Fichier products-amm.csv non trouvé, utilisation de l\'ancien format');
+    return seedProductsLegacy();
+  }
+
+  const rows = parseCSV(csvPath);
+  let created = 0, updated = 0, skipped = 0;
+
+  for (const row of rows) {
+    const code = row.code;
+    if (!code || !row.name) {
+      skipped++;
+      continue;
+    }
+
+    // Parser les espèces cibles en tableau
+    const targetSpecies = row.targetSpecies
+      ? row.targetSpecies.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : [];
+
+    // Parser les délais d'attente
+    const withdrawalMeatDays = row.withdrawalMeatDays ? parseInt(row.withdrawalMeatDays) : null;
+    const withdrawalMilkHours = row.withdrawalMilkHours ? parseInt(row.withdrawalMilkHours) : null;
+
+    // Parser prescription required
+    const prescriptionRequired = row.prescriptionRequired === 'true';
+
+    const data = {
+      scope: 'global' as const,
+      farmId: null,
+      nameFr: row.name,
+      nameEn: row.name,
+      commercialName: row.name,
+      atcVetCode: row.atcVetCode || null,
+      // Champs simplifiés enrichis (AMM)
+      therapeuticForm: row.therapeuticForm || null,
+      form: row.therapeuticForm || null, // Legacy field
+      composition: row.composition || null,
+      manufacturer: row.manufacturer || null,
+      administrationRoute: row.administrationRoute || null,
+      targetSpecies,
+      withdrawalMeatDays: isNaN(withdrawalMeatDays as number) ? null : withdrawalMeatDays,
+      withdrawalMilkHours: isNaN(withdrawalMilkHours as number) ? null : withdrawalMilkHours,
+      prescriptionRequired,
+      // Métadonnées AMM
+      description: row.indications || null,
+      notes: row.rcpLink ? `RCP: ${row.rcpLink}` : null,
+    };
+
+    try {
+      const existing = await prisma.product.findUnique({ where: { code } });
+
+      const product = await prisma.product.upsert({
+        where: { code },
+        update: data,
+        create: { code, ...data },
+      });
+
+      productIdMap.set(row.srcId, product.id);
+      existing ? updated++ : created++;
+    } catch (error) {
+      skipped++;
+    }
+  }
+
+  console.log(`   ✅ Médicaments AMM: ${created} créés, ${updated} mis à jour, ${skipped} ignorés`);
+}
+
+// Ancien format de chargement (fallback)
+async function seedProductsLegacy() {
+  console.log('\n📦 Chargement des médicaments (ancien format)...');
   const rows = parseCSV(path.join(CSV_DIR, '09_medicaments_clinique.csv'));
 
   let created = 0, updated = 0, skipped = 0;
@@ -327,7 +409,7 @@ async function seedProducts() {
     }
   }
 
-  console.log(`   ✅ Médicaments: ${created} créés, ${updated} mis à jour, ${skipped} ignorés`);
+  console.log(`   ✅ Médicaments (legacy): ${created} créés, ${updated} mis à jour, ${skipped} ignorés`);
 }
 
 // ============================================================================
@@ -562,13 +644,16 @@ async function main() {
     console.log('   - AgeCategory (catégories d\'âge) ✓');
     console.log('   - Unit (unités) ✓');
     console.log('   - Breed (races) ✓');
-    console.log('   - Product (médicaments + champs simplifiés) ✓');
+    console.log('   - Product (médicaments AMM enrichis) ✓');
+    console.log('     • Nom, fabricant, forme thérapeutique');
+    console.log('     • Espèces cibles, voie d\'administration');
+    console.log('     • Délais d\'attente viande/lait');
+    console.log('     • Ordonnance obligatoire, lien RCP');
     console.log('   - ProductPackaging (conditionnements) ✓');
     console.log('   - [Optionnel] ProductCategory ✓');
     console.log('   - [Optionnel] ActiveSubstance ✓');
     console.log('   - [Optionnel] AdministrationRoute ✓');
-    console.log('\n💡 CSV supprimé: 06_denrees.csv (non utilisé)');
-    console.log('💡 CSV non chargé: 10_medicaments_especes_age_posologie.csv (TherapeuticIndication optionnel)');
+    console.log('\n💡 Source: products-amm.csv (3191 médicaments ANMV France)');
 
   } catch (error) {
     console.error('\n❌ Erreur:', error);
