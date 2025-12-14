@@ -46,16 +46,6 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   productName: string;
 
-  @ApiPropertyOptional({ description: 'Product packaging ID (new workflow)' })
-  @IsOptional()
-  @IsString()
-  packagingId?: string;
-
-  @ApiPropertyOptional({ description: 'Therapeutic indication ID (new workflow)' })
-  @IsOptional()
-  @IsString()
-  indicationId?: string;
-
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
   @IsString()
@@ -76,10 +66,10 @@ export class CreateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   lotId?: string;
 
-  @ApiProperty({ description: 'Administration route ID', required: false })
+  @ApiPropertyOptional({ description: 'Administration route (oral, injectable, etc.)' })
   @IsOptional()
   @IsString()
-  routeId?: string;
+  administrationRoute?: string;
 
   @ApiProperty({ description: 'Diagnosis', required: false })
   @IsOptional()
@@ -223,11 +213,6 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsNumber()
   animalWeightKg?: number;
 
-  @ApiPropertyOptional({ description: 'Product packaging ID' })
-  @IsOptional()
-  @IsString()
-  packagingId?: string;
-
   @ApiProperty({ description: 'Medical product ID', required: false })
   @IsOptional()
   @IsString()
@@ -237,11 +222,6 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsOptional()
   @IsString()
   productName?: string;
-
-  @ApiPropertyOptional({ description: 'Therapeutic indication ID' })
-  @IsOptional()
-  @IsString()
-  indicationId?: string;
 
   @ApiProperty({ description: 'Veterinarian ID', required: false })
   @IsOptional()
@@ -263,10 +243,10 @@ export class UpdateTreatmentDto extends BaseSyncEntityDto {
   @IsString()
   lotId?: string;
 
-  @ApiProperty({ description: 'Administration route ID', required: false })
+  @ApiPropertyOptional({ description: 'Administration route (oral, injectable, etc.)' })
   @IsOptional()
   @IsString()
-  routeId?: string;
+  administrationRoute?: string;
 
   @ApiProperty({ description: 'Diagnosis', required: false })
   @IsOptional()

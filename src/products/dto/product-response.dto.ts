@@ -2,48 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DataScope, ProductType } from '@prisma/client';
 
 /**
- * Nested DTOs for relations
- */
-class ProductCategoryInfo {
-  @ApiProperty({ description: 'Category UUID' })
-  id: string;
-
-  @ApiProperty({ description: 'Category code' })
-  code: string;
-
-  @ApiProperty({ description: 'Category name in French' })
-  nameFr: string;
-
-  @ApiProperty({ description: 'Category name in English' })
-  nameEn: string;
-
-  @ApiProperty({ description: 'Category name in Arabic' })
-  nameAr: string;
-}
-
-class ActiveSubstanceInfo {
-  @ApiProperty({ description: 'Substance UUID' })
-  id: string;
-
-  @ApiProperty({ description: 'Substance code' })
-  code: string;
-
-  @ApiProperty({ description: 'International name (INN)' })
-  name: string;
-
-  @ApiPropertyOptional({ description: 'Substance name in French' })
-  nameFr: string | null;
-
-  @ApiPropertyOptional({ description: 'Substance name in English' })
-  nameEn: string | null;
-
-  @ApiPropertyOptional({ description: 'Substance name in Arabic' })
-  nameAr: string | null;
-}
-
-/**
  * Response DTO for Product entity (PHASE_15)
  * Handles both global and local products (scope pattern)
+ * Simplified for MVP - all product info is denormalized
  */
 export class ProductResponseDto {
   @ApiProperty({ description: 'Unique identifier' })
@@ -75,12 +36,6 @@ export class ProductResponseDto {
 
   @ApiPropertyOptional({ description: 'Product type', enum: ProductType })
   type: ProductType | null;
-
-  @ApiPropertyOptional({ description: 'Category ID' })
-  categoryId: string | null;
-
-  @ApiPropertyOptional({ description: 'Active substance ID' })
-  substanceId: string | null;
 
   @ApiPropertyOptional({ description: 'ATCvet code (e.g., QJ01MA90)' })
   atcVetCode: string | null;
@@ -142,11 +97,4 @@ export class ProductResponseDto {
 
   @ApiProperty({ description: 'Last update timestamp' })
   updatedAt: Date;
-
-  // Optional relations (when included)
-  @ApiPropertyOptional({ description: 'Product category', type: ProductCategoryInfo })
-  category: ProductCategoryInfo | null;
-
-  @ApiPropertyOptional({ description: 'Active substance', type: ActiveSubstanceInfo })
-  substance: ActiveSubstanceInfo | null;
 }

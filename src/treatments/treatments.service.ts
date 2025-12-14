@@ -9,12 +9,6 @@ import {
 import { ERROR_CODES } from '../common/constants/error-codes';
 import { AlertEngineService } from '../farm-alerts/alert-engine/alert-engine.service';
 
-interface WithdrawalDates {
-  computedWithdrawalMeatDate: Date | null;
-  computedWithdrawalMilkDate: Date | null;
-  withdrawalEndDate: Date;
-}
-
 @Injectable()
 export class TreatmentsService {
   private readonly logger = new AppLogger(TreatmentsService.name);
@@ -35,70 +29,22 @@ export class TreatmentsService {
   }
 
   /**
-   * Find the best therapeutic indication for a treatment context
-   * Priority: country + age > country + all ages > universal + age > universal + all ages
-   */
-  async findBestIndication(
-    productId: string,
-    speciesId: string,
-    routeId: string,
-    countryCode?: string,
-    ageCategoryId?: string,
-  ) {
-    const baseWhere = {
-      productId,
-      speciesId,
-      routeId,
-      isActive: true,
-      deletedAt: null,
-    };
-
-    // Priority 1: Country + Age specific
-    if (countryCode && ageCategoryId) {
-      const indication = await this.prisma.therapeuticIndication.findFirst({
-        where: { ...baseWhere, countryCode, ageCategoryId },
-      });
-      if (indication) return indication;
-    }
-
-    // Priority 2: Country + All ages
-    if (countryCode) {
-      const indication = await this.prisma.therapeuticIndication.findFirst({
-        where: { ...baseWhere, countryCode, ageCategoryId: null },
-      });
-      if (indication) return indication;
-    }
-
-    // Priority 3: Universal + Age specific
-    if (ageCategoryId) {
-      const indication = await this.prisma.therapeuticIndication.findFirst({
-        where: { ...baseWhere, countryCode: null, ageCategoryId },
-      });
-      if (indication) return indication;
-    }
-
-    // Priority 4: Universal + All ages (fallback)
-    return this.prisma.therapeuticIndication.findFirst({
-      where: { ...baseWhere, countryCode: null, ageCategoryId: null },
-    });
-  }
-
-  /**
-   * Calculate withdrawal dates from therapeutic indication
+   * Calculate withdrawal dates from product's simplified fields
    */
   calculateWithdrawalDates(
     treatmentDate: Date,
-    indication: { withdrawalMeatDays: number | null; withdrawalMilkDays: number | null },
-  ): WithdrawalDates {
-    const meatDays = indication.withdrawalMeatDays ?? 0;
-    const milkDays = indication.withdrawalMilkDays ?? 0;
+    product: { withdrawalMeatDays: number | null; withdrawalMilkHours: number | null },
+  ) {
+    const meatDays = product.withdrawalMeatDays ?? 0;
+    const milkHours = product.withdrawalMilkHours ?? 0;
+    const milkDays = Math.ceil(milkHours / 24);
 
     const computedWithdrawalMeatDate = meatDays > 0
       ? new Date(treatmentDate.getTime() + meatDays * 24 * 60 * 60 * 1000)
       : null;
 
-    const computedWithdrawalMilkDate = milkDays > 0
-      ? new Date(treatmentDate.getTime() + milkDays * 24 * 60 * 60 * 1000)
+    const computedWithdrawalMilkDate = milkHours > 0
+      ? new Date(treatmentDate.getTime() + milkHours * 60 * 60 * 1000)
       : null;
 
     // withdrawalEndDate = max of meat and milk dates
@@ -110,49 +56,6 @@ export class TreatmentsService {
       computedWithdrawalMilkDate,
       withdrawalEndDate,
     };
-  }
-
-  /**
-   * Get indication context for an animal (species, age category, country)
-   */
-  async getAnimalIndicationContext(animalId: string, farmId: string) {
-    const animal = await this.prisma.animal.findFirst({
-      where: { id: animalId, farmId, deletedAt: null },
-      include: {
-        breed: { include: { species: true } },
-        farm: true,
-      },
-    });
-
-    if (!animal) return null;
-
-    const speciesId = animal.breed?.speciesId;
-    const countryCode = animal.farm?.country;
-
-    // Calculate age in days
-    let ageCategoryId: string | null = null;
-    if (speciesId && animal.birthDate) {
-      const ageInDays = Math.floor(
-        (Date.now() - new Date(animal.birthDate).getTime()) / (24 * 60 * 60 * 1000)
-      );
-
-      const ageCategory = await this.prisma.ageCategory.findFirst({
-        where: {
-          speciesId,
-          ageMinDays: { lte: ageInDays },
-          OR: [
-            { ageMaxDays: null },
-            { ageMaxDays: { gte: ageInDays } },
-          ],
-          deletedAt: null,
-          isActive: true,
-        },
-      });
-
-      ageCategoryId = ageCategory?.id ?? null;
-    }
-
-    return { speciesId, countryCode, ageCategoryId };
   }
 
   async create(farmId: string, dto: CreateTreatmentDto) {
@@ -226,45 +129,30 @@ export class TreatmentsService {
         autoCalculateWithdrawal,
         batchExpiryDate,
         nextDueDate,
+        // Remove deprecated fields
+        packagingId: _packagingId,
+        indicationId: _indicationId,
+        routeId: _routeId,
         ...treatmentData
       } = dto;
 
       const treatmentDate = new Date(dto.treatmentDate);
       const finalNextDueDate = nextDueDate ? new Date(nextDueDate) : null;
 
-      // Calculate withdrawal dates if requested and indication is available
-      let withdrawalDates: WithdrawalDates | null = null;
-      if (autoCalculateWithdrawal && dto.indicationId) {
-        const indication = await this.prisma.therapeuticIndication.findUnique({
-          where: { id: dto.indicationId },
+      // Calculate withdrawal dates from product if requested
+      let withdrawalDates: { computedWithdrawalMeatDate: Date | null; computedWithdrawalMilkDate: Date | null; withdrawalEndDate: Date } | null = null;
+      if (autoCalculateWithdrawal && dto.productId) {
+        const product = await this.prisma.product.findUnique({
+          where: { id: dto.productId },
+          select: { withdrawalMeatDays: true, withdrawalMilkHours: true },
         });
-        if (indication) {
-          withdrawalDates = this.calculateWithdrawalDates(treatmentDate, indication);
-          this.logger.debug('Auto-calculated withdrawal dates', {
-            indicationId: dto.indicationId,
+        if (product) {
+          withdrawalDates = this.calculateWithdrawalDates(treatmentDate, product);
+          this.logger.debug('Auto-calculated withdrawal dates from product', {
+            productId: dto.productId,
             meatDate: withdrawalDates.computedWithdrawalMeatDate,
             milkDate: withdrawalDates.computedWithdrawalMilkDate,
           });
-        }
-      } else if (autoCalculateWithdrawal && dto.productId && dto.routeId) {
-        // Try to find best indication from context
-        const context = await this.getAnimalIndicationContext(animalIds[0], farmId);
-        if (context?.speciesId) {
-          const indication = await this.findBestIndication(
-            dto.productId,
-            context.speciesId,
-            dto.routeId,
-            context.countryCode ?? undefined,
-            context.ageCategoryId ?? undefined,
-          );
-          if (indication) {
-            withdrawalDates = this.calculateWithdrawalDates(treatmentDate, indication);
-            // Store the indication ID for audit
-            treatmentData.indicationId = indication.id;
-            this.logger.debug('Auto-found and calculated withdrawal from best indication', {
-              indicationId: indication.id,
-            });
-          }
         }
       }
 
@@ -316,8 +204,6 @@ export class TreatmentsService {
               animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
               product: true,
               veterinarian: true,
-              route: true,
-              indication: true,
               farmerLot: {
                 select: {
                   id: true,
@@ -365,8 +251,6 @@ export class TreatmentsService {
           animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
           product: true,
           veterinarian: true,
-          route: true,
-          indication: true,
           farmerLot: {
             select: {
               id: true,
@@ -486,10 +370,8 @@ export class TreatmentsService {
     const treatments = await this.prisma.treatment.findMany({
       where,
       include: {
-        product: { select: { id: true, nameFr: true, nameEn: true } },
+        product: { select: { id: true, nameFr: true, nameEn: true, withdrawalMeatDays: true, withdrawalMilkHours: true } },
         veterinarian: { select: { id: true, firstName: true, lastName: true } },
-        route: { select: { id: true, nameFr: true, nameEn: true } },
-        indication: { select: { id: true, withdrawalMeatDays: true, withdrawalMilkDays: true } },
         farmerLot: {
           select: {
             id: true,
@@ -518,8 +400,6 @@ export class TreatmentsService {
         animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
         product: true,
         veterinarian: true,
-        route: true,
-        indication: true,
         farmerLot: {
           select: {
             id: true,
@@ -585,7 +465,21 @@ export class TreatmentsService {
 
     try {
       // Destructure to exclude BaseSyncEntityDto fields and date fields that need conversion
-      const { farmId: dtoFarmId, created_at, updated_at, version, treatmentDate, withdrawalEndDate, nextDueDate, batchExpiryDate, ...treatmentData } = dto;
+      const {
+        farmId: dtoFarmId,
+        created_at,
+        updated_at,
+        version,
+        treatmentDate,
+        withdrawalEndDate,
+        nextDueDate,
+        batchExpiryDate,
+        // Remove deprecated fields
+        packagingId: _packagingId,
+        indicationId: _indicationId,
+        routeId: _routeId,
+        ...treatmentData
+      } = dto;
 
       const updateData: any = {
         ...treatmentData,
@@ -607,8 +501,6 @@ export class TreatmentsService {
           animal: { select: { id: true, visualId: true, currentEid: true, officialNumber: true } },
           product: true,
           veterinarian: true,
-          route: true,
-          indication: true,
           farmerLot: {
             select: {
               id: true,

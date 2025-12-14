@@ -142,7 +142,7 @@ export class FarmProductPreferencesController {
   @ApiOperation({ summary: 'Get custom configuration of a product preference' })
   @ApiParam({ name: 'farmId', description: 'Farm UUID' })
   @ApiParam({ name: 'id', description: 'Preference UUID' })
-  @ApiResponse({ status: 200, description: 'Config with packaging, lots and userDefined fields', type: FarmProductPreferenceResponseDto })
+  @ApiResponse({ status: 200, description: 'Config with lots and userDefined fields', type: FarmProductPreferenceResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Preference not found' })
   getConfig(
@@ -159,7 +159,7 @@ export class FarmProductPreferencesController {
   @ApiResponse({ status: 200, description: 'Config updated successfully', type: FarmProductPreferenceResponseDto })
   @ApiResponse({ status: 400, description: 'Validation error (dose without unit)' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Preference or packaging not found' })
+  @ApiResponse({ status: 404, description: 'Preference not found' })
   updateConfig(
     @Param('farmId', ParseUUIDPipe) farmId: string,
     @Param('id', ParseUUIDPipe) id: string,

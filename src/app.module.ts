@@ -4,7 +4,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { FeaturesConfigService } from './common/config/features.config';
 import { ConditionalThrottlerGuard } from './common/guards/conditional-throttler.guard';
-import { AdministrationRoutesModule } from './administration-routes/administration-routes.module';
 import { AlertConfigurationsModule } from './alert-configurations/alert-configurations.module';
 import { AlertTemplatesModule } from './alert-templates/alert-templates.module';
 import { AnimalsModule } from './animals/animals.module';
@@ -31,7 +30,6 @@ import { NationalCampaignsModule } from './national-campaigns/national-campaigns
 import { PersonalCampaignsModule } from './personal-campaigns/personal-campaigns.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
-import { ProductPackagingsModule } from './product-packagings/product-packagings.module';
 import { SpeciesModule } from './species/species.module';
 import { SyncModule } from './sync/sync.module';
 import { TreatmentsModule } from './treatments/treatments.module';
@@ -40,9 +38,6 @@ import { WeightsModule } from './weights/weights.module';
 import { FarmVeterinarianPreferencesModule } from './farm-veterinarian-preferences/farm-veterinarian-preferences.module';
 import { FarmNationalCampaignPreferencesModule } from './farm-national-campaign-preferences/farm-national-campaign-preferences.module';
 import { UnitsModule } from './units/units.module';
-import { TherapeuticIndicationsModule } from './therapeutic-indications/therapeutic-indications.module';
-import { ActiveSubstancesModule } from './active-substances/active-substances.module';
-import { ProductCategoriesModule } from './product-categories/product-categories.module';
 import { AgeCategoriesModule } from './age-categories/age-categories.module';
 import { AnimalStatusModule } from './animal-status/animal-status.module';
 import { FarmerProductLotsModule } from './farmer-product-lots/farmer-product-lots.module';
@@ -95,15 +90,10 @@ const rateLimitConfig = FeaturesConfigService.getRateLimitConfig();
     // Reference tables (admin)
     VeterinariansModule,
     ProductsModule,
-    ProductPackagingsModule,
     UnitsModule,
-    TherapeuticIndicationsModule,
-    ActiveSubstancesModule,
-    ProductCategoriesModule,
     AgeCategoriesModule,
     NationalCampaignsModule,
     AlertTemplatesModule,
-    AdministrationRoutesModule,
     SpeciesModule,
     BreedsModule,
     BreedCountriesModule,

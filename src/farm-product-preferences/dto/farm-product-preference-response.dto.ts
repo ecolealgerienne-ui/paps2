@@ -17,9 +17,6 @@ export class FarmProductPreferenceResponseDto {
   @ApiProperty({ description: 'Whether this preference is active', example: true })
   isActive: boolean;
 
-  @ApiPropertyOptional({ description: 'Selected packaging ID', nullable: true })
-  packagingId: string | null;
-
   @ApiPropertyOptional({ description: 'User-defined dose (overrides AMM/RCP)', nullable: true, type: 'number' })
   userDefinedDose: Decimal | null;
 
@@ -49,9 +46,6 @@ export class FarmProductPreferenceResponseDto {
 
   @ApiPropertyOptional({ description: 'Associated farm details' })
   farm?: object;
-
-  @ApiPropertyOptional({ description: 'Selected packaging details', nullable: true })
-  packaging?: object | null;
 
   @ApiPropertyOptional({ description: 'Associated farmer product lots' })
   lots?: object[];

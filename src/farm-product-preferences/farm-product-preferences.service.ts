@@ -303,7 +303,7 @@ export class FarmProductPreferencesService {
 
   /**
    * Récupérer la configuration personnalisée d'une préférence produit
-   * Inclut packaging, lots et les champs userDefined*
+   * Inclut lots et les champs userDefined*
    */
   async getConfig(farmId: string, id: string): Promise<FarmProductPreferenceResponseDto> {
     const preference = await this.prisma.farmProductPreference.findFirst({
@@ -314,7 +314,6 @@ export class FarmProductPreferencesService {
       },
       include: {
         product: true,
-        packaging: true,
         lots: {
           where: { deletedAt: null },
           orderBy: { createdAt: 'desc' },
@@ -361,27 +360,9 @@ export class FarmProductPreferencesService {
       throw new BadRequestException('Dose unit is required when dose is defined');
     }
 
-    // Vérifier que le packaging appartient au même produit si fourni
-    if (dto.packagingId) {
-      const packaging = await this.prisma.productPackaging.findFirst({
-        where: {
-          id: dto.packagingId,
-          productId: existing.productId,
-          deletedAt: null,
-        },
-      });
-
-      if (!packaging) {
-        throw new NotFoundException(
-          `Packaging with ID "${dto.packagingId}" not found for this product`,
-        );
-      }
-    }
-
     const updated = await this.prisma.farmProductPreference.update({
       where: { id },
       data: {
-        ...(dto.packagingId !== undefined && { packagingId: dto.packagingId }),
         ...(dto.userDefinedDose !== undefined && { userDefinedDose: dto.userDefinedDose }),
         ...(dto.userDefinedDoseUnit !== undefined && { userDefinedDoseUnit: dto.userDefinedDoseUnit as any }),
         ...(dto.userDefinedMeatWithdrawal !== undefined && { userDefinedMeatWithdrawal: dto.userDefinedMeatWithdrawal }),
@@ -390,7 +371,6 @@ export class FarmProductPreferencesService {
       },
       include: {
         product: true,
-        packaging: true,
         lots: {
           where: { deletedAt: null },
           orderBy: { createdAt: 'desc' },
@@ -404,7 +384,6 @@ export class FarmProductPreferencesService {
 
   /**
    * Réinitialiser la configuration personnalisée (remet tous les userDefined* à NULL)
-   * Réinitialise également packagingId à NULL
    */
   async resetConfig(farmId: string, id: string): Promise<FarmProductPreferenceResponseDto> {
     this.logger.debug(`Resetting product config for preference ${id}`);
@@ -426,7 +405,6 @@ export class FarmProductPreferencesService {
     const updated = await this.prisma.farmProductPreference.update({
       where: { id },
       data: {
-        packagingId: null,
         userDefinedDose: null,
         userDefinedDoseUnit: null,
         userDefinedMeatWithdrawal: null,
@@ -435,7 +413,6 @@ export class FarmProductPreferencesService {
       },
       include: {
         product: true,
-        packaging: true,
       },
     });
 

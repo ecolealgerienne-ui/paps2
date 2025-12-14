@@ -5,7 +5,6 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
-  IsUUID,
   Min,
   ValidateIf,
 } from 'class-validator';
@@ -19,14 +18,6 @@ export enum DoseUnitType {
 }
 
 export class UpdateProductConfigDto {
-  @ApiPropertyOptional({
-    description: 'ID du conditionnement préféré (ProductPackaging)',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @IsOptional()
-  @IsUUID()
-  packagingId?: string | null;
-
   @ApiPropertyOptional({
     description: 'Dosage personnalisé (surcharge AMM/RCP)',
     example: 1.5,

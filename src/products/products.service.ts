@@ -10,7 +10,6 @@ export interface FindAllOptions {
   search?: string;
   scope?: 'global' | 'local' | 'all';
   type?: ProductType;
-  categoryId?: string;
   isActive?: boolean;
   vaccinesOnly?: boolean;
   page?: number;
@@ -59,8 +58,6 @@ export class ProductsService {
           commercialName: dto.commercialName || null,
           description: dto.description || null,
           type: dto.type || null,
-          categoryId: dto.categoryId || null,
-          substanceId: dto.substanceId || null,
           atcVetCode: dto.atcVetCode || null,
           manufacturer: dto.manufacturer || null,
           form: dto.form || null,
@@ -70,10 +67,6 @@ export class ProductsService {
           isActive: dto.isActive ?? true,
           ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
           ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
-        },
-        include: {
-          category: true,
-          substance: true,
         },
       });
 
@@ -110,8 +103,6 @@ export class ProductsService {
           commercialName: dto.commercialName || null,
           description: dto.description || null,
           type: dto.type || null,
-          categoryId: dto.categoryId || null,
-          substanceId: dto.substanceId || null,
           atcVetCode: dto.atcVetCode || null,
           manufacturer: dto.manufacturer || null,
           form: dto.form || null,
@@ -120,10 +111,6 @@ export class ProductsService {
           notes: dto.notes || null,
           isActive: dto.isActive ?? true,
           version: existingDeleted.version + 1,
-        },
-        include: {
-          category: true,
-          substance: true,
         },
       });
 
@@ -149,8 +136,6 @@ export class ProductsService {
           commercialName: dto.commercialName || null,
           description: dto.description || null,
           type: dto.type || null,
-          categoryId: dto.categoryId || null,
-          substanceId: dto.substanceId || null,
           atcVetCode: dto.atcVetCode || null,
           manufacturer: dto.manufacturer || null,
           form: dto.form || null,
@@ -160,10 +145,6 @@ export class ProductsService {
           isActive: dto.isActive ?? true,
           ...(dto.created_at && { createdAt: new Date(dto.created_at) }),
           ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
-        },
-        include: {
-          category: true,
-          substance: true,
         },
       });
 
@@ -213,7 +194,6 @@ export class ProductsService {
     // Other filters
     if (type) where.type = type;
     if (vaccinesOnly) where.type = ProductType.vaccine;
-    if (categoryId) where.categoryId = categoryId;
     if (isActive !== undefined) where.isActive = isActive;
 
     // Search in multiple fields
@@ -245,10 +225,6 @@ export class ProductsService {
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
-        include: {
-          category: true,
-          substance: true,
-        },
         orderBy: { [sort]: order },
         skip,
         take: limit,
@@ -353,8 +329,6 @@ export class ProductsService {
           commercialName: dto.commercialName !== undefined ? dto.commercialName : existing.commercialName,
           description: dto.description !== undefined ? dto.description : existing.description,
           type: dto.type !== undefined ? dto.type : existing.type,
-          categoryId: dto.categoryId !== undefined ? dto.categoryId : existing.categoryId,
-          substanceId: dto.substanceId !== undefined ? dto.substanceId : existing.substanceId,
           atcVetCode: dto.atcVetCode !== undefined ? dto.atcVetCode : existing.atcVetCode,
           manufacturer: dto.manufacturer !== undefined ? dto.manufacturer : existing.manufacturer,
           form: dto.form !== undefined ? dto.form : existing.form,
@@ -364,10 +338,6 @@ export class ProductsService {
           isActive: dto.isActive !== undefined ? dto.isActive : existing.isActive,
           version: existing.version + 1,
           ...(dto.updated_at && { updatedAt: new Date(dto.updated_at) }),
-        },
-        include: {
-          category: true,
-          substance: true,
         },
       });
 
@@ -411,25 +381,14 @@ export class ProductsService {
     }
 
     // Check dependencies before deleting
-    const [therapeuticIndicationsCount, lotsCount] = await Promise.all([
-      this.prisma.therapeuticIndication.count({
-        where: { productId: id, deletedAt: null },
-      }),
-      this.prisma.farmerProductLot.count({
-        where: {
-          deletedAt: null,
-          config: {
-            productId: id,
-          },
+    const lotsCount = await this.prisma.farmerProductLot.count({
+      where: {
+        deletedAt: null,
+        config: {
+          productId: id,
         },
-      }),
-    ]);
-
-    if (therapeuticIndicationsCount > 0) {
-      throw new ConflictException(
-        `Cannot delete product: ${therapeuticIndicationsCount} therapeutic indication(s) depend on it`,
-      );
-    }
+      },
+    });
 
     if (lotsCount > 0) {
       throw new ConflictException(
@@ -443,10 +402,6 @@ export class ProductsService {
         data: {
           deletedAt: new Date(),
           version: existing.version + 1,
-        },
-        include: {
-          category: true,
-          substance: true,
         },
       });
 
@@ -608,9 +563,6 @@ export class ProductsService {
     if (vaccinesOnly) {
       where.type = ProductType.vaccine;
     }
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
     if (isActive !== undefined) {
       where.isActive = isActive;
     }
@@ -620,10 +572,6 @@ export class ProductsService {
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
-        include: {
-          category: true,
-          substance: true,
-        },
         orderBy: { [sort]: order },
         skip,
         take: limit,

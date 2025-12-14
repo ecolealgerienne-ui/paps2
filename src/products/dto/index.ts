@@ -55,16 +55,6 @@ export class CreateProductDto {
   @IsEnum(ProductType)
   type?: ProductType;
 
-  @ApiPropertyOptional({ description: 'Category ID' })
-  @IsOptional()
-  @IsUUID()
-  categoryId?: string;
-
-  @ApiPropertyOptional({ description: 'Active substance ID' })
-  @IsOptional()
-  @IsUUID()
-  substanceId?: string;
-
   @ApiPropertyOptional({ description: 'ATCvet code (e.g., QJ01MA90)' })
   @IsOptional()
   @IsString()
@@ -167,16 +157,6 @@ export class UpdateProductDto {
   @IsEnum(ProductType)
   type?: ProductType;
 
-  @ApiPropertyOptional({ description: 'Category ID' })
-  @IsOptional()
-  @IsUUID()
-  categoryId?: string;
-
-  @ApiPropertyOptional({ description: 'Active substance ID' })
-  @IsOptional()
-  @IsUUID()
-  substanceId?: string;
-
   @ApiPropertyOptional({ description: 'ATCvet code' })
   @IsOptional()
   @IsString()
@@ -253,11 +233,6 @@ export class QueryProductDto {
   @IsOptional()
   @IsEnum(ProductType)
   type?: ProductType;
-
-  @ApiPropertyOptional({ description: 'Filter by category ID' })
-  @IsOptional()
-  @IsUUID()
-  categoryId?: string;
 
   @ApiPropertyOptional({ description: 'Filter by active status' })
   @IsOptional()
